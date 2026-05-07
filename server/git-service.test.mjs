@@ -82,6 +82,68 @@ test('git service returns truncated diff with status', async () => {
   assert.equal(calls.includes('diff HEAD --stat'), true);
 });
 
+test('git service lists local branches with default and checked-out metadata', async () => {
+  const service = createGitService({
+    getProject: () => ({ path: '/repo' }),
+    runner: async (cwd, args) => {
+      if (args[0] === 'rev-parse') {
+        return { stdout: '/repo\n', stderr: '' };
+      }
+      if (args[0] === 'status') {
+        return { stdout: '## codex/git-panel...origin/codex/git-panel\n', stderr: '' };
+      }
+      if (args[0] === 'symbolic-ref') {
+        return { stdout: 'origin/main\n', stderr: '' };
+      }
+      if (args[0] === 'for-each-ref') {
+        return {
+          stdout: [
+            'main\torigin/main\t',
+            'codex/git-panel\torigin/codex/git-panel\t/repo',
+            'codex/other\torigin/codex/other\t/tmp/repo-other'
+          ].join('\n'),
+          stderr: ''
+        };
+      }
+      throw new Error(`unexpected git ${args.join(' ')}`);
+    }
+  });
+
+  const result = await service.branches('project-1');
+  assert.equal(result.current, 'codex/git-panel');
+  assert.equal(result.defaultBranch, 'main');
+  assert.deepEqual(result.branches.map((branch) => [branch.name, branch.current, branch.default, branch.checkedOutElsewhere]), [
+    ['codex/git-panel', true, false, false],
+    ['main', false, true, false],
+    ['codex/other', false, false, true]
+  ]);
+});
+
+test('git service checks out an existing branch', async () => {
+  const calls = [];
+  const service = createGitService({
+    getProject: () => ({ path: '/repo' }),
+    runner: async (cwd, args) => {
+      calls.push(args.join(' '));
+      if (args[0] === 'rev-parse') {
+        return { stdout: '/repo\n', stderr: '' };
+      }
+      if (args[0] === 'switch') {
+        return { stdout: '', stderr: '' };
+      }
+      if (args[0] === 'status') {
+        return { stdout: '## codex/target...origin/codex/target\n', stderr: '' };
+      }
+      throw new Error(`unexpected git ${args.join(' ')}`);
+    }
+  });
+
+  const result = await service.checkout('project-1', 'codex/target');
+  assert.equal(calls.includes('switch codex/target'), true);
+  assert.equal(result.branch, 'codex/target');
+  assert.equal(result.status.branch, 'codex/target');
+});
+
 test('git service pulls with fast-forward only', async () => {
   const calls = [];
   const service = createGitService({
@@ -104,6 +166,77 @@ test('git service pulls with fast-forward only', async () => {
   const result = await service.pull('project-1');
   assert.deepEqual(calls.find((args) => args[0] === 'pull'), ['pull', '--ff-only']);
   assert.equal(result.status.clean, true);
+});
+
+test('git service creates a linked worktree from a codex branch name', async () => {
+  const calls = [];
+  const service = createGitService({
+    getProject: () => ({ path: '/repo' }),
+    runner: async (cwd, args) => {
+      calls.push(args.join(' '));
+      if (args[0] === 'rev-parse') {
+        return { stdout: '/repo\n', stderr: '' };
+      }
+      if (args[0] === 'worktree') {
+        return { stdout: 'Preparing worktree\n', stderr: '' };
+      }
+      if (args[0] === 'status') {
+        return { stdout: '## codex/mobile-panel\n', stderr: '' };
+      }
+      if (args[0] === 'symbolic-ref') {
+        return { stdout: 'origin/main\n', stderr: '' };
+      }
+      if (args[0] === 'for-each-ref') {
+        return { stdout: 'codex/mobile-panel\t\t/repo-mobile-panel\n', stderr: '' };
+      }
+      throw new Error(`unexpected git ${args.join(' ')}`);
+    }
+  });
+
+  const result = await service.worktree('project-1', {
+    branchName: 'mobile panel',
+    baseBranch: 'main'
+  });
+  assert.equal(
+    calls.includes('worktree add -b codex/mobile-panel /repo-mobile-panel main'),
+    true
+  );
+  assert.equal(result.branch, 'codex/mobile-panel');
+  assert.equal(result.worktreePath, '/repo-mobile-panel');
+});
+
+test('git service generates a copyable PR draft', async () => {
+  const service = createGitService({
+    getProject: () => ({ path: '/repo' }),
+    runner: async (cwd, args) => {
+      if (args[0] === 'rev-parse') {
+        return { stdout: '/repo\n', stderr: '' };
+      }
+      if (args[0] === 'status') {
+        return {
+          stdout: '## codex/git-panel...origin/codex/git-panel [ahead 1]\n M server/git-service.js\n',
+          stderr: ''
+        };
+      }
+      if (args[0] === 'config') {
+        return { stdout: 'git@github.com:flyyangX/CodexMobile.git\n', stderr: '' };
+      }
+      if (args[0] === 'log') {
+        return { stdout: 'abc123 refactor: align mobile git panel api contract\n', stderr: '' };
+      }
+      if (args[0] === 'diff') {
+        return { stdout: ' server/git-service.js | 20 ++++++++++++++++++++\n', stderr: '' };
+      }
+      throw new Error(`unexpected git ${args.join(' ')}`);
+    }
+  });
+
+  const result = await service.prDraft('project-1', { baseBranch: 'main' });
+  assert.equal(result.title, '更新 git service');
+  assert.equal(result.needsPush, true);
+  assert.match(result.compareUrl, /github\.com\/flyyangX\/CodexMobile\/compare\/main\.\.\.codex%2Fgit-panel/);
+  assert.match(result.body, /server\/git-service\.js/);
+  assert.match(result.body, /node --test/);
 });
 
 test('git service sync pulls then pushes only when ahead remains', async () => {

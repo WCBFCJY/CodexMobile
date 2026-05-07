@@ -538,6 +538,17 @@ async function handleApi(req, res, url) {
     return;
   }
 
+  if (method === 'GET' && pathname === '/api/git/branches') {
+    const projectId = url.searchParams.get('projectId');
+    try {
+      sendJson(res, 200, { success: true, branches: await gitService.branches(projectId) });
+    } catch (error) {
+      console.warn(`[git] branches failed project=${projectId || ''}: ${error.message}`);
+      sendGitError(res, error, 'Failed to read Git branches');
+    }
+    return;
+  }
+
   if (method === 'POST' && pathname === '/api/git/branch') {
     const body = await readBody(req);
     try {
@@ -546,6 +557,18 @@ async function handleApi(req, res, url) {
     } catch (error) {
       console.warn(`[git] branch failed project=${body.projectId || ''}: ${error.message}`);
       sendGitError(res, error, 'Failed to create Git branch');
+    }
+    return;
+  }
+
+  if (method === 'POST' && pathname === '/api/git/checkout') {
+    const body = await readBody(req);
+    try {
+      const result = await gitService.checkout(body.projectId, body.branch);
+      sendJson(res, 200, { success: true, ...result });
+    } catch (error) {
+      console.warn(`[git] checkout failed project=${body.projectId || ''}: ${error.message}`);
+      sendGitError(res, error, 'Failed to checkout Git branch');
     }
     return;
   }
@@ -612,6 +635,35 @@ async function handleApi(req, res, url) {
     } catch (error) {
       console.warn(`[git] commit-push failed project=${body.projectId || ''}: ${error.message}`);
       sendGitError(res, error, 'Failed to commit and push Git changes');
+    }
+    return;
+  }
+
+  if (method === 'POST' && pathname === '/api/git/worktree') {
+    const body = await readBody(req);
+    try {
+      const result = await gitService.worktree(body.projectId, {
+        branchName: body.branchName,
+        baseBranch: body.baseBranch
+      });
+      sendJson(res, 200, { success: true, ...result });
+    } catch (error) {
+      console.warn(`[git] worktree failed project=${body.projectId || ''}: ${error.message}`);
+      sendGitError(res, error, 'Failed to create Git worktree');
+    }
+    return;
+  }
+
+  if (method === 'POST' && pathname === '/api/git/pr-draft') {
+    const body = await readBody(req);
+    try {
+      const draft = await gitService.prDraft(body.projectId, {
+        baseBranch: body.baseBranch
+      });
+      sendJson(res, 200, { success: true, draft });
+    } catch (error) {
+      console.warn(`[git] pr-draft failed project=${body.projectId || ''}: ${error.message}`);
+      sendGitError(res, error, 'Failed to create PR draft');
     }
     return;
   }

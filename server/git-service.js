@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process';
+import path from 'node:path';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
@@ -125,6 +126,64 @@ function sanitizeCommitMessage(value = '') {
   return message.slice(0, 200);
 }
 
+function sanitizeExistingBranchName(value = '') {
+  const branch = String(value || '').trim();
+  if (!branch || branch.startsWith('-') || branch.includes('..') || /[\s~^:?*[\]\\]/.test(branch)) {
+    throw serviceError('分支名无效', 400);
+  }
+  return branch;
+}
+
+function parseBranchList(output = '', currentBranch = '', defaultBranch = 'main', cwd = '') {
+  return String(output || '')
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => {
+      const [name = '', upstream = '', worktreePath = ''] = line.split('\t');
+      const branch = name.trim();
+      const checkedOutElsewhere =
+        Boolean(worktreePath.trim()) &&
+        branch !== currentBranch &&
+        path.resolve(worktreePath.trim()) !== path.resolve(cwd || '.');
+      return {
+        name: branch,
+        current: branch === currentBranch,
+        default: branch === defaultBranch,
+        upstream: upstream.trim() || null,
+        checkedOutElsewhere,
+        worktreePath: checkedOutElsewhere ? worktreePath.trim() : null
+      };
+    })
+    .filter((branch) => branch.name)
+    .sort((a, b) => {
+      if (a.current !== b.current) {
+        return a.current ? -1 : 1;
+      }
+      if (a.default !== b.default) {
+        return a.default ? -1 : 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
+}
+
+function parseDefaultBranch(value = '') {
+  const branch = String(value || '').trim().replace(/^origin\//, '');
+  return branch || 'main';
+}
+
+function remoteCompareUrl(remoteUrl = '', baseBranch = 'main', branch = '') {
+  const raw = String(remoteUrl || '').trim().replace(/\.git$/, '');
+  const match =
+    raw.match(/^git@github\.com:([^/]+)\/(.+)$/) ||
+    raw.match(/^https:\/\/github\.com\/([^/]+)\/(.+)$/);
+  if (!match || !branch) {
+    return '';
+  }
+  const owner = encodeURIComponent(match[1]);
+  const repo = encodeURIComponent(match[2]);
+  return `https://github.com/${owner}/${repo}/compare/${encodeURIComponent(baseBranch)}...${encodeURIComponent(branch)}?expand=1`;
+}
+
 export function truncateGitOutput(value = '', maxChars = MAX_DIFF_CHARS) {
   const text = String(value || '');
   const limit = Math.max(1000, Number(maxChars) || MAX_DIFF_CHARS);
@@ -156,6 +215,12 @@ export function createGitService({ getProject, runner = runGit } = {}) {
     return project.path;
   }
 
+  async function projectRoot(projectId) {
+    const cwd = await projectCwd(projectId);
+    const result = await runner(cwd, ['rev-parse', '--show-toplevel']);
+    return result.stdout.trim() || cwd;
+  }
+
   async function status(projectId) {
     const cwd = await projectCwd(projectId);
     const result = await runner(cwd, ['status', '--short', '--branch']);
@@ -170,6 +235,40 @@ export function createGitService({ getProject, runner = runGit } = {}) {
     const cwd = await projectCwd(projectId);
     const name = normalizeBranchName(branchName);
     await runner(cwd, ['switch', '-c', name]);
+    return {
+      branch: name,
+      status: await status(projectId)
+    };
+  }
+
+  async function branches(projectId) {
+    const cwd = await projectCwd(projectId);
+    const current = await status(projectId);
+    let defaultBranch = 'main';
+    try {
+      const result = await runner(cwd, ['symbolic-ref', 'refs/remotes/origin/HEAD', '--short']);
+      defaultBranch = parseDefaultBranch(result.stdout);
+    } catch {
+      defaultBranch = current.branch === 'master' ? 'master' : 'main';
+    }
+    const result = await runner(cwd, [
+      'for-each-ref',
+      'refs/heads',
+      '--format=%(refname:short)\t%(upstream:short)\t%(worktreepath)'
+    ]);
+    return {
+      current: current.branch || '',
+      defaultBranch,
+      limited: false,
+      branches: parseBranchList(result.stdout, current.branch || '', defaultBranch, cwd),
+      status: current
+    };
+  }
+
+  async function checkout(projectId, branch) {
+    const cwd = await projectCwd(projectId);
+    const name = sanitizeExistingBranchName(branch);
+    await runner(cwd, ['switch', name]);
     return {
       branch: name,
       status: await status(projectId)
@@ -242,6 +341,63 @@ export function createGitService({ getProject, runner = runGit } = {}) {
     };
   }
 
+  async function worktree(projectId, { branchName, baseBranch = 'main' } = {}) {
+    const cwd = await projectCwd(projectId);
+    const root = await projectRoot(projectId);
+    const branch = normalizeBranchName(branchName);
+    const base = sanitizeExistingBranchName(baseBranch || 'main');
+    const leaf = branch.split('/').filter(Boolean).pop() || 'worktree';
+    const worktreePath = path.join(path.dirname(root), `${path.basename(root)}-${leaf}`);
+    const result = await runner(cwd, ['worktree', 'add', '-b', branch, worktreePath, base], { timeoutMs: 120_000 });
+    return {
+      branch,
+      baseBranch: base,
+      worktreePath,
+      output: result.stdout.trim() || result.stderr.trim(),
+      branches: await branches(projectId)
+    };
+  }
+
+  async function prDraft(projectId, { baseBranch = 'main' } = {}) {
+    const cwd = await projectCwd(projectId);
+    const current = await status(projectId);
+    if (!current.branch) {
+      throw serviceError('当前不在有效分支上', 409);
+    }
+    const base = sanitizeExistingBranchName(baseBranch || 'main');
+    const [remote, log, diffSummary] = await Promise.all([
+      runner(cwd, ['config', '--get', 'remote.origin.url']).catch(() => ({ stdout: '', stderr: '' })),
+      runner(cwd, ['log', '--oneline', `${base}..HEAD`]).catch(() => ({ stdout: '', stderr: '' })),
+      runner(cwd, ['diff', `${base}...HEAD`, '--stat']).catch(() => ({ stdout: '', stderr: '' }))
+    ]);
+    const title = current.defaultCommitMessage || `更新 ${current.branch}`;
+    const changedFiles = current.files.map((file) => `- ${file.status} ${file.path}`).join('\n');
+    const commits = log.stdout.trim() || '- 暂无本地提交差异';
+    const body = [
+      '## Summary',
+      changedFiles || '- 工作区当前无未提交改动',
+      '',
+      '## Commits',
+      commits,
+      '',
+      '## Diff Stat',
+      diffSummary.stdout.trim() || '暂无 diff stat',
+      '',
+      '## Test Plan',
+      '- [ ] node --test server/*.test.* shared/*.test.* client/src/*.test.*',
+      '- [ ] npm run build'
+    ].join('\n');
+    return {
+      title,
+      body,
+      baseBranch: base,
+      branch: current.branch,
+      compareUrl: remoteCompareUrl(remote.stdout, base, current.branch),
+      needsPush: !current.upstream || current.ahead > 0,
+      status: current
+    };
+  }
+
   async function sync(projectId) {
     const pulled = await pull(projectId);
     const afterPull = pulled.status;
@@ -270,5 +426,5 @@ export function createGitService({ getProject, runner = runGit } = {}) {
     };
   }
 
-  return { status, createBranch, diff, commit, push, pull, sync, commitPush };
+  return { status, branches, createBranch, checkout, diff, commit, push, pull, sync, commitPush, worktree, prDraft };
 }
