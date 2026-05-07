@@ -1,6 +1,7 @@
 import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { applyMacSystemProxyEnv } from './system-proxy-env.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const logDir = path.join(root, '.codexmobile');
@@ -77,6 +78,10 @@ function childEnv() {
 }
 
 loadDotEnv();
+const proxyEnv = applyMacSystemProxyEnv();
+if (proxyEnv.applied) {
+  console.log(`Using macOS system proxy for background Codex requests: ${proxyEnv.proxyUrl}`);
+}
 
 function listenerPidsForPort(value) {
   if (process.platform === 'win32') {

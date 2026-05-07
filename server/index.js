@@ -33,6 +33,7 @@ import { createGitService } from './git-service.js';
 import { abortCodexTurn, getActiveRuns, runCodexTurn, steerCodexTurn } from './codex-runner.js';
 import {
   interruptDesktopFollowerTurn,
+  setDesktopFollowerCollaborationMode,
   startDesktopFollowerTurn,
   steerDesktopFollowerTurn
 } from './desktop-ipc-client.js';
@@ -347,6 +348,7 @@ const chatService = createChatService({
   renameSession,
   broadcast,
   runCodexTurn,
+  setDesktopFollowerCollaborationMode,
   startDesktopFollowerTurn,
   steerDesktopFollowerTurn,
   interruptDesktopFollowerTurn,

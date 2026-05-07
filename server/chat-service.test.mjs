@@ -16,6 +16,7 @@ function makeChatService(overrides = {}) {
     broadcast: (payload) => broadcasts.push(payload),
     runCodexTurn: async () => 'thread-1',
     steerCodexTurn: async () => ({ accepted: true, delivery: 'steered', sessionId: 'thread-1', turnId: 'active-turn' }),
+    setDesktopFollowerCollaborationMode: async () => ({ ok: true }),
     abortCodexTurn: () => true,
     getActiveRuns: () => [],
     runImageTurn: async () => 'thread-1',
@@ -133,6 +134,51 @@ test('sendChat sends existing desktop-ipc threads through the desktop follower b
   assert.equal(started.conversationId, 'thread-1');
   assert.equal(started.params.input[0].type, 'text');
   assert.equal(started.params.input[0].text, '从手机发到桌面已有线程');
+});
+
+test('sendChat sends desktop-ipc plan requests with desktop collaboration mode', async () => {
+  let started = null;
+  let collaborationUpdate = null;
+  const { service } = makeChatService({
+    getDesktopBridgeStatus: async () => ({
+      strict: true,
+      connected: true,
+      mode: 'desktop-ipc',
+      reason: null,
+      capabilities: { sendToOpenDesktopThread: true, createThread: false }
+    }),
+    setDesktopFollowerCollaborationMode: async (conversationId, collaborationMode) => {
+      collaborationUpdate = { conversationId, collaborationMode };
+      return { ok: true };
+    },
+    startDesktopFollowerTurn: async (conversationId, params) => {
+      started = { conversationId, params };
+      return { result: { turn: { id: 'desktop-plan-turn-1' } } };
+    }
+  });
+
+  const result = await service.sendChat({
+    projectId: 'project-1',
+    sessionId: 'thread-1',
+    message: '先给我计划',
+    collaborationMode: 'plan',
+    model: 'gpt-5.5',
+    reasoningEffort: 'high'
+  });
+
+  assert.equal(result.delivery, 'started');
+  assert.deepEqual(collaborationUpdate, {
+    conversationId: 'thread-1',
+    collaborationMode: {
+      mode: 'plan',
+      settings: {
+        model: 'gpt-5.5',
+        reasoning_effort: 'high',
+        developer_instructions: null
+      }
+    }
+  });
+  assert.deepEqual(started.params.collaborationMode, collaborationUpdate.collaborationMode);
 });
 
 test('sendChat falls back to headless local when desktop-ipc has no thread owner', async () => {
@@ -312,6 +358,43 @@ test('sendChat starts a headless local Codex turn when desktop bridge is in head
   assert.equal(runPayload.draftSessionId, 'draft-project-1-1');
   assert.match(runPayload.message, /桌面端没开也跑一下/);
   assert.equal(broadcasts.some((payload) => payload.type === 'user-message'), true);
+});
+
+test('sendChat passes plan collaboration mode to headless local Codex turns', async () => {
+  let runPayload = null;
+  const { service } = makeChatService({
+    getDesktopBridgeStatus: async () => ({
+      strict: false,
+      connected: true,
+      mode: 'headless-local',
+      reason: '桌面端未打开，正在使用后台 Codex',
+      capabilities: { read: true, createThread: true, sendToOpenDesktopThread: false }
+    }),
+    runCodexTurn: async (payload, emit) => {
+      runPayload = payload;
+      emit({ type: 'thread-started', sessionId: 'headless-plan-thread-1', previousSessionId: payload.draftSessionId, turnId: payload.turnId });
+      emit({ type: 'chat-complete', sessionId: 'headless-plan-thread-1', previousSessionId: payload.draftSessionId, turnId: payload.turnId });
+      return 'headless-plan-thread-1';
+    }
+  });
+
+  await service.sendChat({
+    projectId: 'project-1',
+    draftSessionId: 'draft-project-1-1',
+    message: '先规划一下',
+    collaborationMode: 'plan',
+    model: 'gpt-5.5',
+    reasoningEffort: 'high'
+  });
+
+  assert.deepEqual(runPayload.collaborationMode, {
+    mode: 'plan',
+    settings: {
+      model: 'gpt-5.5',
+      reasoning_effort: 'high',
+      developer_instructions: null
+    }
+  });
 });
 
 test('queue drafts can be listed, deleted, and restored without auto starting during active work', async () => {

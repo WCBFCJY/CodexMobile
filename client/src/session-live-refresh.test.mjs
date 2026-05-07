@@ -71,6 +71,72 @@ test('mergeLiveSelectedThreadMessages switches to desktop messages once the desk
   assert.deepEqual(merged.map((message) => message.id), ['old-user', 'desktop-user', 'desktop-activity']);
 });
 
+test('mergeLiveSelectedThreadMessages treats image-preview optimistic sends as the same user message', () => {
+  const current = [
+    {
+      id: 'local-1',
+      role: 'user',
+      content: '移动端发送带图片消息\n\n![screenshot](/tmp/uploads/screenshot.png)',
+      timestamp: '2026-05-08T06:30:00.000Z'
+    },
+    {
+      id: 'status-1',
+      role: 'activity',
+      status: 'running',
+      content: '正在处理',
+      timestamp: '2026-05-08T06:30:00.000Z'
+    }
+  ];
+  const loaded = [
+    {
+      id: 'desktop-user',
+      role: 'user',
+      content: '移动端发送带图片消息',
+      timestamp: '2026-05-08T06:30:00.000Z'
+    },
+    {
+      id: 'desktop-activity',
+      role: 'activity',
+      status: 'running',
+      content: '正在处理本地任务',
+      timestamp: '2026-05-08T06:30:01.000Z'
+    }
+  ];
+
+  const merged = mergeLiveSelectedThreadMessages(current, loaded);
+
+  assert.deepEqual(merged.map((message) => message.id), ['desktop-user', 'desktop-activity']);
+});
+
+test('mergeLiveSelectedThreadMessages keeps local activity when desktop messages omit process records', () => {
+  const current = [
+    { id: 'local-user', role: 'user', content: '状态显示自测', sessionId: 'thread-1', turnId: 'turn-1', timestamp: '2026-05-07T06:01:00.000Z' },
+    {
+      id: 'status-turn-1',
+      role: 'activity',
+      status: 'running',
+      sessionId: 'thread-1',
+      turnId: 'turn-1',
+      content: '正在处理',
+      timestamp: '2026-05-07T06:01:01.000Z',
+      activities: [
+        { id: 'thinking', kind: 'reasoning', label: '正在思考', status: 'running' },
+        { id: 'cmd', kind: 'command_execution', label: '运行命令', status: 'completed', command: 'date' }
+      ]
+    }
+  ];
+  const loaded = [
+    { id: 'desktop-user', role: 'user', content: '状态显示自测', sessionId: 'thread-1', turnId: 'turn-1', timestamp: '2026-05-07T06:01:00.000Z' },
+    { id: 'desktop-assistant', role: 'assistant', content: '完成', sessionId: 'thread-1', turnId: 'turn-1', timestamp: '2026-05-07T06:01:08.000Z' }
+  ];
+
+  const merged = mergeLiveSelectedThreadMessages(current, loaded);
+
+  assert.deepEqual(merged.map((message) => message.id), ['desktop-user', 'status-turn-1', 'desktop-assistant']);
+  assert.equal(merged[1].status, 'completed');
+  assert.equal(merged[1].activities[0].status, 'completed');
+});
+
 test('desktopThreadHasAssistantAfterLocalSend detects final desktop output for the pending mobile send', () => {
   const current = [
     { id: 'local-1', role: 'user', content: '手机刚发的新消息', timestamp: '2026-05-07T06:01:00.000Z' },

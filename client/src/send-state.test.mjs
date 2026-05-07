@@ -52,7 +52,7 @@ test('composerSendState preserves queue and interrupt when active turn cannot st
   assert.equal(state.canInterrupt, true);
 });
 
-test('composerSendState blocks draft sends when desktop bridge cannot create threads', () => {
+test('composerSendState blocks draft sends when desktop direct creation is unavailable', () => {
   const state = composerSendState({
     hasInput: true,
     sessionIsDraft: true,

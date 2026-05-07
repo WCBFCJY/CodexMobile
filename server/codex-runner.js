@@ -706,7 +706,7 @@ function abortError() {
   return error;
 }
 
-export async function runCodexTurn({ sessionId, draftSessionId, projectPath, message, attachments = [], selectedSkills = [], model, reasoningEffort, permissionMode, turnId: providedTurnId }, emit) {
+export async function runCodexTurn({ sessionId, draftSessionId, projectPath, message, attachments = [], selectedSkills = [], model, reasoningEffort, permissionMode, collaborationMode = null, turnId: providedTurnId }, emit) {
   const workingDirectory = await ensureAsciiWorkingDirectory(projectPath);
   const { sandboxMode, approvalPolicy } = mapPermissionMode(permissionMode);
   const feishuSkillKeys = detectFeishuSkillKeys(message);
@@ -855,7 +855,8 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
       approvalPolicy,
       sandboxPolicy: sandboxPolicyFromMode(sandboxMode, { networkAccess: larkCliContext.enabled }),
       model: model || null,
-      effort: modelReasoningEffort || null
+      effort: modelReasoningEffort || null,
+      collaborationMode: collaborationMode || null
     }, { timeoutMs: 30_000 });
     if (turnResponse?.turn?.id) {
       run.appTurnId = turnResponse.turn.id;

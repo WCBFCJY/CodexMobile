@@ -4,7 +4,11 @@ export function isThinkingActivityStep(step = null) {
   if (kind !== 'reasoning') {
     return false;
   }
-  return /正在思考|思考中|thinking/i.test(label) || step?.status === 'running';
+  const status = String(step?.status || '').toLowerCase();
+  if (['completed', 'failed', 'cancelled', 'canceled'].includes(status)) {
+    return false;
+  }
+  return /正在思考|思考中|thinking/i.test(label) || status === 'running' || status === 'queued';
 }
 
 export function thinkingActivityText(step = null) {

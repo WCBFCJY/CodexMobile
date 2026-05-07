@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { applyMacSystemProxyEnv } from './system-proxy-env.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 
@@ -30,5 +31,9 @@ function loadDotEnv() {
 }
 
 loadDotEnv();
+const proxyEnv = applyMacSystemProxyEnv();
+if (proxyEnv.applied) {
+  console.log(`[launchd] Using macOS system proxy for background Codex requests: ${proxyEnv.proxyUrl}`);
+}
 console.log(`[launchd] CodexMobile run-server starting cwd=${process.cwd()} node=${process.execPath}`);
 await import('../server/index.js');

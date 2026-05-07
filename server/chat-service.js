@@ -82,6 +82,22 @@ export function normalizeSelectedSkills(value, availableSkills = []) {
   return selected.slice(0, 8);
 }
 
+function normalizeCollaborationMode(value, { model = '', reasoningEffort = null } = {}) {
+  const requestedMode = typeof value === 'string' ? value : value?.mode;
+  if (String(requestedMode || '').trim().toLowerCase() !== 'plan') {
+    return null;
+  }
+  const settings = typeof value === 'object' && value?.settings ? value.settings : {};
+  return {
+    mode: 'plan',
+    settings: {
+      model: String(settings.model ?? model ?? '').trim(),
+      reasoning_effort: settings.reasoning_effort ?? settings.reasoningEffort ?? reasoningEffort ?? null,
+      developer_instructions: settings.developer_instructions ?? null
+    }
+  };
+}
+
 export function createChatService({
   imagePromptState,
   defaultReasoningEffort = 'xhigh',
@@ -98,6 +114,7 @@ export function createChatService({
   startDesktopFollowerTurn,
   steerDesktopFollowerTurn,
   interruptDesktopFollowerTurn,
+  setDesktopFollowerCollaborationMode,
   abortCodexTurn,
   getActiveRuns,
   runImageTurn,
@@ -398,6 +415,7 @@ export function createChatService({
       attachments: Array.isArray(job.attachments) ? job.attachments : [],
       selectedSkills: Array.isArray(job.selectedSkills) ? job.selectedSkills : [],
       fileMentions: Array.isArray(job.fileMentions) ? job.fileMentions : [],
+      collaborationMode: job.collaborationMode?.mode === 'plan' ? 'plan' : null,
       createdAt: job.createdAt || new Date().toISOString(),
       sessionId: job.selectedSessionId || null,
       draftSessionId: job.draftSessionId || null
@@ -456,6 +474,7 @@ export function createChatService({
       attachments: draft.attachments,
       selectedSkills: draft.selectedSkills,
       fileMentions: draft.fileMentions,
+      collaborationMode: draft.collaborationMode,
       sendMode: 'steer'
     });
   }
@@ -554,6 +573,7 @@ export function createChatService({
         model: job.model,
         reasoningEffort: job.reasoningEffort,
         permissionMode: job.permissionMode,
+        collaborationMode: job.collaborationMode,
         turnId: job.turnId
       },
       (payload) => {
@@ -668,7 +688,8 @@ export function createChatService({
     selectedSkills,
     model,
     reasoningEffort,
-    permissionMode
+    permissionMode,
+    collaborationMode
   }) {
     if (!selectedSessionId) {
       throw desktopCreateThreadUnavailableError();
@@ -691,6 +712,7 @@ export function createChatService({
         : { type: 'workspaceWrite', networkAccess: false },
       model: model || null,
       effort: reasoningEffort || null,
+      collaborationMode: collaborationMode || null,
       attachments: []
     };
 
@@ -719,6 +741,9 @@ export function createChatService({
     let result;
     try {
       if (sendMode === 'steer') {
+        if (collaborationMode && setDesktopFollowerCollaborationMode) {
+          await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode);
+        }
         result = await steerDesktopFollowerTurn(selectedSessionId, {
           input,
           attachments: [],
@@ -727,7 +752,7 @@ export function createChatService({
             cwd: lastSession?.cwd || project.path || null,
             context: {
               workspaceRoots: project.path ? [project.path] : [],
-              collaborationMode: null
+              collaborationMode: collaborationMode || null
             },
             responsesapiClientMetadata: null
           }
@@ -735,6 +760,9 @@ export function createChatService({
       } else {
         if (sendMode === 'interrupt') {
           await interruptDesktopFollowerTurn(selectedSessionId);
+        }
+        if (collaborationMode && setDesktopFollowerCollaborationMode) {
+          await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode);
         }
         result = await startDesktopFollowerTurn(selectedSessionId, baseTurnStartParams);
       }
@@ -802,6 +830,12 @@ export function createChatService({
     const sendMode = String(body.sendMode || body.mode || 'start').trim();
     const config = getCacheSnapshot().config || {};
     const selectedSkills = normalizeSelectedSkills(body.selectedSkills, config.skills);
+    const modelForTurn = session?.model || body.model || config.model || 'gpt-5.5';
+    const reasoningEffortForTurn = body.reasoningEffort || defaultReasoningEffort;
+    const collaborationMode = normalizeCollaborationMode(body.collaborationMode, {
+      model: modelForTurn,
+      reasoningEffort: reasoningEffortForTurn
+    });
     const displayMessage = message || '请查看附件。';
     const visibleMessage = withImageAttachmentPreviews(displayMessage, attachments);
     const codexMessage = withFileMentionReferences(
@@ -834,9 +868,10 @@ export function createChatService({
         attachments,
         selectedSkills,
         fileMentions,
-        model: session?.model || body.model || config.model || 'gpt-5.5',
-        reasoningEffort: body.reasoningEffort || defaultReasoningEffort,
-        permissionMode: body.permissionMode || 'bypassPermissions'
+        model: modelForTurn,
+        reasoningEffort: reasoningEffortForTurn,
+        permissionMode: body.permissionMode || 'bypassPermissions',
+        collaborationMode
       }, { forceQueued: true, autoStart: false });
       return {
         accepted: true,
@@ -865,9 +900,10 @@ export function createChatService({
             visibleMessage,
             attachments,
             selectedSkills,
-            model: session?.model || body.model || config.model || 'gpt-5.5',
-            reasoningEffort: body.reasoningEffort || defaultReasoningEffort,
-            permissionMode: body.permissionMode || 'bypassPermissions'
+            model: modelForTurn,
+            reasoningEffort: reasoningEffortForTurn,
+            permissionMode: body.permissionMode || 'bypassPermissions',
+            collaborationMode
           });
         } catch (error) {
           if (error?.code !== 'CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE' || !desktopIpcCanUseBackgroundFallback(bridge)) {
@@ -1069,9 +1105,10 @@ export function createChatService({
       attachments,
       selectedSkills,
       fileMentions,
-      model: session?.model || body.model || config.model || 'gpt-5.5',
-      reasoningEffort: body.reasoningEffort || defaultReasoningEffort,
-      permissionMode: body.permissionMode || 'bypassPermissions'
+      model: modelForTurn,
+      reasoningEffort: reasoningEffortForTurn,
+      permissionMode: body.permissionMode || 'bypassPermissions',
+      collaborationMode
     });
 
     return {

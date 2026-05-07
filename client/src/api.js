@@ -32,7 +32,10 @@ export async function apiFetch(path, options = {}) {
   const text = await response.text();
   const data = text ? JSON.parse(text) : {};
   if (!response.ok) {
-    throw new Error(data.error || `Request failed: ${response.status}`);
+    const error = new Error(data.error || `Request failed: ${response.status}`);
+    error.status = response.status;
+    error.code = data.code || null;
+    throw error;
   }
   return data;
 }
@@ -57,13 +60,18 @@ export async function apiBlobFetch(path, options = {}) {
   if (!response.ok) {
     const text = await response.text();
     let message = `Request failed: ${response.status}`;
+    let code = null;
     try {
       const data = text ? JSON.parse(text) : {};
       message = data.error || message;
+      code = data.code || null;
     } catch {
       message = text || message;
     }
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = response.status;
+    error.code = code;
+    throw error;
   }
 
   return response.blob();
@@ -73,10 +81,4 @@ export function websocketUrl() {
   const token = encodeURIComponent(getToken());
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   return `${protocol}//${window.location.host}/ws?token=${token}`;
-}
-
-export function realtimeVoiceWebsocketUrl() {
-  const token = encodeURIComponent(getToken());
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${protocol}//${window.location.host}/ws/realtime?token=${token}`;
 }

@@ -1,3 +1,5 @@
+import { sameUserMessageContent, userMessageIdentity } from './chat/message-identity.js';
+
 function normalizeText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
 }
@@ -8,6 +10,72 @@ function isPendingLocalMessage(message) {
     return true;
   }
   return message?.role === 'activity' && ['running', 'queued'].includes(String(message?.status || ''));
+}
+
+function messageRunKeys(message) {
+  return [message?.turnId, message?.sessionId, message?.previousSessionId].filter(Boolean).map(String);
+}
+
+function messageMatchesRunKeys(message, keys) {
+  if (!keys.size) {
+    return false;
+  }
+  return messageRunKeys(message).some((key) => keys.has(key));
+}
+
+function completeLocalActivityMessage(message, loaded = []) {
+  const keys = new Set(messageRunKeys(message));
+  const assistant = loaded.find((item) => item?.role === 'assistant' && messageMatchesRunKeys(item, keys) && normalizeText(item.content));
+  if (!assistant && !['running', 'queued'].includes(String(message?.status || ''))) {
+    return message;
+  }
+  return {
+    ...message,
+    status: message.status === 'failed' ? 'failed' : 'completed',
+    label: message.status === 'failed' ? message.label : '过程已同步',
+    content: message.status === 'failed' ? message.content : '过程已同步',
+    completedAt: message.completedAt || assistant?.timestamp || new Date().toISOString(),
+    activities: Array.isArray(message.activities)
+      ? message.activities.map((activity) =>
+        ['running', 'queued'].includes(String(activity?.status || ''))
+          ? { ...activity, status: 'completed' }
+          : activity
+      )
+      : message.activities
+  };
+}
+
+function activityInsertIndex(loaded, activity) {
+  const keys = new Set(messageRunKeys(activity));
+  const index = loaded.findIndex((message) => message?.role === 'assistant' && messageMatchesRunKeys(message, keys));
+  return index >= 0 ? index : loaded.length;
+}
+
+function preserveLocalActivityMessages(current = [], loaded = []) {
+  const loadedIds = new Set(loaded.map((message) => String(message?.id || '')).filter(Boolean));
+  const preserved = current
+    .filter((message) => message?.role === 'activity' && !loadedIds.has(String(message?.id || '')))
+    .filter((message) => {
+      const keys = new Set(messageRunKeys(message));
+      if (!keys.size) {
+        return false;
+      }
+      if (loaded.some((item) => item?.role === 'activity' && messageMatchesRunKeys(item, keys))) {
+        return false;
+      }
+      return loaded.some((item) => messageMatchesRunKeys(item, keys)) || ['running', 'queued'].includes(String(message?.status || ''));
+    })
+    .map((message) => completeLocalActivityMessage(message, loaded));
+
+  if (!preserved.length) {
+    return loaded;
+  }
+
+  const result = [...loaded];
+  for (const activity of preserved.sort((a, b) => activityInsertIndex(result, a) - activityInsertIndex(result, b))) {
+    result.splice(activityInsertIndex(result, activity), 0, activity);
+  }
+  return result;
 }
 
 function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
@@ -33,20 +101,15 @@ export function mergeLiveSelectedThreadMessages(current = [], loaded = []) {
     return loaded;
   }
 
-  const loadedUserTexts = new Set(
-    loaded
-      .filter((message) => message?.role === 'user')
-      .map((message) => normalizeText(message.content))
-      .filter(Boolean)
-  );
+  const loadedUsers = loaded.filter((message) => message?.role === 'user');
   const hasUncaughtLocalUser = current.some((message) =>
     message?.role === 'user' &&
     isPendingLocalMessage(message) &&
-    !loadedUserTexts.has(normalizeText(message.content))
+    !loadedUsers.some((loadedMessage) => sameUserMessageContent(message.content, loadedMessage.content))
   );
 
   if (!hasUncaughtLocalUser) {
-    return loaded;
+    return preserveLocalActivityMessages(current, loaded);
   }
 
   const loadedIds = new Set(loaded.map((message) => String(message?.id || '')).filter(Boolean));
@@ -57,13 +120,13 @@ export function mergeLiveSelectedThreadMessages(current = [], loaded = []) {
     if (loadedIds.has(String(message?.id || ''))) {
       return false;
     }
-    if (message?.role === 'user' && loadedUserTexts.has(normalizeText(message.content))) {
+    if (message?.role === 'user' && loadedUsers.some((loadedMessage) => sameUserMessageContent(message.content, loadedMessage.content))) {
       return false;
     }
     return true;
   });
 
-  return [...loaded, ...pending].sort(
+  return preserveLocalActivityMessages(current, [...loaded, ...pending]).sort(
     (a, b) => new Date(a?.timestamp || 0).getTime() - new Date(b?.timestamp || 0).getTime()
   );
 }
@@ -72,18 +135,13 @@ export function desktopThreadHasAssistantAfterLocalSend(current = [], loaded = [
   if (!Array.isArray(current) || !Array.isArray(loaded) || !current.length || !loaded.length) {
     return false;
   }
-  const pendingUserTexts = new Set(
-    current
-      .filter((message) => message?.role === 'user' && isPendingLocalMessage(message))
-      .map((message) => normalizeText(message.content))
-      .filter(Boolean)
-  );
-  if (!pendingUserTexts.size) {
+  const pendingUsers = current.filter((message) => message?.role === 'user' && isPendingLocalMessage(message));
+  if (!pendingUsers.length) {
     return false;
   }
   let matchedPendingUser = false;
   for (const message of loaded) {
-    if (message?.role === 'user' && pendingUserTexts.has(normalizeText(message.content))) {
+    if (message?.role === 'user' && pendingUsers.some((pending) => sameUserMessageContent(pending.content, message.content))) {
       matchedPendingUser = true;
       continue;
     }
@@ -95,13 +153,13 @@ export function desktopThreadHasAssistantAfterLocalSend(current = [], loaded = [
 }
 
 export function desktopThreadHasAssistantAfterPendingSend(pending = null, loaded = []) {
-  const pendingText = normalizeText(pending?.message);
+  const pendingText = userMessageIdentity(pending?.message);
   if (!pendingText || !Array.isArray(loaded) || !loaded.length) {
     return false;
   }
   let matchedPendingUser = false;
   for (const message of loaded) {
-    if (message?.role === 'user' && normalizeText(message.content) === pendingText) {
+    if (message?.role === 'user' && userMessageIdentity(message.content) === pendingText) {
       matchedPendingUser = true;
       continue;
     }

@@ -284,6 +284,13 @@ export async function interruptDesktopFollowerTurn(conversationId, options = {})
   }, options);
 }
 
+export async function setDesktopFollowerCollaborationMode(conversationId, collaborationMode, options = {}) {
+  return requestDesktopFollower('thread-follower-set-collaboration-mode', {
+    conversationId,
+    collaborationMode
+  }, options);
+}
+
 export async function broadcastDesktopThreadArchived(conversationId, { hostId = 'local', cwd = null, timeoutMs = 1500 } = {}) {
   const client = new DesktopIpcClient({ clientType: 'codexmobile-archive-sync' });
   try {

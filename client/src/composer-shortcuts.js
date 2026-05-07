@@ -1,5 +1,14 @@
 export const SLASH_COMMANDS = [
   {
+    id: 'plan',
+    token: '/plan',
+    aliases: ['/计划模式'],
+    title: '计划模式',
+    description: '先让 Codex 只规划，不直接改代码',
+    action: 'insert-prompt',
+    prompt: '/plan'
+  },
+  {
     id: 'status',
     token: '/状态',
     aliases: ['/status'],
