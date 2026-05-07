@@ -1,3 +1,8 @@
+import {
+  completeActivityMessagesForTurn,
+  upsertStatusMessage
+} from '../chat/activity-model.js';
+
 export function realSessionIdFromTurn(turn) {
   const sessionIdText = String(turn?.sessionId || '');
   if (!sessionIdText || sessionIdText.startsWith('draft-') || sessionIdText.startsWith('codex-')) {
@@ -83,4 +88,19 @@ export function restoredComposerText(current, nextText) {
     return current;
   }
   return `${base}\n${value}`;
+}
+
+export function completeLocalAbortMessages(current, payload = {}) {
+  const completedAt = payload.completedAt || payload.timestamp || new Date().toISOString();
+  return upsertStatusMessage(
+    completeActivityMessagesForTurn(current, { ...payload, completedAt }),
+    {
+      ...payload,
+      kind: 'turn',
+      status: 'completed',
+      label: '已中止',
+      completedAt,
+      timestamp: completedAt
+    }
+  );
 }

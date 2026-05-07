@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   displayMessageForTurn,
+  completeLocalAbortMessages,
   prepareComposerSubmission,
   projectForTurnSelection,
   realSessionIdFromTurn,
@@ -89,4 +90,33 @@ test('restoredComposerText appends failed message text only once', () => {
   assert.equal(restoredComposerText('', '继续修复'), '继续修复');
   assert.equal(restoredComposerText('先看日志', '继续修复'), '先看日志\n继续修复');
   assert.equal(restoredComposerText('先看日志\n继续修复', '继续修复'), '先看日志\n继续修复');
+});
+
+test('completeLocalAbortMessages finishes the optimistic running activity', () => {
+  const messages = [
+    {
+      id: 'status-turn-1',
+      role: 'activity',
+      status: 'running',
+      sessionId: 'thread-1',
+      turnId: 'turn-1',
+      content: '正在处理',
+      label: '正在处理',
+      timestamp: '2026-05-08T02:00:00.000Z',
+      activities: [
+        { id: 'thinking', kind: 'reasoning', label: '正在思考中', status: 'running' }
+      ]
+    }
+  ];
+
+  const next = completeLocalAbortMessages(messages, {
+    sessionId: 'thread-1',
+    turnId: 'turn-1',
+    completedAt: '2026-05-08T02:00:05.000Z'
+  });
+
+  assert.equal(next[0].status, 'completed');
+  assert.equal(next[0].label, '已中止');
+  assert.equal(next[0].activities[0].status, 'completed');
+  assert.equal(next[0].completedAt, '2026-05-08T02:00:05.000Z');
 });

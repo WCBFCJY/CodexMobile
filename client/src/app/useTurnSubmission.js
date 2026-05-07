@@ -16,6 +16,7 @@ import {
 } from './session-utils.js';
 import {
   displayMessageForTurn,
+  completeLocalAbortMessages,
   prepareComposerSubmission,
   projectForTurnSelection,
   realSessionIdFromTurn,
@@ -393,19 +394,31 @@ export function useTurnSubmission({
   }
 
   async function abortCurrentRun() {
+    const currentSession = selectedSessionRef.current;
     const abortId =
-      selectedSessionRef.current?.id ||
-      selectedSessionRef.current?.turnId ||
+      currentSession?.turnId ||
+      currentSession?.id ||
       Object.keys(runningByIdRef.current || runningById)[0];
     if (!abortId) {
       return false;
     }
+    const completedAt = new Date().toISOString();
+    const abortPayload = {
+      sessionId: currentSession?.id || abortId,
+      turnId: currentSession?.turnId || null,
+      previousSessionId: currentSession?.previousSessionId || null,
+      completedAt,
+      timestamp: completedAt
+    };
     await apiFetch('/api/chat/abort', {
       method: 'POST',
-      body: { sessionId: abortId, turnId: selectedSessionRef.current?.turnId || null }
+      body: { sessionId: currentSession?.id || abortId, turnId: currentSession?.turnId || null }
     }).catch(() => null);
-    desktopIpcPendingRunsRef.current.delete(abortId);
-    clearRun({ sessionId: abortId, turnId: selectedSessionRef.current?.turnId || null });
+    for (const key of [abortId, abortPayload.sessionId, abortPayload.turnId, abortPayload.previousSessionId].filter(Boolean)) {
+      desktopIpcPendingRunsRef.current.delete(key);
+    }
+    clearRun(abortPayload);
+    setMessages((current) => completeLocalAbortMessages(current, abortPayload));
     return true;
   }
 
