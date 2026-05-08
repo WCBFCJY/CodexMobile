@@ -526,9 +526,36 @@ export function createChatService({
     };
   }
 
-  function abortChat(body, { remoteAddress = '' } = {}) {
-    console.log(`[chat] abort request remote=${remoteAddress} turn=${body.turnId || ''} session=${body.sessionId || ''}`);
-    return abortCodexTurn(body.turnId || body.sessionId);
+  function abortChat(body = {}, { remoteAddress = '' } = {}) {
+    const turnId = String(body.turnId || '').trim();
+    const sessionId = String(body.sessionId || '').trim();
+    const previousSessionId = String(body.previousSessionId || '').trim();
+    console.log(`[chat] abort request remote=${remoteAddress} turn=${turnId} session=${sessionId}`);
+    const aborted = abortCodexTurn(turnId || sessionId);
+    if (!turnId && !aborted) {
+      return false;
+    }
+
+    const completedAt = new Date().toISOString();
+    const payload = {
+      type: 'chat-aborted',
+      projectId: body.projectId || undefined,
+      sessionId: sessionId || undefined,
+      previousSessionId: previousSessionId || undefined,
+      turnId: turnId || sessionId,
+      completedAt,
+      timestamp: completedAt
+    };
+    rememberTurn(payload.turnId, {
+      projectId: payload.projectId,
+      sessionId: payload.sessionId,
+      previousSessionId: payload.previousSessionId,
+      status: 'aborted',
+      label: '已中止',
+      completedAt
+    });
+    broadcast(payload);
+    return true;
   }
 
   return {

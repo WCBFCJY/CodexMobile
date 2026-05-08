@@ -79,6 +79,30 @@ test('sendChat rejects when strict desktop bridge is unavailable', async () => {
   assert.equal(broadcasts.length, 0);
 });
 
+test('abortChat records and broadcasts an aborted turn even after the backend run is gone', () => {
+  let abortedIdentifier = null;
+  const { service, broadcasts } = makeChatService({
+    abortCodexTurn: (identifier) => {
+      abortedIdentifier = identifier;
+      return false;
+    }
+  });
+
+  const aborted = service.abortChat({
+    sessionId: 'thread-1',
+    turnId: 'client-turn-1',
+    previousSessionId: 'thread-1'
+  }, { remoteAddress: '127.0.0.1' });
+
+  assert.equal(aborted, true);
+  assert.equal(abortedIdentifier, 'client-turn-1');
+  assert.equal(service.getTurn('client-turn-1').status, 'aborted');
+  assert.equal(service.getTurn('client-turn-1').sessionId, 'thread-1');
+  assert.equal(broadcasts.at(-1).type, 'chat-aborted');
+  assert.equal(broadcasts.at(-1).turnId, 'client-turn-1');
+  assert.equal(broadcasts.at(-1).sessionId, 'thread-1');
+});
+
 test('sendChat rejects desktop-ipc draft sends with a create-thread specific error', async () => {
   const { service, broadcasts } = makeChatService({
     getDesktopBridgeStatus: async () => ({
