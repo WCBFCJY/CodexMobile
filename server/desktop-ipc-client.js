@@ -310,3 +310,30 @@ export async function broadcastDesktopThreadArchived(conversationId, { hostId = 
     client.close();
   }
 }
+
+export async function broadcastDesktopThreadTitleUpdated(
+  conversationId,
+  title,
+  { hostId = 'local', socketPath = null, timeoutMs = 1500 } = {}
+) {
+  const client = new DesktopIpcClient({
+    clientType: 'codexmobile-title-sync',
+    ...(socketPath ? { socketPath } : {})
+  });
+  try {
+    await client.connect({ timeoutMs });
+    client.sendBroadcast('thread-title-updated', {
+      hostId,
+      conversationId,
+      title
+    });
+    return { sent: true };
+  } catch (error) {
+    return {
+      sent: false,
+      reason: error.message || '桌面端 Codex IPC 广播失败'
+    };
+  } finally {
+    client.close();
+  }
+}

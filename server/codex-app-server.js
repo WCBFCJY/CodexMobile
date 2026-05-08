@@ -3,7 +3,11 @@ import fsSync from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import readline from 'node:readline';
-import { broadcastDesktopThreadArchived, probeDesktopIpc } from './desktop-ipc-client.js';
+import {
+  broadcastDesktopThreadArchived,
+  broadcastDesktopThreadTitleUpdated,
+  probeDesktopIpc
+} from './desktop-ipc-client.js';
 
 const DEFAULT_CODEX_APP_BINARY = '/Applications/Codex.app/Contents/Resources/codex';
 const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
@@ -477,10 +481,15 @@ export async function setDesktopThreadName(threadId, name) {
     allowHeadlessLocal: true
   });
   try {
-    return await client.request('thread/name/set', {
+    const result = await client.request('thread/name/set', {
       threadId,
       name
     }, { timeoutMs: 20_000 });
+    const broadcast = await broadcastDesktopThreadTitleUpdated(threadId, name);
+    if (!broadcast.sent) {
+      console.warn(`[desktop-ipc] title broadcast skipped thread=${threadId}: ${broadcast.reason}`);
+    }
+    return result;
   } finally {
     client.close();
   }

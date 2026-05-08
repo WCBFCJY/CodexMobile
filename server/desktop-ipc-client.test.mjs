@@ -4,7 +4,9 @@ import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { DesktopIpcClient, desktopIpcMethodVersion } from './desktop-ipc-client.js';
+import * as desktopIpc from './desktop-ipc-client.js';
+
+const { DesktopIpcClient, desktopIpcMethodVersion } = desktopIpc;
 
 test('desktop follower IPC methods use the current desktop protocol version', () => {
   assert.equal(desktopIpcMethodVersion('initialize'), 0);
@@ -80,6 +82,47 @@ test('sendBroadcast writes desktop IPC broadcast frames', async () => {
   });
 
   client.close();
+  server.close();
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+test('broadcastDesktopThreadTitleUpdated writes desktop title update broadcast frames', async () => {
+  assert.equal(typeof desktopIpc.broadcastDesktopThreadTitleUpdated, 'function');
+
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-ipc-test-'));
+  const socketPath = path.join(dir, 'ipc.sock');
+  const server = net.createServer();
+  await new Promise((resolve) => server.listen(socketPath, resolve));
+
+  const accepted = new Promise((resolve) => server.once('connection', resolve));
+  const sent = desktopIpc.broadcastDesktopThreadTitleUpdated('thread-1', 'Renamed thread', {
+    hostId: 'local',
+    socketPath,
+    timeoutMs: 1000
+  });
+  const socket = await accepted;
+  const init = await readFrame(socket);
+  socket.write(frameFor({
+    type: 'response',
+    requestId: init.requestId,
+    resultType: 'success',
+    method: 'initialize',
+    result: { clientId: 'client-1' }
+  }));
+  const broadcast = await readFrame(socket);
+  const result = await sent;
+
+  assert.deepEqual(result, { sent: true });
+  assert.equal(broadcast.type, 'broadcast');
+  assert.equal(broadcast.method, 'thread-title-updated');
+  assert.equal(broadcast.sourceClientId, 'client-1');
+  assert.equal(broadcast.version, 0);
+  assert.deepEqual(broadcast.params, {
+    hostId: 'local',
+    conversationId: 'thread-1',
+    title: 'Renamed thread'
+  });
+
   server.close();
   await fs.rm(dir, { recursive: true, force: true });
 });
