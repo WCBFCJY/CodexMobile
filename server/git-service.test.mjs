@@ -22,12 +22,28 @@ test('parseGitStatusShort reads branch, ahead/behind, and changed files', () => 
   assert.equal(status.ahead, 2);
   assert.equal(status.behind, 1);
   assert.equal(status.clean, false);
+  assert.equal(status.fileCount, 4);
+  assert.equal(status.filesTruncated, false);
   assert.deepEqual(status.files.map((file) => [file.status, file.path]), [
     ['M', 'client/src/App.jsx'],
     ['A', 'server/git-service.js'],
     ['R', 'new-name.js'],
     ['??', 'server/git-service.test.mjs']
   ]);
+});
+
+test('parseGitStatusShort caps large file lists but keeps true dirty count', () => {
+  const output = [
+    '## main...origin/main',
+    ...Array.from({ length: 5 }, (_, index) => ` M file-${index}.md`)
+  ].join('\n');
+  const status = parseGitStatusShort(output, { maxFiles: 2 });
+
+  assert.equal(status.clean, false);
+  assert.equal(status.canCommit, true);
+  assert.equal(status.fileCount, 5);
+  assert.equal(status.filesTruncated, true);
+  assert.deepEqual(status.files.map((file) => file.path), ['file-0.md', 'file-1.md']);
 });
 
 test('normalizeBranchName keeps codex prefix and sanitizes unsafe text', () => {
@@ -258,7 +274,7 @@ test('git service sync pulls then pushes only when ahead remains', async () => {
       if (args[0] === 'status') {
         statusCount += 1;
         return {
-          stdout: statusCount === 1
+          stdout: statusCount <= 2
             ? '## codex/git-panel...origin/codex/git-panel [ahead 1]\n'
             : '## codex/git-panel...origin/codex/git-panel\n',
           stderr: ''
@@ -273,6 +289,50 @@ test('git service sync pulls then pushes only when ahead remains', async () => {
   assert.equal(calls.includes('push origin'), true);
   assert.equal(result.pushed.branch, 'codex/git-panel');
   assert.equal(result.status.ahead, 0);
+});
+
+test('git service blocks commit on non-codex branches', async () => {
+  const service = createGitService({
+    getProject: () => ({ path: '/repo' }),
+    runner: async (cwd, args) => {
+      if (args[0] === 'rev-parse') {
+        return { stdout: '/repo\n', stderr: '' };
+      }
+      if (args[0] === 'status') {
+        return { stdout: '## main...origin/main\n M vault.md\n', stderr: '' };
+      }
+      throw new Error(`unexpected git ${args.join(' ')}`);
+    }
+  });
+
+  await assert.rejects(
+    () => service.commit('project-1', '更新 vault'),
+    /移动端只允许在 codex\/ 分支执行提交或推送/
+  );
+});
+
+test('git service blocks push when the dirty file list is too large', async () => {
+  const output = [
+    '## codex/git-panel...origin/codex/git-panel [ahead 1]',
+    ...Array.from({ length: 501 }, (_, index) => ` M file-${index}.md`)
+  ].join('\n');
+  const service = createGitService({
+    getProject: () => ({ path: '/repo' }),
+    runner: async (cwd, args) => {
+      if (args[0] === 'rev-parse') {
+        return { stdout: '/repo\n', stderr: '' };
+      }
+      if (args[0] === 'status') {
+        return { stdout: output, stderr: '' };
+      }
+      throw new Error(`unexpected git ${args.join(' ')}`);
+    }
+  });
+
+  await assert.rejects(
+    () => service.push('project-1'),
+    /改动文件过多/
+  );
 });
 
 test('git service commitPush commits and then pushes', async () => {

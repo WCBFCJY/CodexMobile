@@ -1,6 +1,7 @@
 import { Check, ChevronLeft, Copy, ExternalLink, FileText, FolderGit2, GitBranch, GitCommitHorizontal, GitPullRequest, Loader2, Plus, RefreshCw, UploadCloud, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '../api.js';
+import { gitActionBlockReason, gitChangedFileCount, gitSafetyWarnings } from '../git-panel-state.js';
 import { copyTextToClipboard } from '../utils/clipboard.js';
 
 function gitActionTitle(action) {
@@ -29,20 +30,6 @@ function gitBranchDraft(project) {
   return `codex/${name || 'changes'}`;
 }
 
-function gitSafetyWarnings(status = {}) {
-  const warnings = [];
-  const files = Array.isArray(status.files) ? status.files : [];
-  if (files.length) warnings.push(`工作区有 ${files.length} 个改动文件`);
-  if (status.behind > 0) warnings.push(`落后远端 ${status.behind} 个提交`);
-  if (status.branch && !String(status.branch).startsWith('codex/')) warnings.push('当前不是 codex/ 分支');
-  if (status.branch && !status.upstream) warnings.push('当前分支没有 upstream');
-  return warnings;
-}
-
-function isAutoAction(action) {
-  return action === 'sync' || action === 'push';
-}
-
 export function GitPanel({ open, action, project, onClose, onToast }) {
   const projectId = project?.id || '';
   const [status, setStatus] = useState(null);
@@ -56,11 +43,11 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
   const [branchName, setBranchName] = useState('');
   const [baseBranch, setBaseBranch] = useState('');
   const [copiedDraft, setCopiedDraft] = useState(false);
-  const autoRunKeyRef = useRef('');
 
   const title = gitActionTitle(action);
-  const files = Array.isArray(status?.files) ? status.files : [];
+  const fileCount = gitChangedFileCount(status || {});
   const safetyWarnings = gitSafetyWarnings(status || {});
+  const blockReason = status ? gitActionBlockReason(status, action) : '';
   const branchList = Array.isArray(branches?.branches) ? branches.branches : [];
   const branchControlsLimited = Boolean(branches?.limited);
   const defaultBaseBranch = branches?.defaultBranch || baseBranch || 'main';
@@ -141,7 +128,6 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
     setCommitMessage('');
     setBranchName('');
     setBaseBranch('');
-    autoRunKeyRef.current = '';
     refreshAll();
   }, [open, action, projectId, refreshAll]);
 
@@ -151,16 +137,18 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
     }
   }, [open, action, diff, busy, loadDiff]);
 
-  useEffect(() => {
-    if (!open || !projectId || !isAutoAction(action) || busy) return;
-    const key = `${action}:${projectId}`;
-    if (autoRunKeyRef.current === key) return;
-    autoRunKeyRef.current = key;
-    runGitAction(action);
-  }, [open, projectId, action, busy]);
-
   async function runGitAction(nextAction = action, extraBody = {}) {
     if (!projectId || busy) return;
+    if (!status && (nextAction === 'commit' || nextAction === 'commit-push' || nextAction === 'push' || nextAction === 'sync')) {
+      setError('Git 状态尚未读取完成');
+      return;
+    }
+    const nextBlockReason = status ? gitActionBlockReason(status, nextAction) : '';
+    if ((nextAction === 'commit' || nextAction === 'commit-push' || nextAction === 'push' || nextAction === 'sync') && nextBlockReason) {
+      setError(nextBlockReason);
+      onToast?.({ level: 'warning', title: gitActionTitle(nextAction), body: nextBlockReason });
+      return;
+    }
     setBusy(true);
     setBusyAction(nextAction);
     setError('');
@@ -185,16 +173,16 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
 
   async function requestGitAction(nextAction, extraBody) {
     if (nextAction === 'commit') {
-      return apiFetch('/api/git/commit', { method: 'POST', body: { projectId, message: commitMessage } });
+      return apiFetch('/api/git/commit', { method: 'POST', body: { projectId, message: commitMessage }, timeoutMs: 70_000 });
     }
     if (nextAction === 'commit-push') {
-      return apiFetch('/api/git/commit-push', { method: 'POST', body: { projectId, message: commitMessage } });
+      return apiFetch('/api/git/commit-push', { method: 'POST', body: { projectId, message: commitMessage }, timeoutMs: 130_000 });
     }
     if (nextAction === 'push') {
-      return apiFetch('/api/git/push', { method: 'POST', body: { projectId } });
+      return apiFetch('/api/git/push', { method: 'POST', body: { projectId }, timeoutMs: 130_000 });
     }
     if (nextAction === 'sync') {
-      return apiFetch('/api/git/sync', { method: 'POST', body: { projectId } });
+      return apiFetch('/api/git/sync', { method: 'POST', body: { projectId }, timeoutMs: 130_000 });
     }
     if (nextAction === 'branch') {
       return apiFetch('/api/git/branch', { method: 'POST', body: { projectId, branchName } });
@@ -218,8 +206,8 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
     if (!copied) window.alert('复制失败');
   }
 
-  const canCommit = Boolean(status?.canCommit && commitMessage.trim());
-  const canPush = Boolean(status?.branch);
+  const canCommit = Boolean(status?.canCommit && commitMessage.trim() && !blockReason);
+  const canPush = Boolean(status?.branch && !blockReason);
   const canCreateBranch = Boolean(branchName.trim());
   const canCreateWorktree = Boolean(branchName.trim() && (baseBranch || defaultBaseBranch));
 
@@ -241,7 +229,7 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
       </header>
 
       <div className="docs-panel-body git-panel-body">
-        <GitStatusSummary status={status} files={files} warnings={safetyWarnings} onRefresh={refreshAll} busy={busy} />
+        <GitStatusSummary status={status} fileCount={fileCount} warnings={safetyWarnings} onRefresh={refreshAll} busy={busy} />
 
         {action === 'branches' ? (
           <BranchSheet
@@ -283,11 +271,12 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
             busy={busy}
             busyAction={busyAction}
             onCommit={() => runGitAction(action)}
+            blockReason={blockReason}
           />
         ) : null}
 
         {action === 'sync' || action === 'push' ? (
-          <ActionProgress action={action} busy={busy} result={result} />
+          <ActionProgress action={action} busy={busy} result={result} blockReason={blockReason} onRun={() => runGitAction(action)} />
         ) : null}
 
         {action === 'pr-draft' ? (
@@ -310,7 +299,7 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
   );
 }
 
-function GitStatusSummary({ status, files, warnings, onRefresh, busy }) {
+function GitStatusSummary({ status, fileCount, warnings, onRefresh, busy }) {
   return (
     <section className="git-status-card is-compact">
       <div className="git-status-head">
@@ -323,7 +312,7 @@ function GitStatusSummary({ status, files, warnings, onRefresh, busy }) {
         </button>
       </div>
       <div className="git-status-metrics">
-        <span>{files.length} 文件</span>
+        <span>{fileCount} 文件</span>
         <span>ahead {status?.ahead || 0}</span>
         <span>behind {status?.behind || 0}</span>
       </div>
@@ -412,7 +401,7 @@ function DiffSheet({ diff, busy, onRefresh }) {
   );
 }
 
-function CommitSheet({ action, commitMessage, setCommitMessage, canCommit, busy, busyAction, onCommit }) {
+function CommitSheet({ action, commitMessage, setCommitMessage, canCommit, busy, busyAction, onCommit, blockReason }) {
   return (
     <section className="git-action-card">
       <label className="git-field">
@@ -425,11 +414,12 @@ function CommitSheet({ action, commitMessage, setCommitMessage, canCommit, busy,
           {action === 'commit-push' ? '提交并推送' : '提交'}
         </button>
       </div>
+      {blockReason ? <small className="git-diff-note">{blockReason}</small> : null}
     </section>
   );
 }
 
-function ActionProgress({ action, busy, result }) {
+function ActionProgress({ action, busy, result, blockReason, onRun }) {
   return (
     <section className="git-action-card">
       <div className="git-section-head">
@@ -437,6 +427,15 @@ function ActionProgress({ action, busy, result }) {
         <span>{busy ? '正在执行...' : result ? '已完成' : '准备执行'}</span>
       </div>
       {busy ? <div className="git-inline-progress"><Loader2 className="spin" size={16} /> 正在处理 Git 操作</div> : null}
+      {!busy && !result ? (
+        <div className="git-action-grid">
+          <button type="button" onClick={onRun} disabled={Boolean(blockReason)}>
+            {action === 'push' ? <UploadCloud size={15} /> : <RefreshCw size={15} />}
+            开始{gitActionTitle(action)}
+          </button>
+        </div>
+      ) : null}
+      {blockReason ? <small className="git-diff-note">{blockReason}</small> : null}
     </section>
   );
 }

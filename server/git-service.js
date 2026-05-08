@@ -6,6 +6,7 @@ const execFileAsync = promisify(execFile);
 const DEFAULT_TIMEOUT_MS = 30_000;
 const MAX_GIT_OUTPUT = 1024 * 1024;
 const MAX_DIFF_CHARS = 80_000;
+const MAX_STATUS_FILES = 500;
 
 function serviceError(message, statusCode = 500) {
   const error = new Error(message);
@@ -54,15 +55,17 @@ async function runGit(cwd, args, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   }
 }
 
-export function parseGitStatusShort(output = '') {
+export function parseGitStatusShort(output = '', { maxFiles = MAX_STATUS_FILES } = {}) {
   const lines = String(output || '').split(/\r?\n/).filter(Boolean);
   const first = lines[0] || '';
   const branchMatch = first.match(/^##\s+([^.\s]+|\S+?)(?:\.\.\.(\S+))?(?:\s+\[(.+)\])?$/);
   const meta = branchMatch?.[3] || '';
   const ahead = Number(meta.match(/ahead\s+(\d+)/)?.[1] || 0);
   const behind = Number(meta.match(/behind\s+(\d+)/)?.[1] || 0);
-  const files = lines
-    .filter((line) => !line.startsWith('## '))
+  const fileLines = lines.filter((line) => !line.startsWith('## '));
+  const fileLimit = Math.max(1, Number(maxFiles) || MAX_STATUS_FILES);
+  const files = fileLines
+    .slice(0, fileLimit)
     .map((line) => {
       const rawStatus = line.slice(0, 2);
       const rawPath = line.slice(3).trim();
@@ -81,9 +84,11 @@ export function parseGitStatusShort(output = '') {
     upstream: branchMatch?.[2] || null,
     ahead,
     behind,
-    clean: files.length === 0,
+    clean: fileLines.length === 0,
+    fileCount: fileLines.length,
+    filesTruncated: fileLines.length > files.length,
     files,
-    canCommit: files.length > 0,
+    canCommit: fileLines.length > 0,
     canPush: Boolean(branchMatch?.[1]) && (ahead > 0 || Boolean(branchMatch?.[2]))
   };
 }
@@ -132,6 +137,15 @@ function sanitizeExistingBranchName(value = '') {
     throw serviceError('分支名无效', 400);
   }
   return branch;
+}
+
+function ensureMobileSafeGitAction(current = {}) {
+  if (!current.branch || !String(current.branch).startsWith('codex/')) {
+    throw serviceError('移动端只允许在 codex/ 分支执行提交或推送', 409);
+  }
+  if (current.filesTruncated || Number(current.fileCount || 0) > MAX_STATUS_FILES) {
+    throw serviceError('改动文件过多，请先在桌面端确认范围', 409);
+  }
 }
 
 function parseBranchList(output = '', currentBranch = '', defaultBranch = 'main', cwd = '') {
@@ -294,6 +308,7 @@ export function createGitService({ getProject, runner = runGit } = {}) {
   async function commit(projectId, message) {
     const cwd = await projectCwd(projectId);
     const before = await status(projectId);
+    ensureMobileSafeGitAction(before);
     if (before.clean) {
       throw serviceError('没有可提交的改动', 409);
     }
@@ -312,6 +327,7 @@ export function createGitService({ getProject, runner = runGit } = {}) {
   async function push(projectId, { remote = 'origin', branch = null } = {}) {
     const cwd = await projectCwd(projectId);
     const current = await status(projectId);
+    ensureMobileSafeGitAction(current);
     const targetBranch = String(branch || current.branch || '').trim();
     if (!targetBranch) {
       throw serviceError('当前不在有效分支上', 409);
@@ -399,8 +415,11 @@ export function createGitService({ getProject, runner = runGit } = {}) {
   }
 
   async function sync(projectId) {
+    const before = await status(projectId);
+    ensureMobileSafeGitAction(before);
     const pulled = await pull(projectId);
     const afterPull = pulled.status;
+    ensureMobileSafeGitAction(afterPull);
     let pushed = null;
     if (afterPull.ahead > 0) {
       pushed = await push(projectId);
