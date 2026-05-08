@@ -110,6 +110,33 @@ test('single command activity uses desktop-style run title', () => {
   assert.equal(activityStepDetailTitle(timeline[0].items[0]), '已运行 npm run build');
 });
 
+test('plan implementation activity stays actionable in the timeline model', () => {
+  const timeline = buildActivityTimeline([
+    {
+      id: 'implement-plan:turn-1',
+      kind: 'plan_implementation',
+      label: '等待确认执行计划',
+      detail: '1. 定位同步链路',
+      status: 'running',
+      planImplementation: {
+        requestId: 'implement-plan:turn-1',
+        turnId: 'turn-1',
+        planContent: '1. 定位同步链路',
+        completed: false
+      }
+    }
+  ], false);
+
+  assert.equal(timeline[0].items[0].type, 'plan_implementation');
+  assert.equal(timeline[0].title, '等待确认执行计划');
+  assert.deepEqual(timeline[0].items[0].planImplementation, {
+    requestId: 'implement-plan:turn-1',
+    turnId: 'turn-1',
+    planContent: '1. 定位同步链路',
+    completed: false
+  });
+});
+
 test('skill reads use skill names instead of raw SKILL.md paths', () => {
   const timeline = buildActivityTimeline([
     {

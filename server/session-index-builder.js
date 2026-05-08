@@ -4,7 +4,8 @@ import os from 'node:os';
 import path from 'node:path';
 import {
   isoFromEpochSeconds,
-  publicContextState
+  publicContextState,
+  publicRuntimeState
 } from './session-message-reader.js';
 
 export const PROJECTLESS_PROJECT_ID = '__codexmobile_projectless__';
@@ -130,6 +131,30 @@ function subAgentMetaFromThread(thread, spawnEdge = null) {
   };
 }
 
+function desktopThreadRuntime(thread, contextState = {}) {
+  const runtime = publicRuntimeState(contextState.runtime, thread?.id);
+  if (runtime) {
+    return runtime;
+  }
+
+  const rawStatus = typeof thread?.status === 'object'
+    ? thread.status.type || thread.status.status || thread.status.phase
+    : thread?.status;
+  const status = String(rawStatus || '').trim().toLowerCase();
+  if (!['running', 'queued', 'pending', 'streaming', 'in_progress', 'in-progress', 'busy'].includes(status)) {
+    return null;
+  }
+  return {
+    status: 'running',
+    source: 'desktop-thread',
+    sessionId: thread.id,
+    turnId: thread.turnId || null,
+    startedAt: isoFromEpochSeconds(thread.startedAt) || null,
+    updatedAt: isoFromEpochSeconds(thread.updatedAt) || new Date().toISOString(),
+    steerable: false
+  };
+}
+
 async function sessionFromDesktopThread({
   thread,
   mobileSessionIndex,
@@ -185,6 +210,7 @@ async function sessionFromDesktopThread({
     projectlessRegistered,
     mobileSessionKnown: Boolean(mobileSession),
     filePath: thread.path || null,
+    runtime: desktopThreadRuntime(thread, contextState),
     context: publicContextState(contextState, configContext)
   };
 }
@@ -449,4 +475,3 @@ export async function buildSessionIndex({
     sessionById
   };
 }
-

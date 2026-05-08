@@ -19,12 +19,14 @@ import { useTurnSubmission } from './useTurnSubmission.js';
 import { useTurnRuntime } from './useTurnRuntime.js';
 import { useViewportSizing } from './useViewportSizing.js';
 import { applyPwaTheme } from './pwa-theme.js';
+import { nextSyncedComposerSettings } from './model-sync.js';
 import { rememberSelectedSession } from './selection-persistence.js';
 import {
   buildComposerRunStatus,
   emptyContextStatus,
   hasRunningKey,
   isDraftSession,
+  reconcileThreadRuntimeWithSessions,
   runningByIdWithSelectedActivity,
   selectedRunKeys,
   selectedSessionIsRunning,
@@ -103,6 +105,10 @@ export default function App() {
   const runningByIdRef = useRef({});
   const activePollsRef = useRef(new Set());
   const turnRefreshTimersRef = useRef(new Map());
+  const lastStatusSettingsRef = useRef({
+    model: DEFAULT_STATUS.model,
+    reasoningEffort: DEFAULT_STATUS.reasoningEffort || DEFAULT_REASONING_EFFORT
+  });
   const sessionLivePollRef = useRef(false);
   const bootstrapStartedRef = useRef(false);
   const drawerSyncAtRef = useRef(0);
@@ -125,10 +131,13 @@ export default function App() {
 
   useViewportSizing(composerRef);
 
-  const running = hasRunningKey(runningById, selectedRunKeys(selectedSession));
   const selectedRuntime = selectedRunKeys(selectedSession)
     .map((key) => threadRuntimeById[key])
     .find(Boolean) || null;
+  const running =
+    hasRunningKey(runningById, selectedRunKeys(selectedSession)) ||
+    selectedRuntime?.status === 'running' ||
+    selectedSession?.runtime?.status === 'running';
   const hasRunningActivity = useMemo(
     () =>
       messages.some(
@@ -151,6 +160,13 @@ export default function App() {
   useEffect(() => {
     loadQueueDrafts(selectedSession).catch(() => null);
   }, [selectedSession?.id]);
+
+  useEffect(() => {
+    setThreadRuntimeById((current) => {
+      const next = reconcileThreadRuntimeWithSessions(current, sessionsByProject);
+      return next === current ? current : next;
+    });
+  }, [sessionsByProject]);
 
   useEffect(() => {
     if (!selectedRunning) {
@@ -234,17 +250,28 @@ export default function App() {
   }, [selectedReasoningEffort]);
 
   useEffect(() => {
-    if (status.model && selectedModel === DEFAULT_STATUS.model) {
-      setSelectedModel(status.model);
+    const previous = lastStatusSettingsRef.current;
+    const next = nextSyncedComposerSettings({
+      currentModel: selectedModel,
+      previousStatusModel: previous.model,
+      statusModel: status.model,
+      fallbackModel: DEFAULT_STATUS.model,
+      currentReasoningEffort: selectedReasoningEffort,
+      previousStatusReasoningEffort: previous.reasoningEffort,
+      statusReasoningEffort: status.reasoningEffort,
+      fallbackReasoningEffort: DEFAULT_REASONING_EFFORT
+    });
+    lastStatusSettingsRef.current = {
+      model: status.model || previous.model,
+      reasoningEffort: status.reasoningEffort || previous.reasoningEffort
+    };
+    if (next.model && next.model !== selectedModel) {
+      setSelectedModel(next.model);
     }
-  }, [selectedModel, status.model]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('codexmobile.reasoningEffort');
-    if (!saved && status.reasoningEffort && !selectedReasoningEffort) {
-      setSelectedReasoningEffort(status.reasoningEffort);
+    if (next.reasoningEffort && next.reasoningEffort !== selectedReasoningEffort) {
+      setSelectedReasoningEffort(next.reasoningEffort);
     }
-  }, [selectedReasoningEffort, status.reasoningEffort]);
+  }, [selectedModel, selectedReasoningEffort, status.model, status.reasoningEffort]);
 
   const {
     loadStatus,
@@ -397,6 +424,8 @@ export default function App() {
 
   const {
     handleSubmit,
+    handleImplementPlan,
+    handleAdjustPlan,
     handleAbort
   } = useTurnSubmission({
     defaultStatus: DEFAULT_STATUS,
@@ -562,7 +591,9 @@ export default function App() {
     running: selectedRunning,
     now: activityClockNow,
     onPreviewImage: setPreviewImage,
-    onDeleteMessage: handleDeleteMessage
+    onDeleteMessage: handleDeleteMessage,
+    onImplementPlan: handleImplementPlan,
+    onAdjustPlan: handleAdjustPlan
   };
   const composerProps = {
     composerRef,

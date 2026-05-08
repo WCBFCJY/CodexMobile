@@ -312,6 +312,77 @@ export function sessionRunKeys(session) {
   return [session?.id, session?.turnId, session?.previousSessionId].filter(Boolean);
 }
 
+export function isExternalThreadRuntimeSource(value) {
+  return ['desktop-thread', 'desktop-ipc', 'headless-local'].includes(String(value || ''));
+}
+
+export function isExternalThreadRuntime(runtime) {
+  return runtime?.status === 'running' && isExternalThreadRuntimeSource(runtime?.source);
+}
+
+export function shouldClearRuntimeWhenNoActiveRuns(runtime) {
+  return runtime?.status === 'running' && !isExternalThreadRuntime(runtime);
+}
+
+export function externalThreadRuntimeById(threadRuntimeById = {}) {
+  const next = {};
+  for (const [key, runtime] of Object.entries(threadRuntimeById || {})) {
+    if (isExternalThreadRuntime(runtime)) {
+      next[key] = runtime;
+    }
+  }
+  return next;
+}
+
+function allProjectSessions(sessionsByProject = {}) {
+  return Object.values(sessionsByProject || {}).flatMap((sessions) =>
+    Array.isArray(sessions) ? sessions : []
+  );
+}
+
+function runtimeFromSession(session) {
+  if (!session?.id || session.runtime?.status !== 'running') {
+    return null;
+  }
+  return {
+    ...session.runtime,
+    status: 'running',
+    source: session.runtime.source || 'desktop-thread',
+    sessionId: session.runtime.sessionId || session.id,
+    turnId: session.runtime.turnId || session.turnId || null,
+    updatedAt: session.runtime.updatedAt || session.updatedAt || null,
+    steerable: session.runtime.steerable === true
+  };
+}
+
+export function reconcileThreadRuntimeWithSessions(threadRuntimeById = {}, sessionsByProject = {}) {
+  const sessions = allProjectSessions(sessionsByProject);
+  if (!sessions.length) {
+    return threadRuntimeById || {};
+  }
+
+  const loadedSessionIds = new Set(sessions.map((session) => session?.id).filter(Boolean));
+  const next = { ...(threadRuntimeById || {}) };
+  for (const [key, runtime] of Object.entries(next)) {
+    const sessionId = runtime?.sessionId || (loadedSessionIds.has(key) ? key : '');
+    if (sessionId && loadedSessionIds.has(sessionId) && isExternalThreadRuntime(runtime)) {
+      delete next[key];
+    }
+  }
+
+  for (const session of sessions) {
+    const runtime = runtimeFromSession(session);
+    if (!runtime) {
+      continue;
+    }
+    for (const key of [session.id, runtime.turnId].filter(Boolean)) {
+      next[key] = runtime;
+    }
+  }
+
+  return next;
+}
+
 export function runningByIdWithSelectedActivity(runningById = {}, selectedSession = null, hasRunningActivity = false) {
   if (!hasRunningActivity || !selectedSession?.id) {
     return runningById || {};

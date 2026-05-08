@@ -7,8 +7,13 @@ import {
   readRawSessionActivities as defaultReadRawSessionActivities
 } from './desktop-activity-parser.js';
 import {
+  extractProposedPlanContent,
+  implementedPlanContentFromMessage,
   messagesFromDesktopThread as defaultMessagesFromDesktopThread,
+  planMessageFromContent,
+  planRequestMessageFromContent,
   removeFallbackActivitiesCoveredByRaw as defaultRemoveFallbackActivitiesCoveredByRaw,
+  sanitizeVisibleUserMessage,
   sortDesktopActivitySteps as defaultSortDesktopActivitySteps,
   upsertDesktopActivity as defaultUpsertDesktopActivity
 } from './desktop-thread-projector.js';
@@ -21,6 +26,17 @@ const ROLLOUT_CONTEXT_READ_BYTES = Math.max(
   64 * 1024,
   Number(process.env.CODEXMOBILE_ROLLOUT_CONTEXT_READ_BYTES) || 1024 * 1024
 );
+const GUIDED_USER_LABEL = '已引导对话';
+
+function guidedUserMetadata(enabled) {
+  return enabled
+    ? {
+      guided: true,
+      guideLabel: GUIDED_USER_LABEL,
+      kind: 'guided_user'
+    }
+    : {};
+}
 
 function positiveNumber(value) {
   const number = Number(value);
@@ -61,6 +77,8 @@ function ensureRolloutTurn(turns, sessionId, timestamp) {
 export function messagesFromRolloutJsonl(content, sessionId) {
   const messages = [];
   const turns = [];
+  const implementedPlanContents = new Set();
+  const userCountsByTurn = new Map();
   const lines = String(content || '').split(/\r?\n/);
 
   for (const line of lines) {
@@ -95,18 +113,66 @@ export function messagesFromRolloutJsonl(content, sessionId) {
     if (!contentText) {
       continue;
     }
+    const implementedPlanContent = role === 'user' ? implementedPlanContentFromMessage(contentText) : '';
+    if (implementedPlanContent) {
+      implementedPlanContents.add(implementedPlanContent.replace(/\s+/g, ' ').trim());
+    }
     const turn = ensureRolloutTurn(turns, sessionId, timestamp);
+    let userIndex = -1;
+    if (role === 'user') {
+      userIndex = userCountsByTurn.get(turn.id) || 0;
+      userCountsByTurn.set(turn.id, userIndex + 1);
+    }
+    if (role === 'assistant') {
+      const proposedPlan = extractProposedPlanContent(contentText);
+      if (proposedPlan) {
+        const baseId = entry.payload.id || `${turn.id}-assistant-${messages.length + 1}`;
+        const planMessage = planMessageFromContent({
+          id: `${baseId}-plan`,
+          content: proposedPlan,
+          timestamp,
+          turnId: turn.id,
+          sessionId
+        });
+        const requestMessage = planRequestMessageFromContent({
+          id: `${baseId}-plan-request`,
+          requestId: `implement-plan:${turn.id}`,
+          content: proposedPlan,
+          timestamp,
+          turnId: turn.id,
+          sessionId
+        });
+        if (planMessage) {
+          messages.push(planMessage);
+        }
+        if (requestMessage) {
+          messages.push(requestMessage);
+        }
+        continue;
+      }
+    }
     messages.push({
       id: entry.payload.id || `${turn.id}-${role}-${messages.length + 1}`,
       role,
-      content: contentText,
+      content: role === 'user' ? sanitizeVisibleUserMessage(contentText) : contentText,
+      ...(role === 'user' ? guidedUserMetadata(userIndex > 0) : {}),
       timestamp,
       turnId: turn.id,
       sessionId
     });
   }
 
-  return { messages, turns };
+  const filteredMessages = implementedPlanContents.size
+    ? messages.filter((message) => {
+      if (message.role !== 'plan_request') {
+        return true;
+      }
+      const planContent = String(message.planImplementation?.planContent || '').replace(/\s+/g, ' ').trim();
+      return !implementedPlanContents.has(planContent);
+    })
+    : messages;
+
+  return { messages: filteredMessages, turns };
 }
 
 async function readRolloutThreadFromFile(filePath, sessionId) {
@@ -121,6 +187,15 @@ async function readRolloutThreadFromFile(filePath, sessionId) {
     turns: parsed.turns,
     messages: parsed.messages
   };
+}
+
+function desktopThreadHasMessages(thread) {
+  if (Array.isArray(thread?.messages) && thread.messages.length > 0) {
+    return true;
+  }
+  return (Array.isArray(thread?.turns) ? thread.turns : []).some((turn) =>
+    Array.isArray(turn?.items) && turn.items.length > 0
+  );
 }
 
 function canFallbackToRollout(error) {
@@ -158,6 +233,21 @@ export function publicContextState(state = {}, configContext = {}) {
   };
 }
 
+export function publicRuntimeState(runtime = null, sessionId = '') {
+  if (runtime?.status !== 'running') {
+    return null;
+  }
+  return {
+    status: 'running',
+    source: runtime.source || 'desktop-thread',
+    sessionId: runtime.sessionId || sessionId || null,
+    turnId: runtime.turnId || null,
+    startedAt: runtime.startedAt || null,
+    updatedAt: runtime.updatedAt || null,
+    steerable: runtime.steerable === true
+  };
+}
+
 function tokenUsageFromPayload(payload) {
   const info = payload?.info && typeof payload.info === 'object' ? payload.info : {};
   const last = info.last_token_usage && typeof info.last_token_usage === 'object' ? info.last_token_usage : {};
@@ -171,12 +261,48 @@ function tokenUsageFromPayload(payload) {
   };
 }
 
+function isoFromEpochValue(value, fallback = null) {
+  const seconds = Number(value);
+  if (Number.isFinite(seconds) && seconds > 0) {
+    return new Date(seconds * 1000).toISOString();
+  }
+  return fallback;
+}
+
+function markRuntimeRunning(state, { turnId, timestamp, startedAt = null } = {}) {
+  const id = String(turnId || '').trim();
+  if (!id) {
+    return;
+  }
+  const startedAtIso = isoFromEpochValue(startedAt, timestamp || new Date().toISOString());
+  state.runtime = {
+    status: 'running',
+    source: 'desktop-thread',
+    sessionId: state.sessionId || null,
+    turnId: id,
+    startedAt: startedAtIso,
+    updatedAt: timestamp || startedAtIso || new Date().toISOString(),
+    steerable: false
+  };
+}
+
+function clearRuntimeForTurn(state, turnId) {
+  if (!state.runtime) {
+    return;
+  }
+  const id = String(turnId || '').trim();
+  if (!id || state.runtime.turnId === id) {
+    state.runtime = null;
+  }
+}
+
 function applyContextEntry(state, entry, sessionId) {
   const payload = entry?.payload || {};
   const timestamp = entry?.timestamp || new Date().toISOString();
   const type = payload.type || '';
 
   if (entry.type === 'turn_context') {
+    markRuntimeRunning(state, { turnId: payload.turn_id, timestamp });
     const summary = String(payload.summary || '').trim();
     if (summary && summary !== 'none') {
       state.autoCompactDetected = true;
@@ -203,7 +329,18 @@ function applyContextEntry(state, entry, sessionId) {
   }
 
   if (type === 'task_started') {
+    markRuntimeRunning(state, {
+      turnId: payload.turn_id,
+      timestamp,
+      startedAt: payload.started_at
+    });
     state.contextWindow = positiveNumber(payload.model_context_window) || state.contextWindow || null;
+    state.updatedAt = timestamp;
+    return;
+  }
+
+  if (/^task_(complete|failed|aborted|cancelled|canceled)$/.test(type) || /^turn_(complete|failed|aborted|cancelled|canceled)$/.test(type)) {
+    clearRuntimeForTurn(state, payload.turn_id);
     state.updatedAt = timestamp;
     return;
   }
@@ -235,7 +372,7 @@ function applyContextEntry(state, entry, sessionId) {
 }
 
 export async function readRolloutContextState(filePath, sessionId) {
-  const state = { sessionId };
+  const state = { sessionId, runtime: null };
   if (!filePath) {
     return state;
   }
@@ -288,6 +425,26 @@ export function paginateMessages(messages, { limit = 120, offset = null, latest 
   };
 }
 
+function messageTimestampValue(message) {
+  const value = Date.parse(message?.timestamp || '');
+  return Number.isFinite(value) ? value : 0;
+}
+
+function sortMessagesByConversationOrder(messages) {
+  return messages
+    .map((message, index) => ({ message, index }))
+    .sort((left, right) => {
+      const leftTurnId = left.message?.turnId || '';
+      const rightTurnId = right.message?.turnId || '';
+      if (leftTurnId && leftTurnId === rightTurnId) {
+        return left.index - right.index;
+      }
+      const timestampDelta = messageTimestampValue(left.message) - messageTimestampValue(right.message);
+      return timestampDelta || left.index - right.index;
+    })
+    .map((item) => item.message);
+}
+
 export function isoFromEpochSeconds(value) {
   const seconds = Number(value);
   if (!Number.isFinite(seconds) || seconds <= 0) {
@@ -314,6 +471,14 @@ export function createSessionMessageReader({
     try {
       const response = await readDesktopThread(sessionId, { includeTurns: true });
       if (response?.thread) {
+        if (!desktopThreadHasMessages(response.thread)) {
+          const session = await resolveSessionThread(sessionId);
+          const filePath = session?.filePath || session?.path || response.thread.path || '';
+          const fallbackThread = await readRolloutThreadFromFile(filePath, sessionId).catch(() => null);
+          if (fallbackThread && desktopThreadHasMessages(fallbackThread)) {
+            return fallbackThread;
+          }
+        }
         return response.thread;
       }
     } catch (error) {
@@ -347,19 +512,19 @@ export function createSessionMessageReader({
       const rawActivities = await readRawSessionActivities(thread.path, thread.turns || []);
       removeFallbackActivitiesCoveredByRaw(messages, rawActivities);
       for (const item of rawActivities) {
-        upsertDesktopActivity(messages, item.turnId, item.activity);
+        upsertDesktopActivity(messages, item.turnId, item.activity, item.segmentIndex);
       }
       const collabActivities = await readDesktopCollabActivities(thread.path);
       for (const item of collabActivities) {
-        upsertDesktopActivity(messages, item.turnId, item.activity);
+        upsertDesktopActivity(messages, item.turnId, item.activity, item.segmentIndex);
       }
       sortDesktopActivitySteps(messages);
     }
-    messages.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+    const orderedMessages = sortMessagesByConversationOrder(messages);
 
     const contextState = await readRolloutContextStateImpl(thread.path, sessionId);
     return {
-      ...paginateMessages(filterDeletedMessages(messages, deletedIds), { limit, offset, latest }),
+      ...paginateMessages(filterDeletedMessages(orderedMessages, deletedIds), { limit, offset, latest }),
       context: publicContextState(contextState, getConfigContext() || {})
     };
   }

@@ -1,6 +1,7 @@
 import { apiFetch } from '../api.js';
 import { contentWithAttachmentPreviews } from '../chat/MarkdownContent.jsx';
 import {
+  dismissPlanImplementationPrompts,
   mergeLoadedMessagesPreservingActivity,
   upsertStatusMessage
 } from '../chat/activity-model.js';
@@ -17,6 +18,7 @@ import {
 import {
   displayMessageForTurn,
   completeLocalAbortMessages,
+  implementationPromptForPlan,
   localHandoffStatusPayload,
   prepareComposerSubmission,
   projectForTurnSelection,
@@ -25,7 +27,8 @@ import {
   sessionForTurnSelection,
   selectedSkillsForPaths,
   shouldPollTurnEndpointAfterSend,
-  turnMatchesSelection
+  turnMatchesSelection,
+  userMessageMetadataForSendMode
 } from './turn-submission-utils.js';
 
 export function useTurnSubmission({
@@ -234,12 +237,15 @@ export function useTurnSubmission({
     clearComposer = false,
     restoreTextOnError = false,
     sendMode = 'start',
-    collaborationMode = null
+    collaborationMode = null,
+    visibleMessageOverride = null,
+    codexMessageOverride = null
   }) {
     const project = projectForTurnSelection(selectedProject, selectedProjectRef, selectedSession, selectedSessionRef, projects);
     const selectedAttachments = Array.isArray(attachmentsForTurn) ? attachmentsForTurn : [];
     const selectedFileMentions = Array.isArray(fileMentionsForTurn) ? fileMentionsForTurn : [];
-    const displayMessage = displayMessageForTurn(message, selectedAttachments, selectedFileMentions);
+    const displayMessage = displayMessageForTurn(visibleMessageOverride ?? message, selectedAttachments, selectedFileMentions);
+    const requestMessage = String(codexMessageOverride || displayMessage || '').trim();
     if ((!displayMessage && !selectedAttachments.length && !selectedFileMentions.length) || !project) {
       if (restoreTextOnError && displayMessage) {
         restoreTextToInput(displayMessage);
@@ -292,6 +298,7 @@ export function useTurnSubmission({
       id: `local-${Date.now()}`,
       role: 'user',
       content: optimisticContent,
+      ...userMessageMetadataForSendMode(sendMode),
       timestamp: submittedAt,
       sessionId: optimisticSessionId,
       turnId
@@ -317,7 +324,8 @@ export function useTurnSubmission({
           sessionId: outgoingSessionId,
           draftSessionId,
           clientTurnId: turnId,
-          message: displayMessage,
+          message: requestMessage,
+          visibleMessage: displayMessage,
           permissionMode,
           model: selectedModel || status.model,
           reasoningEffort: selectedReasoningEffort || status.reasoningEffort || defaultReasoningEffort,
@@ -453,9 +461,62 @@ export function useTurnSubmission({
     await abortCurrentRun();
   }
 
+  async function handleImplementPlan(planImplementation) {
+    const planContent = String(planImplementation?.planContent || '').trim();
+    const prompt = implementationPromptForPlan(planContent);
+    if (!prompt) {
+      return false;
+    }
+    try {
+      await submitCodexMessage({
+        message: '执行计划',
+        visibleMessageOverride: '执行计划',
+        codexMessageOverride: prompt,
+        clearComposer: false,
+        sendMode: 'start',
+        collaborationMode: null
+      });
+      const requestId = String(planImplementation?.requestId || '').trim();
+      const requestTurnId = String(planImplementation?.turnId || '').trim();
+      setMessages((current) =>
+        dismissPlanImplementationPrompts(current, {
+          ...planImplementation,
+          requestId,
+          turnId: requestTurnId
+        })
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function handleAdjustPlan(message, planImplementation = null) {
+    const text = String(message || '').trim();
+    if (!text) {
+      return false;
+    }
+    try {
+      await submitCodexMessage({
+        message: text,
+        clearComposer: false,
+        sendMode: 'start',
+        collaborationMode: null
+      });
+      if (planImplementation) {
+        setMessages((current) => dismissPlanImplementationPrompts(current, planImplementation));
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   return {
     submitCodexMessage,
     handleSubmit,
+    handleImplementPlan,
+    handleAdjustPlan,
     handleAbort,
     abortCurrentRun,
     pollTurnUntilComplete

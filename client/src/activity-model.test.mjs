@@ -2,10 +2,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  activityStepFromPayload,
   completeActivityMessagesForTurn,
+  dismissPlanImplementationPrompts,
   isPlaceholderActivityMessage,
+  isVisibleActivityStep,
   shouldRenderActivityMessageInChat,
   upsertActivityMessage,
+  upsertAssistantMessage,
   upsertStatusMessage
 } from './chat/activity-model.js';
 
@@ -125,6 +129,40 @@ test('completeActivityMessagesForTurn marks running activity steps completed', (
   assert.deepEqual(result[0].activities.map((activity) => activity.status), ['completed', 'completed']);
 });
 
+test('completeActivityMessagesForTurn keeps pending plan implementation actionable', () => {
+  const result = completeActivityMessagesForTurn([
+    {
+      id: 'status-turn-1',
+      role: 'activity',
+      sessionId: 'thread-1',
+      turnId: 'turn-1',
+      status: 'running',
+      activities: [
+        {
+          id: 'implement-plan:app-turn-1',
+          kind: 'plan_implementation',
+          label: '等待确认执行计划',
+          status: 'running',
+          planImplementation: {
+            requestId: 'implement-plan:app-turn-1',
+            turnId: 'app-turn-1',
+            planContent: '1. 修复',
+            completed: false
+          }
+        }
+      ]
+    }
+  ], {
+    sessionId: 'thread-1',
+    turnId: 'turn-1',
+    completedAt: '2026-05-08T02:00:05.000Z'
+  });
+
+  assert.equal(result[0].status, 'completed');
+  assert.equal(result[0].activities[0].status, 'running');
+  assert.equal(result[0].activities[0].planImplementation.completed, false);
+});
+
 test('placeholder thinking activity is suppressed from chat stream', () => {
   assert.equal(isPlaceholderActivityMessage({
     id: 'status-turn-1',
@@ -171,4 +209,99 @@ test('real activity still renders in the chat stream', () => {
       { id: 'tool', kind: 'mcp_tool_call', label: '运行命令', detail: 'functions.exec_command', status: 'running' }
     ]
   }), true);
+});
+
+test('plan implementation activity is visible and preserves confirmation payload', () => {
+  const step = activityStepFromPayload({
+    sessionId: 'thread-1',
+    turnId: 'turn-1',
+    messageId: 'implement-plan:turn-1',
+    kind: 'plan_implementation',
+    status: 'running',
+    label: '等待确认执行计划',
+    detail: '1. 定位同步链路',
+    planImplementation: {
+      requestId: 'implement-plan:turn-1',
+      turnId: 'turn-1',
+      planContent: '1. 定位同步链路',
+      completed: false
+    }
+  });
+
+  assert.equal(isVisibleActivityStep(step, 'completed'), true);
+  assert.deepEqual(step.planImplementation, {
+    requestId: 'implement-plan:turn-1',
+    turnId: 'turn-1',
+    planContent: '1. 定位同步链路',
+    completed: false
+  });
+});
+
+test('upsertAssistantMessage renders proposed plans as standalone plan messages', () => {
+  const result = upsertAssistantMessage([], {
+    sessionId: 'thread-1',
+    turnId: 'turn-1',
+    messageId: 'assistant-plan-1',
+    content: '<proposed_plan>\n# 移动端计划模式测试计划\n\n## Summary\n创建一个轻量测试计划。\n</proposed_plan>'
+  });
+
+  assert.deepEqual(result.map((message) => message.role), ['plan', 'plan_request']);
+  assert.equal(result[0].id, 'assistant-plan-1-plan');
+  assert.equal(result[0].title, '移动端计划模式测试计划');
+  assert.equal(result[0].content, '# 移动端计划模式测试计划\n\n## Summary\n创建一个轻量测试计划。');
+  assert.deepEqual(result[1].planImplementation, {
+    requestId: 'implement-plan:turn-1',
+    turnId: 'turn-1',
+    planContent: '# 移动端计划模式测试计划\n\n## Summary\n创建一个轻量测试计划。',
+    completed: false
+  });
+});
+
+test('dismissPlanImplementationPrompts removes the plan request after a choice is submitted', () => {
+  const result = dismissPlanImplementationPrompts([
+    {
+      id: 'plan-1',
+      role: 'plan',
+      content: '1. 定位同步链路'
+    },
+    {
+      id: 'request-1',
+      role: 'plan_request',
+      content: '实施此计划?',
+      planImplementation: {
+        requestId: 'implement-plan:turn-1',
+        turnId: 'turn-1',
+        planContent: '1. 定位同步链路',
+        completed: false
+      }
+    },
+    {
+      id: 'activity-1',
+      role: 'activity',
+      status: 'completed',
+      activities: [
+        {
+          id: 'step-1',
+          kind: 'plan_implementation',
+          status: 'completed',
+          label: '等待确认执行计划',
+          planImplementation: {
+            requestId: 'implement-plan:turn-1',
+            turnId: 'turn-1',
+            planContent: '1. 定位同步链路',
+            completed: false
+          }
+        }
+      ]
+    }
+  ], {
+    requestId: 'implement-plan:turn-1',
+    turnId: 'turn-1',
+    planContent: '1. 定位同步链路'
+  });
+
+  assert.deepEqual(result.map((message) => message.role), ['plan', 'activity']);
+  assert.equal(result[1].activities[0].planImplementation.completed, true);
+  assert.equal(isVisibleActivityStep(result[1].activities[0], result[1].status), false);
+  assert.equal(shouldRenderActivityMessageInChat(result[1]), false);
 });

@@ -55,6 +55,26 @@ export function displayMessageForTurn(message, attachments = [], fileMentions = 
   return '';
 }
 
+export function userMessageMetadataForSendMode(sendMode = 'start') {
+  return sendMode === 'steer'
+    ? {
+      guided: true,
+      guideLabel: '已引导对话',
+      kind: 'guided_user'
+    }
+    : {};
+}
+
+export const IMPLEMENT_PLAN_PROMPT_PREFIX = 'PLEASE IMPLEMENT THIS PLAN:';
+
+export function implementationPromptForPlan(planContent) {
+  const text = String(planContent || '').trim();
+  if (!text) {
+    return '';
+  }
+  return `${IMPLEMENT_PLAN_PROMPT_PREFIX}\n${text}`;
+}
+
 export function prepareComposerSubmission(message, attachments = [], fileMentions = []) {
   const raw = String(message || '').trim();
   const planMatch = raw.match(/^\/(?:plan|计划模式)(?:\s+|$)/iu);

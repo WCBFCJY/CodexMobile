@@ -106,7 +106,10 @@ export function Drawer({
   const [threadActionMenu, setThreadActionMenu] = useState(null);
   const [newConversationOpen, setNewConversationOpen] = useState(false);
   const normalizedDrawerQuery = drawerQuery.trim().toLowerCase();
-  const runningCount = Object.values(runningById || {}).filter(Boolean).length;
+  const runningCount = Object.values(sessionsByProject || {})
+    .flatMap((sessions) => (Array.isArray(sessions) ? sessions : []))
+    .filter((session) => sessionRunBadgeState(session, { runningById, threadRuntimeById, completedSessionIds }) === 'running')
+    .length;
   const orderedProjects = [
     ...projects.filter((project) => project.projectless),
     ...projects.filter((project) => !project.projectless)

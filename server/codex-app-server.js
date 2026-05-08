@@ -115,7 +115,7 @@ function unavailableBridgeError(transport) {
   return error;
 }
 
-function defaultServerRequestResult(message) {
+export function defaultServerRequestResult(message) {
   switch (message?.method) {
     case 'item/commandExecution/requestApproval':
       return { decision: 'decline' };
@@ -128,6 +128,8 @@ function defaultServerRequestResult(message) {
       return { decision: 'denied' };
     case 'item/tool/requestUserInput':
       return { answers: {} };
+    case 'item/plan/requestImplementation':
+      return {};
     case 'mcpServer/elicitation/request':
       return { action: 'decline', content: null, _meta: null };
     case 'item/tool/call':

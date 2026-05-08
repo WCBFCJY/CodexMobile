@@ -291,6 +291,14 @@ export async function setDesktopFollowerCollaborationMode(conversationId, collab
   }, options);
 }
 
+export async function setDesktopFollowerModelAndReasoning(conversationId, model, reasoningEffort, options = {}) {
+  return requestDesktopFollower('thread-follower-set-model-and-reasoning', {
+    conversationId,
+    model,
+    reasoningEffort
+  }, options);
+}
+
 export async function broadcastDesktopThreadArchived(conversationId, { hostId = 'local', cwd = null, timeoutMs = 1500 } = {}) {
   const client = new DesktopIpcClient({ clientType: 'codexmobile-archive-sync' });
   try {

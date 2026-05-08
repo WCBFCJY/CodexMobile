@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createCodexAppServerClient } from './codex-app-server.js';
+import { createCodexAppServerClient, defaultServerRequestResult } from './codex-app-server.js';
 import { buildCodexTurnInput, imageMarkdownFromCodexImageGeneration } from './codex-native-images.js';
 import { buildCodexLarkCliContext } from './lark-cli.js';
 import { detectFeishuSkillKeys } from './feishu-skills.js';
@@ -149,6 +149,7 @@ export function statusLabel(kind, status = 'running') {
     dynamic_tool_call: done ? '已完成一步操作' : failed ? '这一步操作失败' : '正在完成一步操作',
     web_search: done ? '网页信息已查到' : failed ? '网页搜索失败' : '正在查找网页信息',
     plan: done ? '计划已更新' : '正在规划',
+    plan_implementation: done ? '计划已确认执行' : '等待确认执行计划',
     todo_list: done ? '计划已更新' : '正在规划',
     image_generation_call: done ? '图片生成完成' : failed ? '图片生成失败' : '正在生成图片',
     context_compaction: '上下文已自动压缩',
@@ -189,6 +190,9 @@ function detailFromItem(item) {
   }
   if (item.message) {
     return item.message;
+  }
+  if (item.planContent) {
+    return item.planContent;
   }
   return item.aggregatedOutput || contentFromItem(item);
 }
@@ -385,6 +389,16 @@ function codexErrorDiagnostics(error) {
 
 function emitActivity(emit, { sessionId, turnId, messageId, item, kind, status }) {
   const detail = detailFromItem(item);
+  const requestTurnId = String(item?.turnId || '').trim();
+  const planContent = String(item?.planContent || detail || '').trim();
+  const planImplementation = kind === 'plan_implementation'
+    ? {
+      requestId: String(item?.id || (requestTurnId ? `implement-plan:${requestTurnId}` : messageId) || '').trim(),
+      turnId: requestTurnId || turnId,
+      planContent,
+      completed: Boolean(item?.isCompleted || item?.completed || status === 'completed')
+    }
+    : null;
   emit({
     type: 'activity-update',
     sessionId,
@@ -398,6 +412,7 @@ function emitActivity(emit, { sessionId, turnId, messageId, item, kind, status }
     output: item?.aggregated_output || item?.aggregatedOutput || item?.output || '',
     exitCode: item?.exitCode ?? item?.exit_code ?? null,
     fileChanges: normalizeFileChanges(item),
+    planImplementation,
     toolName: item?.tool || item?.name || '',
     error: item?.error?.message || item?.message || '',
     timestamp: new Date().toISOString()
@@ -428,6 +443,8 @@ function appItemKind(type) {
     imageGeneration: 'image_generation_call',
     contextCompaction: 'context_compaction',
     plan: 'plan',
+    planImplementation: 'plan_implementation',
+    'plan-implementation': 'plan_implementation',
     reasoning: 'reasoning',
     userMessage: 'user_message'
   };
@@ -700,6 +717,31 @@ function emitAppServerNotification(message, sessionId, turnId, emit, state) {
   }
 }
 
+function emitPlanImplementationRequest(message, sessionId, turnId, emit) {
+  const params = message?.params || {};
+  const requestTurnId = String(params.turnId || '').trim();
+  const requestThreadId = String(params.threadId || sessionId || '').trim();
+  const planContent = String(params.planContent || '').trim();
+  const requestId = String(message?.id || (requestTurnId ? `implement-plan:${requestTurnId}` : '')).trim();
+  emit({
+    type: 'activity-update',
+    sessionId: requestThreadId || sessionId,
+    turnId,
+    messageId: requestId || `${turnId}-plan-implementation`,
+    kind: 'plan_implementation',
+    label: '等待确认执行计划',
+    status: 'running',
+    detail: planContent,
+    timestamp: new Date().toISOString(),
+    planImplementation: {
+      requestId: requestId || (requestTurnId ? `implement-plan:${requestTurnId}` : ''),
+      turnId: requestTurnId || turnId,
+      planContent,
+      completed: false
+    }
+  });
+}
+
 function abortError() {
   const error = new Error('aborted');
   error.name = 'AbortError';
@@ -767,6 +809,13 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
       cwd: workingDirectory,
       clientInfo: { name: 'CodexMobile', title: null, version: '0.1.0' },
       allowHeadlessLocal: true,
+      onServerRequest: async (appMessage) => {
+        resetTurnInactivityTimeout();
+        if (appMessage?.method === 'item/plan/requestImplementation') {
+          emitPlanImplementationRequest(appMessage, currentSessionId || sessionId || draftSessionId, turnId, emit);
+        }
+        return defaultServerRequestResult(appMessage);
+      },
       onNotification: (appMessage) => {
         resetTurnInactivityTimeout();
         const params = appMessage.params || {};

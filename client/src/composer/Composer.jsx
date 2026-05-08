@@ -1,9 +1,11 @@
 import { ArrowUp, Bot, Check, ChevronDown, FileText, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { apiFetch } from '../api.js';
+import { apiFetch, getToken } from '../api.js';
 import { detectComposerToken, filteredSlashCommands, replaceComposerToken } from '../composer-shortcuts.js';
 import { composerSendState } from '../send-state.js';
 import { isDraftSession } from '../app/session-utils.js';
+import { attachmentPreviewUrl, isImageAttachment } from './attachment-preview.js';
+import { filesFromClipboardData } from './paste-files.js';
 import { ContextStatusButton, ContextStatusDetails } from './ContextStatus.jsx';
 import { DEFAULT_PERMISSION_MODE, PERMISSION_OPTIONS, REASONING_OPTIONS, formatBytes, permissionLabel, reasoningLabel, selectedSkillSummary, shortModelName } from './composer-options.js';
 
@@ -53,6 +55,7 @@ export function Composer({
   const [cursorPosition, setCursorPosition] = useState(0);
   const [fileSearch, setFileSearch] = useState({ query: '', loading: false, results: [] });
   const selectedFileMentions = Array.isArray(fileMentions) ? fileMentions : [];
+  const deviceToken = getToken();
   const hasInput = input.trim().length > 0 || attachments.length > 0 || selectedFileMentions.length > 0;
   const modelList = models?.length ? models : [{ value: selectedModel || 'gpt-5.5', label: selectedModel || 'gpt-5.5' }];
   const selectedModelLabel = modelList.find((model) => model.value === selectedModel)?.label || selectedModel || 'gpt-5.5';
@@ -212,6 +215,19 @@ export function Composer({
       onUploadFiles(files, kind);
     }
     event.target.value = '';
+    setOpenMenu(null);
+  }
+
+  function handlePaste(event) {
+    const files = filesFromClipboardData(event.clipboardData);
+    if (!files.length) {
+      return;
+    }
+    const text = event.clipboardData?.getData?.('text') || '';
+    if (!text) {
+      event.preventDefault();
+    }
+    onUploadFiles(files, 'paste');
     setOpenMenu(null);
   }
 
@@ -484,16 +500,37 @@ export function Composer({
       <div className="composer">
         {attachments.length || selectedFileMentions.length ? (
           <div className="attachment-tray">
-            {attachments.map((attachment) => (
-              <span key={attachment.id} className="attachment-chip">
-                <Paperclip size={14} />
-                <span>{attachment.name}</span>
-                <small>{formatBytes(attachment.size)}</small>
-                <button type="button" onClick={() => onRemoveAttachment(attachment.id)} aria-label="移除附件">
-                  <Trash2 size={13} />
-                </button>
-              </span>
-            ))}
+            {attachments.map((attachment) => {
+              if (isImageAttachment(attachment)) {
+                const previewUrl = attachmentPreviewUrl(attachment, deviceToken);
+                return (
+                  <span key={attachment.id} className="attachment-preview-card">
+                    {previewUrl ? (
+                      <img src={previewUrl} alt={attachment.name || '图片附件'} loading="lazy" />
+                    ) : (
+                      <span className="attachment-preview-empty"><Image size={18} /></span>
+                    )}
+                    <span className="attachment-preview-meta">
+                      <span>{attachment.name || '图片'}</span>
+                      <small>{formatBytes(attachment.size)}</small>
+                    </span>
+                    <button type="button" onClick={() => onRemoveAttachment(attachment.id)} aria-label="移除图片">
+                      <Trash2 size={13} />
+                    </button>
+                  </span>
+                );
+              }
+              return (
+                <span key={attachment.id} className="attachment-chip">
+                  <Paperclip size={14} />
+                  <span>{attachment.name}</span>
+                  <small>{formatBytes(attachment.size)}</small>
+                  <button type="button" onClick={() => onRemoveAttachment(attachment.id)} aria-label="移除附件">
+                    <Trash2 size={13} />
+                  </button>
+                </span>
+              );
+            })}
             {selectedFileMentions.map((file) => (
               <span key={file.path} className="attachment-chip file-mention-chip">
                 <FileText size={14} />
@@ -516,6 +553,7 @@ export function Composer({
           onClick={updateCursorFromTextarea}
           onKeyUp={updateCursorFromTextarea}
           onFocus={() => setOpenMenu(null)}
+          onPaste={handlePaste}
           placeholder="给 Codex 发送消息"
         />
         <div className="composer-controls">

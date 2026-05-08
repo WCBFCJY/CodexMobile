@@ -4,11 +4,14 @@ import { appReducer, createInitialUiState } from './app/AppState.js';
 import { applyPwaTheme } from './app/pwa-theme.js';
 import {
   createDraftSession,
+  externalThreadRuntimeById,
   payloadRunKeys,
+  reconcileThreadRuntimeWithSessions,
   resolveNewConversationProject,
   runningByIdWithSelectedActivity,
   selectedSessionIsRunning,
   sessionRunBadgeState,
+  shouldClearRuntimeWhenNoActiveRuns,
   shouldDropRunningActivityWhenNoActiveRuns,
   shouldPreserveLocalRunsFromStatus,
   titleFromFirstMessage
@@ -88,6 +91,31 @@ test('empty activeRuns status keeps desktop thread running activity', () => {
     status: 'running',
     transient: true
   }), false);
+  assert.equal(shouldClearRuntimeWhenNoActiveRuns({
+    status: 'running',
+    source: 'desktop-thread'
+  }), false);
+  assert.equal(shouldClearRuntimeWhenNoActiveRuns({
+    status: 'running',
+    source: 'codexmobile'
+  }), true);
+});
+
+test('activeRuns status merge can preserve external desktop runtimes beside mobile runs', () => {
+  const desktopRuntime = {
+    status: 'running',
+    source: 'desktop-thread',
+    sessionId: 'desktop-thread-1',
+    turnId: 'desktop-turn-1'
+  };
+  const preserved = externalThreadRuntimeById({
+    'desktop-thread-1': desktopRuntime,
+    'mobile-turn-1': { status: 'running', source: 'codexmobile' },
+    'completed-thread': { status: 'completed', source: 'desktop-thread' }
+  });
+
+  assert.deepEqual(Object.keys(preserved), ['desktop-thread-1']);
+  assert.equal(preserved['desktop-thread-1'], desktopRuntime);
 });
 
 test('selected desktop activity counts as running for composer controls', () => {
@@ -170,6 +198,60 @@ test('sessionRunBadgeState reads active runs by session id', () => {
     sessionRunBadgeState(session, { runningById: { 'thread-2': true } }),
     'running'
   );
+});
+
+test('session runtime reconciliation keeps multiple desktop threads running in the sidebar', () => {
+  const runtimeById = reconcileThreadRuntimeWithSessions({}, {
+    projectA: [
+      {
+        id: 'thread-1',
+        runtime: {
+          status: 'running',
+          source: 'desktop-thread',
+          turnId: 'turn-1',
+          updatedAt: '2026-05-08T02:00:00.000Z'
+        }
+      },
+      {
+        id: 'thread-2',
+        runtime: {
+          status: 'running',
+          source: 'desktop-thread',
+          turnId: 'turn-2',
+          updatedAt: '2026-05-08T02:01:00.000Z'
+        }
+      }
+    ]
+  });
+
+  assert.equal(runtimeById['thread-1'].status, 'running');
+  assert.equal(runtimeById['turn-1'].sessionId, 'thread-1');
+  assert.equal(runtimeById['thread-2'].status, 'running');
+  assert.equal(runtimeById['turn-2'].sessionId, 'thread-2');
+  assert.equal(sessionRunBadgeState({ id: 'thread-1' }, { threadRuntimeById: runtimeById }), 'running');
+  assert.equal(sessionRunBadgeState({ id: 'thread-2' }, { threadRuntimeById: runtimeById }), 'running');
+});
+
+test('session runtime reconciliation clears stale desktop runtime for loaded sessions', () => {
+  const runtime = {
+    status: 'running',
+    source: 'desktop-thread',
+    sessionId: 'thread-1',
+    turnId: 'turn-1',
+    updatedAt: '2026-05-08T02:00:00.000Z'
+  };
+  const runtimeById = reconcileThreadRuntimeWithSessions(
+    {
+      'thread-1': runtime,
+      'turn-1': runtime,
+      'mobile-turn': { status: 'running', source: 'codexmobile' }
+    },
+    { projectA: [{ id: 'thread-1' }] }
+  );
+
+  assert.equal(runtimeById['thread-1'], undefined);
+  assert.equal(runtimeById['turn-1'], undefined);
+  assert.equal(runtimeById['mobile-turn'].status, 'running');
 });
 
 test('completed turn payload maps back to the selected sidebar session', () => {

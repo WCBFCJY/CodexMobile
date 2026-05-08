@@ -1,4 +1,5 @@
-import { BookOpenCheck, Bot, FileText, Pencil, Search, SquareTerminal } from 'lucide-react';
+import { BookOpenCheck, Bot, CheckCircle2, FileText, Pencil, Play, Search, SquareTerminal } from 'lucide-react';
+import { useState } from 'react';
 import { ActivityFileSummary } from './ActivityFileSummary.jsx';
 import {
   activityBodyItemsForDisplay,
@@ -8,19 +9,21 @@ import {
 } from './activity-timeline-model.js';
 import { MarkdownContent } from './MarkdownContent.jsx';
 
-export function ActivityTimeline({ timeline, fileSummary }) {
+export function ActivityTimeline({ timeline, fileSummary, onImplementPlan }) {
   if (!timeline?.length && !fileSummary) {
     return null;
   }
   return (
     <div className="activity-timeline" aria-label="任务进度">
-      {(timeline || []).map((item) => <ActivityTimelineItem key={item.id} item={item} />)}
+      {(timeline || []).map((item) => (
+        <ActivityTimelineItem key={item.id} item={item} onImplementPlan={onImplementPlan} />
+      ))}
       {fileSummary ? <ActivityFileSummary summary={fileSummary} /> : null}
     </div>
   );
 }
 
-function ActivityTimelineItem({ item }) {
+function ActivityTimelineItem({ item, onImplementPlan }) {
   if (item.type === 'text') {
     return (
       <MarkdownContent
@@ -47,15 +50,25 @@ function ActivityTimelineItem({ item }) {
   if (item.metaType === 'subagent') {
     return <SubagentActivityBlock item={item} />;
   }
-  return <MetaActivityBlock item={item} />;
+  return <MetaActivityBlock item={item} onImplementPlan={onImplementPlan} />;
 }
 
-function MetaActivityBlock({ item }) {
+function MetaActivityBlock({ item, onImplementPlan }) {
   const visibleItems = item.type === 'metaBurst' ? item.visibleItems || [] : item.items || [];
   const overflowItems = item.type === 'metaBurst' ? item.overflowItems || [] : [];
   const allItems = item.items || visibleItems;
   const running = allItems.some((step) => step.status === 'running' || step.status === 'queued');
   const { visibleBodyItems, overflowBodyItems } = activityBodyItemsForDisplay(visibleItems, overflowItems);
+  const planImplementationStep = [...visibleBodyItems, ...overflowBodyItems].find((step) => step.planImplementation);
+  if (planImplementationStep) {
+    return (
+      <PlanImplementationBlock
+        item={item}
+        step={planImplementationStep}
+        onImplementPlan={onImplementPlan}
+      />
+    );
+  }
 
   if (!visibleBodyItems.length && !overflowBodyItems.length) {
     return (
@@ -90,6 +103,46 @@ function MetaActivityBlock({ item }) {
         ) : null}
       </div>
     </details>
+  );
+}
+
+function PlanImplementationBlock({ item, step, onImplementPlan }) {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const plan = step.planImplementation || {};
+  const completed = Boolean(plan.completed || submitted);
+  const disabled = completed || submitting || !onImplementPlan;
+
+  async function handleClick() {
+    if (disabled) {
+      return;
+    }
+    setSubmitting(true);
+    const ok = await onImplementPlan(plan);
+    setSubmitting(false);
+    if (ok) {
+      setSubmitted(true);
+    }
+  }
+
+  return (
+    <div className={`activity-meta activity-plan-confirmation ${completed ? 'is-completed' : ''}`}>
+      <div className="activity-meta-summary">
+        {completed ? <CheckCircle2 size={13} strokeWidth={1.9} /> : activityMetaIcon(item)}
+        <span>{completed ? '计划已确认执行' : activityStepDetailTitle(step)}</span>
+      </div>
+      <div className="activity-plan-confirmation-body">
+        <button
+          type="button"
+          className="activity-plan-confirmation-button"
+          disabled={disabled}
+          onClick={handleClick}
+        >
+          {completed ? <CheckCircle2 size={14} /> : <Play size={14} />}
+          <span>{completed ? '已发送' : submitting ? '发送中' : '确认执行计划'}</span>
+        </button>
+      </div>
+    </div>
   );
 }
 

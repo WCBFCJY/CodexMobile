@@ -133,10 +133,11 @@ export function prepareChatRequest(body = {}, {
     model: modelForTurn,
     reasoningEffort: reasoningEffortForTurn
   });
-  const displayMessage = message || '请查看附件。';
+  const visibleMessageOverride = String(body.visibleMessage || body.displayMessage || '').trim();
+  const displayMessage = visibleMessageOverride || message || '请查看附件。';
   const visibleMessage = withImageAttachmentPreviews(displayMessage, attachments);
   const codexMessage = withFileMentionReferences(
-    withAttachmentReferences(displayMessage, attachments),
+    withAttachmentReferences(message || '请查看附件。', attachments),
     fileMentions
   );
   const conversationSessionId = selectedSessionId || draftSessionId || null;
@@ -162,4 +163,3 @@ export function prepareChatRequest(body = {}, {
     conversationSessionId
   };
 }
-

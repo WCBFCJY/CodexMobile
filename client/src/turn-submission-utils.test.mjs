@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   displayMessageForTurn,
   completeLocalAbortMessages,
+  implementationPromptForPlan,
   prepareComposerSubmission,
   projectForTurnSelection,
   realSessionIdFromTurn,
@@ -10,7 +11,8 @@ import {
   sessionForTurnSelection,
   selectedSkillsForPaths,
   shouldPollTurnEndpointAfterSend,
-  turnMatchesSelection
+  turnMatchesSelection,
+  userMessageMetadataForSendMode
 } from './app/turn-submission-utils.js';
 
 test('realSessionIdFromTurn ignores draft and codex placeholder sessions', () => {
@@ -74,6 +76,23 @@ test('prepareComposerSubmission strips leading plan command and marks collaborat
     message: '请查看引用文件。',
     collaborationMode: 'plan'
   });
+});
+
+test('userMessageMetadataForSendMode marks steer messages as guided followups', () => {
+  assert.deepEqual(userMessageMetadataForSendMode('start'), {});
+  assert.deepEqual(userMessageMetadataForSendMode('steer'), {
+    guided: true,
+    guideLabel: '已引导对话',
+    kind: 'guided_user'
+  });
+});
+
+test('implementationPromptForPlan builds the desktop-compatible followup prompt', () => {
+  assert.equal(
+    implementationPromptForPlan('  1. 定位同步链路\n2. 补测试  '),
+    'PLEASE IMPLEMENT THIS PLAN:\n1. 定位同步链路\n2. 补测试'
+  );
+  assert.equal(implementationPromptForPlan('  '), '');
 });
 
 test('selectedSkillsForPaths returns structured skills without leaking tokens', () => {

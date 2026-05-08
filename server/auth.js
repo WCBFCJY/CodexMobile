@@ -82,14 +82,17 @@ export function getTrustedDeviceCount() {
   return authState?.devices?.length || 0;
 }
 
-export function extractBearerToken(req) {
+export function extractBearerToken(req, url = null) {
   const header = req.headers.authorization || '';
   if (header.toLowerCase().startsWith('bearer ')) {
     return header.slice(7).trim();
   }
 
   const fallback = req.headers['x-codexmobile-token'];
-  return typeof fallback === 'string' ? fallback.trim() : '';
+  if (typeof fallback === 'string' && fallback.trim()) {
+    return fallback.trim();
+  }
+  return url?.searchParams?.get('token')?.trim() || '';
 }
 
 export async function verifyToken(token, metadata = {}) {

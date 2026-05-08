@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 
 export const CODEX_HOME = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
 export const CODEX_CONFIG_PATH = path.join(CODEX_HOME, 'config.toml');
@@ -9,6 +10,7 @@ export const CODEX_MODELS_CACHE_PATH = path.join(CODEX_HOME, 'models_cache.json'
 export const CODEX_SESSIONS_DIR = path.join(CODEX_HOME, 'sessions');
 export const CODEX_SESSION_INDEX = path.join(CODEX_HOME, 'session_index.jsonl');
 export const CODEX_STATE_DB = path.join(CODEX_HOME, 'state_5.sqlite');
+let codexGlobalStateMutationQueue = Promise.resolve();
 const DEFAULT_SKILL_ROOTS = [
   path.join(process.cwd(), 'skills'),
   path.join(CODEX_HOME, 'skills'),
@@ -248,50 +250,98 @@ export function defaultProjectlessWorkspaceRoot() {
   return path.join(os.homedir(), 'Documents', 'Codex');
 }
 
+async function readCodexGlobalStateForMutation() {
+  try {
+    return JSON.parse(await fs.readFile(CODEX_GLOBAL_STATE_PATH, 'utf8'));
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+    return {};
+  }
+}
+
+async function writeCodexGlobalStateAtomically(nextState) {
+  await fs.mkdir(CODEX_HOME, { recursive: true });
+  const tempPath = `${CODEX_GLOBAL_STATE_PATH}.tmp-${process.pid}-${Date.now()}-${randomUUID()}`;
+  await fs.writeFile(tempPath, JSON.stringify(nextState), 'utf8');
+  await fs.rename(tempPath, CODEX_GLOBAL_STATE_PATH);
+}
+
+function mutateCodexGlobalState(mutator) {
+  const run = async () => {
+    const state = await readCodexGlobalStateForMutation();
+    const { nextState, result } = await mutator(state);
+    if (nextState) {
+      await writeCodexGlobalStateAtomically(nextState);
+    }
+    return result;
+  };
+  const task = codexGlobalStateMutationQueue.then(run, run);
+  codexGlobalStateMutationQueue = task.catch(() => {});
+  return task;
+}
+
 export async function registerProjectlessThread(threadId, workspaceRoot = defaultProjectlessWorkspaceRoot()) {
   const id = String(threadId || '').trim();
   if (!id) {
     return null;
   }
 
-  let state = {};
-  try {
-    state = JSON.parse(await fs.readFile(CODEX_GLOBAL_STATE_PATH, 'utf8'));
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      throw error;
-    }
+  const [result] = await registerProjectlessThreads([{ id, workspaceRoot }]);
+  return result || null;
+}
+
+export async function registerProjectlessThreads(entries = []) {
+  const normalizedEntries = entries
+    .map((entry) => ({
+      id: String(entry?.id || entry?.threadId || '').trim(),
+      workspaceRoot: path.resolve(entry?.workspaceRoot || entry?.projectPath || defaultProjectlessWorkspaceRoot())
+    }))
+    .filter((entry) => entry.id);
+
+  if (!normalizedEntries.length) {
+    return [];
   }
 
-  const root = path.resolve(workspaceRoot || defaultProjectlessWorkspaceRoot());
-  const projectlessThreadIds = Array.isArray(state['projectless-thread-ids'])
-    ? state['projectless-thread-ids'].filter((value) => typeof value === 'string' && value.trim())
-    : [];
-  if (!projectlessThreadIds.includes(id)) {
-    projectlessThreadIds.push(id);
-  }
+  return mutateCodexGlobalState(async (state) => {
+    const projectlessThreadIds = Array.isArray(state['projectless-thread-ids'])
+      ? state['projectless-thread-ids'].filter((value) => typeof value === 'string' && value.trim())
+      : [];
+    const threadWorkspaceRootHints = state['thread-workspace-root-hints'] &&
+      typeof state['thread-workspace-root-hints'] === 'object' &&
+      !Array.isArray(state['thread-workspace-root-hints'])
+      ? state['thread-workspace-root-hints']
+      : {};
+    const nextHints = { ...threadWorkspaceRootHints };
+    const results = [];
+    let changed = false;
 
-  const threadWorkspaceRootHints = state['thread-workspace-root-hints'] &&
-    typeof state['thread-workspace-root-hints'] === 'object' &&
-    !Array.isArray(state['thread-workspace-root-hints'])
-    ? state['thread-workspace-root-hints']
-    : {};
-
-  const nextState = {
-    ...state,
-    'projectless-thread-ids': projectlessThreadIds,
-    'thread-workspace-root-hints': {
-      ...threadWorkspaceRootHints,
-      [id]: root
+    for (const entry of normalizedEntries) {
+      if (!projectlessThreadIds.includes(entry.id)) {
+        projectlessThreadIds.push(entry.id);
+        changed = true;
+      }
+      if (nextHints[entry.id] !== entry.workspaceRoot) {
+        nextHints[entry.id] = entry.workspaceRoot;
+        changed = true;
+      }
+      results.push({ threadId: entry.id, workspaceRoot: entry.workspaceRoot });
     }
-  };
 
-  await fs.mkdir(CODEX_HOME, { recursive: true });
-  const tempPath = `${CODEX_GLOBAL_STATE_PATH}.tmp-${process.pid}-${Date.now()}`;
-  await fs.writeFile(tempPath, JSON.stringify(nextState), 'utf8');
-  await fs.rename(tempPath, CODEX_GLOBAL_STATE_PATH);
+    if (!changed) {
+      return { nextState: null, result: results };
+    }
 
-  return { threadId: id, workspaceRoot: root };
+    return {
+      nextState: {
+        ...state,
+        'projectless-thread-ids': projectlessThreadIds,
+        'thread-workspace-root-hints': nextHints
+      },
+      result: results
+    };
+  });
 }
 
 export async function readCodexConfig() {

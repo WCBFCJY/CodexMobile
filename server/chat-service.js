@@ -37,6 +37,7 @@ export function createChatService({
   startDesktopFollowerTurn,
   steerDesktopFollowerTurn,
   interruptDesktopFollowerTurn,
+  setDesktopFollowerModelAndReasoning,
   setDesktopFollowerCollaborationMode,
   abortCodexTurn,
   getActiveRuns,
@@ -46,7 +47,8 @@ export function createChatService({
   maybeAutoNameSession,
   registerProjectlessThread = registerProjectlessThreadInCodexState,
   registerMobileSession = registerMobileSessionInIndex,
-  rememberLiveSession = () => null
+  rememberLiveSession = () => null,
+  desktopOwnerRetryDelays = [250, 700, 1500]
 }) {
   const chatQueue = createChatQueue();
   const getConversationQueue = chatQueue.getConversationQueue;
@@ -195,12 +197,16 @@ export function createChatService({
       throw error;
     }
     const config = getCacheSnapshot().config || {};
+    const prepared = prepareChatRequest(body, {
+      getSession,
+      config,
+      defaultReasoningEffort
+    });
     const {
       attachments,
       fileMentions,
       requestedSessionId,
       draftSessionId,
-      selectedSessionId,
       turnId,
       sendMode,
       selectedSkills,
@@ -209,13 +215,10 @@ export function createChatService({
       collaborationMode,
       displayMessage,
       visibleMessage,
-      codexMessage,
-      conversationSessionId
-    } = prepareChatRequest(body, {
-      getSession,
-      config,
-      defaultReasoningEffort
-    });
+      codexMessage
+    } = prepared;
+    let selectedSessionId = prepared.selectedSessionId;
+    let conversationSessionId = prepared.conversationSessionId;
     let bridge = await assertDesktopBridgeAvailable(getDesktopBridgeStatus);
 
     const imagePrompt = chatImage.resolveImagePrompt({
@@ -225,6 +228,11 @@ export function createChatService({
       attachments
     });
     const queueKey = resolveConversationKey(selectedSessionId, draftSessionId, requestedSessionId);
+    const existingConversationState = getConversationQueue(queueKey);
+    if (!selectedSessionId && draftSessionId && existingConversationState.sessionId) {
+      selectedSessionId = existingConversationState.sessionId;
+      conversationSessionId = selectedSessionId;
+    }
     const shouldHoldInLocalQueue =
       sendMode === 'queue' &&
       conversationSessionId &&
@@ -282,10 +290,12 @@ export function createChatService({
             getSession,
             rememberTurn,
             broadcast,
+            setDesktopFollowerModelAndReasoning,
             setDesktopFollowerCollaborationMode,
             steerDesktopFollowerTurn,
             startDesktopFollowerTurn,
-            interruptDesktopFollowerTurn
+            interruptDesktopFollowerTurn,
+            desktopOwnerRetryDelays
           });
           desktopTurnMonitor.startRun({
             projectId: project.id,

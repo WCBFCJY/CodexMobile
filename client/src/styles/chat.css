@@ -33,6 +33,21 @@
   max-width: 100%;
 }
 
+.message-guide-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  margin: 0 4px 5px 0;
+  color: #737b86;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.message-guide-label svg {
+  flex: 0 0 auto;
+}
+
 .message-bubble {
   min-width: 0;
   max-width: 100%;
@@ -90,6 +105,259 @@
   color: #69717c;
   background: transparent;
   box-shadow: none;
+}
+
+.message-row.is-plan,
+.message-row.is-plan-request {
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.plan-card,
+.plan-request-panel {
+  width: 100%;
+  max-width: min(100%, 736px);
+  min-width: 0;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.045);
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+
+.plan-card {
+  padding: 15px 16px 16px;
+  color: var(--text);
+}
+
+.plan-card.is-collapsed {
+  padding-bottom: 12px;
+}
+
+.plan-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  min-height: 28px;
+  margin-bottom: 4px;
+  color: #4b5563;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+}
+
+.plan-card.is-collapsed .plan-card-header {
+  margin-bottom: 0;
+}
+
+.plan-card-toggle {
+  display: inline-grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 30px;
+  padding: 0 6px 0 0;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.plan-card-toggle:hover,
+.plan-card-toggle:focus-visible {
+  color: #1f2937;
+}
+
+.plan-card-chevron {
+  flex: 0 0 auto;
+  color: #8b949e;
+  transform: rotate(-90deg);
+  transition: transform 160ms ease;
+}
+
+.plan-card-chevron.is-open {
+  transform: rotate(0deg);
+}
+
+.plan-card-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-card-actions {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.plan-icon-button {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #6b7280;
+  background: transparent;
+}
+
+.plan-icon-button:hover,
+.plan-icon-button:focus-visible {
+  color: #374151;
+  background: rgba(17, 24, 39, 0.05);
+}
+
+.plan-card-content {
+  font-size: 15px;
+  line-height: 1.62;
+}
+
+.plan-card-content h1 {
+  margin: 6px 0 12px;
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.plan-card-content h2 {
+  margin-top: 16px;
+  font-size: 18px;
+}
+
+.plan-card time {
+  display: block;
+  margin-top: 10px;
+  color: rgba(111, 116, 122, 0.78);
+  font-size: 10px;
+}
+
+.plan-request-panel {
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+  color: #2f353e;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.plan-request-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 2px 2px 5px;
+  color: #3f4651;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 700;
+}
+
+.plan-request-title svg {
+  flex: 0 0 auto;
+}
+
+.plan-request-option {
+  display: grid;
+  grid-template-columns: 22px auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid rgba(17, 24, 39, 0.06);
+  border-radius: 8px;
+  color: inherit;
+  background: rgba(17, 24, 39, 0.045);
+  text-align: left;
+}
+
+.plan-request-option.is-primary {
+  grid-template-columns: 22px auto minmax(0, 1fr);
+}
+
+.plan-request-option.is-adjust {
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+}
+
+.plan-request-option.is-primary:not(:disabled):hover,
+.plan-request-option.is-primary:not(:disabled):focus-visible {
+  background: rgba(209, 42, 42, 0.08);
+  border-color: rgba(209, 42, 42, 0.18);
+}
+
+.plan-request-option:disabled {
+  color: #7b838f;
+}
+
+.plan-option-index,
+.plan-option-index-button {
+  color: #858d98;
+  font-size: 13px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-option-index-button {
+  width: 22px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.plan-request-option svg {
+  flex: 0 0 auto;
+}
+
+.plan-request-option strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.plan-request-option input {
+  min-width: 0;
+  width: 100%;
+  height: 34px;
+  border: 0;
+  outline: none;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+}
+
+.plan-request-option input::placeholder {
+  color: #858d98;
+}
+
+.plan-adjust-submit {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #2563eb;
+}
+
+.plan-adjust-submit:disabled {
+  color: #8d95a1;
+  background: rgba(17, 24, 39, 0.08);
+}
+
+.plan-request-panel.is-completed .plan-request-option.is-adjust {
+  opacity: 0.78;
 }
 
 .activity-bubble.is-failed {
@@ -623,6 +891,10 @@
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+[data-theme="dark"] .message-guide-label {
+  color: #a1a1aa;
+}
+
 [data-theme="dark"] .message-row.is-assistant .message-bubble {
   color: var(--text);
   background: transparent;
@@ -634,6 +906,70 @@
   color: #a1a1aa;
   background: transparent;
   border-color: transparent;
+}
+
+[data-theme="dark"] .plan-card,
+[data-theme="dark"] .plan-request-panel {
+  color: #f4f4f5;
+  background: rgba(31, 31, 33, 0.9);
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .plan-card-header,
+[data-theme="dark"] .plan-request-title {
+  color: #f4f4f5;
+}
+
+[data-theme="dark"] .plan-card-toggle:hover,
+[data-theme="dark"] .plan-card-toggle:focus-visible {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .plan-card-chevron {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .plan-icon-button {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .plan-icon-button:hover,
+[data-theme="dark"] .plan-icon-button:focus-visible {
+  color: #f4f4f5;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .plan-card time {
+  color: rgba(212, 212, 216, 0.62);
+}
+
+[data-theme="dark"] .plan-request-option {
+  color: #f4f4f5;
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .plan-request-option.is-primary:not(:disabled):hover,
+[data-theme="dark"] .plan-request-option.is-primary:not(:disabled):focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+[data-theme="dark"] .plan-option-index,
+[data-theme="dark"] .plan-option-index-button,
+[data-theme="dark"] .plan-request-option input::placeholder {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .plan-adjust-submit {
+  color: #101012;
+  background: #f4f4f5;
+}
+
+[data-theme="dark"] .plan-adjust-submit:disabled {
+  color: #71717a;
+  background: rgba(255, 255, 255, 0.09);
 }
 
 [data-theme="dark"] .activity-bubble.is-failed {

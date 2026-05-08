@@ -25,6 +25,31 @@ function desktopCreateThreadUnavailableError() {
   return error;
 }
 
+function isDesktopFollowerPreflightTimeout(error) {
+  if (error?.code !== 'CODEXMOBILE_DESKTOP_IPC_TIMEOUT') {
+    return false;
+  }
+  return /thread-follower-set-(?:model-and-reasoning|collaboration-mode)\b/.test(String(error.message || ''));
+}
+
+function isDesktopThreadOwnerUnavailable(error) {
+  return (
+    error?.message === 'no-client-found' ||
+    error?.statusCode === 409 ||
+    isDesktopFollowerPreflightTimeout(error)
+  );
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function retryDelays(value) {
+  return Array.isArray(value)
+    ? value.map((item) => Number(item)).filter((item) => Number.isFinite(item) && item >= 0)
+    : [];
+}
+
 export function desktopIpcCanUseBackgroundFallback(bridge) {
   return Boolean(
     bridge?.capabilities?.backgroundCodex ||
@@ -51,6 +76,16 @@ export function backgroundFallbackBridge(bridge, reason = '桌面端当前没有
   };
 }
 
+function userMessageMetadataForSendMode(sendMode = 'start') {
+  return sendMode === 'steer'
+    ? {
+      guided: true,
+      guideLabel: '已引导对话',
+      kind: 'guided_user'
+    }
+    : {};
+}
+
 export async function sendViaDesktopIpc({
   bridge,
   project,
@@ -69,10 +104,13 @@ export async function sendViaDesktopIpc({
   getSession,
   rememberTurn,
   broadcast,
+  setDesktopFollowerModelAndReasoning,
   setDesktopFollowerCollaborationMode,
   steerDesktopFollowerTurn,
   startDesktopFollowerTurn,
-  interruptDesktopFollowerTurn
+  interruptDesktopFollowerTurn,
+  desktopOwnerRetryDelays = [],
+  sleep = wait
 }) {
   if (!selectedSessionId) {
     throw desktopCreateThreadUnavailableError();
@@ -117,13 +155,16 @@ export async function sendViaDesktopIpc({
       id: `local-${Date.now()}`,
       role: 'user',
       content: visibleMessage,
+      ...userMessageMetadataForSendMode(sendMode),
       timestamp: now
     }
   });
 
-  let result;
-  try {
+  async function attemptDesktopFollowerTurn() {
     if (sendMode === 'steer') {
+      if (setDesktopFollowerModelAndReasoning) {
+        await setDesktopFollowerModelAndReasoning(selectedSessionId, model || null, reasoningEffort || null);
+      }
       if (collaborationMode && setDesktopFollowerCollaborationMode) {
         await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode);
       }
@@ -144,14 +185,37 @@ export async function sendViaDesktopIpc({
       if (sendMode === 'interrupt') {
         await interruptDesktopFollowerTurn(selectedSessionId);
       }
+      if (setDesktopFollowerModelAndReasoning) {
+        await setDesktopFollowerModelAndReasoning(selectedSessionId, model || null, reasoningEffort || null);
+      }
       if (collaborationMode && setDesktopFollowerCollaborationMode) {
         await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode);
       }
       result = await startDesktopFollowerTurn(selectedSessionId, baseTurnStartParams);
     }
+    return result;
+  }
+
+  let result;
+  const ownerRetryDelays = retryDelays(desktopOwnerRetryDelays);
+  try {
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        result = await attemptDesktopFollowerTurn();
+        break;
+      } catch (error) {
+        if (!isDesktopThreadOwnerUnavailable(error) || attempt >= ownerRetryDelays.length) {
+          throw error;
+        }
+        const delay = ownerRetryDelays[attempt] || 0;
+        if (delay > 0) {
+          await sleep(delay);
+        }
+      }
+    }
   } catch (error) {
-    if (error?.message === 'no-client-found' || error?.statusCode === 409) {
-      throw desktopIpcUnavailableError();
+    if (isDesktopThreadOwnerUnavailable(error)) {
+      throw desktopIpcUnavailableError(error?.message || undefined);
     }
     throw error;
   }

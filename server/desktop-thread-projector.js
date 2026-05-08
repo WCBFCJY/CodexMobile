@@ -10,11 +10,43 @@ const INTERNAL_PROMPT_MARKERS = [
   'CodexMobile 已接入飞书官方 lark-cli。',
   'CodexMobile 已接入飞书官方 lark-cli'
 ];
+const IMPLEMENT_PLAN_PROMPT_PREFIX = 'PLEASE IMPLEMENT THIS PLAN:';
+const IMPLEMENT_PLAN_REQUEST_PREFIX = 'implement-plan:';
+const GUIDED_USER_LABEL = '已引导对话';
 
-function sanitizeVisibleUserMessage(message) {
+function guidedUserMetadata(enabled) {
+  return enabled
+    ? {
+      guided: true,
+      guideLabel: GUIDED_USER_LABEL,
+      kind: 'guided_user'
+    }
+    : {};
+}
+
+function normalizedPlanText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+export function implementedPlanContentFromMessage(message) {
+  const value = String(message || '').trim();
+  if (!value.startsWith(IMPLEMENT_PLAN_PROMPT_PREFIX)) {
+    return '';
+  }
+  return value.slice(IMPLEMENT_PLAN_PROMPT_PREFIX.length).trim();
+}
+
+function hasImplementedPlanContent(implementedPlanContents, content) {
+  return implementedPlanContents.has(normalizedPlanText(content));
+}
+
+export function sanitizeVisibleUserMessage(message) {
   const value = String(message || '').trim();
   if (!value) {
     return '';
+  }
+  if (value.startsWith(IMPLEMENT_PLAN_PROMPT_PREFIX)) {
+    return '执行计划';
   }
   let cutAt = value.length;
   for (const marker of INTERNAL_PROMPT_MARKERS) {
@@ -24,6 +56,96 @@ function sanitizeVisibleUserMessage(message) {
     }
   }
   return value.slice(0, cutAt).trim() || value;
+}
+
+export function extractProposedPlanContent(message) {
+  const value = String(message || '').trim();
+  if (!value) {
+    return '';
+  }
+  const match = value.match(/<proposed_plan\b[^>]*>([\s\S]*?)<\/proposed_plan>/i);
+  return match ? String(match[1] || '').trim() : '';
+}
+
+export function planTitleFromContent(content) {
+  const lines = String(content || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const heading = lines
+    .map((line) => line.match(/^#{1,6}\s+(.+)$/)?.[1]?.trim())
+    .find(Boolean);
+  if (heading) {
+    return heading.replace(/[*_`]/g, '').trim() || '计划';
+  }
+  const plainLead = lines.find((line) => !/^[-*+]\s+/.test(line) && !/^\d+[.)]\s+/.test(line));
+  if (plainLead && plainLead.length <= 60) {
+    return plainLead.replace(/[*_`#]/g, '').trim() || '计划';
+  }
+  return '计划';
+}
+
+export function planMessageFromContent({ id, content, timestamp, turnId, sessionId }) {
+  const planContent = String(content || '').trim();
+  if (!planContent) {
+    return null;
+  }
+  return {
+    id,
+    role: 'plan',
+    content: planContent,
+    title: planTitleFromContent(planContent),
+    timestamp,
+    turnId,
+    sessionId
+  };
+}
+
+export function planRequestMessageFromContent({
+  id,
+  requestId,
+  content,
+  timestamp,
+  turnId,
+  sessionId,
+  completed = false
+}) {
+  const planContent = String(content || '').trim();
+  if (!planContent) {
+    return null;
+  }
+  const requestTurnId = String(turnId || '').trim();
+  return {
+    id,
+    role: 'plan_request',
+    content: completed ? '计划已确认执行' : '实施此计划?',
+    status: completed ? 'completed' : 'running',
+    timestamp,
+    turnId: requestTurnId || turnId,
+    sessionId,
+    planImplementation: {
+      requestId: requestId || (requestTurnId ? `${IMPLEMENT_PLAN_REQUEST_PREFIX}${requestTurnId}` : ''),
+      turnId: requestTurnId || turnId,
+      planContent,
+      completed: Boolean(completed)
+    }
+  };
+}
+
+function implementedPlanContentsFromTurns(turns) {
+  const implementedPlanContents = new Set();
+  for (const turn of turns || []) {
+    for (const item of Array.isArray(turn?.items) ? turn.items : []) {
+      if (item?.type !== 'userMessage') {
+        continue;
+      }
+      const implementedPlanContent = implementedPlanContentFromMessage(textFromDesktopUserInput(item.content));
+      if (implementedPlanContent) {
+        implementedPlanContents.add(normalizedPlanText(implementedPlanContent));
+      }
+    }
+  }
+  return implementedPlanContents;
 }
 
 function diffStats(unifiedDiff = '') {
@@ -85,6 +207,41 @@ function desktopActivityMessageId(turnId, segmentIndex = 0) {
   return segmentIndex > 0 ? `activity-${turnId}-${segmentIndex}` : `activity-${turnId}`;
 }
 
+function numericSegmentIndex(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function findDesktopSegmentUserIndex(messages, turnId, segmentIndex) {
+  let inferredSegmentIndex = 0;
+  for (let index = 0; index < messages.length; index += 1) {
+    const message = messages[index];
+    if (message?.role !== 'user' || message.turnId !== turnId) {
+      continue;
+    }
+    const currentSegmentIndex = numericSegmentIndex(message.segmentIndex) ?? inferredSegmentIndex;
+    if (currentSegmentIndex === segmentIndex) {
+      return index;
+    }
+    inferredSegmentIndex += 1;
+  }
+  return -1;
+}
+
+function findDesktopActivityInsertIndex(messages, turnId, segmentIndex) {
+  const userIndex = findDesktopSegmentUserIndex(messages, turnId, segmentIndex);
+  if (userIndex >= 0) {
+    return userIndex + 1;
+  }
+  let lastTurnIndex = -1;
+  for (let index = 0; index < messages.length; index += 1) {
+    if (messages[index]?.turnId === turnId) {
+      lastTurnIndex = index;
+    }
+  }
+  return lastTurnIndex >= 0 ? lastTurnIndex + 1 : messages.length;
+}
+
 export function upsertDesktopActivity(messages, turnId, activity, segmentIndex = 0) {
   if (!activity) {
     return;
@@ -113,9 +270,10 @@ export function upsertDesktopActivity(messages, turnId, activity, segmentIndex =
       existing.activities = [...current, activity];
     }
     existing.timestamp = activity.timestamp || existing.timestamp;
+    applyDesktopActivityContainerStatus(existing);
     return;
   }
-  messages.push({
+  const nextMessage = {
     id,
     role: 'activity',
     turnId,
@@ -127,7 +285,87 @@ export function upsertDesktopActivity(messages, turnId, activity, segmentIndex =
     timestamp: activity.timestamp || new Date().toISOString(),
     startedAt: activity.startedAt || activity.timestamp || null,
     activities: [activity]
-  });
+  };
+  applyDesktopActivityContainerStatus(nextMessage);
+  messages.splice(findDesktopActivityInsertIndex(messages, turnId, segmentIndex), 0, nextMessage);
+}
+
+function normalizedActivityStatus(value) {
+  const status = String(value || '').toLowerCase();
+  if (['completed', 'success', 'succeeded'].includes(status)) {
+    return 'completed';
+  }
+  if (['failed', 'error', 'cancelled', 'canceled', 'interrupted', 'aborted'].includes(status)) {
+    return 'failed';
+  }
+  if (['running', 'queued'].includes(status)) {
+    return status;
+  }
+  return 'running';
+}
+
+function aggregateDesktopActivityStatus(activities = []) {
+  const statuses = activities.map((item) => normalizedActivityStatus(item?.status));
+  if (!statuses.length || statuses.some((status) => status === 'running' || status === 'queued')) {
+    return 'running';
+  }
+  if (statuses.some((status) => status === 'completed')) {
+    return 'completed';
+  }
+  return 'failed';
+}
+
+function activityTimestampRange(activities = []) {
+  let startedAt = null;
+  let completedAt = null;
+  for (const activity of activities) {
+    const timestamp = activity?.timestamp || activity?.startedAt || activity?.completedAt || '';
+    const time = Date.parse(timestamp);
+    if (!Number.isFinite(time)) {
+      continue;
+    }
+    if (!startedAt || time < Date.parse(startedAt)) {
+      startedAt = timestamp;
+    }
+    if (!completedAt || time > Date.parse(completedAt)) {
+      completedAt = timestamp;
+    }
+  }
+  return { startedAt, completedAt };
+}
+
+function positiveDurationMs(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function durationMsBetween(startedAt, completedAt) {
+  const startMs = Date.parse(startedAt || '');
+  const endMs = Date.parse(completedAt || '');
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) {
+    return null;
+  }
+  return endMs - startMs;
+}
+
+function applyDesktopActivityContainerStatus(message) {
+  const activities = Array.isArray(message.activities) ? message.activities : [];
+  const status = aggregateDesktopActivityStatus(activities);
+  const range = activityTimestampRange(activities);
+  message.status = status;
+  message.label = status === 'running' ? '正在处理' : status === 'failed' ? '过程已中止' : '过程已同步';
+  message.content = message.label;
+  if (range.startedAt) {
+    message.startedAt = range.startedAt;
+  }
+  if (status !== 'running') {
+    message.completedAt = range.completedAt || message.completedAt || message.timestamp || new Date().toISOString();
+    message.durationMs = durationMsBetween(message.startedAt, message.completedAt) || positiveDurationMs(message.durationMs) || null;
+  }
+  if (status === 'running') {
+    message.completedAt = null;
+    message.durationMs = null;
+  }
 }
 
 export function removeFallbackActivitiesCoveredByRaw(messages, rawActivities) {
@@ -360,6 +598,32 @@ function desktopActivityFallbackStatus(turnStatus) {
   return turnStatus === 'running' ? 'running' : turnStatus === 'failed' ? 'failed' : 'completed';
 }
 
+function planMessageFromThreadItem(item, turnId, index, timestamp, sessionId) {
+  return planMessageFromContent({
+    id: `${turnId}-plan-${item.id || index}`,
+    content: item.text || item.planContent || item.plan_content || '',
+    timestamp,
+    turnId,
+    sessionId
+  });
+}
+
+function planRequestMessageFromThreadItem(item, turnId, index, timestamp, sessionId) {
+  const requestTurnId = String(item.turnId || turnId || '').trim();
+  const requestId = String(item.id || (requestTurnId ? `${IMPLEMENT_PLAN_REQUEST_PREFIX}${requestTurnId}` : '')).trim();
+  const planContent = String(item.planContent || item.plan_content || item.text || '').trim();
+  const completed = Boolean(item.isCompleted || item.completed || item.status === 'completed');
+  return planRequestMessageFromContent({
+    id: `${turnId}-plan-request-${requestId || index}`,
+    requestId: requestId || (requestTurnId ? `${IMPLEMENT_PLAN_REQUEST_PREFIX}${requestTurnId}` : ''),
+    content: planContent,
+    timestamp,
+    turnId: requestTurnId || turnId,
+    sessionId,
+    completed
+  });
+}
+
 function desktopActivityFromThreadItem(item, turnId, index, timestamp, turnStatus = 'completed') {
   if (!item || item.type === 'userMessage') {
     return null;
@@ -396,15 +660,10 @@ function desktopActivityFromThreadItem(item, turnId, index, timestamp, turnStatu
     };
   }
   if (item.type === 'plan') {
-    const status = normalizedDesktopItemStatus(item.status, fallbackStatus);
-    return {
-      id: `${turnId}-plan-${item.id || index}`,
-      kind: 'plan',
-      label: desktopActivityLabel(status, { running: '正在更新计划', completed: '计划已更新', failed: '计划更新中止' }),
-      status,
-      detail: item.text || '',
-      timestamp
-    };
+    return null;
+  }
+  if (item.type === 'planImplementation' || item.type === 'plan-implementation') {
+    return null;
   }
   if (item.type === 'commandExecution') {
     const status = normalizedDesktopItemStatus(item.status, item.exitCode ? 'failed' : fallbackStatus);
@@ -496,6 +755,7 @@ function desktopActivityFromThreadItem(item, turnId, index, timestamp, turnStatu
 export function messagesFromDesktopThread(thread, { includeActivity = false } = {}) {
   const messages = [];
   const turns = Array.isArray(thread?.turns) ? thread.turns : [];
+  const implementedPlanContents = implementedPlanContentsFromTurns(turns);
 
   turns.forEach((turn, turnIndex) => {
     const turnId = turn.id || `${thread.id}-desktop-${turnIndex + 1}`;
@@ -504,6 +764,9 @@ export function messagesFromDesktopThread(thread, { includeActivity = false } = 
     const completedAt = isoFromEpochSeconds(turn.completedAt) || (turnStatus === 'running' ? null : startedAt);
     const items = Array.isArray(turn.items) ? turn.items : [];
     const lastUserItemIndex = items.reduce((latest, item, index) => (item?.type === 'userMessage' ? index : latest), -1);
+    const hasExplicitPlanImplementation = items.some(
+      (item) => item?.type === 'planImplementation' || item?.type === 'plan-implementation'
+    );
     let segmentIndex = -1;
     let finalAssistantText = '';
 
@@ -531,10 +794,35 @@ export function messagesFromDesktopThread(thread, { includeActivity = false } = 
             id: item.id || `${turnId}-user-${itemIndex}`,
             role: 'user',
             content: sanitizeVisibleUserMessage(content),
+            ...guidedUserMetadata(segmentIndex > 0),
             timestamp,
             turnId,
             sessionId: thread.id
           });
+        }
+        return;
+      }
+      if (item.type === 'plan') {
+        const planMessage = planMessageFromThreadItem(item, turnId, itemIndex, timestamp, thread.id);
+        if (planMessage) {
+          upsertMessage(messages, planMessage);
+          if (!hasExplicitPlanImplementation && !hasImplementedPlanContent(implementedPlanContents, planMessage.content)) {
+            upsertMessage(messages, planRequestMessageFromContent({
+              id: `${turnId}-plan-request-${item.id || itemIndex}`,
+              requestId: `${IMPLEMENT_PLAN_REQUEST_PREFIX}${turnId}`,
+              content: planMessage.content,
+              timestamp,
+              turnId,
+              sessionId: thread.id
+            }));
+          }
+        }
+        return;
+      }
+      if (item.type === 'planImplementation' || item.type === 'plan-implementation') {
+        const requestMessage = planRequestMessageFromThreadItem(item, turnId, itemIndex, timestamp, thread.id);
+        if (requestMessage && !hasImplementedPlanContent(implementedPlanContents, requestMessage.planImplementation?.planContent)) {
+          upsertMessage(messages, requestMessage);
         }
         return;
       }
@@ -553,15 +841,38 @@ export function messagesFromDesktopThread(thread, { includeActivity = false } = 
       if (item.type === 'agentMessage' && item.phase !== 'commentary') {
         const content = String(item.text || '').trim();
         if (content) {
-          finalAssistantText = content;
-          upsertMessage(messages, {
-            id: item.id || `${turnId}-assistant`,
-            role: 'assistant',
-            content,
-            timestamp,
-            turnId,
-            sessionId: thread.id
-          });
+          const proposedPlan = extractProposedPlanContent(content);
+          if (proposedPlan) {
+            finalAssistantText = proposedPlan;
+            const baseId = item.id || `${turnId}-assistant`;
+            upsertMessage(messages, planMessageFromContent({
+              id: `${baseId}-plan`,
+              content: proposedPlan,
+              timestamp,
+              turnId,
+              sessionId: thread.id
+            }));
+            if (!hasImplementedPlanContent(implementedPlanContents, proposedPlan)) {
+              upsertMessage(messages, planRequestMessageFromContent({
+                id: `${baseId}-plan-request`,
+                requestId: `${IMPLEMENT_PLAN_REQUEST_PREFIX}${turnId}`,
+                content: proposedPlan,
+                timestamp,
+                turnId,
+                sessionId: thread.id
+              }));
+            }
+          } else {
+            finalAssistantText = content;
+            upsertMessage(messages, {
+              id: item.id || `${turnId}-assistant`,
+              role: 'assistant',
+              content,
+              timestamp,
+              turnId,
+              sessionId: thread.id
+            });
+          }
         }
       }
       if (item.type === 'imageGeneration') {

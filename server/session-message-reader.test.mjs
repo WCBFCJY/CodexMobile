@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { createSessionMessageReader } from './session-message-reader.js';
+import { createSessionMessageReader, messagesFromRolloutJsonl, readRolloutContextState } from './session-message-reader.js';
 
 test('session message reader filters hidden messages, paginates, and exposes context status', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-message-reader-'));
@@ -66,6 +66,53 @@ test('session message reader filters hidden messages, paginates, and exposes con
   }
 });
 
+test('rollout context state exposes running desktop runtime until task completion', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-runtime-state-'));
+  try {
+    const rolloutPath = path.join(dir, 'rollout.jsonl');
+    const startedRows = [
+      JSON.stringify({
+        timestamp: '2026-05-08T01:00:00.000Z',
+        type: 'event_msg',
+        payload: {
+          type: 'task_started',
+          turn_id: 'turn-1',
+          started_at: 1778202000,
+          model_context_window: 100000
+        }
+      }),
+      JSON.stringify({
+        timestamp: '2026-05-08T01:00:01.000Z',
+        type: 'turn_context',
+        payload: { turn_id: 'turn-1', model: 'gpt-5.5' }
+      })
+    ];
+    await fs.writeFile(rolloutPath, startedRows.join('\n'));
+
+    const running = await readRolloutContextState(rolloutPath, 'session-1');
+
+    assert.equal(running.runtime.status, 'running');
+    assert.equal(running.runtime.source, 'desktop-thread');
+    assert.equal(running.runtime.sessionId, 'session-1');
+    assert.equal(running.runtime.turnId, 'turn-1');
+
+    await fs.writeFile(rolloutPath, [
+      ...startedRows,
+      JSON.stringify({
+        timestamp: '2026-05-08T01:00:10.000Z',
+        type: 'event_msg',
+        payload: { type: 'task_complete', turn_id: 'turn-1' }
+      })
+    ].join('\n'));
+
+    const completed = await readRolloutContextState(rolloutPath, 'session-1');
+
+    assert.equal(completed.runtime, null);
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
+
 test('session message reader merges raw and collaboration activities only when requested', async () => {
   const calls = [];
   const messages = [
@@ -116,6 +163,108 @@ test('session message reader merges raw and collaboration activities only when r
     ['upsert', 'turn-1', 'collab-1'],
     ['sort', 3]
   ]);
+});
+
+test('session message reader preserves raw activity segment indices', async () => {
+  const upserts = [];
+  const reader = createSessionMessageReader({
+    readDeletedMessageIds: async () => new Set(),
+    readDesktopThread: async () => ({
+      thread: { id: 'session-1', path: '/tmp/rollout.jsonl', turns: [{ id: 'turn-1' }] }
+    }),
+    messagesFromDesktopThread: () => [],
+    readRawSessionActivities: async () => [
+      { turnId: 'turn-1', segmentIndex: 1, activity: { id: 'raw-1', kind: 'command_execution' } }
+    ],
+    readDesktopCollabActivities: async () => [],
+    removeFallbackActivitiesCoveredByRaw: () => null,
+    upsertDesktopActivity: (_items, turnId, activity, segmentIndex) => {
+      upserts.push([turnId, activity.id, segmentIndex]);
+    },
+    sortDesktopActivitySteps: () => null,
+    readRolloutContextState: async () => ({ sessionId: 'session-1' })
+  });
+
+  await reader.readSessionMessages('session-1', { includeActivity: true });
+
+  assert.deepEqual(upserts, [['turn-1', 'raw-1', 1]]);
+});
+
+test('session message reader keeps raw activity beside its steered message after final sorting', async () => {
+  const reader = createSessionMessageReader({
+    readDeletedMessageIds: async () => new Set(),
+    readDesktopThread: async () => ({
+      thread: {
+        id: 'session-1',
+        path: '/tmp/rollout.jsonl',
+        turns: [{ id: 'turn-1' }]
+      }
+    }),
+    messagesFromDesktopThread: () => [
+      {
+        id: 'user-1',
+        role: 'user',
+        content: '先修列表同步',
+        turnId: 'turn-1',
+        timestamp: '2026-02-02T00:00:00.000Z'
+      },
+      {
+        id: 'answer-1',
+        role: 'assistant',
+        content: '第一段回复',
+        turnId: 'turn-1',
+        timestamp: '2026-02-02T00:00:05.000Z'
+      },
+      {
+        id: 'user-2',
+        role: 'user',
+        content: '再把移动端 UI 分开',
+        turnId: 'turn-1',
+        guided: true,
+        timestamp: '2026-02-02T00:00:00.000Z'
+      },
+      {
+        id: 'answer-2',
+        role: 'assistant',
+        content: '第二段回复',
+        turnId: 'turn-1',
+        timestamp: '2026-02-02T00:00:06.000Z'
+      }
+    ],
+    readRawSessionActivities: async () => [
+      {
+        turnId: 'turn-1',
+        segmentIndex: 0,
+        activity: {
+          id: 'raw-0',
+          kind: 'command_execution',
+          label: '本地任务已处理',
+          command: 'git status --short',
+          timestamp: '2026-02-02T00:00:01.000Z'
+        }
+      },
+      {
+        turnId: 'turn-1',
+        segmentIndex: 1,
+        activity: {
+          id: 'raw-1',
+          kind: 'command_execution',
+          label: '本地任务已处理',
+          command: 'rg steer client/src',
+          timestamp: '2026-02-02T00:00:03.000Z'
+        }
+      }
+    ],
+    readDesktopCollabActivities: async () => [],
+    readRolloutContextState: async () => ({ sessionId: 'session-1' })
+  });
+
+  const result = await reader.readSessionMessages('session-1', { includeActivity: true });
+
+  assert.deepEqual(
+    result.messages.map((message) => message.id),
+    ['user-1', 'activity-turn-1', 'answer-1', 'user-2', 'activity-turn-1-1', 'answer-2']
+  );
 });
 
 test('session message reader falls back to rollout jsonl when desktop thread is not loaded', async () => {
@@ -175,6 +324,178 @@ test('session message reader falls back to rollout jsonl when desktop thread is 
       ]
     );
     assert.equal(result.total, 2);
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('messagesFromRolloutJsonl converts proposed plan answers into standalone plan UI messages', () => {
+  const content = [
+    JSON.stringify({
+      timestamp: '2026-05-08T18:29:01.775Z',
+      type: 'turn_context',
+      payload: { turn_id: 'turn-1' }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-08T18:29:02.000Z',
+      type: 'response_item',
+      payload: {
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: '/plan 测试计划卡片' }]
+      }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-08T18:29:11.962Z',
+      type: 'response_item',
+      payload: {
+        id: 'assistant-plan-1',
+        type: 'message',
+        role: 'assistant',
+        phase: 'final_answer',
+        content: [{
+          type: 'output_text',
+          text: '<proposed_plan>\n# 移动端计划模式测试计划\n\n## Summary\n创建一个轻量测试计划。\n</proposed_plan>'
+        }]
+      }
+    })
+  ].join('\n');
+
+  const result = messagesFromRolloutJsonl(content, 'session-1');
+
+  assert.deepEqual(result.messages.map((message) => message.role), ['user', 'plan', 'plan_request']);
+  assert.equal(result.messages[1].id, 'assistant-plan-1-plan');
+  assert.equal(result.messages[1].title, '移动端计划模式测试计划');
+  assert.equal(result.messages[1].content, '# 移动端计划模式测试计划\n\n## Summary\n创建一个轻量测试计划。');
+  assert.deepEqual(result.messages[2].planImplementation, {
+    requestId: 'implement-plan:turn-1',
+    turnId: 'turn-1',
+    planContent: '# 移动端计划模式测试计划\n\n## Summary\n创建一个轻量测试计划。',
+    completed: false
+  });
+});
+
+test('messagesFromRolloutJsonl removes stale plan request after implementation starts', () => {
+  const planContent = '# 移动端计划模式测试计划\n\n## Summary\n创建一个轻量测试计划。';
+  const content = [
+    JSON.stringify({
+      timestamp: '2026-05-08T18:29:01.775Z',
+      type: 'turn_context',
+      payload: { turn_id: 'turn-1' }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-08T18:29:02.000Z',
+      type: 'response_item',
+      payload: {
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: '/plan 测试计划卡片' }]
+      }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-08T18:29:11.962Z',
+      type: 'response_item',
+      payload: {
+        id: 'assistant-plan-1',
+        type: 'message',
+        role: 'assistant',
+        phase: 'final_answer',
+        content: [{ type: 'output_text', text: `<proposed_plan>\n${planContent}\n</proposed_plan>` }]
+      }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-08T18:30:01.000Z',
+      type: 'turn_context',
+      payload: { turn_id: 'turn-2' }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-08T18:30:02.000Z',
+      type: 'response_item',
+      payload: {
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: `PLEASE IMPLEMENT THIS PLAN:\n${planContent}` }]
+      }
+    })
+  ].join('\n');
+
+  const result = messagesFromRolloutJsonl(content, 'session-1');
+
+  assert.deepEqual(result.messages.map((message) => message.role), ['user', 'plan', 'user']);
+  assert.equal(result.messages[1].content, planContent);
+  assert.equal(result.messages[2].content, '执行计划');
+});
+
+test('messagesFromRolloutJsonl marks second user message in one turn as guided', () => {
+  const content = [
+    JSON.stringify({
+      timestamp: '2026-05-08T18:29:01.775Z',
+      type: 'turn_context',
+      payload: { turn_id: 'turn-1' }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-08T18:29:02.000Z',
+      type: 'response_item',
+      payload: {
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: '先修列表同步' }]
+      }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-08T18:29:05.000Z',
+      type: 'response_item',
+      payload: {
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: '再把移动端 UI 分开' }]
+      }
+    })
+  ].join('\n');
+
+  const result = messagesFromRolloutJsonl(content, 'session-1');
+
+  assert.deepEqual(
+    result.messages.map((message) => [message.content, Boolean(message.guided), message.guideLabel || '']),
+    [
+      ['先修列表同步', false, ''],
+      ['再把移动端 UI 分开', true, '已引导对话']
+    ]
+  );
+});
+
+test('session message reader falls back to rollout jsonl when desktop thread is empty but a rollout file exists', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-message-reader-empty-thread-'));
+  try {
+    const rolloutPath = path.join(dir, 'rollout.jsonl');
+    await fs.writeFile(rolloutPath, [
+      JSON.stringify({
+        timestamp: '2026-05-08T18:29:01.775Z',
+        type: 'turn_context',
+        payload: { turn_id: 'turn-1' }
+      }),
+      JSON.stringify({
+        timestamp: '2026-05-08T18:29:02.000Z',
+        type: 'response_item',
+        payload: {
+          type: 'message',
+          role: 'user',
+          content: [{ type: 'input_text', text: '移动端消息' }]
+        }
+      })
+    ].join('\n'));
+
+    const reader = createSessionMessageReader({
+      readDeletedMessageIds: async () => new Set(),
+      readDesktopThread: async () => ({ thread: { id: 'session-1', turns: [] } }),
+      resolveSessionThread: async (sessionId) => ({ id: sessionId, filePath: rolloutPath })
+    });
+
+    const result = await reader.readSessionMessages('session-1');
+
+    assert.deepEqual(result.messages.map((message) => [message.role, message.content]), [
+      ['user', '移动端消息']
+    ]);
   } finally {
     await fs.rm(dir, { recursive: true, force: true });
   }

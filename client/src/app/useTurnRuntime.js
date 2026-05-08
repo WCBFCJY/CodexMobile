@@ -8,10 +8,12 @@ import {
 } from '../chat/activity-model.js';
 import { mergeContextStatus } from './context-status.js';
 import {
+  externalThreadRuntimeById,
   hasVisibleAssistantForTurn,
   isDraftSession,
   payloadRunKeys,
   sessionMessagesApiPath,
+  shouldClearRuntimeWhenNoActiveRuns,
   shouldDropRunningActivityWhenNoActiveRuns,
   shouldPreserveLocalRunsFromStatus
 } from './session-utils.js';
@@ -178,7 +180,7 @@ export function useTurnRuntime({
         setThreadRuntimeById((current) => {
           const next = { ...current };
           for (const [key, value] of Object.entries(next)) {
-            if (value?.status === 'running') {
+            if (shouldClearRuntimeWhenNoActiveRuns(value)) {
               delete next[key];
             }
           }
@@ -213,7 +215,9 @@ export function useTurnRuntime({
       return next;
     });
     setThreadRuntimeById((current) => {
-      const next = shouldPreserveLocalRuns ? { ...current, ...nextRuntime } : nextRuntime;
+      const next = shouldPreserveLocalRuns
+        ? { ...current, ...nextRuntime }
+        : { ...externalThreadRuntimeById(current), ...nextRuntime };
       return next;
     });
   }, [activePollsRef, runningByIdRef, setMessages, setRunningById, setThreadRuntimeById, turnRefreshTimersRef]);

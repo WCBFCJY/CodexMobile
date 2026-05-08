@@ -101,6 +101,22 @@ test('prepareChatRequest keeps drafts separate and preserves mobile-only request
   assert.equal(mobileOnly.turnId, 'generated-turn-2');
 });
 
+test('prepareChatRequest can send an internal prompt while showing a short visible message', () => {
+  const prepared = prepareChatRequest({
+    projectId: 'project-1',
+    sessionId: 'thread-1',
+    message: 'PLEASE IMPLEMENT THIS PLAN:\n1. 修复同步',
+    visibleMessage: '执行计划'
+  }, {
+    getSession: () => ({ id: 'thread-1' }),
+    config: {}
+  });
+
+  assert.equal(prepared.displayMessage, '执行计划');
+  assert.equal(prepared.visibleMessage, '执行计划');
+  assert.equal(prepared.codexMessage, 'PLEASE IMPLEMENT THIS PLAN:\n1. 修复同步');
+});
+
 test('prepareChatRequest rejects empty text without attachments', () => {
   assert.throws(
     () => prepareChatRequest({ message: '   ' }, { getSession: () => null, config: {} }),

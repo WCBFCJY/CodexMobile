@@ -1,12 +1,13 @@
-import { Check, Copy, Trash2 } from 'lucide-react';
+import { Check, Copy, CornerDownRight, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { formatTime } from '../app/session-utils.js';
 import { copyTextToClipboard } from '../utils/clipboard.js';
 import { ActivityMessage } from './ActivityMessage.jsx';
 import { MessageContent, splitMessageImages } from './MarkdownContent.jsx';
+import { PlanMessage } from './PlanMessage.jsx';
 import { UserImageStrip } from './ImagePreview.jsx';
 
-export function ChatMessage({ message, now, onPreviewImage, onDeleteMessage }) {
+export function ChatMessage({ message, now, onPreviewImage, onDeleteMessage, onImplementPlan, onAdjustPlan }) {
   const [copied, setCopied] = useState(false);
   const copiedTimerRef = useRef(null);
 
@@ -17,9 +18,20 @@ export function ChatMessage({ message, now, onPreviewImage, onDeleteMessage }) {
   }, []);
 
   if (message.role === 'activity') {
-    return <ActivityMessage message={message} now={now} />;
+    return <ActivityMessage message={message} now={now} onImplementPlan={onImplementPlan} />;
+  }
+  if (message.role === 'plan' || message.role === 'plan_request') {
+    return (
+      <PlanMessage
+        message={message}
+        onPreviewImage={onPreviewImage}
+        onImplementPlan={onImplementPlan}
+        onAdjustPlan={onAdjustPlan}
+      />
+    );
   }
   const isUser = message.role === 'user';
+  const isGuided = isUser && (message.guided || message.kind === 'guided_user');
   const canAct = message.role === 'user' || message.role === 'assistant';
   const userMedia = isUser ? splitMessageImages(message.content) : { text: message.content, images: [] };
   const visibleContent = isUser ? userMedia.text : message.content;
@@ -40,6 +52,12 @@ export function ChatMessage({ message, now, onPreviewImage, onDeleteMessage }) {
   return (
     <div className={`message-row ${isUser ? 'is-user' : 'is-assistant'}`}>
       <div className="message-stack">
+        {isGuided ? (
+          <div className="message-guide-label">
+            <CornerDownRight size={13} strokeWidth={1.8} />
+            <span>{message.guideLabel || '已引导对话'}</span>
+          </div>
+        ) : null}
         {isUser ? <UserImageStrip images={userMedia.images} onPreviewImage={onPreviewImage} /> : null}
         {visibleContent ? (
           <div className="message-bubble">

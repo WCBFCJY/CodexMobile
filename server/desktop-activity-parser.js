@@ -79,9 +79,9 @@ function rawFunctionExitCode(value) {
   return match ? Number(match[1]) : null;
 }
 
-function rawFunctionStatus(outputRecord) {
+function rawFunctionStatus(outputRecord, missingOutputStatus = 'running') {
   if (!outputRecord) {
-    return 'running';
+    return missingOutputStatus;
   }
   const exitCode = rawFunctionExitCode(outputRecord.output);
   if (exitCode === null) {
@@ -90,9 +90,9 @@ function rawFunctionStatus(outputRecord) {
   return exitCode === 0 ? 'completed' : 'failed';
 }
 
-function rawToolStatus(outputRecord) {
+function rawToolStatus(outputRecord, missingOutputStatus = 'running') {
   if (!outputRecord) {
-    return 'running';
+    return missingOutputStatus;
   }
   const exitCode = rawFunctionExitCode(outputRecord.output);
   if (exitCode !== null) {
@@ -139,13 +139,105 @@ function turnIdForRawActivityTimestamp(turns, timestamp) {
   return latestStartedTurnId;
 }
 
+function rawMissingOutputStatusForTurn(turns, turnId) {
+  const turn = (Array.isArray(turns) ? turns : []).find((item) => item?.id === turnId);
+  const status = String(turn?.status || '').toLowerCase();
+  if (['completed', 'success', 'succeeded'].includes(status) || turn?.completedAt) {
+    return 'completed';
+  }
+  if (['failed', 'error', 'cancelled', 'canceled', 'interrupted', 'aborted'].includes(status)) {
+    return 'failed';
+  }
+  return 'running';
+}
+
+function comparableSequence(value) {
+  const number = Number(value);
+  if (Number.isFinite(number)) {
+    return number;
+  }
+  const match = String(value || '').match(/^\d+/);
+  return match ? Number(match[0]) : null;
+}
+
+function userSegmentMarkersFromMessages(messages, turns) {
+  const countsByTurn = new Map();
+  const markers = [];
+  const userMessages = (Array.isArray(messages) ? messages : [])
+    .filter(isVisibleRawUserSegmentMessage)
+    .sort((a, b) => (comparableSequence(a.sequence) ?? 0) - (comparableSequence(b.sequence) ?? 0));
+
+  for (const message of userMessages) {
+    const turnId = turnIdForRawActivityTimestamp(turns, message.timestamp);
+    if (!turnId) {
+      continue;
+    }
+    const segmentIndex = countsByTurn.get(turnId) || 0;
+    countsByTurn.set(turnId, segmentIndex + 1);
+    markers.push({
+      turnId,
+      segmentIndex,
+      sequence: comparableSequence(message.sequence),
+      timestampMs: Date.parse(message.timestamp || '')
+    });
+  }
+  return markers;
+}
+
+function isVisibleRawUserSegmentMessage(message) {
+  if (message?.role !== 'user') {
+    return false;
+  }
+  const text = responseMessageText(message);
+  if (!text) {
+    return false;
+  }
+  return !/^<environment_context\b/i.test(text.trim());
+}
+
+function segmentIndexForRawActivity(markers, item) {
+  const activity = item?.activity || {};
+  const sequence = comparableSequence(activity.sequence);
+  const timestampMs = Date.parse(activity.timestamp || '');
+  let match = null;
+
+  for (const marker of markers || []) {
+    if (marker.turnId !== item?.turnId) {
+      continue;
+    }
+    const sequenceApplies =
+      Number.isFinite(sequence) && Number.isFinite(marker.sequence)
+        ? marker.sequence <= sequence
+        : false;
+    const timestampApplies =
+      Number.isFinite(timestampMs) && Number.isFinite(marker.timestampMs)
+        ? marker.timestampMs <= timestampMs
+        : false;
+    if (sequenceApplies || (!Number.isFinite(sequence) && timestampApplies)) {
+      match = marker;
+    }
+  }
+  return match?.segmentIndex || 0;
+}
+
+function applyRawActivitySegments(items, messages, turns) {
+  const markers = userSegmentMarkersFromMessages(messages, turns);
+  if (!markers.length) {
+    return items;
+  }
+  return items.map((item) => ({
+    ...item,
+    segmentIndex: segmentIndexForRawActivity(markers, item)
+  }));
+}
+
 function rawCommandActivityFromCall({ payload, outputRecord, turns, sequence, command, toolName }) {
   const timestamp = payload.timestamp || outputRecord?.timestamp || new Date().toISOString();
   const turnId = turnIdForRawActivityTimestamp(turns, timestamp);
   if (!turnId || !command) {
     return null;
   }
-  const status = rawFunctionStatus(outputRecord);
+  const status = rawFunctionStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
   const exitCode = rawFunctionExitCode(outputRecord?.output);
   const idSuffix = payload.call_id || `${sequence}`;
   return {
@@ -231,7 +323,7 @@ function rawPlanActivityFromCall({ payload, outputRecord, turns, sequence }) {
     .map((item) => [item?.status, item?.step].filter(Boolean).join(' '))
     .filter(Boolean)
     .join('\n');
-  const status = rawFunctionStatus(outputRecord);
+  const status = rawFunctionStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
   const idSuffix = payload.call_id || `${sequence}`;
   return {
     turnId,
@@ -257,7 +349,7 @@ function rawMcpActivityFromCall({ payload, outputRecord, turns, sequence }) {
   if (!turnId) {
     return null;
   }
-  const status = rawToolStatus(outputRecord);
+  const status = rawToolStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
   const server = namespace.replace(/^mcp__/, '').replace(/__+/g, '/');
   const tool = String(payload.name || '').trim();
   return {
@@ -285,7 +377,7 @@ function rawFileChangeActivityFromCustomCall({ payload, outputRecord, turns, seq
   if (!turnId) {
     return null;
   }
-  const status = rawToolStatus(outputRecord);
+  const status = rawToolStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
   return {
     turnId,
     activity: {
@@ -354,7 +446,7 @@ function rawSessionActivitiesFromFunctionCall(payload, outputRecord, turns, sequ
     if (!turnId) {
       return [];
     }
-    const status = rawFunctionStatus(outputRecord);
+    const status = rawFunctionStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
     return [{
       turnId,
       activity: {
@@ -454,7 +546,7 @@ export function rawSessionActivitiesFromJsonl(content, turns = []) {
       rawActivities.push(item);
     }
   }
-  return rawActivities.sort((a, b) => {
+  return applyRawActivitySegments(rawActivities, messages, turns).sort((a, b) => {
     const left = Number(a.activity.sequence);
     const right = Number(b.activity.sequence);
     if (Number.isFinite(left) && Number.isFinite(right) && left !== right) {

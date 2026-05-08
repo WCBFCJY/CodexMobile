@@ -7,6 +7,137 @@ export function statusMessageId(payload) {
   return `status-${payload.clientTurnId || payload.turnId || payload.sessionId || 'current'}`;
 }
 
+export function extractProposedPlanContent(message) {
+  const value = String(message || '').trim();
+  if (!value) {
+    return '';
+  }
+  const match = value.match(/<proposed_plan\b[^>]*>([\s\S]*?)<\/proposed_plan>/i);
+  return match ? String(match[1] || '').trim() : '';
+}
+
+export function planTitleFromContent(content) {
+  const lines = String(content || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const heading = lines
+    .map((line) => line.match(/^#{1,6}\s+(.+)$/)?.[1]?.trim())
+    .find(Boolean);
+  if (heading) {
+    return heading.replace(/[*_`]/g, '').trim() || '计划';
+  }
+  const plainLead = lines.find((line) => !/^[-*+]\s+/.test(line) && !/^\d+[.)]\s+/.test(line));
+  if (plainLead && plainLead.length <= 60) {
+    return plainLead.replace(/[*_`#]/g, '').trim() || '计划';
+  }
+  return '计划';
+}
+
+function planMessageFromPayload(payload, planContent) {
+  const baseId = payload.messageId || `assistant-${payload.turnId || Date.now()}`;
+  const turnId = payload.turnId || null;
+  return {
+    id: `${baseId}-plan`,
+    role: 'plan',
+    content: planContent,
+    title: planTitleFromContent(planContent),
+    timestamp: payload.timestamp || new Date().toISOString(),
+    turnId,
+    sessionId: payload.sessionId || null
+  };
+}
+
+function planRequestMessageFromPayload(payload, planContent) {
+  const baseId = payload.messageId || `assistant-${payload.turnId || Date.now()}`;
+  const turnId = payload.turnId || null;
+  return {
+    id: `${baseId}-plan-request`,
+    role: 'plan_request',
+    content: '实施此计划?',
+    status: 'running',
+    timestamp: payload.timestamp || new Date().toISOString(),
+    turnId,
+    sessionId: payload.sessionId || null,
+    planImplementation: {
+      requestId: turnId ? `implement-plan:${turnId}` : '',
+      turnId,
+      planContent,
+      completed: false
+    }
+  };
+}
+
+function normalizedPlanText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function planImplementationMatches(candidate, target) {
+  if (!candidate || !target) {
+    return false;
+  }
+  const candidateRequestId = String(candidate.requestId || '').trim();
+  const targetRequestId = String(target.requestId || '').trim();
+  if (candidateRequestId && targetRequestId && candidateRequestId === targetRequestId) {
+    return true;
+  }
+  const candidateTurnId = String(candidate.turnId || '').trim();
+  const targetTurnId = String(target.turnId || '').trim();
+  if (candidateTurnId && targetTurnId && candidateTurnId === targetTurnId) {
+    return true;
+  }
+  const candidatePlan = normalizedPlanText(candidate.planContent);
+  const targetPlan = normalizedPlanText(target.planContent);
+  return Boolean(candidatePlan && targetPlan && candidatePlan === targetPlan);
+}
+
+export function dismissPlanImplementationPrompts(current, planImplementation) {
+  const target = {
+    requestId: String(planImplementation?.requestId || '').trim(),
+    turnId: String(planImplementation?.turnId || '').trim(),
+    planContent: String(planImplementation?.planContent || '').trim()
+  };
+  if (!target.requestId && !target.turnId && !target.planContent) {
+    return current;
+  }
+  return current
+    .map((message) => {
+      if (message.role === 'plan_request' && planImplementationMatches(message.planImplementation, target)) {
+        return null;
+      }
+      if (message.role !== 'activity' || !Array.isArray(message.activities)) {
+        return message;
+      }
+      let changed = false;
+      const activities = message.activities.map((activity) => {
+        if (activity?.kind !== 'plan_implementation' || !planImplementationMatches(activity.planImplementation, target)) {
+          return activity;
+        }
+        changed = true;
+        return {
+          ...activity,
+          status: 'completed',
+          planImplementation: {
+            ...(activity.planImplementation || {}),
+            completed: true
+          }
+        };
+      });
+      return changed ? { ...message, activities } : message;
+    })
+    .filter(Boolean);
+}
+
+function upsertMessageById(current, message) {
+  const existingIndex = current.findIndex((item) => item.id === message.id);
+  if (existingIndex >= 0) {
+    const next = [...current];
+    next[existingIndex] = { ...next[existingIndex], ...message };
+    return next;
+  }
+  return [...current, message];
+}
+
 export function larkCliActivityLabel(value) {
   const text = String(value || '').replace(/\s+/g, ' ').trim();
   const lower = text.toLowerCase();
@@ -233,6 +364,7 @@ export function activityStepFromPayload(payload, fallbackKind = 'status') {
     output: activityPayloadText(payload.output),
     error: activityPayloadText(payload.error),
     fileChanges: payload.fileChanges || [],
+    planImplementation: payload.planImplementation || null,
     toolName: payload.toolName || payload.name || '',
     timestamp: payload.timestamp || new Date().toISOString()
   };
@@ -326,6 +458,9 @@ export function isVisibleActivityStep(step, messageStatus) {
   if (!step) {
     return false;
   }
+  if (step.kind === 'plan_implementation' && step.planImplementation?.completed) {
+    return false;
+  }
   if (isThinkingActivityStep(step)) {
     return true;
   }
@@ -341,6 +476,7 @@ export function isVisibleActivityStep(step, messageStatus) {
     'web_search',
     'image_generation_call',
     'plan',
+    'plan_implementation',
     'context_compaction',
     'subagent_activity'
   ]);
@@ -414,7 +550,11 @@ export function completeActivityMessagesForTurn(current, payload) {
         : message.activities;
     const completedActivities = Array.isArray(activities)
       ? activities.map((activity) =>
-        ['running', 'queued'].includes(String(activity?.status || ''))
+        activity?.kind === 'plan_implementation' &&
+        activity.planImplementation &&
+        !activity.planImplementation.completed
+          ? activity
+          : ['running', 'queued'].includes(String(activity?.status || ''))
           ? { ...activity, status: 'completed' }
           : activity
       )
@@ -619,6 +759,17 @@ export function upsertAssistantMessage(current, payload) {
   const content = String(payload.content || '').trim();
   if (!content) {
     return current;
+  }
+  const proposedPlan = extractProposedPlanContent(content);
+  if (proposedPlan) {
+    const dedupedActivity = removeDuplicateFinalAnswerActivity(current, { ...payload, content: proposedPlan });
+    const withCompletedActivity = payload.done === false
+      ? dedupedActivity
+      : completeActivityMessagesForTurn(dedupedActivity, { ...payload, content: proposedPlan });
+    return upsertMessageById(
+      upsertMessageById(withCompletedActivity, planMessageFromPayload(payload, proposedPlan)),
+      planRequestMessageFromPayload(payload, proposedPlan)
+    );
   }
   const id = payload.messageId || `assistant-${payload.turnId || Date.now()}`;
   const nextMessage = {

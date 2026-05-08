@@ -41,6 +41,7 @@ import { abortCodexTurn, getActiveRuns, runCodexTurn, steerCodexTurn } from './c
 import {
   interruptDesktopFollowerTurn,
   setDesktopFollowerCollaborationMode,
+  setDesktopFollowerModelAndReasoning,
   startDesktopFollowerTurn,
   steerDesktopFollowerTurn
 } from './desktop-ipc-client.js';
@@ -133,12 +134,12 @@ function remoteAddress(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || '';
 }
 
-async function isAuthenticated(req) {
-  return verifyToken(extractBearerToken(req), { remoteAddress: remoteAddress(req) });
+async function isAuthenticated(req, url = null) {
+  return verifyToken(extractBearerToken(req, url), { remoteAddress: remoteAddress(req) });
 }
 
-async function requireAuth(req, res, pathname = '') {
-  if (await isAuthenticated(req)) {
+async function requireAuth(req, res, pathname = '', url = null) {
+  if (await isAuthenticated(req, url)) {
     return true;
   }
   if ((req.method || 'GET') !== 'GET') {
@@ -173,6 +174,7 @@ const chatService = createChatService({
   renameSession,
   broadcast,
   runCodexTurn,
+  setDesktopFollowerModelAndReasoning,
   setDesktopFollowerCollaborationMode,
   startDesktopFollowerTurn,
   steerDesktopFollowerTurn,
@@ -276,7 +278,7 @@ async function publicStatus(authenticated) {
     models: config.models?.length ? config.models : fallbackModels(config),
     skills: Array.isArray(config.skills) ? config.skills : [],
     context: config.context || null,
-    reasoningEffort: DEFAULT_REASONING_EFFORT,
+    reasoningEffort: config.reasoningEffort || DEFAULT_REASONING_EFFORT,
     voiceTranscription: publicVoiceTranscriptionStatus(config),
     voiceSpeech: publicVoiceSpeechStatus(config),
     voiceRealtime: publicVoiceRealtimeStatus(config),
@@ -296,7 +298,7 @@ async function handleApi(req, res, url) {
   const pathname = url.pathname;
 
   if (method === 'GET' && pathname === '/api/status') {
-    sendJson(res, 200, await publicStatus(await isAuthenticated(req)));
+    sendJson(res, 200, await publicStatus(await isAuthenticated(req, url)));
     return;
   }
 
@@ -321,7 +323,7 @@ async function handleApi(req, res, url) {
     return;
   }
 
-  if (!(await requireAuth(req, res, pathname))) {
+  if (!(await requireAuth(req, res, pathname, url))) {
     return;
   }
 

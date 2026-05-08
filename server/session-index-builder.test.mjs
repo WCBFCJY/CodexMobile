@@ -192,3 +192,45 @@ test('session index builder can include missing subagent threads behind the feat
   assert.equal(index.sessionById.get('missing-child').parentSessionId, 'parent-1');
   assert.equal(index.sessionById.get('missing-child').subAgent.status, 'closed');
 });
+
+test('session index builder exposes desktop runtime from rollout state', async () => {
+  const projectA = '/tmp/codexmobile-project-runtime';
+  const projectAId = projectIdFor(projectA);
+
+  const index = await buildSessionIndex({
+    config: { projects: [{ path: projectA, trustLevel: 'trusted' }], context: {} },
+    workspaceState: { projects: [], projectlessThreadIds: [], threadWorkspaceRootHints: {} },
+    mobileSessionIndex: new Map(),
+    hiddenSessionIds: new Set(),
+    desktopThreads: [
+      {
+        id: 'thread-running',
+        cwd: projectA,
+        name: 'running',
+        updatedAt: 1_800_000_000,
+        path: '/tmp/running.jsonl',
+        source: 'vscode'
+      }
+    ],
+    readRolloutContextState: async (_filePath, sessionId) => ({
+      sessionId,
+      runtime: {
+        status: 'running',
+        source: 'desktop-thread',
+        sessionId,
+        turnId: 'turn-running',
+        startedAt: '2026-05-08T01:00:00.000Z',
+        updatedAt: '2026-05-08T01:00:01.000Z',
+        steerable: false
+      }
+    }),
+    pathExists: () => true
+  });
+
+  const [session] = index.sessionsByProject.get(projectAId);
+
+  assert.equal(session.id, 'thread-running');
+  assert.equal(session.runtime.status, 'running');
+  assert.equal(session.runtime.sessionId, 'thread-running');
+  assert.equal(session.runtime.turnId, 'turn-running');
+});

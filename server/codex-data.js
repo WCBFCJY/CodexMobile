@@ -162,6 +162,7 @@ export function listProjectSessions(projectId) {
     openChildCount: session.openChildCount || 0,
     messageCount: session.messageCount,
     updatedAt: session.updatedAt,
+    runtime: session.runtime || null,
     context: session.context || null
   }));
 }
