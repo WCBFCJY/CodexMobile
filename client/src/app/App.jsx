@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { apiFetch, getToken } from '../api.js';
 import { DEFAULT_PERMISSION_MODE } from '../composer/Composer.jsx';
+import { DEFAULT_MODEL_SPEED, normalizeModelSpeed } from '../composer/composer-options.js';
 import { useComposerSelections } from '../composer/useComposerSelections.js';
 import { useQueueDrafts } from '../composer/useQueueDrafts.js';
 import { connectionRecoveryState } from '../connection-recovery.js';
@@ -35,6 +36,8 @@ import {
 } from './session-utils.js';
 import { AppShell } from './AppShell.jsx';
 import PairingScreen from './PairingScreen.jsx';
+
+const MODEL_SPEED_KEY = 'codexmobile.modelSpeed';
 
 export default function App() {
   const [status, setStatus] = useState(DEFAULT_STATUS);
@@ -74,6 +77,7 @@ export default function App() {
   const [uploading, setUploading] = useState(false);
   const [permissionMode, setPermissionMode] = useState(DEFAULT_PERMISSION_MODE);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_STATUS.model);
+  const [selectedModelSpeed, setSelectedModelSpeed] = useState(() => normalizeModelSpeed(localStorage.getItem(MODEL_SPEED_KEY)));
   const [selectedReasoningEffort, setSelectedReasoningEffort] = useState(() => {
     const defaultVersion = localStorage.getItem('codexmobile.reasoningDefaultVersion');
     if (defaultVersion !== REASONING_DEFAULT_VERSION) {
@@ -241,6 +245,26 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
     applyPwaTheme(theme);
+    if (theme !== 'system' || typeof window === 'undefined') {
+      return undefined;
+    }
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
+    if (!media) {
+      return undefined;
+    }
+    const syncSystemTheme = () => applyPwaTheme('system');
+    if (media.addEventListener) {
+      media.addEventListener('change', syncSystemTheme);
+    } else {
+      media.addListener?.(syncSystemTheme);
+    }
+    return () => {
+      if (media.removeEventListener) {
+        media.removeEventListener('change', syncSystemTheme);
+      } else {
+        media.removeListener?.(syncSystemTheme);
+      }
+    };
   }, [theme]);
 
   useEffect(() => {
@@ -248,6 +272,10 @@ export default function App() {
       localStorage.setItem('codexmobile.reasoningEffort', selectedReasoningEffort);
     }
   }, [selectedReasoningEffort]);
+
+  useEffect(() => {
+    localStorage.setItem(MODEL_SPEED_KEY, normalizeModelSpeed(selectedModelSpeed || DEFAULT_MODEL_SPEED));
+  }, [selectedModelSpeed]);
 
   useEffect(() => {
     const previous = lastStatusSettingsRef.current;
@@ -430,15 +458,16 @@ export default function App() {
   } = useTurnSubmission({
     defaultStatus: DEFAULT_STATUS,
     defaultReasoningEffort: DEFAULT_REASONING_EFFORT,
-	    selectedProject,
-	    selectedProjectRef,
-	    selectedSession,
-	    selectedSessionRef,
-	    projects,
-	    selectedSkillPaths,
+    selectedProject,
+    selectedProjectRef,
+    selectedSession,
+    selectedSessionRef,
+    projects,
+    selectedSkillPaths,
     status,
     permissionMode,
     selectedModel,
+    selectedModelSpeed,
     selectedReasoningEffort,
     input,
     attachments,
@@ -607,6 +636,8 @@ export default function App() {
     models: status.models,
     selectedModel,
     onSelectModel: setSelectedModel,
+    selectedModelSpeed,
+    onSelectModelSpeed: (value) => setSelectedModelSpeed(normalizeModelSpeed(value)),
     selectedReasoningEffort,
     onSelectReasoningEffort: setSelectedReasoningEffort,
     skills: status.skills,

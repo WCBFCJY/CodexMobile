@@ -6,6 +6,13 @@ export const PERMISSION_OPTIONS = [
 
 export const DEFAULT_PERMISSION_MODE = 'bypassPermissions';
 
+export const DEFAULT_MODEL_SPEED = 'standard';
+
+export const MODEL_SPEED_OPTIONS = [
+  { value: 'standard', label: '标准', description: '默认速度与稳定性' },
+  { value: 'fast', label: '快速', description: '优先使用快速服务通道' }
+];
+
 export const REASONING_OPTIONS = [
   { value: 'low', label: '低' },
   { value: 'medium', label: '中' },
@@ -40,6 +47,18 @@ export function permissionLabel(value) {
 
 export function reasoningLabel(value) {
   return REASONING_OPTIONS.find((option) => option.value === value)?.label || '超高';
+}
+
+export function normalizeModelSpeed(value) {
+  return value === 'fast' ? 'fast' : DEFAULT_MODEL_SPEED;
+}
+
+export function modelSpeedLabel(value) {
+  return MODEL_SPEED_OPTIONS.find((option) => option.value === normalizeModelSpeed(value))?.label || '标准';
+}
+
+export function serviceTierForModelSpeed(value) {
+  return normalizeModelSpeed(value) === 'fast' ? 'fast' : null;
 }
 
 export function selectedSkillSummary(selectedSkills) {

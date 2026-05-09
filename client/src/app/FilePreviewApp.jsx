@@ -5,6 +5,7 @@ import { MarkdownContent } from '../chat/MarkdownContent.jsx';
 import { copyTextToClipboard } from '../utils/clipboard.js';
 import { THEME_KEY } from './AppState.js';
 import { PdfPreview } from './PdfPreview.jsx';
+import { resolvePwaTheme } from './pwa-theme.js';
 import { compactPath, localFileApiPath } from './session-utils.js';
 
 function fileNameFromPath(value) {
@@ -66,7 +67,7 @@ export default function FilePreviewApp() {
   });
 
   useEffect(() => {
-    const theme = localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light';
+    const theme = resolvePwaTheme(localStorage.getItem(THEME_KEY), window);
     const previousTheme = document.documentElement.dataset.theme;
     const previousBody = {
       position: document.body.style.position,

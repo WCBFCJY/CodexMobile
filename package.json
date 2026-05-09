@@ -1,6 +1,6 @@
 {
   "name": "codexmobile",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "iPhone-first Codex PWA workbench for local sessions, queues, Git, skills, and private-network notifications.",
   "license": "MIT",
   "type": "module",

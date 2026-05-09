@@ -4,9 +4,19 @@ All notable changes to CodexMobile are tracked here.
 
 ## Unreleased
 
+## [1.2.0] - 2026-05-09
+
+### Added
+
+- Added a system theme option so CodexMobile can follow the OS light/dark preference across the main app and file preview flow.
+- Added a model speed selector in the composer model menu, with Standard and Fast choices persisted locally.
+- Added end-to-end service tier routing so Fast model speed sends `fast` through chat requests, desktop IPC, and headless Codex runs.
+- Added compact memory citation cards for `<oai-mem-citation>` blocks in chat output.
+
 ### Changed
 
 - Replaced the README screenshots with redacted dark/light demos that show the sidebar, running state, and desktop-style tool activity flow.
+- Synced PWA theme color updates with the resolved light/dark mode when following the system theme.
 
 ## [1.0.0] - 2026-05-09
 

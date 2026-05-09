@@ -74,12 +74,15 @@
   max-height: min(280px, 38svh);
 }
 
-.send-mode-menu button > span:last-child {
+.send-mode-menu button > span:last-child,
+.model-menu button > .menu-item-main {
   display: block;
 }
 
 .send-mode-menu strong,
 .send-mode-menu small,
+.model-menu strong,
+.model-menu small,
 .shortcut-menu strong,
 .shortcut-menu small {
   display: block;
@@ -90,12 +93,14 @@
 }
 
 .send-mode-menu strong,
+.model-menu strong,
 .shortcut-menu strong {
   font-size: 14px;
   font-weight: 650;
 }
 
 .send-mode-menu small,
+.model-menu small,
 .shortcut-menu small {
   margin-top: 2px;
   color: #7b838d;
@@ -697,6 +702,16 @@
   flex: 0 0 auto;
   opacity: 0.85;
   font-weight: 550;
+}
+
+.model-chip-speed {
+  flex: 0 0 auto;
+  color: #b45309;
+  font-weight: 650;
+}
+
+[data-theme="dark"] .model-chip-speed {
+  color: #fbbf24;
 }
 
 .context-status-wrap {

@@ -1,4 +1,4 @@
-import { ArrowUp, Bot, Check, ChevronDown, FileText, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2 } from 'lucide-react';
+import { ArrowUp, Bot, Check, ChevronDown, FileText, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, Zap } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiFetch, getToken } from '../api.js';
 import { detectComposerToken, filteredSlashCommands, replaceComposerToken } from '../composer-shortcuts.js';
@@ -7,7 +7,7 @@ import { isDraftSession } from '../app/session-utils.js';
 import { attachmentPreviewUrl, isImageAttachment } from './attachment-preview.js';
 import { filesFromClipboardData } from './paste-files.js';
 import { ContextStatusButton, ContextStatusDetails } from './ContextStatus.jsx';
-import { DEFAULT_PERMISSION_MODE, PERMISSION_OPTIONS, REASONING_OPTIONS, formatBytes, permissionLabel, reasoningLabel, selectedSkillSummary, shortModelName } from './composer-options.js';
+import { DEFAULT_PERMISSION_MODE, MODEL_SPEED_OPTIONS, PERMISSION_OPTIONS, REASONING_OPTIONS, formatBytes, modelSpeedLabel, normalizeModelSpeed, permissionLabel, reasoningLabel, selectedSkillSummary, shortModelName } from './composer-options.js';
 
 export { DEFAULT_PERMISSION_MODE } from './composer-options.js';
 
@@ -23,6 +23,8 @@ export function Composer({
   models,
   selectedModel,
   onSelectModel,
+  selectedModelSpeed,
+  onSelectModelSpeed,
   selectedReasoningEffort,
   onSelectReasoningEffort,
   skills,
@@ -59,6 +61,7 @@ export function Composer({
   const hasInput = input.trim().length > 0 || attachments.length > 0 || selectedFileMentions.length > 0;
   const modelList = models?.length ? models : [{ value: selectedModel || 'gpt-5.5', label: selectedModel || 'gpt-5.5' }];
   const selectedModelLabel = modelList.find((model) => model.value === selectedModel)?.label || selectedModel || 'gpt-5.5';
+  const normalizedModelSpeed = normalizeModelSpeed(selectedModelSpeed);
   const skillList = Array.isArray(skills) ? skills : [];
   const selectedSkillSet = new Set(Array.isArray(selectedSkillPaths) ? selectedSkillPaths : []);
   const selectedSkills = skillList.filter((skill) => selectedSkillSet.has(skill.path));
@@ -363,6 +366,26 @@ export function Composer({
               <span>{option.label}</span>
             </button>
           ))}
+          <div className="menu-divider" />
+          <div className="menu-section-label">速度</div>
+          {MODEL_SPEED_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={normalizedModelSpeed === option.value ? 'is-selected' : ''}
+              onClick={() => {
+                onSelectModelSpeed?.(option.value);
+                setOpenMenu(null);
+              }}
+            >
+              {normalizedModelSpeed === option.value ? <Check size={16} /> : <span className="menu-spacer" />}
+              {option.value === 'fast' ? <Zap size={15} /> : null}
+              <span className="menu-item-main">
+                <strong>{option.label}</strong>
+                <small>{option.description}</small>
+              </span>
+            </button>
+          ))}
         </div>
       ) : null}
       {openMenu === 'context' ? (
@@ -597,6 +620,12 @@ export function Composer({
                 <span className="model-chip-name">{shortModelName(selectedModelLabel)}</span>
                 <span className="model-chip-dot" aria-hidden="true" />
                 <span className="model-chip-reason">{reasoningLabel(selectedReasoningEffort)}</span>
+                {normalizedModelSpeed === 'fast' ? (
+                  <>
+                    <span className="model-chip-dot" aria-hidden="true" />
+                    <span className="model-chip-speed">{modelSpeedLabel(normalizedModelSpeed)}</span>
+                  </>
+                ) : null}
               </span>
               <ChevronDown size={13} strokeWidth={2} aria-hidden="true" />
             </button>

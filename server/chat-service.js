@@ -223,6 +223,7 @@ export function createChatService({
       selectedSkills,
       modelForTurn,
       reasoningEffortForTurn,
+      serviceTierForTurn,
       collaborationMode,
       displayMessage,
       visibleMessage,
@@ -267,6 +268,7 @@ export function createChatService({
         fileMentions,
         model: modelForTurn,
         reasoningEffort: reasoningEffortForTurn,
+        serviceTier: serviceTierForTurn,
         permissionMode: body.permissionMode || 'bypassPermissions',
         collaborationMode
       }, { forceQueued: true, autoStart: false });
@@ -299,6 +301,7 @@ export function createChatService({
             selectedSkills,
             model: modelForTurn,
             reasoningEffort: reasoningEffortForTurn,
+            serviceTier: serviceTierForTurn,
             permissionMode: body.permissionMode || 'bypassPermissions',
             collaborationMode,
             getSession,
@@ -452,6 +455,7 @@ export function createChatService({
       fileMentions,
       model: modelForTurn,
       reasoningEffort: reasoningEffortForTurn,
+      serviceTier: serviceTierForTurn,
       permissionMode: body.permissionMode || 'bypassPermissions',
       collaborationMode
     });

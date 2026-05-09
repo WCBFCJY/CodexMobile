@@ -110,6 +110,7 @@ export async function sendViaDesktopIpc({
   selectedSkills,
   model,
   reasoningEffort,
+  serviceTier,
   permissionMode,
   collaborationMode,
   getSession,
@@ -144,6 +145,7 @@ export async function sendViaDesktopIpc({
       : { type: 'workspaceWrite', networkAccess: false },
     model: model || null,
     effort: reasoningEffort || null,
+    serviceTier: serviceTier || null,
     collaborationMode: collaborationMode || null,
     attachments: []
   };
@@ -325,6 +327,7 @@ export function runQueuedHeadlessChatJob({
       selectedSkills: job.selectedSkills,
       model: job.model,
       reasoningEffort: job.reasoningEffort,
+      serviceTier: job.serviceTier,
       permissionMode: job.permissionMode,
       collaborationMode: job.collaborationMode,
       turnId: job.turnId

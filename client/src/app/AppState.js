@@ -1,4 +1,9 @@
 export const THEME_KEY = 'codexmobile.theme';
+const THEME_VALUES = new Set(['light', 'dark', 'system']);
+
+function normalizeThemePreference(value) {
+  return THEME_VALUES.has(value) ? value : 'light';
+}
 
 export function createInitialUiState({ storage = globalThis.localStorage } = {}) {
   return {
@@ -9,7 +14,7 @@ export function createInitialUiState({ storage = globalThis.localStorage } = {})
     docsError: '',
     gitPanel: { open: false, action: 'commit' },
     toasts: [],
-    theme: storage?.getItem?.(THEME_KEY) === 'dark' ? 'dark' : 'light'
+    theme: normalizeThemePreference(storage?.getItem?.(THEME_KEY))
   };
 }
 
@@ -34,7 +39,7 @@ export function appReducer(state, action) {
     case 'ui/toasts':
       return { ...state, toasts: resolveValue(action.value, state.toasts) };
     case 'ui/theme':
-      return { ...state, theme: resolveValue(action.value, state.theme) };
+      return { ...state, theme: normalizeThemePreference(resolveValue(action.value, state.theme)) };
     default:
       return state;
   }

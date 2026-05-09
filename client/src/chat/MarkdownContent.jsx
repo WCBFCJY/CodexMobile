@@ -1,4 +1,4 @@
-import { Check, Copy } from 'lucide-react';
+import { BookOpen, Check, Copy } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
@@ -7,6 +7,7 @@ import { getToken } from '../api.js';
 import { isLocalFileSource, isLocalImageSource, localFilePreviewPath } from '../app/session-utils.js';
 import { copyTextToClipboard } from '../utils/clipboard.js';
 import { GeneratedImage } from './ImagePreview.jsx';
+import { formatCitationLines, shortRolloutId, splitMemoryCitationBlock } from './memory-citation.js';
 
 export function MarkdownContent({ text, onPreviewImage, className = 'message-content' }) {
   const value = String(text || '');
@@ -66,7 +67,51 @@ export function MarkdownContent({ text, onPreviewImage, className = 'message-con
 }
 
 export function MessageContent({ content, onPreviewImage }) {
-  return <MarkdownContent text={content} onPreviewImage={onPreviewImage} />;
+  const { text, citation } = splitMemoryCitationBlock(content);
+  return (
+    <>
+      {text ? <MarkdownContent text={text} onPreviewImage={onPreviewImage} /> : null}
+      {citation ? <MemoryCitationBlock citation={citation} /> : null}
+    </>
+  );
+}
+
+function MemoryCitationBlock({ citation }) {
+  const entries = Array.isArray(citation?.entries) ? citation.entries : [];
+  const rolloutIds = Array.isArray(citation?.rolloutIds) ? citation.rolloutIds : [];
+  if (!entries.length && !rolloutIds.length) {
+    return null;
+  }
+  const count = entries.length || rolloutIds.length;
+
+  return (
+    <details className="memory-citation-card">
+      <summary>
+        <span className="memory-citation-icon" aria-hidden="true">
+          <BookOpen size={14} />
+        </span>
+        <span className="memory-citation-title">{count} 条记忆引用</span>
+      </summary>
+      <div className="memory-citation-body">
+        {entries.length ? (
+          <ul className="memory-citation-list">
+            {entries.map((entry, index) => (
+              <li key={`${entry.file}-${entry.lineStart}-${entry.lineEnd}-${index}`}>
+                <span className="memory-citation-file">{entry.file}</span>
+                <span className="memory-citation-lines">{formatCitationLines(entry)}</span>
+                {entry.note ? <span className="memory-citation-note">{entry.note}</span> : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {rolloutIds.length ? (
+          <div className="memory-citation-rollouts">
+            {rolloutIds.length} 个 rollout：{rolloutIds.map(shortRolloutId).join('、')}
+          </div>
+        ) : null}
+      </div>
+    </details>
+  );
 }
 
 function CodeBlock({ language, code }) {

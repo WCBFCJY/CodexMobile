@@ -32,7 +32,8 @@ test('prepareChatRequest normalizes skills, plan mode, attachments, and file men
       settings: { developer_instructions: '只先规划' }
     },
     model: 'body-model',
-    reasoningEffort: 'high'
+    reasoningEffort: 'high',
+    serviceTier: 'fast'
   }, {
     getSession: (sessionId) => ({ id: sessionId, mobileOnly: false, model: 'session-model' }),
     config: {
@@ -52,6 +53,7 @@ test('prepareChatRequest normalizes skills, plan mode, attachments, and file men
   assert.equal(prepared.sendMode, 'queue');
   assert.equal(prepared.modelForTurn, 'session-model');
   assert.equal(prepared.reasoningEffortForTurn, 'high');
+  assert.equal(prepared.serviceTierForTurn, 'fast');
   assert.deepEqual(prepared.selectedSkills, [
     { type: 'skill', name: 'frontend-design', path: '/skills/frontend-design/SKILL.md' },
     { type: 'skill', name: 'backend-helper', path: '/skills/backend-helper/SKILL.md' }
@@ -71,6 +73,18 @@ test('prepareChatRequest normalizes skills, plan mode, attachments, and file men
   assert.match(prepared.codexMessage, /引用文件路径:/);
   assert.match(prepared.codexMessage, /App\.jsx \(\/repo\/client\/src\/App\.jsx\)/);
   assert.doesNotMatch(prepared.codexMessage, /App duplicate/);
+});
+
+test('prepareChatRequest ignores unsupported service tier values', () => {
+  const prepared = prepareChatRequest({
+    message: 'hello',
+    serviceTier: 'turbo'
+  }, {
+    getSession: () => null,
+    config: {}
+  });
+
+  assert.equal(prepared.serviceTierForTurn, null);
 });
 
 test('prepareChatRequest keeps drafts separate and preserves mobile-only requested session ids', () => {

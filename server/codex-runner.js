@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { normalizeServiceTier } from '../shared/service-tier.js';
 import { createCodexAppServerClient, defaultServerRequestResult } from './codex-app-server.js';
 import { buildCodexTurnInput, imageMarkdownFromCodexImageGeneration } from './codex-native-images.js';
 import { buildCodexLarkCliContext } from './lark-cli.js';
@@ -767,11 +768,12 @@ function abortError() {
   return error;
 }
 
-export async function runCodexTurn({ sessionId, draftSessionId, projectPath, message, attachments = [], selectedSkills = [], model, reasoningEffort, permissionMode, collaborationMode = null, turnId: providedTurnId }, emit) {
+export async function runCodexTurn({ sessionId, draftSessionId, projectPath, message, attachments = [], selectedSkills = [], model, reasoningEffort, serviceTier, permissionMode, collaborationMode = null, turnId: providedTurnId }, emit) {
   const workingDirectory = await ensureAsciiWorkingDirectory(projectPath);
   const { sandboxMode, approvalPolicy } = mapPermissionMode(permissionMode);
   const feishuSkillKeys = detectFeishuSkillKeys(message);
   const normalizedReasoningEffort = normalizeReasoningEffort(reasoningEffort);
+  const normalizedServiceTier = normalizeServiceTier(serviceTier);
   const modelReasoningEffort =
     feishuSkillKeys.length && normalizedReasoningEffort === 'xhigh' ? 'low' : normalizedReasoningEffort;
   const larkCliContext = await buildCodexLarkCliContext(message).catch((error) => {
@@ -912,6 +914,9 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
       config: modelReasoningEffort ? { model_reasoning_effort: modelReasoningEffort } : null,
       serviceName: 'CodexMobile'
     };
+    if (normalizedServiceTier) {
+      threadParams.serviceTier = normalizedServiceTier;
+    }
     const threadResponse = sessionId
       ? await client.request('thread/resume', { threadId: sessionId, ...threadParams }, { timeoutMs: 30_000 })
       : await client.request('thread/start', threadParams, { timeoutMs: 30_000 });
@@ -934,7 +939,7 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
     });
     emitStatus(emit, { sessionId: currentSessionId, turnId, kind: 'reasoning', status: 'running', label: '正在思考' });
 
-    const turnResponse = await client.request('turn/start', {
+    const turnStartParams = {
       threadId: currentSessionId,
       input: buildCodexTurnInput({
         message,
@@ -948,7 +953,11 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
       model: model || null,
       effort: modelReasoningEffort || null,
       collaborationMode: collaborationMode || null
-    }, { timeoutMs: 30_000 });
+    };
+    if (normalizedServiceTier) {
+      turnStartParams.serviceTier = normalizedServiceTier;
+    }
+    const turnResponse = await client.request('turn/start', turnStartParams, { timeoutMs: 30_000 });
     if (turnResponse?.turn?.id) {
       run.appTurnId = turnResponse.turn.id;
     }

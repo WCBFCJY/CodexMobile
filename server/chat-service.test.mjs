@@ -392,7 +392,8 @@ test('sendChat sends desktop-ipc plan requests with desktop collaboration mode',
     message: '先给我计划',
     collaborationMode: 'plan',
     model: 'gpt-5.5',
-    reasoningEffort: 'high'
+    reasoningEffort: 'high',
+    serviceTier: 'fast'
   });
 
   assert.equal(result.delivery, 'started');
@@ -413,6 +414,7 @@ test('sendChat sends desktop-ipc plan requests with desktop collaboration mode',
     }
   });
   assert.deepEqual(started.params.collaborationMode, collaborationUpdate.collaborationMode);
+  assert.equal(started.params.serviceTier, 'fast');
 });
 
 test('sendChat clears desktop collaboration mode for normal follow-up turns', async () => {
@@ -871,9 +873,11 @@ test('sendChat passes plan collaboration mode to headless local Codex turns', as
     message: '先规划一下',
     collaborationMode: 'plan',
     model: 'gpt-5.5',
-    reasoningEffort: 'high'
+    reasoningEffort: 'high',
+    serviceTier: 'fast'
   });
 
+  assert.equal(runPayload.serviceTier, 'fast');
   assert.deepEqual(runPayload.collaborationMode, {
     mode: 'plan',
     settings: {

@@ -1,5 +1,6 @@
 import { apiFetch } from '../api.js';
 import { contentWithAttachmentPreviews } from '../chat/MarkdownContent.jsx';
+import { serviceTierForModelSpeed } from '../composer/composer-options.js';
 import {
   dismissPlanImplementationPrompts,
   mergeLoadedMessagesPreservingActivity,
@@ -43,6 +44,7 @@ export function useTurnSubmission({
   status,
   permissionMode,
   selectedModel,
+  selectedModelSpeed,
   selectedReasoningEffort,
   input,
   attachments,
@@ -328,6 +330,7 @@ export function useTurnSubmission({
           visibleMessage: displayMessage,
           permissionMode,
           model: selectedModel || status.model,
+          serviceTier: serviceTierForModelSpeed(selectedModelSpeed),
           reasoningEffort: selectedReasoningEffort || status.reasoningEffort || defaultReasoningEffort,
           selectedSkills: selectedSkillsForPaths(status.skills, selectedSkillPaths),
           attachments: selectedAttachments,

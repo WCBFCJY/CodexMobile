@@ -11,6 +11,7 @@ import {
   withAttachmentReferences,
   withImageAttachmentPreviews
 } from './upload-service.js';
+import { normalizeServiceTier } from '../shared/service-tier.js';
 
 function dateStamp(date = new Date()) {
   const year = date.getFullYear();
@@ -129,6 +130,7 @@ export function prepareChatRequest(body = {}, {
   const selectedSkills = normalizeSelectedSkills(body.selectedSkills, config.skills);
   const modelForTurn = session?.model || body.model || config.model || 'gpt-5.5';
   const reasoningEffortForTurn = body.reasoningEffort || defaultReasoningEffort;
+  const serviceTierForTurn = normalizeServiceTier(body.serviceTier);
   const collaborationMode = normalizeCollaborationMode(body.collaborationMode, {
     model: modelForTurn,
     reasoningEffort: reasoningEffortForTurn
@@ -156,6 +158,7 @@ export function prepareChatRequest(body = {}, {
     selectedSkills,
     modelForTurn,
     reasoningEffortForTurn,
+    serviceTierForTurn,
     collaborationMode,
     displayMessage,
     visibleMessage,

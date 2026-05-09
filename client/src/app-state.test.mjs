@@ -39,6 +39,11 @@ test('createInitialUiState restores dark theme from storage', () => {
   assert.equal(state.theme, 'dark');
 });
 
+test('createInitialUiState restores system theme preference from storage', () => {
+  const state = createInitialUiState({ storage: { getItem: () => 'system' } });
+  assert.equal(state.theme, 'system');
+});
+
 test('applyPwaTheme syncs iOS PWA meta with dark theme', () => {
   const elements = new Map([
     ['meta[data-app-theme-color]', { content: '', setAttribute(name, value) { this[name] = value; } }],
@@ -57,6 +62,31 @@ test('applyPwaTheme syncs iOS PWA meta with dark theme', () => {
   assert.equal(meta.themeColor, '#000000');
   assert.equal(elements.get('meta[data-app-theme-color]').content, '#000000');
   assert.equal(elements.get('meta[data-app-status-bar-style]').content, 'black-translucent');
+});
+
+test('applyPwaTheme resolves system preference from media query', () => {
+  const elements = new Map([
+    ['meta[data-app-theme-color]', { content: '', setAttribute(name, value) { this[name] = value; } }],
+    ['meta[data-app-status-bar-style]', { content: '', setAttribute(name, value) { this[name] = value; } }]
+  ]);
+  const doc = {
+    documentElement: { dataset: {} },
+    querySelector(selector) {
+      return elements.get(selector);
+    },
+    defaultView: {
+      matchMedia(query) {
+        return { media: query, matches: query === '(prefers-color-scheme: dark)' };
+      }
+    }
+  };
+
+  const meta = applyPwaTheme('system', doc);
+
+  assert.equal(doc.documentElement.dataset.theme, 'dark');
+  assert.equal(meta.preference, 'system');
+  assert.equal(meta.resolvedTheme, 'dark');
+  assert.equal(elements.get('meta[data-app-theme-color]').content, '#000000');
 });
 
 test('status sync preserves only active local submission polling', () => {

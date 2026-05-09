@@ -223,6 +223,13 @@ export function Drawer({
                   >
                     黑色
                   </button>
+                  <button
+                    type="button"
+                    className={theme === 'system' ? 'is-selected' : ''}
+                    onClick={() => setTheme('system')}
+                  >
+                    跟随系统
+                  </button>
                 </div>
               </div>
             </section>
