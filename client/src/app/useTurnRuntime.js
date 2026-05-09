@@ -40,6 +40,22 @@ export function runtimeKeysForPayload(payload, currentSession = null) {
   return Array.from(keys).filter(Boolean);
 }
 
+export function completeMessagesForTurnCompletion(current, payload, detail = '结果同步中') {
+  const completedAt = payload?.completedAt || payload?.timestamp || new Date().toISOString();
+  const completedPayload = { ...payload, completedAt };
+  const messagesWithCompletedActivity = completeActivityMessagesForTurn(current, completedPayload);
+  if (hasAssistantMessageForTurn(current, payload)) {
+    return messagesWithCompletedActivity;
+  }
+  return upsertStatusMessage(messagesWithCompletedActivity, {
+    ...completedPayload,
+    kind: 'turn',
+    status: 'completed',
+    label: '任务已完成',
+    detail
+  });
+}
+
 export function useTurnRuntime({
   defaultStatus,
   activePollsRef,
@@ -291,19 +307,7 @@ export function useTurnRuntime({
     const completedAt = payload.completedAt || payload.timestamp || new Date().toISOString();
     clearRun({ ...payload, completedAt });
     markSessionCompleteNotice({ ...payload, completedAt });
-    setMessages((current) => {
-      if (hasAssistantMessageForTurn(current, payload)) {
-        return completeActivityMessagesForTurn(current, { ...payload, completedAt });
-      }
-      return upsertStatusMessage(current, {
-        ...payload,
-        kind: 'turn',
-        status: 'completed',
-        label: '任务已完成',
-        detail,
-        completedAt
-      });
-    });
+    setMessages((current) => completeMessagesForTurnCompletion(current, { ...payload, completedAt }, detail));
   }
 
   function scheduleTurnRefresh(payload, attempt = 0) {

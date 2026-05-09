@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  shouldCompleteLocalTurnBeforeRefresh,
   shouldRefreshDesktopThreadForPayload,
   shouldRefreshCurrentSessionAfterReconnect,
   shouldRenderActivityMessageForPayload,
@@ -47,7 +48,7 @@ test('desktop IPC status updates drive runtime without rendering local activity 
   );
 });
 
-test('external thread terminal events refresh the thread instead of completing local cards', () => {
+test('external thread terminal events refresh after completing local turn state', () => {
   assert.equal(
     shouldRefreshDesktopThreadForPayload({
       type: 'chat-complete',
@@ -70,6 +71,31 @@ test('external thread terminal events refresh the thread instead of completing l
       source: 'headless-local'
     }),
     true
+  );
+  assert.equal(
+    shouldCompleteLocalTurnBeforeRefresh({
+      type: 'chat-complete',
+      source: 'desktop-ipc'
+    }),
+    true
+  );
+  assert.equal(
+    shouldCompleteLocalTurnBeforeRefresh({
+      type: 'status-update',
+      source: 'desktop-ipc',
+      kind: 'turn',
+      status: 'completed'
+    }),
+    true
+  );
+  assert.equal(
+    shouldCompleteLocalTurnBeforeRefresh({
+      type: 'status-update',
+      source: 'desktop-ipc',
+      kind: 'turn',
+      status: 'failed'
+    }),
+    false
   );
 });
 

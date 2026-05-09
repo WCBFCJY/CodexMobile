@@ -45,6 +45,16 @@ export function shouldRefreshDesktopThreadForPayload(payload = {}) {
   return payload.type === 'status-update' && payload.kind === 'turn' && ['completed', 'failed'].includes(payload.status);
 }
 
+export function shouldCompleteLocalTurnBeforeRefresh(payload = {}) {
+  if (!shouldRefreshDesktopThreadForPayload(payload)) {
+    return false;
+  }
+  if (payload.type === 'chat-complete') {
+    return true;
+  }
+  return payload.type === 'status-update' && payload.kind === 'turn' && payload.status === 'completed';
+}
+
 export function shouldRefreshCurrentSessionAfterReconnect(session = null) {
   const sessionId = String(session?.id || '').trim();
   return Boolean(sessionId && !sessionId.startsWith('draft-'));
@@ -266,6 +276,9 @@ export function useAppWebSocket({
             return;
           }
           if (shouldRefreshDesktopThreadForPayload(payload)) {
+            if (shouldCompleteLocalTurnBeforeRefresh(payload)) {
+              markTurnCompleted(payload);
+            }
             scheduleTurnRefresh(payload);
             return;
           }
@@ -316,6 +329,9 @@ export function useAppWebSocket({
               setContextStatus((current) => mergeContextStatus(current, payload.context, defaultStatus.context));
             }
             if (shouldRefreshDesktopThreadForPayload(payload)) {
+              if (shouldCompleteLocalTurnBeforeRefresh(payload)) {
+                markTurnCompleted(payload);
+              }
               scheduleTurnRefresh(payload);
               return;
             }

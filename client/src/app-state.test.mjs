@@ -19,7 +19,7 @@ import {
   shouldPreserveLocalRunsFromStatus,
   titleFromFirstMessage
 } from './app/session-utils.js';
-import { runtimeKeysForPayload } from './app/useTurnRuntime.js';
+import { completeMessagesForTurnCompletion, runtimeKeysForPayload } from './app/useTurnRuntime.js';
 import { viewportSizingMetrics } from './app/useViewportSizing.js';
 
 test('appReducer updates ui state with direct and functional values', () => {
@@ -200,6 +200,34 @@ test('desktop ipc active runs expose both app and client turn ids', () => {
     }),
     ['desktop-turn-1', 'client-turn-1', 'thread-1', 'thread-1']
   );
+});
+
+test('turn completion finishes matching running activity before thread refresh', () => {
+  const next = completeMessagesForTurnCompletion([
+    {
+      id: 'activity-1',
+      role: 'activity',
+      kind: 'turn',
+      status: 'running',
+      sessionId: 'thread-1',
+      turnId: 'client-turn-1',
+      clientTurnId: 'client-turn-1',
+      activities: [
+        { id: 'step-1', title: '执行中', status: 'running' }
+      ]
+    }
+  ], {
+    source: 'desktop-ipc',
+    sessionId: 'thread-1',
+    turnId: 'desktop-turn-1',
+    clientTurnId: 'client-turn-1',
+    completedAt: '2026-05-09T00:00:00.000Z'
+  });
+
+  const activity = next.find((message) => message.id === 'activity-1');
+  assert.equal(activity.status, 'completed');
+  assert.equal(activity.activities[0].status, 'completed');
+  assert.equal(next.some((message) => message.status === 'running'), false);
 });
 
 test('new conversation project resolution prefers explicit drawer choice', () => {
