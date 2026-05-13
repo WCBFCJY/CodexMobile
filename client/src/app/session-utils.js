@@ -1,13 +1,13 @@
 /**
- * 客户端会话域工具集：时间路径格式化、本地文件/图片 URL、草稿与列表合并、桌面 thread runtime 判定与 reconciler、Composer 运行态与轮次可见性。
+ * 客户端会话域工具集：时间路径格式化、本地文件/图片 URL、草稿与列表合并、桌面 thread runtime 判定与轮次可见性。
  *
- * Keywords: session-utils, draft-session, thread-runtime, running-activity, composer-status
+ * Keywords: session-utils, draft-session, thread-runtime, running-activity
  *
  * Exports:
  * - 通用与展示 — `formatTime`、`formatDuration*`、`subAgentRoleLabel`、`compactPath`、`safeStoredJsonArray` 等。
  * - 上下文与媒体 — `emptyContextStatus`、`imageUrlWithRetry`、本地源与 `local*ApiPath`、`dataImageObjectUrl`、`useResolvedImageSource`。
  * - 会话生命周期 — `createClientTurnId`、`createDraftSession`、`resolveNewConversationProject`、`isDraftSession`、`sessionMessagesApiPath`、标题补丁、`upsertSessionInProject`。
- * - Runtime — `payloadRunKeys`、`selectedRunKeys`、`reconcileThreadRuntimeWithSessions`、`is*Runtime`、`runningByIdWithSelectedActivity`、`sessionRunBadgeState`、`buildComposerRunStatus`、`selectedSessionIsRunning`、`hasVisibleAssistantForTurn` 等。
+ * - Runtime — `payloadRunKeys`、`selectedRunKeys`、`reconcileThreadRuntimeWithSessions`、`is*Runtime`、`runningByIdWithSelectedActivity`、`sessionRunBadgeState`、`selectedSessionIsRunning`、`hasVisibleAssistantForTurn` 等。
  *
  * Inward: `api`（blob）；`context-status`；`shared/session-title`。
  *
@@ -438,150 +438,8 @@ export function sessionRunBadgeState(session, {
   return null;
 }
 
-export function selectedSessionIsRunning({ running = false, hasRunningActivity = false } = {}) {
-  void hasRunningActivity;
+export function selectedSessionIsRunning({ running = false } = {}) {
   return Boolean(running);
-}
-
-function compactComposerActivityText(value, maxLength = 28) {
-  const text = String(value || '').replace(/\s+/g, ' ').trim();
-  if (text.length <= maxLength) {
-    return text;
-  }
-  return `${text.slice(0, maxLength - 1).trim()}…`;
-}
-
-function isGenericComposerActivityLabel(value) {
-  const text = String(value || '').trim();
-  return /^(正在思考中?|正在处理|正在回复|正在整理回复|处理中|运行中|queued|running)$/i.test(text);
-}
-
-function isVisibleComposerActivityStep(step, messageStatus) {
-  if (!step) {
-    return false;
-  }
-  const label = String(step.label || '').trim();
-  const hasWorkDetail =
-    Boolean(step.command || step.detail || step.output || step.error || step.toolName) ||
-    (Array.isArray(step.fileChanges) && step.fileChanges.length > 0);
-  if (isGenericComposerActivityLabel(label) && !hasWorkDetail) {
-    return false;
-  }
-  if (step.kind === 'function_call_output' && messageStatus !== 'failed' && step.status !== 'failed') {
-    return false;
-  }
-  return true;
-}
-
-function describeComposerActivityStep(step) {
-  const label = String(step?.label || '').trim();
-  const detail = String(step?.detail || step?.command || step?.toolName || '').trim();
-  const source = `${step?.kind || ''} ${label} ${detail} ${step?.output || ''}`.toLowerCase();
-  if (step?.kind === 'file_change' || Array.isArray(step?.fileChanges) && step.fileChanges.length) {
-    return { type: 'edit', label: compactComposerActivityText(label || '编辑文件') };
-  }
-  if (step?.kind === 'command_execution' || /命令|shell|执行|npm|node|git|rg|sed|cat/.test(source)) {
-    return { type: 'command', label: compactComposerActivityText(label || '运行命令') };
-  }
-  if (step?.kind === 'web_search' || /web_search|网页搜索|搜索网页/.test(source)) {
-    return { type: 'web_search', label: compactComposerActivityText(label || '网页搜索') };
-  }
-  if (/搜索|查找|search/.test(source)) {
-    return { type: 'search', label: compactComposerActivityText(label || '搜索') };
-  }
-  if (/编辑|修改|写入|替换|创建|删除|apply_patch/.test(source)) {
-    return { type: 'edit', label: compactComposerActivityText(label || '编辑文件') };
-  }
-  if (/读取|查看|检查|探索|read|list|inspect/.test(source)) {
-    return { type: 'explore', label: compactComposerActivityText(label || '探索文件') };
-  }
-  return { type: 'tool', label: compactComposerActivityText(label || '调用工具') };
-}
-
-export function buildComposerRunStatus(messages, running, now = Date.now(), { runtimeStartedAt = null } = {}) {
-  if (!running) {
-    return null;
-  }
-  const activity = latestComposerActivityForRuntime(messages, { runtimeStartedAt });
-
-  const steps = Array.isArray(activity?.activities) ? activity.activities : [];
-  const visibleSteps = steps.filter((step) => isVisibleComposerActivityStep(step, activity?.status || 'running'));
-  const activeStep = [...visibleSteps].reverse().find((step) => step.status === 'running' || step.status === 'queued') || null;
-  const latestStep = activeStep || visibleSteps[visibleSteps.length - 1] || null;
-  const startedAt = activity?.startedAt || activity?.timestamp || now;
-  const duration = formatDuration(startedAt, now);
-  let label = '正在思考';
-
-  if (latestStep) {
-    if (latestStep.kind === 'agent_message' || latestStep.kind === 'message') {
-      label = '正在同步回复';
-    } else if (activeStep) {
-      label = describeComposerActivityStep(latestStep).label || latestStep.label || label;
-    } else if (activity?.status === 'running' || activity?.status === 'queued') {
-      label = '正在思考';
-    } else {
-      const descriptor = describeComposerActivityStep(latestStep);
-      label = descriptor.type === 'command'
-        ? '等待命令返回'
-        : descriptor.type === 'edit'
-          ? '文件变更已同步'
-          : descriptor.type === 'web_search'
-            ? '网页搜索已完成'
-            : descriptor.label || latestStep.label || '等待下一步';
-    }
-  } else if (activity?.detail) {
-    label = activity.detail;
-  } else if (activity?.label && !isGenericComposerActivityLabel(activity.label)) {
-    label = activity.label;
-  }
-
-  return {
-    label: compactComposerActivityText(label) || '正在处理',
-    duration,
-    running: true
-  };
-}
-
-function latestComposerActivityForRuntime(messages = [], { runtimeStartedAt = null } = {}) {
-  const activities = [...(messages || [])].reverse().filter((message) => message?.role === 'activity');
-  return (
-    activities.find((message) =>
-      (message.status === 'running' || message.status === 'queued') &&
-      composerActivityTouchesRuntimeWindow(message, runtimeStartedAt)
-    ) ||
-    activities.find((message) => {
-      if (!composerActivityTouchesRuntimeWindow(message, runtimeStartedAt)) {
-        return false;
-      }
-      const steps = Array.isArray(message.activities) ? message.activities : [];
-      return steps.some((step) => isVisibleComposerActivityStep(step, message.status || 'running'));
-    }) ||
-    null
-  );
-}
-
-function composerActivityTouchesRuntimeWindow(message, runtimeStartedAt) {
-  const runtimeStartMs = runtimeStartedAt ? new Date(runtimeStartedAt).getTime() : NaN;
-  if (!Number.isFinite(runtimeStartMs)) {
-    return true;
-  }
-  const values = [
-    message?.timestamp,
-    message?.startedAt,
-    message?.completedAt,
-    ...(Array.isArray(message?.activities)
-      ? message.activities.flatMap((activity) => [
-        activity?.timestamp,
-        activity?.startedAt,
-        activity?.completedAt
-      ])
-      : [])
-  ];
-  const latestMs = values.reduce((latest, value) => {
-    const time = value ? new Date(value).getTime() : NaN;
-    return Number.isFinite(time) && time > latest ? time : latest;
-  }, Number.NEGATIVE_INFINITY);
-  return Number.isFinite(latestMs) && latestMs >= runtimeStartMs - 1000;
 }
 
 export function hasVisibleAssistantForTurn(messages, payload) {

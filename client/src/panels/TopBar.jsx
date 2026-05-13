@@ -1,7 +1,7 @@
 /**
- * 主顶栏：会话标题、连接状态、菜单、文档 / Git 快捷入口与线程 ID 复制等。
+ * 主顶栏：会话标题、连接状态、菜单、桌面回跳、文档 / Git 快捷入口与线程 ID 复制等。
  *
- * Keywords: topbar, header, git, docs, notifications
+ * Keywords: topbar, header, desktop-handoff, git, docs, notifications
  *
  * Exports:
  * - TopBar — 顶栏组件。
@@ -12,10 +12,11 @@
  * Outward: App 根布局顶部固定区域。
  */
 
-import { Bell, Check, Copy, FileText, GitBranch, GitCommitHorizontal, Menu, MoreHorizontal, RefreshCw, UploadCloud } from 'lucide-react';
+import { Bell, Check, Copy, FileText, GitBranch, GitCommitHorizontal, Menu, MonitorUp, MoreHorizontal, RefreshCw, UploadCloud } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { copyTextToClipboard } from '../utils/clipboard.js';
 import { isDraftSession } from '../app/session-utils.js';
+import { desktopHandoffMenuState } from '../desktop-handoff-state.js';
 import { FeishuLogoIcon } from './DocsPanel.jsx';
 import { bridgeConnectionLabel } from './topbar-status.js';
 
@@ -30,6 +31,9 @@ export function TopBar({
   onMenu,
   onOpenDocs,
   onGitAction,
+  onDesktopHandoff,
+  desktopHandoffSupported = true,
+  desktopHandoffPending = false,
   notificationSupported,
   notificationEnabled,
   onEnableNotifications,
@@ -41,6 +45,12 @@ export function TopBar({
   const menuRef = useRef(null);
   const copiedTimerRef = useRef(null);
   const canCopyThreadId = Boolean(selectedSession?.id && !isDraftSession(selectedSession));
+  const desktopHandoffState = desktopHandoffMenuState({
+    selectedSession,
+    selectedRuntime,
+    supported: desktopHandoffSupported,
+    pending: desktopHandoffPending
+  });
   const projectId = selectedProject?.id || '';
   const title = selectedSession?.title || selectedProject?.name || 'CodexMobile';
 
@@ -89,6 +99,14 @@ export function TopBar({
     onOpenDocs?.();
   }
 
+  function handleDesktopHandoff() {
+    if (desktopHandoffState.disabled) {
+      return;
+    }
+    setMenuOpen(false);
+    onDesktopHandoff?.();
+  }
+
   function handleEnableNotifications() {
     setMenuOpen(false);
     onEnableNotifications?.();
@@ -126,6 +144,10 @@ export function TopBar({
               <button type="button" role="menuitem" onClick={handleCopyThreadId} disabled={!canCopyThreadId}>
                 {copiedThreadId ? <Check size={16} /> : <Copy size={16} />}
                 <span>{copiedThreadId ? '已复制对话 ID' : '复制对话 ID'}</span>
+              </button>
+              <button type="button" role="menuitem" onClick={handleDesktopHandoff} disabled={desktopHandoffState.disabled} title={desktopHandoffState.reason}>
+                <MonitorUp size={16} />
+                <span>{desktopHandoffState.label}</span>
               </button>
               <button type="button" role="menuitem" onClick={handleOpenDocs}>
                 <FeishuLogoIcon size={18} className="top-docs-logo" />

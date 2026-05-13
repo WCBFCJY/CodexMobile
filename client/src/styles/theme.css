@@ -115,42 +115,6 @@
   color: var(--muted);
 }
 
-[data-theme="dark"] .composer-run-status {
-  color: #ededf0;
-  background: transparent;
-  box-shadow: none;
-}
-
-[data-theme="dark"] .composer-run-status.is-running::before {
-  background:
-    linear-gradient(
-      100deg,
-      transparent 0%,
-      transparent 34%,
-      rgba(159, 183, 255, 0.08) 44%,
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(159, 183, 255, 0.08) 56%,
-      transparent 68%,
-      transparent 100%
-    );
-}
-
-[data-theme="dark"] .composer-run-status.is-warning {
-  background: rgba(55, 41, 20, 0.78);
-}
-
-[data-theme="dark"] .composer-run-main strong {
-  color: #f4f4f5;
-}
-
-[data-theme="dark"] .composer-run-main small {
-  color: #a1a1aa;
-}
-
-[data-theme="dark"] .composer-run-time {
-  color: #a1a1aa;
-}
-
 [data-theme="dark"] .send-button {
   color: #000000;
   background: #f4f4f5;
@@ -305,17 +269,6 @@
   }
   50% {
     opacity: 1;
-  }
-}
-
-@keyframes runPulse {
-  from {
-    opacity: 0.7;
-    transform: scale(0.72);
-  }
-  to {
-    opacity: 0;
-    transform: scale(1.8);
   }
 }
 

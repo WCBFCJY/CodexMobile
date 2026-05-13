@@ -41,7 +41,6 @@ import { applyPwaTheme } from './pwa-theme.js';
 import { mergeModelSettingsIntoStatus, nextSyncedComposerSettings } from './model-sync.js';
 import { rememberSelectedSession } from './selection-persistence.js';
 import {
-  buildComposerRunStatus,
   emptyContextStatus,
   hasRunningKey,
   isDraftSession,
@@ -122,6 +121,7 @@ export default function App() {
   const [runningById, setRunningById] = useState({});
   const [threadRuntimeById, setThreadRuntimeById] = useState({});
   const [syncing, setSyncing] = useState(false);
+  const [desktopHandoffPending, setDesktopHandoffPending] = useState(false);
   const [connectionState, setConnectionState] = useState(() => (getToken() ? 'connecting' : 'disconnected'));
   const wsRef = useRef(null);
   const selectedProjectRef = useRef(null);
@@ -166,23 +166,8 @@ export default function App() {
     hasRunningKey(syncRunningById, selectedRunKeys(selectedSession)) ||
     selectedRuntime?.status === 'running' ||
     selectedRuntime?.status === 'queued';
-  const hasRunningActivity = useMemo(
-    () =>
-      messages.some(
-        (message) =>
-          message.role === 'activity' &&
-          (message.status === 'running' || message.status === 'queued')
-      ),
-    [messages]
-  );
   const selectedRunning = selectedSessionIsRunning({ running });
   const drawerRunningById = syncRunningById;
-  const composerRunStatus = useMemo(
-    () => buildComposerRunStatus(messages, selectedRunning, activityClockNow, {
-      runtimeStartedAt: selectedRuntime?.startedAt || selectedRuntime?.updatedAt || null
-    }),
-    [messages, selectedRunning, activityClockNow, selectedRuntime?.startedAt, selectedRuntime?.updatedAt]
-  );
   const selectedActiveRunKeys = useMemo(() => {
     if (!selectedRunning) {
       return [];
@@ -721,14 +706,54 @@ export default function App() {
     }
   }, [selectedProject, selectedSession, showToast]);
 
+  const handleDesktopHandoff = useCallback(async () => {
+    const session = selectedSessionRef.current || selectedSession;
+    if (!session?.id || isDraftSession(session)) {
+      showToast({
+        level: 'warning',
+        title: '暂时不能回到桌面',
+        body: '请先打开一个已创建的对话。'
+      });
+      return false;
+    }
+    if (selectedRunning) {
+      showToast({
+        level: 'warning',
+        title: '执行完成后再回到桌面',
+        body: '当前对话还在执行中，完成后再打开桌面端更安全。'
+      });
+      return false;
+    }
+    setDesktopHandoffPending(true);
+    try {
+      await apiFetch('/api/desktop-handoff', {
+        method: 'POST',
+        timeoutMs: 12_000,
+        body: { sessionId: session.id }
+      });
+      showToast({
+        level: 'success',
+        title: '已重启桌面端',
+        body: 'Codex 桌面端会重新进入当前对话。'
+      });
+      return true;
+    } catch (error) {
+      showToast({
+        level: 'error',
+        title: '桌面端打开失败',
+        body: error.message || '请确认 Mac 上已安装并可打开 Codex.app。'
+      });
+      return false;
+    } finally {
+      setDesktopHandoffPending(false);
+    }
+  }, [selectedSession, selectedRunning, showToast]);
+
   if (!authenticated) {
     return <PairingScreen onPaired={bootstrap} />;
   }
 
   const sessionLoading = Boolean(sessionLoadingId && selectedSession?.id === sessionLoadingId);
-  const composerRunStatusForShell = composerRunStatus
-    ? { ...composerRunStatus, steerable: selectedRuntime?.steerable !== false }
-    : null;
   const panelProps = {
     topBarProps: {
       selectedProject,
@@ -739,6 +764,9 @@ export default function App() {
       onMenu: () => setDrawerOpen(true),
       onOpenDocs: () => setDocsOpen(true),
       onGitAction: handleGitAction,
+      onDesktopHandoff: handleDesktopHandoff,
+      desktopHandoffSupported: status.desktopRefresh?.supported !== false,
+      desktopHandoffPending,
       notificationSupported,
       notificationEnabled,
       onEnableNotifications: enableNotifications,
@@ -856,7 +884,7 @@ export default function App() {
     onRemoveFileMention: removeFileMention,
     uploading,
     contextStatus: visibleContextStatus,
-    runStatus: composerRunStatusForShell,
+    runSteerable: selectedRuntime?.steerable !== false,
     desktopBridge: status.desktopBridge,
     queueDrafts,
     onRestoreQueueDraft: restoreQueueDraft,

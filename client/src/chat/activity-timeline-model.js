@@ -445,15 +445,9 @@ export function activityBodyItemsForDisplay(visibleItems, overflowItems) {
 }
 
 export function activityMetaShouldOpen(item, { forceOpen = false } = {}) {
-  if (forceOpen) {
-    return true;
-  }
-  const items = [
-    ...(Array.isArray(item?.items) ? item.items : []),
-    ...(Array.isArray(item?.visibleItems) ? item.visibleItems : []),
-    ...(Array.isArray(item?.overflowItems) ? item.overflowItems : [])
-  ];
-  return items.some((step) => step?.status === 'running' || step?.status === 'queued');
+  void item;
+  void forceOpen;
+  return false;
 }
 
 export function activityStepDetailShouldOpen(step, { forceOpen = false } = {}) {

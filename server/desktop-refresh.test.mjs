@@ -1,7 +1,7 @@
 /**
- * 测试 server/desktop-refresh.js：实验性桌面 Codex.app route bounce 开关、持久化与触发条件。
+ * 测试 server/desktop-refresh.js：桌面 Codex.app 自动 route bounce 与手动重启接续。
  *
- * Keywords: desktop-refresh, tests, Codex.app, route-bounce
+ * Keywords: desktop-refresh, tests, Codex.app, route-bounce, desktop-handoff
  *
  * Exports: 无导出，内含用例
  *
@@ -15,6 +15,7 @@ import test from 'node:test';
 import {
   configureDesktopRefresh,
   getDesktopRefreshPublicState,
+  openDesktopThread,
   setDesktopRefreshEnabled,
   triggerDesktopRefreshForThread
 } from './desktop-refresh.js';
@@ -68,4 +69,23 @@ test('desktop refresh persists setting and bounces settings before target thread
     sleep: async () => {}
   });
   assert.equal(getDesktopRefreshPublicState().enabled, true);
+});
+
+test('manual desktop handoff restarts Codex.app before opening the target thread', async () => {
+  const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-desktop-handoff-'));
+  const calls = [];
+  configureDesktopRefresh({
+    rootDir,
+    platform: 'darwin',
+    executor: async (step) => calls.push(step),
+    sleep: async () => {}
+  });
+
+  const result = await openDesktopThread('thread-handoff', { reason: 'manual-handoff' });
+
+  assert.equal(result.triggered, true);
+  assert.equal(result.restarted, true);
+  assert.equal(result.targetUrl, 'codex://threads/thread-handoff');
+  assert.deepEqual(calls.map((step) => step.phase), ['quit', 'target']);
+  assert.deepEqual(calls.map((step) => step.url || ''), ['', 'codex://threads/thread-handoff']);
 });

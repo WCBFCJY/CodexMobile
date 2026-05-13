@@ -122,7 +122,7 @@ function MetaActivityBlock({ item, detailsOpen = false }) {
           <ActivityStepDetail key={step.id} step={step} detailsOpen={detailsOpen} />
         ))}
         {overflowBodyItems.length ? (
-          <details className="activity-overflow" open={detailsOpen}>
+          <details className="activity-overflow">
             <summary>还有 {overflowBodyItems.length} 条过程</summary>
             <div className="activity-meta-body">
               {overflowBodyItems.map((step) => (

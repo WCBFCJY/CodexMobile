@@ -41,6 +41,37 @@ test('messagesFromDesktopThread preserves running desktop file activity', () => 
   assert.equal(activityMessage.activities[0].label, '正在更新文件');
 });
 
+test('messagesFromDesktopThread keeps the activity container running between completed desktop steps', () => {
+  const messages = messagesFromDesktopThread({
+    id: 'thread-1',
+    turns: [
+      {
+        id: 'turn-1',
+        status: 'running',
+        startedAt: Date.parse('2026-05-14T02:00:00.000Z') / 1000,
+        items: [
+          { id: 'user-1', type: 'userMessage', content: [{ type: 'text', text: '继续排查' }] },
+          {
+            id: 'cmd-1',
+            type: 'commandExecution',
+            status: 'completed',
+            command: 'rg activity',
+            aggregatedOutput: 'ok',
+            startedAt: '2026-05-14T02:00:03.000Z',
+            completedAt: '2026-05-14T02:00:14.000Z'
+          }
+        ]
+      }
+    ]
+  }, { includeActivity: true });
+
+  const activityMessage = messages.find((message) => message.role === 'activity');
+  assert.equal(activityMessage.status, 'running');
+  assert.equal(activityMessage.completedAt, null);
+  assert.equal(activityMessage.durationMs, null);
+  assert.equal(activityMessage.activities[0].status, 'completed');
+});
+
 test('messagesFromDesktopThread uses mobile labels for completed desktop command activity', () => {
   const messages = messagesFromDesktopThread({
     id: 'thread-1',

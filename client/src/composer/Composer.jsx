@@ -58,7 +58,7 @@ export function Composer({
   onRemoveFileMention,
   uploading,
   contextStatus,
-  runStatus,
+  runSteerable = true,
   desktopBridge,
   queueDrafts,
   onRestoreQueueDraft,
@@ -107,7 +107,7 @@ export function Composer({
     hasInput,
     uploading,
     desktopBridge,
-    steerable: runStatus?.steerable !== false,
+    steerable: runSteerable,
     sessionIsDraft: isDraftSession(selectedSession)
   });
   const stopMode = sendState.mode === 'abort';
@@ -495,15 +495,6 @@ export function Composer({
           ))}
         </div>
       ) : null}
-      {!sendState.disabled || sendState.mode !== 'unavailable' ? null : (
-        <div className="composer-run-status is-warning" role="status" aria-live="polite">
-          <span className="composer-run-dot" />
-          <span className="composer-run-main">
-            <strong>桌面端 Codex 未连接</strong>
-            <small>{desktopBridge?.reason || '打开桌面端 Codex，或配置同源 app-server control socket 后再发送'}</small>
-          </span>
-        </div>
-      )}
       {openMenu === 'send-mode' ? (
         <div className="composer-menu send-mode-menu">
           <button

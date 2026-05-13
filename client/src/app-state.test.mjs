@@ -11,7 +11,6 @@ import { appReducer, createInitialUiState } from './app/AppState.js';
 import { applyPwaTheme } from './app/pwa-theme.js';
 import {
   createDraftSession,
-  buildComposerRunStatus,
   localFileApiPath,
   localFilePreviewPath,
   payloadRunKeys,
@@ -122,67 +121,6 @@ test('selected running activity does not synthesize sidebar runtime badges', () 
     ),
     null
   );
-});
-
-test('composer run status appears immediately from runtime even before activity arrives', () => {
-  const status = buildComposerRunStatus([], true, Date.parse('2026-05-13T08:40:00.000Z'));
-
-  assert.equal(status.running, true);
-  assert.equal(status.label, '正在思考');
-});
-
-test('composer run status keeps optimistic time from completed desktop activity while runtime is active', () => {
-  const status = buildComposerRunStatus([
-    {
-      id: 'activity-1',
-      role: 'activity',
-      status: 'completed',
-      startedAt: '2026-05-13T08:40:00.000Z',
-      completedAt: '2026-05-13T08:40:02.000Z',
-      durationMs: 2000,
-      activities: [
-        {
-          id: 'command-1',
-          kind: 'command_execution',
-          label: '本地任务已处理',
-          status: 'completed',
-          command: 'node --test',
-          timestamp: '2026-05-13T08:40:01.000Z'
-        }
-      ]
-    }
-  ], true, Date.parse('2026-05-13T08:40:10.000Z'));
-
-  assert.equal(status.running, true);
-  assert.equal(status.duration, '10s');
-});
-
-test('composer run status ignores stale completed activity before active runtime output', () => {
-  const status = buildComposerRunStatus([
-    {
-      id: 'activity-previous-turn',
-      role: 'activity',
-      status: 'completed',
-      startedAt: '2026-05-13T08:39:00.000Z',
-      completedAt: '2026-05-13T08:39:02.000Z',
-      activities: [
-        {
-          id: 'command-previous',
-          kind: 'command_execution',
-          label: '本地任务已处理',
-          status: 'completed',
-          command: 'npm test',
-          timestamp: '2026-05-13T08:39:01.000Z'
-        }
-      ]
-    }
-  ], true, Date.parse('2026-05-13T08:40:10.000Z'), {
-    runtimeStartedAt: '2026-05-13T08:40:00.000Z'
-  });
-
-  assert.equal(status.running, true);
-  assert.equal(status.label, '正在思考');
-  assert.equal(status.duration, '');
 });
 
 test('desktop ipc active runs expose both app and client turn ids', () => {

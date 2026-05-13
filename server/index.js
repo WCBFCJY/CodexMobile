@@ -78,6 +78,7 @@ import {
 import {
   configureDesktopRefresh,
   getDesktopRefreshPublicState,
+  openDesktopThread,
   setDesktopRefreshEnabled
 } from './desktop-refresh.js';
 import { readBody, sendJson } from './http-utils.js';
@@ -656,6 +657,28 @@ async function handleApi(req, res, url) {
     const body = await readBody(req);
     const desktopRefresh = setDesktopRefreshEnabled(Boolean(body.enabled));
     sendJson(res, 200, { success: true, desktopRefresh });
+    return;
+  }
+
+  if (method === 'POST' && pathname === '/api/desktop-handoff') {
+    const body = await readBody(req);
+    const sessionId = String(body.sessionId || body.threadId || '').trim();
+    const result = await openDesktopThread(sessionId, { reason: 'manual-desktop-handoff' });
+    if (result.triggered) {
+      sendJson(res, 200, { success: true, ...result });
+      return;
+    }
+    const statusCode = result.reason === 'desktop-refresh-missing-thread'
+      ? 400
+      : result.reason === 'desktop-refresh-unsupported-platform'
+        ? 501
+        : 500;
+    sendJson(res, statusCode, {
+      success: false,
+      error: result.error || '无法打开桌面端对话',
+      code: result.reason || 'desktop-handoff-failed',
+      ...result
+    });
     return;
   }
 

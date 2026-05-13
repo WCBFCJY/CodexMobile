@@ -399,7 +399,7 @@ function findDesktopActivityInsertIndex(messages, turnId, segmentIndex) {
   return lastTurnIndex >= 0 ? lastTurnIndex + 1 : messages.length;
 }
 
-export function upsertDesktopActivity(messages, turnId, activity, segmentIndex = 0) {
+export function upsertDesktopActivity(messages, turnId, activity, segmentIndex = 0, containerStatus = '') {
   if (!activity) {
     return;
   }
@@ -430,7 +430,7 @@ export function upsertDesktopActivity(messages, turnId, activity, segmentIndex =
       existing.activities = [...current, activity];
     }
     existing.timestamp = activity.timestamp || existing.timestamp;
-    applyDesktopActivityContainerStatus(existing);
+    applyDesktopActivityContainerStatus(existing, { containerStatus });
     return;
   }
   const nextMessage = {
@@ -446,7 +446,7 @@ export function upsertDesktopActivity(messages, turnId, activity, segmentIndex =
     startedAt: activity.startedAt || activity.timestamp || null,
     activities: [activity]
   };
-  applyDesktopActivityContainerStatus(nextMessage);
+  applyDesktopActivityContainerStatus(nextMessage, { containerStatus });
   messages.splice(findDesktopActivityInsertIndex(messages, turnId, segmentIndex), 0, nextMessage);
 }
 
@@ -553,9 +553,13 @@ function latestIso(...values) {
   return latest;
 }
 
-function applyDesktopActivityContainerStatus(message) {
+function applyDesktopActivityContainerStatus(message, { containerStatus = '' } = {}) {
   const activities = Array.isArray(message.activities) ? message.activities : [];
-  const status = aggregateDesktopActivityStatus(activities);
+  const rawContainerStatus = String(containerStatus || '').toLowerCase();
+  const normalizedContainerStatus = rawContainerStatus ? normalizedActivityStatus(rawContainerStatus) : '';
+  const status = ['running', 'queued', 'failed'].includes(normalizedContainerStatus)
+    ? normalizedContainerStatus
+    : aggregateDesktopActivityStatus(activities);
   const range = activityTimestampRange(activities);
   message.status = status;
   message.label = status === 'running' ? '正在处理' : status === 'failed' ? '过程已中止' : '过程已同步';
@@ -1109,7 +1113,8 @@ export function messagesFromDesktopThread(thread, { includeActivity = false } = 
           messages,
           turnId,
           desktopActivityFromThreadItem(item, turnId, itemIndex, timestamp, segmentStatus),
-          segmentIndex
+          segmentIndex,
+          segmentStatus
         );
       }
       if (item.type === 'agentMessage' && item.phase !== 'commentary') {

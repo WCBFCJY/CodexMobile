@@ -219,7 +219,7 @@ test('activity timeline counts command actions instead of paths found in output'
   assert.equal(timeline[0].title, '已搜索 1 次，已探索 1 个文件');
 });
 
-test('outer process can open tool groups while command details stay folded', () => {
+test('outer process keeps tool groups and command details folded', () => {
   const item = {
     type: 'meta',
     items: [
@@ -235,7 +235,8 @@ test('outer process can open tool groups while command details stay folded', () 
 
   assert.equal(activityMetaShouldOpen(item), false);
   assert.equal(activityStepDetailShouldOpen(step), false);
-  assert.equal(activityMetaShouldOpen(item, { forceOpen: true }), true);
+  assert.equal(activityMetaShouldOpen(item, { forceOpen: true }), false);
+  assert.equal(activityMetaShouldOpen({ ...item, items: [{ ...step, status: 'running' }] }, { forceOpen: true }), false);
   assert.equal(activityStepDetailShouldOpen(step, { forceOpen: true }), false);
   assert.equal(activityStepDetailShouldOpen({ ...step, status: 'running' }), false);
 });
