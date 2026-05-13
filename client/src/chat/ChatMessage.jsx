@@ -20,7 +20,15 @@ import { MessageContent, splitMessageImages } from './MarkdownContent.jsx';
 import { PlanMessage } from './PlanMessage.jsx';
 import { UserImageStrip } from './ImagePreview.jsx';
 
-export function ChatMessage({ message, now, onPreviewImage, onDeleteMessage, onImplementPlan, onAdjustPlan }) {
+export function ChatMessage({
+  message,
+  now,
+  activeActivityMessageId = '',
+  onPreviewImage,
+  onDeleteMessage,
+  onImplementPlan,
+  onAdjustPlan
+}) {
   const [copied, setCopied] = useState(false);
   const copiedTimerRef = useRef(null);
 
@@ -31,7 +39,14 @@ export function ChatMessage({ message, now, onPreviewImage, onDeleteMessage, onI
   }, []);
 
   if (message.role === 'activity') {
-    return <ActivityMessage message={message} now={now} onImplementPlan={onImplementPlan} />;
+    return (
+      <ActivityMessage
+        message={message}
+        now={now}
+        forceRunning={Boolean(activeActivityMessageId && message.id === activeActivityMessageId)}
+        onImplementPlan={onImplementPlan}
+      />
+    );
   }
   if (message.role === 'plan' || message.role === 'plan_request') {
     return (

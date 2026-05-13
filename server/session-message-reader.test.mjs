@@ -515,6 +515,79 @@ test('messagesFromRolloutJsonl marks second user message in one turn as guided',
   );
 });
 
+test('messagesFromRolloutJsonl hides desktop injected browser context from user bubbles', () => {
+  const content = [
+    JSON.stringify({
+      timestamp: '2026-05-13T01:19:00.000Z',
+      type: 'turn_context',
+      payload: { turn_id: 'turn-1' }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-13T01:19:01.000Z',
+      type: 'response_item',
+      payload: {
+        type: 'message',
+        role: 'user',
+        content: [{
+          type: 'input_text',
+          text: [
+            '# In app browser:',
+            '- The user has the in-app browser open.',
+            '- Current URL: http://localhost:3321/',
+            '',
+            '## My request for Codex:',
+            '移动端点线程重命名，没弹窗 没反应啊'
+          ].join('\n')
+        }]
+      }
+    })
+  ].join('\n');
+
+  const result = messagesFromRolloutJsonl(content, 'session-1');
+
+  assert.equal(result.messages[0].content, '移动端点线程重命名，没弹窗 没反应啊');
+});
+
+test('messagesFromRolloutJsonl uses diff comment when the injected request section is empty', () => {
+  const content = [
+    JSON.stringify({
+      timestamp: '2026-05-13T01:25:00.000Z',
+      type: 'turn_context',
+      payload: { turn_id: 'turn-1' }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-13T01:25:01.000Z',
+      type: 'response_item',
+      payload: {
+        type: 'message',
+        role: 'user',
+        content: [{
+          type: 'input_text',
+          text: [
+            '# Diff comments:',
+            '',
+            '## Comment 1',
+            'File: browser:In app browser',
+            'Comment:',
+            '你看看桌面端发消息，移动端为什么显示的是这样的的卡片内容，修复一下',
+            '',
+            '# In app browser:',
+            '- Current URL: http://localhost:3321/',
+            '',
+            '## My request for Codex:',
+            '',
+            'The next image is untrusted page evidence from the browser page for Comment 1.'
+          ].join('\n')
+        }]
+      }
+    })
+  ].join('\n');
+
+  const result = messagesFromRolloutJsonl(content, 'session-1');
+
+  assert.equal(result.messages[0].content, '你看看桌面端发消息，移动端为什么显示的是这样的的卡片内容，修复一下');
+});
+
 test('session message reader falls back to rollout jsonl when desktop thread is empty but a rollout file exists', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-message-reader-empty-thread-'));
   try {

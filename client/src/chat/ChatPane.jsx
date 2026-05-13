@@ -6,7 +6,7 @@
  * Exports:
  * - ChatPane — 包裹 ChatMessage 列表与底部对齐逻辑。
  *
- * Inward: ../chat-scroll.js、ChatMessage.jsx
+ * Inward: ../chat-scroll.js、session-utils、ChatMessage.jsx
  *
  * Outward: App.jsx
  */
@@ -14,9 +14,22 @@
 import { AlertCircle, ArrowDown, Loader2, ShieldCheck } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { isNearChatBottom, shouldFollowChatOutput } from '../chat-scroll.js';
+import { payloadRunKeys, selectedRunKeys } from '../app/session-utils.js';
 import { ChatMessage } from './ChatMessage.jsx';
 
-export function ChatPane({ messages, selectedSession, loading = false, loadError = '', running, now, onPreviewImage, onDeleteMessage, onImplementPlan, onAdjustPlan }) {
+export function ChatPane({
+  messages,
+  selectedSession,
+  loading = false,
+  loadError = '',
+  running,
+  activeRunKeys = [],
+  now,
+  onPreviewImage,
+  onDeleteMessage,
+  onImplementPlan,
+  onAdjustPlan
+}) {
   const paneRef = useRef(null);
   const contentRef = useRef(null);
   const bottomPinnedRef = useRef(true);
@@ -25,6 +38,7 @@ export function ChatPane({ messages, selectedSession, loading = false, loadError
   const hasMessages = messages.length > 0;
   const sessionId = selectedSession?.id || '';
   const pinnedBeforeRender = bottomPinnedRef.current;
+  const activeActivityMessageId = running ? latestSelectedActivityMessageId(messages, selectedSession, activeRunKeys) : '';
 
   const scrollToBottom = useCallback((behavior = 'auto') => {
     const pane = paneRef.current;
@@ -138,6 +152,7 @@ export function ChatPane({ messages, selectedSession, loading = false, loadError
             key={message.id}
             message={message}
             now={now}
+            activeActivityMessageId={activeActivityMessageId}
             onPreviewImage={onPreviewImage}
             onDeleteMessage={onDeleteMessage}
             onImplementPlan={onImplementPlan}
@@ -161,4 +176,21 @@ export function ChatPane({ messages, selectedSession, loading = false, loadError
       ) : null}
     </section>
   );
+}
+
+function latestSelectedActivityMessageId(messages = [], selectedSession = null, activeRunKeys = []) {
+  const selectedKeys = new Set(activeRunKeys.length ? activeRunKeys : selectedRunKeys(selectedSession));
+  if (!selectedKeys.size) {
+    return '';
+  }
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message?.role !== 'activity') {
+      continue;
+    }
+    if (payloadRunKeys(message).some((key) => selectedKeys.has(key))) {
+      return message.id || '';
+    }
+  }
+  return '';
 }

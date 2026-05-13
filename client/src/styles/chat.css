@@ -559,6 +559,15 @@
   background: #f5f6f8;
 }
 
+.markdown-mermaid-block {
+  max-width: 100%;
+  margin: 8px 0 10px;
+  overflow: hidden;
+  border: 1px solid rgba(210, 213, 208, 0.72);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
 .markdown-code-head {
   display: flex;
   align-items: center;
@@ -603,6 +612,38 @@
   background: transparent;
 }
 
+.markdown-mermaid-canvas {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 10px;
+  background: #ffffff;
+  color-scheme: light;
+}
+
+.markdown-mermaid-canvas svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.markdown-mermaid-loading,
+.markdown-mermaid-error {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 48px;
+  padding: 10px;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.markdown-mermaid-error {
+  color: var(--danger);
+  background: rgba(194, 65, 58, 0.06);
+}
+
 .markdown-code-block code,
 .markdown-code-block code *,
 .message-content pre code,
@@ -640,6 +681,10 @@
 .message-row.is-user .markdown-code-block {
   border-color: rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.1);
+}
+
+.message-row.is-user .markdown-mermaid-block {
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .message-row.is-user .markdown-code-head {
@@ -1302,6 +1347,11 @@
   background: #050506;
 }
 
+[data-theme="dark"] .markdown-mermaid-block {
+  border-color: #242428;
+  background: #101012;
+}
+
 [data-theme="dark"] .markdown-code-head {
   color: #a1a1aa;
   border-bottom-color: #202024;
@@ -1325,6 +1375,20 @@
 
 [data-theme="dark"] .message-content pre code {
   background: transparent;
+}
+
+[data-theme="dark"] .markdown-mermaid-canvas {
+  background: #101012;
+  color-scheme: dark;
+}
+
+[data-theme="dark"] .markdown-mermaid-loading {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .markdown-mermaid-error {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
 }
 
 [data-theme="dark"] .markdown-table-wrap {

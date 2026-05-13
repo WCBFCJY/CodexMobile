@@ -43,18 +43,18 @@ function desktopCreateThreadUnavailableError() {
   return error;
 }
 
-function isDesktopFollowerPreflightTimeout(error) {
+function isDesktopFollowerHandoffTimeout(error) {
   if (error?.code !== 'CODEXMOBILE_DESKTOP_IPC_TIMEOUT') {
     return false;
   }
-  return /thread-follower-set-(?:model-and-reasoning|collaboration-mode)\b/.test(String(error.message || ''));
+  return /thread-follower-(?:set-model-and-reasoning|set-collaboration-mode|start-turn|steer-turn|interrupt-turn)\b/.test(String(error.message || ''));
 }
 
 function isDesktopThreadOwnerUnavailable(error) {
   return (
     error?.message === 'no-client-found' ||
     error?.statusCode === 409 ||
-    isDesktopFollowerPreflightTimeout(error)
+    isDesktopFollowerHandoffTimeout(error)
   );
 }
 
@@ -107,12 +107,15 @@ function userMessageMetadataForSendMode(sendMode = 'start') {
 async function syncDesktopFollowerCollaborationMode({
   selectedSessionId,
   collaborationMode,
-  setDesktopFollowerCollaborationMode
+  setDesktopFollowerCollaborationMode,
+  desktopIpcTimeoutMs
 }) {
   if (!setDesktopFollowerCollaborationMode) {
     return;
   }
-  await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode || null);
+  await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode || null, {
+    timeoutMs: desktopIpcTimeoutMs
+  });
 }
 
 export async function sendViaDesktopIpc({
@@ -140,6 +143,7 @@ export async function sendViaDesktopIpc({
   startDesktopFollowerTurn,
   interruptDesktopFollowerTurn,
   desktopOwnerRetryDelays = [],
+  desktopIpcTimeoutMs = 6000,
   sleep = wait
 }) {
   if (!selectedSessionId) {
@@ -171,12 +175,15 @@ export async function sendViaDesktopIpc({
   async function attemptDesktopFollowerTurn() {
     if (sendMode === 'steer') {
       if (setDesktopFollowerModelAndReasoning) {
-        await setDesktopFollowerModelAndReasoning(selectedSessionId, model || null, reasoningEffort || null);
+        await setDesktopFollowerModelAndReasoning(selectedSessionId, model || null, reasoningEffort || null, {
+          timeoutMs: desktopIpcTimeoutMs
+        });
       }
       await syncDesktopFollowerCollaborationMode({
         selectedSessionId,
         collaborationMode,
-        setDesktopFollowerCollaborationMode
+        setDesktopFollowerCollaborationMode,
+        desktopIpcTimeoutMs
       });
       result = await steerDesktopFollowerTurn(selectedSessionId, {
         input,
@@ -190,20 +197,23 @@ export async function sendViaDesktopIpc({
           },
           responsesapiClientMetadata: null
         }
-      });
+      }, { timeoutMs: desktopIpcTimeoutMs });
     } else {
       if (sendMode === 'interrupt') {
-        await interruptDesktopFollowerTurn(selectedSessionId);
+        await interruptDesktopFollowerTurn(selectedSessionId, { timeoutMs: desktopIpcTimeoutMs });
       }
       if (setDesktopFollowerModelAndReasoning) {
-        await setDesktopFollowerModelAndReasoning(selectedSessionId, model || null, reasoningEffort || null);
+        await setDesktopFollowerModelAndReasoning(selectedSessionId, model || null, reasoningEffort || null, {
+          timeoutMs: desktopIpcTimeoutMs
+        });
       }
       await syncDesktopFollowerCollaborationMode({
         selectedSessionId,
         collaborationMode,
-        setDesktopFollowerCollaborationMode
+        setDesktopFollowerCollaborationMode,
+        desktopIpcTimeoutMs
       });
-      result = await startDesktopFollowerTurn(selectedSessionId, baseTurnStartParams);
+      result = await startDesktopFollowerTurn(selectedSessionId, baseTurnStartParams, { timeoutMs: desktopIpcTimeoutMs });
     }
     return result;
   }
@@ -239,6 +249,7 @@ export async function sendViaDesktopIpc({
     sessionId: selectedSessionId,
     previousSessionId: selectedSessionId,
     draftSessionId,
+    source: 'desktop-ipc',
     status: 'running',
     label: sendMode === 'steer' ? '已发送到当前任务' : '已交给桌面端处理',
     startedAt: now
@@ -292,11 +303,13 @@ export function runQueuedHeadlessChatJob({
   rememberConversationAlias,
   rememberTurn,
   rememberLiveSession,
+  notifyDesktopThreadListChanged,
   emitJobEvent,
   scheduleAutoNameCompletedSession,
   onQueueDrained
 }) {
   const metadataUpdates = [];
+  let lastBackgroundThread = null;
 
   function rememberStartedBackgroundThread(payload) {
     if (!payload?.sessionId || !job.draftSessionId) {
@@ -322,6 +335,11 @@ export function runQueuedHeadlessChatJob({
         }
       ]
     };
+    const backgroundThread = {
+      threadId: payload.sessionId,
+      cwd: payload.cwd || job.executionProjectPath || job.project.path || null
+    };
+    lastBackgroundThread = backgroundThread;
     rememberLiveSession?.(sessionRecord);
     metadataUpdates.push(
       Promise.all([
@@ -329,7 +347,12 @@ export function runQueuedHeadlessChatJob({
           ? registerProjectlessThread(payload.sessionId, job.project.path)
           : Promise.resolve(null),
         registerMobileSession(sessionRecord)
-      ]).catch((error) => {
+      ]).then(() =>
+        notifyDesktopThreadListChanged?.({
+          ...backgroundThread,
+          reason: 'background-thread-started'
+        })
+      ).catch((error) => {
         console.warn('[sessions] Failed to register background thread:', error.message);
       })
     );
@@ -393,6 +416,12 @@ export function runQueuedHeadlessChatJob({
       }
       const snapshot = await refreshCodexCache();
       broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
+      if (lastBackgroundThread) {
+        await notifyDesktopThreadListChanged?.({
+          ...lastBackgroundThread,
+          reason: 'background-thread-completed'
+        });
+      }
     } catch (error) {
       console.warn('[sync] Failed to refresh after chat:', error.message);
     } finally {

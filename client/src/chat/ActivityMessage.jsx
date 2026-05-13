@@ -14,7 +14,7 @@
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { formatDuration, formatDurationMs } from '../app/session-utils.js';
-import { activityCardShouldOpen } from './activity-card-state.js';
+import { activityCardShouldOpen, effectiveActivityMessageIsRunning } from './activity-card-state.js';
 import { isVisibleActivityStep, shouldRenderActivityMessageInChat } from './activity-model.js';
 import { ActivityTimeline } from './ActivityTimeline.jsx';
 import { projectActivityView } from './activity-timeline-projection.js';
@@ -27,13 +27,13 @@ function hasPendingPlanImplementation(activities = []) {
   );
 }
 
-export function ActivityMessage({ message, now = Date.now(), onImplementPlan }) {
+export function ActivityMessage({ message, now = Date.now(), forceRunning = false, onImplementPlan }) {
   if (!shouldRenderActivityMessageInChat(message)) {
     return null;
   }
   const activities = message.activities || [];
   const pendingPlanImplementation = hasPendingPlanImplementation(activities);
-  const running = message.status === 'running' || message.status === 'queued';
+  const running = effectiveActivityMessageIsRunning({ message, activities, forceRunning });
   const failed = message.status === 'failed';
   const visibleSteps = activities.filter((activity) => isVisibleActivityStep(activity, message.status));
   const { timeRange, timeline, fileSummary } = projectActivityView(visibleSteps, { running });

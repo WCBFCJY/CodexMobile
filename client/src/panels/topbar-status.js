@@ -23,7 +23,7 @@ function runtimeSource(runtime) {
 
 function isDesktopRuntime(runtime) {
   const source = runtimeSource(runtime);
-  return source === 'desktop-ipc' || source === 'desktop-thread';
+  return source === 'desktop-ipc';
 }
 
 function isHeadlessRuntime(runtime) {

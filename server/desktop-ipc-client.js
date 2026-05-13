@@ -7,6 +7,7 @@
  * - desktopIpcMethodVersion / desktopIpcSocketPath / getDesktopIpcSocketStatus。
  * - DesktopIpcClient — 连接与请求封装。
  * - probeDesktopIpc / startDesktopFollowerTurn / steerDesktopFollowerTurn / interruptDesktopFollowerTurn 等。
+ * - broadcastDesktopThreadListRefresh — 通知 Codex Desktop 刷新线程列表相关查询。
  *
  * Inward（本模块依赖/组装的关键符号）: node:net、平台相关 socket 路径约定。
  *
@@ -37,7 +38,10 @@ const DESKTOP_IPC_METHOD_VERSIONS = new Map([
   ['thread-follower-permissions-request-approval-response', 1],
   ['thread-follower-submit-user-input', 1],
   ['thread-follower-submit-mcp-server-elicitation-response', 1],
-  ['thread-follower-set-queued-follow-ups-state', 1]
+  ['thread-follower-set-queued-follow-ups-state', 1],
+  ['thread-queued-followups-changed', 1],
+  ['thread-read-state-changed', 1],
+  ['thread-stream-state-changed', 6]
 ]);
 
 export function desktopIpcMethodVersion(method) {
@@ -89,9 +93,11 @@ export function getDesktopIpcSocketStatus(sockPath = desktopIpcSocketPath()) {
 }
 
 export class DesktopIpcClient {
-  constructor({ clientType = 'codexmobile', socketPath = desktopIpcSocketPath() } = {}) {
+  constructor({ clientType = 'codexmobile', socketPath = desktopIpcSocketPath(), onBroadcast = null, onClose = null } = {}) {
     this.clientType = clientType;
     this.socketPath = socketPath;
+    this.onBroadcast = onBroadcast;
+    this.onClose = onClose;
     this.clientId = 'initializing-client';
     this.socket = null;
     this.buffer = Buffer.alloc(0);
@@ -117,7 +123,10 @@ export class DesktopIpcClient {
         clearTimeout(timeout);
         this.socket = socket;
         socket.on('data', (chunk) => this.handleData(chunk));
-        socket.on('close', () => this.rejectAll(ipcError('桌面端 Codex IPC 已断开', 'CODEXMOBILE_DESKTOP_IPC_CLOSED')));
+        socket.on('close', () => {
+          this.rejectAll(ipcError('桌面端 Codex IPC 已断开', 'CODEXMOBILE_DESKTOP_IPC_CLOSED'));
+          this.onClose?.();
+        });
         socket.on('error', (error) => this.rejectAll(error));
         resolve();
       });
@@ -213,6 +222,10 @@ export class DesktopIpcClient {
         requestId: message.requestId,
         response: { canHandle: false }
       }));
+      return;
+    }
+    if (message.type === 'broadcast') {
+      this.onBroadcast?.(message);
       return;
     }
     if (message.type !== 'response') {
@@ -356,6 +369,73 @@ export async function broadcastDesktopThreadTitleUpdated(
     return {
       sent: false,
       reason: error.message || '桌面端 Codex IPC 广播失败'
+    };
+  } finally {
+    client.close();
+  }
+}
+
+export async function broadcastDesktopQueryCacheInvalidate(
+  queryKey,
+  { clientType = 'codexmobile-query-cache-sync', socketPath = null, timeoutMs = 1500 } = {}
+) {
+  const key = Array.isArray(queryKey) ? queryKey : [queryKey].filter(Boolean);
+  if (!key.length) {
+    return { sent: false, reason: 'queryKey is required' };
+  }
+  const client = new DesktopIpcClient({
+    clientType,
+    ...(socketPath ? { socketPath } : {})
+  });
+  try {
+    await client.connect({ timeoutMs });
+    client.sendBroadcast('query-cache-invalidate', { queryKey: key });
+    return { sent: true, queryKey: key };
+  } catch (error) {
+    return {
+      sent: false,
+      reason: error.message || '桌面端 Codex IPC 广播失败',
+      queryKey: key
+    };
+  } finally {
+    client.close();
+  }
+}
+
+export async function broadcastDesktopThreadListRefresh({
+  hostId = 'local',
+  conversationId = null,
+  cwd = null,
+  reason = 'thread-list-refresh',
+  socketPath = null,
+  timeoutMs = 1500
+} = {}) {
+  const client = new DesktopIpcClient({
+    clientType: 'codexmobile-thread-list-sync',
+    ...(socketPath ? { socketPath } : {})
+  });
+  try {
+    await client.connect({ timeoutMs });
+    client.sendBroadcast('query-cache-invalidate', { queryKey: ['tasks'] });
+    client.sendBroadcast('query-cache-invalidate', { queryKey: ['command-menu-thread-search', hostId] });
+    return {
+      sent: true,
+      conversationId,
+      cwd,
+      hostId,
+      reason,
+      queryKeys: [
+        ['tasks'],
+        ['command-menu-thread-search', hostId]
+      ]
+    };
+  } catch (error) {
+    return {
+      sent: false,
+      reason: error.message || '桌面端 Codex IPC 广播失败',
+      conversationId,
+      cwd,
+      hostId
     };
   } finally {
     client.close();

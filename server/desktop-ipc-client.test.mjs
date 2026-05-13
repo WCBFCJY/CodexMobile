@@ -53,6 +53,39 @@ function readFrame(socket) {
   });
 }
 
+function readFrames(socket, count) {
+  return new Promise((resolve, reject) => {
+    let buffer = Buffer.alloc(0);
+    let expected = null;
+    const frames = [];
+    const onData = (chunk) => {
+      buffer = Buffer.concat([buffer, chunk]);
+      for (;;) {
+        if (expected == null) {
+          if (buffer.length < 4) {
+            return;
+          }
+          expected = buffer.readUInt32LE(0);
+          buffer = buffer.subarray(4);
+        }
+        if (buffer.length < expected) {
+          return;
+        }
+        frames.push(JSON.parse(buffer.subarray(0, expected).toString('utf8')));
+        buffer = buffer.subarray(expected);
+        expected = null;
+        if (frames.length >= count) {
+          socket.off('data', onData);
+          resolve(frames);
+          return;
+        }
+      }
+    };
+    socket.on('data', onData);
+    socket.once('error', reject);
+  });
+}
+
 test('sendBroadcast writes desktop IPC broadcast frames', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-ipc-test-'));
   const socketPath = path.join(dir, 'ipc.sock');
@@ -131,6 +164,48 @@ test('broadcastDesktopThreadTitleUpdated writes desktop title update broadcast f
     conversationId: 'thread-1',
     title: 'Renamed thread'
   });
+
+  server.close();
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+test('broadcastDesktopThreadListRefresh invalidates desktop task and command search queries', async () => {
+  assert.equal(typeof desktopIpc.broadcastDesktopThreadListRefresh, 'function');
+
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-ipc-test-'));
+  const socketPath = path.join(dir, 'ipc.sock');
+  const server = net.createServer();
+  await new Promise((resolve) => server.listen(socketPath, resolve));
+
+  const accepted = new Promise((resolve) => server.once('connection', resolve));
+  const sent = desktopIpc.broadcastDesktopThreadListRefresh({
+    hostId: 'local',
+    conversationId: 'thread-1',
+    cwd: '/repo',
+    reason: 'background-thread-started',
+    socketPath,
+    timeoutMs: 1000
+  });
+  const socket = await accepted;
+  const init = await readFrame(socket);
+  socket.write(frameFor({
+    type: 'response',
+    requestId: init.requestId,
+    resultType: 'success',
+    method: 'initialize',
+    result: { clientId: 'client-1' }
+  }));
+  const [taskBroadcast, searchBroadcast] = await readFrames(socket, 2);
+  const result = await sent;
+
+  assert.equal(result.sent, true);
+  assert.equal(taskBroadcast.type, 'broadcast');
+  assert.equal(taskBroadcast.method, 'query-cache-invalidate');
+  assert.equal(taskBroadcast.sourceClientId, 'client-1');
+  assert.equal(taskBroadcast.version, 0);
+  assert.deepEqual(taskBroadcast.params, { queryKey: ['tasks'] });
+  assert.equal(searchBroadcast.method, 'query-cache-invalidate');
+  assert.deepEqual(searchBroadcast.params, { queryKey: ['command-menu-thread-search', 'local'] });
 
   server.close();
   await fs.rm(dir, { recursive: true, force: true });

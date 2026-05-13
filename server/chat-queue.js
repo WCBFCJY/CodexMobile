@@ -241,8 +241,22 @@ export function createChatQueue({ maxRecentTurns = DEFAULT_MAX_RECENT_TURNS } = 
     return false;
   }
 
+  function findActiveTurnForSession(sessionId, { source } = {}) {
+    if (!sessionId) {
+      return null;
+    }
+    const activeStatuses = new Set(['accepted', 'queued', 'running']);
+    const turns = [...recentTurns.values()].reverse();
+    return turns.find((turn) => (
+      activeStatuses.has(turn.status) &&
+      (!source || turn.source === source) &&
+      payloadReferencesSession(turn, sessionId)
+    )) || null;
+  }
+
   return {
     enqueueJob,
+    findActiveTurnForSession,
     getConversationQueue,
     getTurn(turnId) {
       return recentTurns.get(turnId) || null;

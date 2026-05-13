@@ -7,7 +7,7 @@
  * - createChatService — 创建可注入依赖的聊天服务实例。
  * - normalizeSelectedSkills — 再导出自 chat-request-prep。
  *
- * Inward（本模块依赖/组装的关键符号）: chat-queue、chat-delivery、chat-request-prep、chat-image-handler、desktop-turn-monitor、runtime-debug。
+ * Inward（本模块依赖/组装的关键符号）: chat-queue、chat-delivery、chat-request-prep、chat-image-handler、runtime-debug。
  *
  * Outward（谁在用/调用场景）: HTTP 聊天路由或上层服务装配。
  *
@@ -16,6 +16,9 @@
 import {
   registerProjectlessThread as registerProjectlessThreadInCodexState
 } from './codex-config.js';
+import {
+  notifyDesktopThreadListChanged as notifyDesktopThreadListChangedInCodexApp
+} from './codex-app-server.js';
 import { registerMobileSession as registerMobileSessionInIndex } from './mobile-session-index.js';
 import { createChatQueue } from './chat-queue.js';
 import {
@@ -31,7 +34,6 @@ import {
 } from './chat-request-prep.js';
 import { createChatImageHandler } from './chat-image-handler.js';
 import { createChatAutoNamer } from './chat-auto-title.js';
-import { createDesktopTurnMonitor } from './desktop-turn-monitor.js';
 import {
   compactActiveRuns,
   runtimeDebugLine
@@ -47,7 +49,6 @@ export function createChatService({
   getCacheSnapshot,
   getDesktopBridgeStatus,
   listProjectSessions,
-  readSessionMessages = async () => ({ messages: [] }),
   refreshCodexCache,
   renameSession,
   broadcast,
@@ -67,10 +68,13 @@ export function createChatService({
   registerProjectlessThread = registerProjectlessThreadInCodexState,
   registerMobileSession = registerMobileSessionInIndex,
   rememberLiveSession = () => null,
-  desktopOwnerRetryDelays = [250, 700, 1500]
+  notifyDesktopThreadListChanged = notifyDesktopThreadListChangedInCodexApp,
+  desktopOwnerRetryDelays = [250, 700, 1500],
+  desktopIpcTimeoutMs = Math.max(1500, Number(process.env.CODEXMOBILE_DESKTOP_IPC_SEND_TIMEOUT_MS) || 6000)
 }) {
   const chatQueue = createChatQueue();
   const getConversationQueue = chatQueue.getConversationQueue;
+  const findActiveTurnForSession = chatQueue.findActiveTurnForSession;
   const rememberConversationAlias = chatQueue.rememberConversationAlias;
   const rememberTurn = chatQueue.rememberTurn;
   const rememberTurnEvent = chatQueue.rememberTurnEvent;
@@ -85,22 +89,11 @@ export function createChatService({
     rememberTurn,
     emitJobEvent: (job, payload) => emitJobEvent(job, payload)
   });
-  const desktopTurnMonitor = createDesktopTurnMonitor({
-    readSessionMessages,
-    refreshCodexCache,
-    rememberTurn,
-    broadcast
-  });
-
   function sessionHasActiveWork(sessionId) {
-    return (
-      chatQueue.sessionHasActiveWork(sessionId, [
-        ...getActiveRuns(),
-        ...chatImage.getActiveImageRuns(),
-        ...desktopTurnMonitor.getActiveRuns()
-      ]) ||
-      desktopTurnMonitor.hasActiveWork(sessionId)
-    );
+    return chatQueue.sessionHasActiveWork(sessionId, [
+      ...getActiveRuns(),
+      ...chatImage.getActiveImageRuns()
+    ]);
   }
 
   function activeLocalRunForAbort({ turnId = '', sessionId = '', previousSessionId = '' } = {}) {
@@ -208,6 +201,7 @@ export function createChatService({
       rememberConversationAlias,
       rememberTurn,
       rememberLiveSession,
+      notifyDesktopThreadListChanged,
       emitJobEvent,
       scheduleAutoNameCompletedSession,
       onQueueDrained: () => setTimeout(() => runNextQueuedChat(queueKey), 0)
@@ -285,7 +279,6 @@ export function createChatService({
       shouldHoldInLocalQueue,
       selectedSessionResolvedFromBackgroundAlias,
       headlessRuns: compactActiveRuns(getActiveRuns()),
-      desktopTurnRuns: compactActiveRuns(desktopTurnMonitor.getActiveRuns()),
       imageRuns: compactActiveRuns(chatImage.getActiveImageRuns())
     });
 
@@ -355,17 +348,8 @@ export function createChatService({
             steerDesktopFollowerTurn,
             startDesktopFollowerTurn,
             interruptDesktopFollowerTurn,
-            desktopOwnerRetryDelays
-          });
-          desktopTurnMonitor.startRun({
-            projectId: project.id,
-            sessionId: result.sessionId,
-            previousSessionId: draftSessionId || selectedSessionId || null,
-            draftSessionId,
-            turnId: result.turnId,
-            clientTurnId: result.clientTurnId || turnId,
-            userMessage: visibleMessage,
-            startedAt: new Date().toISOString()
+            desktopOwnerRetryDelays,
+            desktopIpcTimeoutMs
           });
           runtimeDebugLine('sendChat.exit', {
             branch: 'desktop-ipc',
@@ -379,6 +363,14 @@ export function createChatService({
             error?.code === 'CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE' &&
             desktopIpcCanUseBackgroundFallback(bridge);
           if (!canFallBackToBackground) {
+            runtimeDebugLine('sendChat.exit', {
+              branch: 'desktop-ipc',
+              delivery: 'failed',
+              sessionId: selectedSessionId,
+              turnId,
+              code: error?.code || null,
+              error: error?.message || 'desktop ipc failed'
+            });
             throw error;
           }
           bridge = backgroundFallbackBridge(
@@ -569,8 +561,7 @@ export function createChatService({
       turnId,
       sessionId,
       previousSessionId,
-      headlessRuns: compactActiveRuns(getActiveRuns()),
-      desktopTurnRuns: compactActiveRuns(desktopTurnMonitor.getActiveRuns())
+      headlessRuns: compactActiveRuns(getActiveRuns())
     });
     const localRun = activeLocalRunForAbort({ turnId, sessionId, previousSessionId });
     if (localRun) {
@@ -599,25 +590,6 @@ export function createChatService({
       runtimeDebugLine('abortChat.exit', { branch: 'headless-local', aborted: Boolean(aborted || turnId || sessionId) });
       return Boolean(aborted || turnId || sessionId);
     }
-    const desktopRun = desktopTurnMonitor.getRun(turnId) || desktopTurnMonitor.getRun(sessionId);
-    if (desktopRun) {
-      if (!interruptDesktopFollowerTurn) {
-        const error = new Error('桌面端中止能力不可用，请在电脑端手动停止。');
-        error.statusCode = 502;
-        throw error;
-      }
-      try {
-        await interruptDesktopFollowerTurn(desktopRun.sessionId);
-      } catch (error) {
-        const wrapped = new Error(`桌面端中止失败：${error.message || '请在电脑端手动停止。'}`);
-        wrapped.statusCode = error.statusCode || 502;
-        throw wrapped;
-      }
-      const ok = desktopTurnMonitor.abortRun(turnId) || desktopTurnMonitor.abortRun(sessionId);
-      runtimeDebugLine('abortChat.exit', { branch: 'desktop-monitor-interrupt', ok });
-      return ok;
-    }
-
     const aborted = abortCodexTurn(turnId || sessionId);
     if (!aborted && sessionId && interruptDesktopFollowerTurn) {
       const bridge = await getDesktopBridgeStatus().catch(() => null);
@@ -630,13 +602,15 @@ export function createChatService({
           throw wrapped;
         }
         const completedAt = new Date().toISOString();
+        const activeDesktopTurn = findActiveTurnForSession(sessionId, { source: 'desktop-ipc' });
+        const resolvedTurnId = activeDesktopTurn?.turnId || turnId || sessionId;
         const payload = {
           type: 'chat-aborted',
-          source: 'desktop-thread',
+          source: 'desktop-ipc',
           projectId: body.projectId || undefined,
           sessionId,
           previousSessionId: previousSessionId || undefined,
-          turnId: turnId || sessionId,
+          turnId: resolvedTurnId,
           completedAt,
           timestamp: completedAt
         };
@@ -644,7 +618,7 @@ export function createChatService({
           projectId: payload.projectId,
           sessionId: payload.sessionId,
           previousSessionId: payload.previousSessionId,
-          source: 'desktop-thread',
+          source: 'desktop-ipc',
           status: 'aborted',
           label: '已中止',
           completedAt
@@ -684,7 +658,6 @@ export function createChatService({
 
   return {
     abortChat,
-    getActiveDesktopIpcRuns: desktopTurnMonitor.getActiveRuns,
     getActiveImageRuns: chatImage.getActiveImageRuns,
     getTurn(turnId) {
       return chatQueue.getTurn(turnId);

@@ -1,7 +1,7 @@
 /**
- * 当会话仍有运行中活动时，定时拉取消息流签名并合并桌面活动 runtime，保持选中线程与服务端一致。
+ * 定时拉取选中会话消息并做轻量合并，作为 WebSocket live events 的补账层。
  *
- * Keywords: live-polling, session-messages, running-activity
+ * Keywords: live-polling, session-messages, reconcile
  *
  * Exports:
  * - `useSessionLivePolling` — 基于认证与选中会话驱动轮询的 effect hook。
@@ -17,16 +17,12 @@ import {
   messageStreamSignature
 } from '../chat/activity-model.js';
 import {
-  mergeLiveSelectedThreadMessages,
-  shouldPollSelectedSessionMessages,
-  syncDesktopActivityRuntimeFromMessages
+  hasStaleRunningActivityResolvedByLoaded,
+  mergeLiveSelectedThreadMessages
 } from '../session-live-refresh.js';
 import { mergeContextStatus } from './context-status.js';
 import {
-  hasRunningKey,
   isDraftSession,
-  isLiveThreadRuntime,
-  selectedRunKeys,
   sessionMessagesApiPath
 } from './session-utils.js';
 
@@ -35,14 +31,10 @@ export function useSessionLivePolling({
   selectedSession,
   hasRunningActivity,
   running,
-  desktopBridge,
-  threadRuntimeById,
   defaultStatus,
   sessionLivePollRef,
   selectedSessionRef,
-  runningByIdRef,
   messagesRef,
-  markRun,
   clearRun,
   markSessionCompleteNotice,
   setContextStatus,
@@ -59,42 +51,29 @@ export function useSessionLivePolling({
       if (stopped || sessionLivePollRef.current) {
         return;
       }
-      const hasSelectedRunning = hasRunningKey(
-        runningByIdRef.current || {},
-        selectedRunKeys(selectedSessionRef.current || selectedSession)
-      );
-      const selectedRunRuntime = selectedRunKeys(selectedSessionRef.current || selectedSession)
-        .map((key) => threadRuntimeById?.[key])
-        .find(isLiveThreadRuntime) || null;
-      const hasDesktopThreadRuntime =
-        selectedRunRuntime?.source === 'desktop-thread' ||
-        selectedRunRuntime?.source === 'desktop-ipc' ||
-        selectedRunRuntime?.source === 'headless-local';
-      const hasExternalThreadRefresh = Boolean(hasDesktopThreadRuntime);
-      if (!shouldPollSelectedSessionMessages({
-        hasSelectedRunning,
-        desktopBridge,
-        hasExternalThreadRefresh
-      })) {
-        return;
-      }
       sessionLivePollRef.current = true;
       try {
         const data = await apiFetch(sessionMessagesApiPath(sessionId));
         if (!stopped && selectedSessionRef.current?.id === sessionId && Array.isArray(data.messages)) {
-          syncDesktopActivityRuntimeFromMessages({
-            messages: data.messages,
-            sessionId,
-            selectedRunRuntime,
-            markRun,
-            clearRun,
-            markSessionCompleteNotice
-          });
+          const currentMessages = Array.isArray(messagesRef?.current) ? messagesRef.current : [];
+          const forceDropStaleRunning = hasStaleRunningActivityResolvedByLoaded(currentMessages, data.messages);
+          if (forceDropStaleRunning) {
+            const assistant = [...data.messages].reverse().find((message) => message?.role === 'assistant');
+            const completedAt = assistant?.completedAt || assistant?.timestamp || new Date().toISOString();
+            const payload = {
+              sessionId,
+              turnId: selectedSessionRef.current?.turnId || '',
+              completedAt,
+              timestamp: completedAt
+            };
+            markSessionCompleteNotice?.(payload);
+            clearRun?.(payload);
+          }
           setContextStatus((current) => mergeContextStatus(current, data.context || defaultStatus.context, defaultStatus.context));
           setMessages((current) =>
             messageStreamSignature(current) === messageStreamSignature(data.messages)
               ? current
-              : mergeLiveSelectedThreadMessages(current, data.messages)
+              : mergeLiveSelectedThreadMessages(current, data.messages, { forceDropStaleRunning })
           );
         }
       } catch {
@@ -115,8 +94,6 @@ export function useSessionLivePolling({
     authenticated,
     selectedSession?.id,
     hasRunningActivity,
-    running,
-    desktopBridge,
-    threadRuntimeById
+    running
   ]);
 }

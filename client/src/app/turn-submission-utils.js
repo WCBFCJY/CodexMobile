@@ -127,7 +127,7 @@ export function restoredComposerText(current, nextText) {
 }
 
 export function shouldPollTurnEndpointAfterSend(result = {}) {
-  return !['desktop-ipc', 'headless-local'].includes(result?.desktopBridge?.mode);
+  return result?.desktopBridge?.mode !== 'desktop-ipc';
 }
 
 export function localHandoffStatusPayload({ sessionId, previousSessionId = null, turnId, timestamp = new Date().toISOString() } = {}) {

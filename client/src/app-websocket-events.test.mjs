@@ -16,7 +16,7 @@ import {
   shouldRenderStatusMessageForPayload
 } from './app/useAppWebSocket.js';
 
-test('desktop IPC status updates drive runtime without rendering local activity cards', () => {
+test('desktop IPC status updates render through the same live path', () => {
   assert.equal(
     shouldRenderStatusMessageForPayload({
       type: 'status-update',
@@ -26,6 +26,9 @@ test('desktop IPC status updates drive runtime without rendering local activity 
     }),
     false
   );
+});
+
+test('headless fallback status updates render like local background work', () => {
   assert.equal(
     shouldRenderStatusMessageForPayload({
       type: 'status-update',
@@ -33,7 +36,7 @@ test('desktop IPC status updates drive runtime without rendering local activity 
       kind: 'turn',
       status: 'completed'
     }),
-    false
+    true
   );
   assert.equal(
     shouldRenderStatusMessageForPayload({
@@ -42,7 +45,7 @@ test('desktop IPC status updates drive runtime without rendering local activity 
       kind: 'turn',
       status: 'running'
     }),
-    false
+    true
   );
   assert.equal(
     shouldRenderStatusMessageForPayload({
@@ -51,17 +54,17 @@ test('desktop IPC status updates drive runtime without rendering local activity 
       kind: 'reasoning',
       status: 'running'
     }),
-    false
+    true
   );
 });
 
-test('external thread terminal events refresh after completing local turn state', () => {
+test('terminal events no longer trigger desktop-thread refresh path', () => {
   assert.equal(
     shouldRefreshDesktopThreadForPayload({
       type: 'chat-complete',
       source: 'desktop-ipc'
     }),
-    true
+    false
   );
   assert.equal(
     shouldRefreshDesktopThreadForPayload({
@@ -70,21 +73,21 @@ test('external thread terminal events refresh after completing local turn state'
       kind: 'turn',
       status: 'completed'
     }),
-    true
+    false
   );
   assert.equal(
     shouldRefreshDesktopThreadForPayload({
       type: 'chat-complete',
       source: 'headless-local'
     }),
-    true
+    false
   );
   assert.equal(
     shouldCompleteLocalTurnBeforeRefresh({
       type: 'chat-complete',
       source: 'desktop-ipc'
     }),
-    true
+    false
   );
   assert.equal(
     shouldCompleteLocalTurnBeforeRefresh({
@@ -93,7 +96,7 @@ test('external thread terminal events refresh after completing local turn state'
       kind: 'turn',
       status: 'completed'
     }),
-    true
+    false
   );
   assert.equal(
     shouldCompleteLocalTurnBeforeRefresh({
@@ -106,14 +109,14 @@ test('external thread terminal events refresh after completing local turn state'
   );
 });
 
-test('headless fallback activity and assistant updates are read from the thread like IPC', () => {
+test('headless fallback activity and assistant updates render from the local live stream', () => {
   assert.equal(
     shouldRenderActivityMessageForPayload({
       type: 'activity-update',
       source: 'headless-local',
       status: 'running'
     }),
-    false
+    true
   );
   assert.equal(
     shouldRenderAssistantMessageForPayload({
@@ -121,7 +124,7 @@ test('headless fallback activity and assistant updates are read from the thread 
       source: 'headless-local',
       content: '完成'
     }),
-    false
+    true
   );
   assert.equal(
     shouldRenderActivityMessageForPayload({

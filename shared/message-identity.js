@@ -10,7 +10,7 @@
  *
  * Inward（本模块依赖/组装的关键符号）: 无。
  *
- * Outward（谁在用/调用场景）: client chat/message-identity 再导出、session-live-refresh、useAppWebSocket；server desktop-turn-monitor。
+ * Outward（谁在用/调用场景）: client chat/message-identity 再导出、session-live-refresh、useAppWebSocket。
  */
 
 function normalizeWhitespace(value) {

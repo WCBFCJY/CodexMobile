@@ -95,7 +95,7 @@ function MetaActivityBlock({ item, onImplementPlan }) {
   }
 
   return (
-    <details className={`activity-meta ${running ? 'is-running' : ''}`}>
+    <details className={`activity-meta ${running ? 'is-running' : ''}`} open={running}>
       <summary className="activity-meta-summary">
         {activityMetaIcon(item)}
         <span>{item.title}</span>
@@ -166,7 +166,7 @@ function ActivityStepDetail({ step }) {
     const command = step.command || detail;
     const output = step.output || step.error || '';
     const failed = step.status === 'failed';
-    const running = step.status === 'running';
+    const running = step.status === 'running' || step.status === 'queued';
     const title = activityStepDetailTitle(step);
     const shellText = [`$ ${command}`, output].filter(Boolean).join('\n\n');
     const statusText = failed && step.exitCode !== undefined && step.exitCode !== null
@@ -177,7 +177,7 @@ function ActivityStepDetail({ step }) {
           ? '运行中'
           : '成功';
     return (
-      <details className={`activity-command-detail ${failed ? 'is-failed' : ''}`}>
+      <details className={`activity-command-detail ${failed ? 'is-failed' : ''}`} open={running}>
         <summary>
           {activityStepIcon(step)}
           <span>{title}</span>
@@ -209,8 +209,9 @@ function SubagentActivityBlock({ item }) {
   const items = item.items || [];
   const agents = items.flatMap((step) => (Array.isArray(step.subAgents) ? step.subAgents : []));
   const title = items[0]?.label || item.title || `${agents.length || 1} 个后台智能体（使用 @ 标记智能体）`;
+  const running = items.some((step) => step.status === 'running' || step.status === 'queued');
   return (
-    <details className="activity-meta activity-subagents">
+    <details className="activity-meta activity-subagents" open={running}>
       <summary className="activity-meta-summary">
         <Bot size={13} />
         <span>{title}</span>

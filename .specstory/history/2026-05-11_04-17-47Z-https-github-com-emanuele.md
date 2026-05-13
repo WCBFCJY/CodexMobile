@@ -402,12 +402,17828 @@ _**Agent (gpt-5.5 2026-05-11 04:18:15Z)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
 <summary>Tool use: **write_stdin**</summary>
-
-**Input:**
-
-- chars: ``
-- max_output_tokens: `6000`
-- session_id: `71649`
-- yield_time_ms: `1000`
-
+```
+Chunk ID: 043db0
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
 </details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg --files`</summary>
+```
+Chunk ID: a359da
+Wall time: 0.0006 seconds
+Process exited with code 0
+Original token count: 5662
+Output:
+SELF_HOSTING_MODEL.md
+CLAUDE.md
+run-local-remodex.sh
+assets/remodex-og.png
+Legal/TERMS_OF_USE.md
+Legal/PRIVACY_POLICY.md
+relay/push-service.test.js
+relay/relay.js
+relay/push-service.js
+relay/package.json
+relay/package-lock.json
+relay/README.md
+relay/apns-client.test.js
+relay/server.test.js
+relay/server.js
+relay/apns-client.js
+AGENTS.md
+deeplinks-D8FzxbSB.js
+main-Bw7nouYH.js
+CONTRIBUTING.md
+README.md
+CodexMobile/CodexMobileUITests/CodexMobileUITests.swift
+CodexMobile/scripts/check-sidebar-badge-performance.sh
+CodexMobile/scripts/check-turnview-performance.sh
+CodexMobile/CodexMobile.xcodeproj/project.pbxproj
+LICENSE
+preload.js
+CodexMobile/CodexMobile.xcodeproj/xcshareddata/xcschemes/RemodexMenuBar.xcscheme
+CodexMobile/CodexMobile.xcodeproj/xcshareddata/xcschemes/CodexMobile.xcscheme
+CodexMobile/CodexMobileTests/CodexThreadForkTests.swift
+CodexMobile/CodexMobileTests/CodexStatusTests.swift
+CodexMobile/CodexMobileTests/TurnComposerSendAvailabilityTests.swift
+CodexMobile/CodexMobileTests/SidebarRunBadgePerformanceTests.swift
+CodexMobile/CodexMobileTests/CodexThreadRenamePersistenceTests.swift
+CodexMobile/CodexMobileTests/SidebarThreadsLoadingPresentationTests.swift
+CodexMobile/CodexMobile.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+CodexMobile/CodexMobile.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+Docs/RECAP-review-finding-fixes.md
+Docs/RECAP-windows-codex-launch.md
+Docs/self-hosting.md
+Docs/RECAP-local-first-cleanup.md
+CodexMobile/RemodexMenuBar/BridgeControlModels.swift
+CodexMobile/RemodexMenuBar/BridgeControlService.swift
+CodexMobile/RemodexMenuBar/BridgeMenuBarViews.swift
+CodexMobile/RemodexMenuBar/RemodexMenuBarApp.swift
+CodexMobile/RemodexMenuBar/BridgeMenuBarStore.swift
+phodex-bridge/src/git-handler.js
+phodex-bridge/src/codex-cli-bootstrap.js
+phodex-bridge/src/bootstrap-codex-cli.js
+phodex-bridge/src/session-state.js
+phodex-bridge/src/desktop-handler.js
+phodex-bridge/src/account-status.js
+phodex-bridge/src/secure-device-state.js
+phodex-bridge/src/qr.js
+phodex-bridge/src/index.js
+phodex-bridge/src/push-notification-tracker.js
+phodex-bridge/src/pet-handler.js
+phodex-bridge/src/push-notification-completion-dedupe.js
+phodex-bridge/src/daemon-state.js
+phodex-bridge/src/ios-app-compatibility.js
+phodex-bridge/src/workspace-handler.js
+phodex-bridge/src/voice-handler.js
+phodex-bridge/src/codex-home.js
+phodex-bridge/src/secure-transport.js
+phodex-bridge/bin/remodex.js
+phodex-bridge/bin/phodex.js
+phodex-bridge/src/rollout-live-mirror.js
+phodex-bridge/src/notifications-handler.js
+phodex-bridge/src/codex-desktop-refresher.js
+phodex-bridge/src/macos-launch-agent.js
+CodexMobile/CodexMobile/Services/CodexService+Transport.swift
+CodexMobile/CodexMobile/Services/CodexService+RuntimeConfig.swift
+CodexMobile/CodexMobile/Services/CodexService+WorkspaceImages.swift
+CodexMobile/CodexMobile/Services/CodexService+ThreadsTurns.swift
+CodexMobile/CodexMobile/Services/CodexService+TurnPaginationCompatibility.swift
+CodexMobile/CodexMobile/Services/CodexService+Incoming.swift
+CodexMobile/CodexMobile/Services/CodexService+Notifications.swift
+CodexMobile/CodexMobile/Services/CodexService+IncomingAssistant.swift
+phodex-bridge/src/project-handler.js
+phodex-bridge/src/bridge.js
+phodex-bridge/src/desktop-ipc-action-follower.js
+phodex-bridge/src/rollout-watch.js
+phodex-bridge/src/push-notification-service-client.js
+phodex-bridge/src/codex-transport.js
+phodex-bridge/src/thread-context-handler.js
+phodex-bridge/src/workspace-checkpoints.js
+phodex-bridge/src/package-version-status.js
+CodexMobile/CodexMobile/Services/CodexService+Sync.swift
+CodexMobile/CodexMobile/Services/GitActionsService.swift
+CodexMobile/CodexMobile/Services/AIChangeSetPersistence.swift
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift
+CodexMobile/CodexMobile/Services/CodexService+ProjectFolders.swift
+CodexMobile/CodexMobile/Services/CodexService+ThreadProjectRouting.swift
+CodexMobile/CodexMobile/Services/CodexService+Pets.swift
+CodexMobile/CodexMobile/Services/CodexService+ThreadFork.swift
+CodexMobile/CodexMobile/Services/AppEnvironment.swift
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift
+CodexMobile/CodexMobile/Services/CodexService+Messages.swift
+CodexMobile/CodexMobile/Services/CodexService.swift
+CodexMobile/CodexMobile/Services/CodexService+IncomingPlanMode.swift
+CodexMobile/CodexMobile/Services/CodexSecureTransportModels.swift
+CodexMobile/CodexMobile/Services/HapticFeedback.swift
+CodexMobile/CodexMobile/Services/CodexService+Review.swift
+CodexMobile/CodexMobile/Services/CodexMessagePersistence.swift
+CodexMobile/CodexMobile/Services/CodexService+WorkspaceCheckpoints.swift
+CodexMobile/CodexMobile/Services/AssistantReplayDeduper.swift
+CodexMobile/CodexMobile/Services/CodexServiceError.swift
+CodexMobile/CodexMobile/Services/DesktopHandoffService.swift
+CodexMobile/CodexMobile/Services/CodexService+Thread
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,240p' README.md`</summary>
+```
+Chunk ID: 5c168d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2930
+Output:
+<p align="center">
+  <img src="CodexMobile/CodexMobile/Assets.xcassets/remodex-og1.imageset/remodex-og2%20%281%29.png" alt="Remodex" />
+</p>
+
+# Remodex
+
+[![npm version](https://img.shields.io/npm/v/remodex)](https://www.npmjs.com/package/remodex)
+[![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+[Follow on X](https://x.com/emanueledpt)
+
+Control [Codex](https://openai.com/index/codex/) from your iPhone. Remodex is a local-first open-source bridge + iOS app that keeps the Codex runtime on your Mac and lets your phone connect through a paired secure session.
+
+## Key App Features
+
+- End-to-end encrypted pairing and chats between your iPhone and Mac
+- Fast mode for lower-latency turns
+- Plan mode for structured planning before execution
+- Subagents from iPhone with the `/subagents` command
+- Steer active runs without starting over
+- Queue follow-up prompts while a turn is still running
+- In-app notifications when turns finish or need attention
+- Git actions from your phone, including commit, push, pull, and branch switching
+- Reasoning controls to tune how much thinking Codex uses
+- Access controls with On-Request or Full access
+- Photo attachments from camera or library
+- One-time QR bootstrap with trusted Mac reconnects
+- macOS-only background bridge service via `launchd`
+- Live streaming on your phone while Codex runs on your Mac
+- Shared thread history with Codex on your Mac
+
+The repo stays local-first and self-host friendly: the iOS app source does not embed a public hosted endpoint, and the transport layer remains inspectable for anyone who wants to run their own setup.
+
+Today, the background daemon / trusted auto-reconnect flow is implemented for macOS. Self-hosted relay setups still work on other OSes, but they currently use the foreground bridge flow instead of the macOS `launchd` service path.
+
+If you want the public-repo distribution model explained clearly, read [SELF_HOSTING_MODEL.md](SELF_HOSTING_MODEL.md).
+
+> **I am very early in this project. Expect bugs.**
+>
+> I am not actively accepting contributions yet. If you still want to help, read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+
+## Get the App
+
+The app is live on the [App Store](https://apps.apple.com/us/app/remodex-remote-ai-coding/id6760243963).
+
+Build the iOS app from source in Xcode, install your own signed build on-device, then use the in-app onboarding flow to pair by scanning the QR from `remodex up`.
+
+If you scan the pairing QR with a generic camera or QR reader before installing the app, your device may treat the QR payload as plain text and open a web search instead of pairing.
+
+## Architecture
+
+```
+┌──────────────┐       Paired session   ┌───────────────┐       stdin/stdout       ┌─────────────┐
+│  Remodex iOS │ ◄────────────────────► │ remodex (Mac) │ ◄──────────────────────► │ codex       │
+│  app         │    WebSocket bridge    │ bridge        │    JSON-RPC              │ app-server  │
+└──────────────┘                        └───────────────┘                          └─────────────┘
+                                               │                                         │
+                                               │  AppleScript route bounce                │ JSONL rollout
+                                               ▼                                         ▼
+                                        ┌─────────────┐                           ┌─────────────┐
+                                        │  Codex.app  │ ◄─── reads from ──────── │  ~/.codex/  │
+                                        │  (desktop)  │      disk on navigate     │  sessions   │
+                                        └─────────────┘                           └─────────────┘
+```
+
+1. Run `remodex up` on your Mac
+2. On macOS, Remodex installs/starts a lightweight background bridge service and prints a QR for first-time pairing or recovery
+3. Scan the QR once with the Remodex iOS app to trust that Mac
+4. After the first handshake, the iPhone can resolve the Mac's live session through the configured relay and reconnect automatically
+5. Your phone sends instructions to Codex through the bridge and receives responses in real-time
+6. The bridge handles git operations and local session persistence on your Mac
+7. `Codex.app` can read the same thread history from disk, but it is not a true live mirror unless you enable the optional refresh workaround
+
+## Reposit
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `find . -maxdepth 2 -type f -name 'package.json' -o -name 'Package.swift' -o -name '*.xcodeproj' -o -name 'docker-compose.yml' -o -name '*.md' | sort`</summary>
+```
+Chunk ID: 75d39b
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 98
+Output:
+./AGENTS.md
+./CLAUDE.md
+./CONTRIBUTING.md
+./CodexMobile/CodexMobile.xcodeproj
+./Docs/RECAP-local-first-cleanup.md
+./Docs/RECAP-review-finding-fixes.md
+./Docs/RECAP-windows-codex-launch.md
+./Docs/self-hosting.md
+./Legal/PRIVACY_POLICY.md
+./Legal/TERMS_OF_USE.md
+./README.md
+./SELF_HOSTING_MODEL.md
+./phodex-bridge/README.md
+./phodex-bridge/package.json
+./relay/README.md
+./relay/package.json
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:29Z)**_
+
+仓库结构很清楚：SwiftUI iOS App、Node 桥接包 `phodex-bridge`、可自托管 relay 三块。接下来我会沿“手机发消息 -> relay/bridge -> codex app-server -> 事件回流 -> 本地历史/桌面刷新”这条链读关键文件。
+
+_**Agent (gpt-5.5 2026-05-11 04:18:29Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "app-server|JSON-RPC|relay|thread|turn|send|codex app-server|trusted|pair|rollout|session" phodex-bridge/src CodexMobile/CodexMobile/Services relay | head -n 240`</summary>
+```
+Chunk ID: f2a456
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 4703
+Output:
+relay/apns-client.js:2:// Purpose: Sends APNs alert pushes for relay-hosted Remodex notifications using token-based auth.
+relay/apns-client.js:23:    return Boolean(teamId && keyId && bundleId && privateKey);
+relay/apns-client.js:26:  async function sendNotification({
+relay/apns-client.js:48:      const response = await sendRequest(client, {
+relay/apns-client.js:75:      return { ok: true };
+relay/apns-client.js:84:      return cachedToken.value;
+relay/apns-client.js:100:    return token;
+relay/apns-client.js:103:  return {
+relay/apns-client.js:105:    sendNotification,
+relay/apns-client.js:109:function sendRequest(client, headers, body) {
+relay/apns-client.js:110:  return new Promise((resolve, reject) => {
+relay/apns-client.js:135:    return null;
+relay/apns-client.js:139:    return JSON.parse(value);
+relay/apns-client.js:141:    return null;
+relay/apns-client.js:146:  return base64Url(Buffer.from(JSON.stringify(value)));
+relay/apns-client.js:150:  return Buffer.from(value)
+relay/apns-client.js:160:    return "";
+relay/apns-client.js:163:  return normalized.replace(/[^a-fA-F0-9]/g, "").toLowerCase();
+relay/apns-client.js:167:  return typeof value === "string" && value.trim() ? value.trim() : "";
+relay/apns-client.js:174:  return error;
+relay/package.json:2:  "name": "remodex-relay",
+relay/README.md:3:This folder contains the public relay and push-service code used by Remodex pairing and trusted reconnect.
+relay/README.md:5:The point of keeping this code in the repo is transparency: anyone forking Remodex can inspect the transport boundary, verify the encrypted-session flow, and run a compatible relay of their own. What should stay private is the actual deployed endpoint and any production credentials.
+relay/README.md:9:- accepts WebSocket connections at `/relay/{sessionId}`
+relay/README.md:10:- pairs one Mac host with one live mobile client for a session
+relay/README.md:11:- keeps an in-memory index of the current live session for each trusted Mac
+relay/README.md:12:- resolves the current live session for a previously trusted mobile client through an authenticated HTTP lookup
+relay/README.md:22:- it does not decrypt Remodex application payloads after the secure session is established
+relay/README.md:28:Remodex uses the relay as a transport hop, not as a trusted application server.
+relay/README.md:30:- The pairing QR gives the mobile client the bridge identity public key plus short-lived session details.
+relay/README.md:31:- After the first successful QR bootstrap, the relay can help the mobile client find the Mac's current live session again through a signed trusted-session resolve request.
+relay/README.md:33:- The relay can still observe connection metadata and the plaintext secure control messages needed to establish the encrypted session.
+relay/README.md:34:- The relay does not receive plaintext Remodex application payloads after the secure session is active.
+relay/README.md:40:    A[Mac bridge starts] --> B[Bridge creates sessionId and notification secret]
+relay/README.md:41:    B --> C[Bridge prints QR with relay URL, sessionId, bridge identity key, expiry]
+relay/README.md:42:    B --> D[Mac opens WebSocket to /relay/{sessionId}<br/>x-role: mac]
+relay/README.md:43:    D --> E[Relay creates in-memory session room]
+relay/README.md:44:    D --> E2[Relay records macDeviceId plus trusted phone metadata for live-session resolve]
+relay/README.md:47:    F --> G[Mobile client opens WebSocket to /relay/{sessionId}<br/>x-role: iphone or android]
+relay/README.md:48:    G --> H{Mac session live?}
+relay/README.md:49:    H -- No --> I[Relay closes mobile socket<br/>4002 session unavailable]
+relay/README.md:50:    H -- Yes --> J[Relay binds mobile client to that session]
+relay/README.md:55:    L --> M[Both sides derive AES-256-GCM session keys]
+relay/README.md:57:    M --> N[Mobile client sends encrypted app messages]
+relay/README.md:58:    M --> O[Mac sends encrypted Codex and bridge responses]
+relay/README.md:63:    R --> S[Codex app-server / git / workspace handlers]
+relay/README.md:68:    D --> U[Relay stores per-session notification secret]
+relay/README.md:69:    U --> V[Push registration/completion endpoints only work while live Mac session exists]
+relay/README.md:81:    AB --> AC[Empty session cleaned up after delay]
+relay/README.md:84:    AD --> AE[Mobile client calls POST /v1/trusted/session/resolve]
+relay/README.md:85:    AE --> AF[Relay verifies trusted-device signature, nonce, and freshness]
+relay/README.md:86:    AF --> AG[Relay returns current live sessionId for that Mac]
+relay/README.md:92:- WebSocket path: `/relay/{sessionId}`
+relay/README.md:94:- close code `4000`: invalid session or role
+relay/README.md:96:- close code `4002`: session unavailable / Mac disconnected
+relay/README.md:102:- `POST /v1/trusted/session/resolve`
+relay/README.md:103:- `POST /v1/push/session/register-device`
+relay/README.m
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:29Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' phodex-bridge/src/bridge.js`</summary>
+```
+Chunk ID: bd7156
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2394
+Output:
+// FILE: bridge.js
+// Purpose: Runs Codex locally, bridges relay traffic, and coordinates desktop refreshes for Codex.app.
+// Layer: CLI service
+// Exports: startBridge
+// Depends on: ws, crypto, os, ./codex-home, ./qr, ./codex-desktop-refresher, ./codex-transport, ./rollout-watch, ./voice-handler, ./ios-app-compatibility
+
+const WebSocket = require("ws");
+const { randomBytes } = require("crypto");
+const { execFile, spawn } = require("child_process");
+const path = require("path");
+const os = require("os");
+const { promisify } = require("util");
+const {
+  CodexDesktopRefresher,
+  readBridgeConfig,
+} = require("./codex-desktop-refresher");
+const { createCodexTransport } = require("./codex-transport");
+const { createThreadRolloutActivityWatcher } = require("./rollout-watch");
+const { printQR } = require("./qr");
+const { rememberActiveThread } = require("./session-state");
+const { handleDesktopRequest } = require("./desktop-handler");
+const { readDaemonConfig, writeDaemonConfig } = require("./daemon-state");
+const { handleGitRequest } = require("./git-handler");
+const { handleThreadContextRequest } = require("./thread-context-handler");
+const { handleWorkspaceRequest } = require("./workspace-handler");
+const { handleProjectRequest } = require("./project-handler");
+const { handlePetRequest } = require("./pet-handler");
+const { createNotificationsHandler } = require("./notifications-handler");
+const { createVoiceHandler, resolveVoiceAuth } = require("./voice-handler");
+const {
+  composeSanitizedAuthStatusFromSettledResults,
+} = require("./account-status");
+const { createBridgePackageVersionStatusReader } = require("./package-version-status");
+const { createPushNotificationServiceClient } = require("./push-notification-service-client");
+const { createPushNotificationTracker } = require("./push-notification-tracker");
+const { resolveCodexGeneratedImagesRoot } = require("./codex-home");
+const {
+  loadOrCreateBridgeDeviceState,
+  rememberLastSeenPhoneAppVersion,
+  resolveBridgeRelaySession,
+} = require("./secure-device-state");
+const { createBridgeSecureTransport } = require("./secure-transport");
+const { createRolloutLiveMirrorController } = require("./rollout-live-mirror");
+const {
+  createDesktopIpcActionFollower,
+} = require("./desktop-ipc-action-follower");
+const { version: bridgePackageVersion = "" } = require("../package.json");
+const {
+  MINIMUM_SUPPORTED_IOS_APP_VERSION,
+  buildCachedIOSAppCompatibilityWarning,
+  buildIOSAppCompatibilitySnapshot,
+  normalizeVersionString,
+} = require("./ios-app-compatibility");
+const { createShortPairingCode, SHORT_PAIRING_CODE_LENGTH } = require("./qr");
+
+const execFileAsync = promisify(execFile);
+const RELAY_WATCHDOG_PING_INTERVAL_MS = 10_000;
+// Keep the watchdog above the relay heartbeat cadence so quiet healthy sockets survive idle gaps.
+const RELAY_WATCHDOG_STALE_AFTER_MS = 70_000;
+const BRIDGE_STATUS_HEARTBEAT_INTERVAL_MS = 5_000;
+const STALE_RELAY_STATUS_MESSAGE = "Relay heartbeat stalled; reconnect pending.";
+const RELAY_HISTORY_IMAGE_REFERENCE_URL = "remodex://history-image-elided";
+const RELAY_THREAD_PAYLOAD_SOFT_LIMIT_BYTES = 4 * 1024 * 1024;
+const RELAY_HISTORY_TEXT_TAIL_LIMIT_CHARS = 24_000;
+const RELAY_HISTORY_RECENT_TURN_TARGET = 40;
+const RELAY_TURNS_LIST_TARGET_BUDGET_MS = 5_500;
+const RELAY_TURNS_LIST_BUDGET_RESERVE_MS = 1_000;
+const RELAY_TURNS_LIST_RESULT_KEYS = ["data", "items", "turns"];
+const RELAY_TURNS_LIST_PAGINATION_RESULT_KEYS = [
+  "nextCursor",
+  "next_cursor",
+  "cursor",
+  "hasNextCursor",
+  "has_next_cursor",
+  "hasNextPage",
+  "has_next_page",
+  "hasMore",
+  "has_more",
+  "prevCursor",
+  "prev_cursor",
+  "previousCursor",
+  "previous_cursor",
+];
+function startBridge({
+  config: explicitConfig = null,
+  printPairingQr = true,
+  onPairingSession = null,
+  onBridgeStatus = null,
+} = {}) {
+  const config = explicitConfig || readBridgeConfig();
+  config.keepMacAwakeEnabled = config.keepMacAwakeEnabled === true;
+  const bridgeWakeAssertion = createMacOSBridgeWakeAssertion({
+    enabled: config.keepMacAwakeEnabled,
+  });
+  const relayBaseUrl = config.relayUrl.replace(/\/+$/, "");
+  if (!relayBaseUrl) {
+    console.error("[remodex] No relay URL configured.");
+    console.error("[remodex] In a source checkout, run ./run-local-remodex.sh or set REMODEX_RELAY.");
+    process.exit(1);
+  }
+
+  let deviceState;
+  try {
+    deviceState = loadOrCreateBridgeDeviceState();
+  } catch (error) {
+    console.error(`[remodex] ${(error && error.message) || "Failed to load the saved bridge pairing state."}`);
+    process.exit(1);
+  }
+  const relaySession = resolveBridgeRelaySession(deviceState);
+  deviceState = relaySession.deviceState;
+  let lastIOSAppCompatibilityWarning = "";
+  const cachedIOSAppCompatibilityWarning = buildCachedIOSAppCompatibilityWarning({
+    bridgeVersion: bridgePackageVersion,
+    iosAppVersion: deviceState.lastSeenPhoneAppVersion,
+  });
+  
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:29Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' phodex-bridge/src/codex-transport.js`</summary>
+```
+Chunk ID: 61e17f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1732
+Output:
+// FILE: codex-transport.js
+// Purpose: Abstracts the Codex-side transport so the bridge can talk to either a spawned app-server or an existing WebSocket endpoint.
+// Layer: CLI helper
+// Exports: createCodexTransport
+// Depends on: child_process, fs, path, ws
+
+const { spawn } = require("child_process");
+const fs = require("fs");
+const path = require("path");
+const WebSocket = require("ws");
+
+function createCodexTransport({
+  endpoint = "",
+  env = process.env,
+  appPath = "",
+  spawnImpl = spawn,
+  WebSocketImpl = WebSocket,
+} = {}) {
+  if (endpoint) {
+    return createWebSocketTransport({ endpoint, WebSocketImpl });
+  }
+
+  return createSpawnTransport({ env, appPath, spawnImpl });
+}
+
+function createSpawnTransport({ env, appPath, spawnImpl = spawn }) {
+  const launchPlans = createCodexLaunchPlans({ env, appPath });
+  let launchIndex = -1;
+  let activeLaunch = null;
+  let codex = null;
+  let stdoutBuffer = "";
+  let stderrBuffer = "";
+  let didRequestShutdown = false;
+  let didReportError = false;
+  const listeners = createListenerBag();
+
+  spawnNextLaunch();
+
+  return {
+    mode: "spawn",
+    describe() {
+      return activeLaunch?.description || launchPlans[0]?.description || "`codex app-server`";
+    },
+    send(message) {
+      if (!codex.stdin.writable || codex.stdin.destroyed || codex.stdin.writableEnded) {
+        return;
+      }
+
+      codex.stdin.write(message.endsWith("\n") ? message : `${message}\n`);
+    },
+    onMessage(handler) {
+      listeners.onMessage = handler;
+    },
+    onClose(handler) {
+      listeners.onClose = handler;
+    },
+    onError(handler) {
+      listeners.onError = handler;
+    },
+    onStarted(handler) {
+      listeners.onStarted = handler;
+    },
+    shutdown() {
+      didRequestShutdown = true;
+      shutdownCodexProcess(codex);
+    },
+  };
+
+  // Retries the launch once with the bundled desktop binary when the shell-visible
+  // `codex` command is unavailable in daemon environments like launchd.
+  function spawnNextLaunch() {
+    launchIndex += 1;
+    activeLaunch = launchPlans[launchIndex] || null;
+    if (!activeLaunch) {
+      return;
+    }
+
+    stdoutBuffer = "";
+    stderrBuffer = "";
+    codex = spawnImpl(activeLaunch.command, activeLaunch.args, activeLaunch.options);
+    attachChildListeners(codex, activeLaunch);
+  }
+
+  function attachChildListeners(child, launch) {
+    child.on("spawn", () => {
+      if (child !== codex) {
+        return;
+      }
+
+      listeners.emitStarted({
+        mode: "spawn",
+        launchDescription: launch.description,
+      });
+    });
+    child.on("error", (error) => {
+      if (child !== codex) {
+        return;
+      }
+
+      if (!didRequestShutdown && shouldRetryLaunchError(error, launchIndex, launchPlans)) {
+        spawnNextLaunch();
+        return;
+      }
+
+      didReportError = true;
+      listeners.emitError(error);
+    });
+    child.on("close", (code, signal) => {
+      if (child !== codex) {
+        return;
+      }
+
+      if (!didRequestShutdown && !didReportError && code !== 0) {
+        didReportError = true;
+        listeners.emitError(createCodexCloseError({
+          code,
+          signal,
+          stderrBuffer,
+          launchDescription: launch.description,
+        }));
+        return;
+      }
+
+      listeners.emitClose(code, signal);
+    });
+    // Ignore broken-pipe shutdown noise once the child is already going away.
+    child.stdin.on("error", (error) => {
+      if (child !== codex) {
+        return;
+      }
+
+      if (didRequestShutdown && isIgnorableStdinShutdownError(error)) {
+        return;
+      }
+
+      if (isIgnorableStdinShutdownError(error)) {
+        return;
+      }
+
+      didReportError = true;
+      listeners.emitError(error);
+    });
+    // Keep stderr muted during normal operation, but preserve enough output to
+    // explain launch failures when the child exits before the bridge can use it.
+    child.stderr.on("data", (chunk) => {
+      if (child !== codex) {
+        return;
+      }
+      stderrBuffer = appendOutputBuffer(stderrBuffer, chunk.toString("utf8"));
+    });
+
+    child.stdout.on("data", (chunk) => {
+      if (child !== codex) {
+        return;
+      }
+      stdoutBuffer += chunk.toString("utf8");
+      const lines = stdoutBuffer.split("\n");
+      stdoutBuffer = lines.pop() || "";
+
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine) {
+          listeners.emitMessage(trimmedLine);
+        }
+      }
+    });
+  }
+}
+
+// Builds a single, platform-aware launch path so the bridge never "guesses"
+// between multiple commands and accidentally starts duplicate runtimes.
+function createCodexLaunchPlans({
+  env,
+  appPath = "",
+  platform = process.platform,
+  fsImpl = fs,
+  pathImpl = path,
+} = {}) {
+  const sharedOptions = {
+    stdio: ["pipe", "pipe", "pipe"],
+    env: { ...env },
+  };
+
+  if (platform === "win32") {
+    return [{
+      command: 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "function sendCodexRequest|sendApplication|socket.on\(\"message|codex.onMessage|secureTransport|thread/turn|turn|desktopRefresher|rolloutLiveMirror|desktopIpcActionFollower|rememberActiveThread" phodex-bridge/src/bridge.js`</summary>
+```
+Chunk ID: d7d96f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3502
+Output:
+20:const { rememberActiveThread } = require("./session-state");
+68:const RELAY_TURNS_LIST_RESULT_KEYS = ["data", "items", "turns"];
+120:  const desktopRefresher = new CodexDesktopRefresher({
+166:    "thread/turns/list",
+175:  const secureTransport = createBridgeSecureTransport({
+188:      return false;
+192:    return true;
+196:  const rolloutLiveMirror = !config.codexEndpoint
+198:      sendApplicationResponse,
+201:  const desktopIpcActionFollower = !config.codexEndpoint
+203:      sendApplicationResponse,
+250:      return;
+258:      return;
+268:      return;
+273:        return;
+283:      return;
+297:      return;
+311:        return;
+315:        return;
+322:        return;
+337:      return;
+353:      return;
+365:      return;
+369:      return;
+383:      return;
+403:      secureTransport.bindLiveSendWireMessage(sendRelayWireMessage);
+410:      if (secureTransport.handleIncomingWireMessage(message, {
+420:        return;
+441:      rolloutLiveMirror?.stopAll();
+442:      desktopIpcActionFollower?.stopAll();
+443:      desktopRefresher.handleTransportReset();
+455:  const pairingPayload = secureTransport.createPairingPayload();
+467:  codex.onMessage((message) => {
+469:      return;
+473:    desktopRefresher.handleOutbound(message);
+476:    secureTransport.queueOutboundApplicationMessage(
+496:    rolloutLiveMirror?.stopAll();
+497:    desktopIpcActionFollower?.stopAll();
+498:    desktopRefresher.handleTransportReset();
+524:      return;
+526:    if (handleBridgeManagedAccountRequest(rawMessage, sendApplicationResponse)) {
+527:      return;
+529:    if (voiceHandler.handleVoiceRequest(rawMessage, sendApplicationResponse)) {
+530:      return;
+532:    if (handleThreadContextRequest(rawMessage, sendApplicationResponse)) {
+533:      return;
+535:    if (handleWorkspaceRequest(rawMessage, sendApplicationResponse)) {
+536:      return;
+538:    if (handleProjectRequest(rawMessage, sendApplicationResponse)) {
+539:      return;
+541:    if (handlePetRequest(rawMessage, sendApplicationResponse)) {
+542:      return;
+544:    if (notificationsHandler.handleNotificationsRequest(rawMessage, sendApplicationResponse)) {
+545:      return;
+547:    if (handleDesktopRequest(rawMessage, sendApplicationResponse, {
+553:      return;
+555:    if (handleGitRequest(rawMessage, sendApplicationResponse, {
+559:      return;
+561:    desktopRefresher.handleInbound(rawMessage);
+562:    rolloutLiveMirror?.observeInbound(rawMessage);
+563:    if (desktopIpcActionFollower?.observeInbound(rawMessage)) {
+564:      return;
+567:      return;
+575:  function sendApplicationResponse(rawMessage) {
+576:    secureTransport.queueOutboundApplicationMessage(
+587:      return;
+590:    sendApplicationResponse(JSON.stringify({
+604:      return false;
+611:          fetchPage: (params) => sendCodexRequest("thread/turns/list", params),
+614:          method: "thread/turns/list",
+617:        sendApplicationResponse(JSON.stringify(response));
+619:        sendApplicationResponse(createJsonRpcErrorResponse(
+622:          "thread_turns_list_failed"
+627:    return true;
+639:      return false;
+647:      return false;
+664:    return true;
+672:        return readSanitizedAuthStatus();
+674:        return openPendingAuthLoginOnMac(params);
+676:        return resolveVoiceAuth(sendCodexRequest);
+696:    return composeSanitizedAuthStatusFromSettledResults({
+729:    return {
+737:      return {
+743:    return {
+750:    return JSON.stringify({
+767:      return;
+791:      return sanitizeLiveGeneratedImageMessageForRelay(rawMessage);
+796:      return rawMessage;
+800:    return sanitizeThreadHistoryImagesForRelay(rawMessage, trackedRequest.method);
+818:            return;
+824:          return;
+829:          return;
+837:      return;
+867:      return JSON.parse(value);
+869:      return null;
+876:      return;
+879:    rememberActiveThread(context.threadId, source);
+887:  function ensureContextUsageWatcher({ threadId, turnId }) {
+889:    const normalizedTurnId = readString(turnId);
+891:      return;
+894:    const nextWatcherKey = `${normalizedThreadId}|${normalizedTurnId || "pending-turn"}`;
+896:      return;
+903:      turnId: normalizedTurnId,
+936:      return;
+939:    sendApplicationResponse(JSON.stringify({
+956:      return false;
+961:      return false;
+967:        sendApplicationResponse(JSON.stringify({
+971:        return true;
+976:        return false;
+979:      sendApplicationResponse(JSON.stringify({
+985:      return true;
+989:      return codexHandshakeState === "warm";
+992:    return false;
+1000:      return null;
+1013:      return null;
+1021:    return {
+1038:      return;
+1051:      return;
+1056:      return;
+1061:      return;
+1068:      return;
+1081:  function sendCodexRequest(method, params) {
+1089:    return new Promise((resolve, reject) => {
+1119:      return false;
+1124:      return false;
+1129:      return false;
+1140:      return true;
+1144:    return true;
+1168:      return;
+117
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '260,760p' phodex-bridge/src/bridge.js`</summary>
+```
+Chunk ID: 0725c9
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3744
+Output:
+
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+
+  // Periodically rewrites the latest bridge snapshot so CLI status does not stay frozen.
+  function startBridgeStatusHeartbeat() {
+    if (statusHeartbeatTimer) {
+      return;
+    }
+
+    statusHeartbeatTimer = setInterval(() => {
+      if (!lastPublishedBridgeStatus || isShuttingDown) {
+        return;
+      }
+
+      onBridgeStatus?.(buildHeartbeatBridgeStatus(lastPublishedBridgeStatus, lastRelayActivityAt));
+    }, BRIDGE_STATUS_HEARTBEAT_INTERVAL_MS);
+    statusHeartbeatTimer.unref?.();
+  }
+
+  function clearBridgeStatusHeartbeat() {
+    if (!statusHeartbeatTimer) {
+      return;
+    }
+
+    clearInterval(statusHeartbeatTimer);
+    statusHeartbeatTimer = null;
+  }
+
+  // Tracks relay liveness locally so sleep/wake zombie sockets can be force-reconnected.
+  function markRelayActivity() {
+    lastRelayActivityAt = Date.now();
+  }
+
+  function clearRelayWatchdog() {
+    if (!relayWatchdogTimer) {
+      return;
+    }
+
+    clearInterval(relayWatchdogTimer);
+    relayWatchdogTimer = null;
+  }
+
+  function startRelayWatchdog(trackedSocket) {
+    clearRelayWatchdog();
+    markRelayActivity();
+
+    relayWatchdogTimer = setInterval(() => {
+      if (isShuttingDown || socket !== trackedSocket) {
+        clearRelayWatchdog();
+        return;
+      }
+
+      if (trackedSocket.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      if (hasRelayConnectionGoneStale(lastRelayActivityAt)) {
+        console.warn("[remodex] relay heartbeat stalled; forcing reconnect");
+        logConnectionStatus("disconnected");
+        trackedSocket.terminate();
+        return;
+      }
+
+      try {
+        trackedSocket.ping();
+      } catch {
+        trackedSocket.terminate();
+      }
+    }, RELAY_WATCHDOG_PING_INTERVAL_MS);
+    relayWatchdogTimer.unref?.();
+  }
+
+  // Keeps npm start output compact by emitting only high-signal connection states.
+  function logConnectionStatus(status) {
+    if (lastConnectionStatus === status) {
+      return;
+    }
+
+    lastConnectionStatus = status;
+    publishBridgeStatus({
+      state: "running",
+      connectionStatus: status,
+      pid: process.pid,
+      lastError: "",
+    });
+    console.log(`[remodex] ${status}`);
+  }
+
+  // Retries the relay socket while preserving the active Codex process and session id.
+  function scheduleRelayReconnect(closeCode) {
+    if (isShuttingDown) {
+      return;
+    }
+
+    if (closeCode === 4000 || closeCode === 4001) {
+      logConnectionStatus("disconnected");
+      shutdown(codex, () => socket, () => {
+        isShuttingDown = true;
+        bridgeWakeAssertion.stop();
+        clearReconnectTimer();
+        clearRelayWatchdog();
+        clearBridgeStatusHeartbeat();
+      });
+      return;
+    }
+
+    if (reconnectTimer) {
+      return;
+    }
+
+    reconnectAttempt += 1;
+    const delayMs = Math.min(1_000 * reconnectAttempt, 5_000);
+    logConnectionStatus("connecting");
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      connectRelay();
+    }, delayMs);
+  }
+
+  function connectRelay() {
+    if (isShuttingDown) {
+      return;
+    }
+
+    logConnectionStatus("connecting");
+    const nextSocket = new WebSocket(relaySessionUrl, {
+      // The relay uses this per-session secret to authenticate the first push registration.
+      headers: {
+        "x-role": "mac",
+        "x-notification-secret": notificationSecret,
+        ...buildMacRegistrationHeaders(deviceState, pairingSession),
+      },
+    });
+    socket = nextSocket;
+
+    nextSocket.on("open", () => {
+      markRelayActivity();
+      clearReconnectTimer();
+      reconnectAttempt = 0;
+      startRelayWatchdog(nextSocket);
+      logConnectionStatus("connected");
+      secureTransport.bindLiveSendWireMessage(sendRelayWireMessage);
+      sendRelayRegistrationUpdate(deviceState);
+    });
+
+    nextSocket.on("message", (data) => {
+      markRelayActivity();
+      const message = typeof data === "string" ? data : data.toString("utf8");
+      if (secureTransport.handleIncomingWireMessage(message, {
+        sendControlMessage(controlMessage) {
+          if (nextSocket.readyState === WebSocket.OPEN) {
+            nextSocket.send(JSON.stringify(controlMessage));
+          }
+        },
+        onApplicationMessage(plaintextMessage) {
+          handleApplicationMessage(plaintextMessage);
+        },
+      })) {
+        return;
+      }
+    });
+
+    nextSocket.on("ping", () => {
+      markRelayActivity();
+    });
+
+    nextSocket.on("pong", () => {
+      markRelayActivity();
+    });
+
+    nextSocket.on("close", (code) => {
+      if (socket === nextSocket) {
+        clearRelayWatchdog();
+      }
+      logConnectionStatus("disconnected");
+      if (socket === nextSocket) {
+        socket = null;
+      }
+      stopContextUsageWatcher();
+      rolloutLiveMirror?.stopAll();
+      desktopIpcActionFollower?.stopAll();
+      desktopRefresher.handleT
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' phodex-bridge/src/secure-transport.js`</summary>
+```
+Chunk ID: 050656
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2256
+Output:
+// FILE: secure-transport.js
+// Purpose: Owns the bridge-side E2EE handshake, envelope crypto, and reconnect catch-up buffer.
+// Layer: CLI helper
+// Exports: createBridgeSecureTransport, SECURE_PROTOCOL_VERSION, PAIRING_QR_VERSION
+// Depends on: crypto, ./secure-device-state
+
+const {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  createPrivateKey,
+  createPublicKey,
+  diffieHellman,
+  generateKeyPairSync,
+  hkdfSync,
+  randomBytes,
+  sign,
+  verify,
+} = require("crypto");
+const {
+  getTrustedPhonePublicKey,
+  rememberTrustedPhone,
+} = require("./secure-device-state");
+
+const PAIRING_QR_VERSION = 2;
+const SECURE_PROTOCOL_VERSION = 1;
+const HANDSHAKE_TAG = "remodex-e2ee-v1";
+const HANDSHAKE_MODE_QR_BOOTSTRAP = "qr_bootstrap";
+const HANDSHAKE_MODE_TRUSTED_RECONNECT = "trusted_reconnect";
+const SECURE_SENDER_MAC = "mac";
+const SECURE_SENDER_IPHONE = "iphone";
+const MAX_PAIRING_AGE_MS = 5 * 60 * 1000;
+const MAX_BRIDGE_OUTBOUND_MESSAGES = 500;
+const MAX_BRIDGE_OUTBOUND_BYTES = 10 * 1024 * 1024;
+
+function createBridgeSecureTransport({
+  sessionId,
+  relayUrl,
+  deviceState,
+  onTrustedPhoneUpdate = null,
+}) {
+  let currentDeviceState = deviceState;
+  let pendingHandshake = null;
+  let activeSession = null;
+  let liveSendWireMessage = null;
+  // Tracks the highest bridge seq the phone has definitely acked, so replay
+  // decisions never depend on best-effort local socket writes.
+  let lastRelayedBridgeOutboundSeq = 0;
+  let currentPairingExpiresAt = Date.now() + MAX_PAIRING_AGE_MS;
+  let nextKeyEpoch = 1;
+  let nextBridgeOutboundSeq = 1;
+  let outboundBufferBytes = 0;
+  const outboundBuffer = [];
+
+  function createPairingPayload() {
+    currentPairingExpiresAt = Date.now() + MAX_PAIRING_AGE_MS;
+    return {
+      v: PAIRING_QR_VERSION,
+      relay: relayUrl,
+      sessionId,
+      macDeviceId: currentDeviceState.macDeviceId,
+      macIdentityPublicKey: currentDeviceState.macIdentityPublicKey,
+      expiresAt: currentPairingExpiresAt,
+    };
+  }
+
+  function handleIncomingWireMessage(rawMessage, { sendControlMessage, onApplicationMessage }) {
+    const parsed = safeParseJSON(rawMessage);
+    if (!parsed || typeof parsed !== "object") {
+      return false;
+    }
+
+    const kind = normalizeNonEmptyString(parsed.kind);
+    if (!kind) {
+      if (parsed.method || parsed.id != null) {
+        sendControlMessage(createSecureError({
+          code: "update_required",
+          message: "This bridge requires the latest Remodex iPhone app for secure pairing.",
+        }));
+        return true;
+      }
+      return false;
+    }
+
+    switch (kind) {
+    case "clientHello":
+      handleClientHello(parsed, sendControlMessage);
+      return true;
+    case "clientAuth":
+      handleClientAuth(parsed, sendControlMessage);
+      return true;
+    case "resumeState":
+      handleResumeState(parsed);
+      return true;
+    case "encryptedEnvelope":
+      return handleEncryptedEnvelope(parsed, sendControlMessage, onApplicationMessage);
+    default:
+      return false;
+    }
+  }
+
+  function queueOutboundApplicationMessage(payloadText, sendWireMessage) {
+    const normalizedPayload = normalizeNonEmptyString(payloadText);
+    if (!normalizedPayload) {
+      return;
+    }
+
+    const bufferEntry = {
+      bridgeOutboundSeq: nextBridgeOutboundSeq,
+      payloadText: normalizedPayload,
+      sizeBytes: Buffer.byteLength(normalizedPayload, "utf8"),
+    };
+    nextBridgeOutboundSeq += 1;
+    outboundBuffer.push(bufferEntry);
+    outboundBufferBytes += bufferEntry.sizeBytes;
+    trimOutboundBuffer();
+
+    const liveSessionSender = activeSession?.sendWireMessage;
+    const effectiveSendWireMessage = typeof liveSessionSender === "function"
+      ? liveSessionSender
+      : sendWireMessage;
+    if (activeSession?.isResumed && typeof effectiveSendWireMessage === "function") {
+      sendBufferedEntry(bufferEntry, effectiveSendWireMessage);
+    }
+  }
+
+  function isSecureChannelReady() {
+    return Boolean(activeSession?.isResumed);
+  }
+
+  function handleClientHello(message, sendControlMessage) {
+    const protocolVersion = Number(message.protocolVersion);
+    const incomingSessionId = normalizeNonEmptyString(message.sessionId);
+    const handshakeMode = normalizeNonEmptyString(message.handshakeMode);
+    const phoneDeviceId = normalizeNonEmptyString(message.phoneDeviceId);
+    const phoneIdentityPublicKey = normalizeNonEmptyString(message.phoneIdentityPublicKey);
+    const phoneEphemeralPublicKey = normalizeNonEmptyString(message.phoneEphemeralPublicKey);
+    const clientNonceBase64 = normalizeNonEmptyString(message.clientNonce);
+
+    if (protocolVersion !== SECURE_PROTOCOL_VERSION || incomingSessionId !== sessionId) {
+      sendControlMessage(createSecureError({
+        code: "update_required",
+        message: "The bridge and iPhone are not using the same secure transport version.",
+      }));
+      return;
+    }
+
+    if (!phoneDeviceId || 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '260,620p' phodex-bridge/src/secure-transport.js`</summary>
+```
+Chunk ID: 8bd806
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2820
+Output:
+      macSignature,
+      clientNonce: clientNonceBase64,
+    });
+  }
+
+  function handleClientAuth(message, sendControlMessage) {
+    if (!pendingHandshake) {
+      sendControlMessage(createSecureError({
+        code: "unexpected_client_auth",
+        message: "The bridge did not have a pending secure handshake to finalize.",
+      }));
+      return;
+    }
+
+    const incomingSessionId = normalizeNonEmptyString(message.sessionId);
+    const phoneDeviceId = normalizeNonEmptyString(message.phoneDeviceId);
+    const keyEpoch = Number(message.keyEpoch);
+    const phoneSignature = normalizeNonEmptyString(message.phoneSignature);
+    if (
+      incomingSessionId !== pendingHandshake.sessionId
+      || phoneDeviceId !== pendingHandshake.phoneDeviceId
+      || keyEpoch !== pendingHandshake.keyEpoch
+      || !phoneSignature
+    ) {
+      pendingHandshake = null;
+      sendControlMessage(createSecureError({
+        code: "invalid_client_auth",
+        message: "The secure client authentication payload was invalid.",
+      }));
+      return;
+    }
+
+    const clientAuthTranscript = Buffer.concat([
+      pendingHandshake.transcriptBytes,
+      encodeLengthPrefixedUTF8("client-auth"),
+    ]);
+    const phoneVerified = verifyTranscript(
+      pendingHandshake.phoneIdentityPublicKey,
+      clientAuthTranscript,
+      phoneSignature
+    );
+    if (!phoneVerified) {
+      pendingHandshake = null;
+      sendControlMessage(createSecureError({
+        code: "invalid_phone_signature",
+        message: "The iPhone secure signature could not be verified.",
+      }));
+      return;
+    }
+
+    const sharedSecret = diffieHellman({
+      privateKey: createPrivateKey({
+        key: {
+          crv: "X25519",
+          d: base64ToBase64Url(pendingHandshake.macEphemeralPrivateKey),
+          kty: "OKP",
+          x: base64ToBase64Url(pendingHandshake.macEphemeralPublicKey),
+        },
+        format: "jwk",
+      }),
+      publicKey: createPublicKey({
+        key: {
+          crv: "X25519",
+          kty: "OKP",
+          x: base64ToBase64Url(pendingHandshake.phoneEphemeralPublicKey),
+        },
+        format: "jwk",
+      }),
+    });
+    const salt = createHash("sha256").update(pendingHandshake.transcriptBytes).digest();
+    const infoPrefix = [
+      HANDSHAKE_TAG,
+      pendingHandshake.sessionId,
+      currentDeviceState.macDeviceId,
+      pendingHandshake.phoneDeviceId,
+      String(pendingHandshake.keyEpoch),
+    ].join("|");
+
+    activeSession = {
+      sessionId: pendingHandshake.sessionId,
+      keyEpoch: pendingHandshake.keyEpoch,
+      phoneDeviceId: pendingHandshake.phoneDeviceId,
+      phoneIdentityPublicKey: pendingHandshake.phoneIdentityPublicKey,
+      phoneToMacKey: deriveAesKey(sharedSecret, salt, `${infoPrefix}|phoneToMac`),
+      macToPhoneKey: deriveAesKey(sharedSecret, salt, `${infoPrefix}|macToPhone`),
+      lastInboundCounter: -1,
+      nextOutboundCounter: 0,
+      isResumed: false,
+      sendWireMessage: liveSendWireMessage,
+    };
+
+    nextKeyEpoch = pendingHandshake.keyEpoch + 1;
+    if (
+      pendingHandshake.handshakeMode === HANDSHAKE_MODE_QR_BOOTSTRAP
+      || getTrustedPhonePublicKey(currentDeviceState, pendingHandshake.phoneDeviceId)
+    ) {
+      // Lock the trusted phone identity so later reconnects can be verified cleanly.
+      const previousTrustedPhonePublicKey = getTrustedPhonePublicKey(
+        currentDeviceState,
+        pendingHandshake.phoneDeviceId
+      );
+      currentDeviceState = rememberTrustedPhone(
+        currentDeviceState,
+        pendingHandshake.phoneDeviceId,
+        pendingHandshake.phoneIdentityPublicKey
+      );
+      if (previousTrustedPhonePublicKey !== pendingHandshake.phoneIdentityPublicKey) {
+        onTrustedPhoneUpdate?.(currentDeviceState);
+      }
+    }
+    if (pendingHandshake.handshakeMode === HANDSHAKE_MODE_QR_BOOTSTRAP) {
+      resetOutboundReplayState();
+    }
+
+    pendingHandshake = null;
+    sendControlMessage({
+      kind: "secureReady",
+      sessionId,
+      keyEpoch: activeSession.keyEpoch,
+      macDeviceId: currentDeviceState.macDeviceId,
+    });
+  }
+
+  function handleResumeState(message) {
+    if (!activeSession) {
+      return;
+    }
+
+    const incomingSessionId = normalizeNonEmptyString(message.sessionId);
+    const keyEpoch = Number(message.keyEpoch);
+    if (incomingSessionId !== sessionId || keyEpoch !== activeSession.keyEpoch) {
+      return;
+    }
+
+    const lastAppliedBridgeOutboundSeq = Number(message.lastAppliedBridgeOutboundSeq) || 0;
+    lastRelayedBridgeOutboundSeq = lastAppliedBridgeOutboundSeq;
+    const missingEntries = replayableOutboundEntries(lastAppliedBridgeOutboundSeq);
+    activeSession.isResumed = true;
+    for (const entry of missingEntries) {
+      if (!sendBufferedEntry(entry, activeSession.sendWireMessage)) {
+        break;
+      }
+    }
+  }
+
+  function handleEncryptedEnvelope(message, sendControlMessage, onApplicationMess
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' relay/README.md`</summary>
+```
+Chunk ID: 4c22c2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1555
+Output:
+# Relay
+
+This folder contains the public relay and push-service code used by Remodex pairing and trusted reconnect.
+
+The point of keeping this code in the repo is transparency: anyone forking Remodex can inspect the transport boundary, verify the encrypted-session flow, and run a compatible relay of their own. What should stay private is the actual deployed endpoint and any production credentials.
+
+## What It Does
+
+- accepts WebSocket connections at `/relay/{sessionId}`
+- pairs one Mac host with one live mobile client for a session
+- keeps an in-memory index of the current live session for each trusted Mac
+- resolves the current live session for a previously trusted mobile client through an authenticated HTTP lookup
+- forwards secure control messages and encrypted payloads between Mac and the mobile client
+- exposes optional HTTP endpoints for push registration and run-completion alerts only when push is enabled explicitly
+- logs only connection metadata and payload sizes, not plaintext prompts or responses
+
+## What It Does Not Do
+
+- it does not run Codex
+- it does not execute git commands
+- it does not contain the user's repository checkout
+- it does not decrypt Remodex application payloads after the secure session is established
+
+Codex, git, and local file operations still run on the user's Mac.
+
+## Security Model
+
+Remodex uses the relay as a transport hop, not as a trusted application server.
+
+- The pairing QR gives the mobile client the bridge identity public key plus short-lived session details.
+- After the first successful QR bootstrap, the relay can help the mobile client find the Mac's current live session again through a signed trusted-session resolve request.
+- The mobile client and bridge perform a signed handshake, derive shared AES-256-GCM keys with X25519 + HKDF-SHA256, and then encrypt application payloads end to end.
+- The relay can still observe connection metadata and the plaintext secure control messages needed to establish the encrypted session.
+- The relay does not receive plaintext Remodex application payloads after the secure session is active.
+
+## Relay Flow
+
+```mermaid
+flowchart TD
+    A[Mac bridge starts] --> B[Bridge creates sessionId and notification secret]
+    B --> C[Bridge prints QR with relay URL, sessionId, bridge identity key, expiry]
+    B --> D[Mac opens WebSocket to /relay/{sessionId}<br/>x-role: mac]
+    D --> E[Relay creates in-memory session room]
+    D --> E2[Relay records macDeviceId plus trusted phone metadata for live-session resolve]
+
+    C --> F[Mobile client scans QR]
+    F --> G[Mobile client opens WebSocket to /relay/{sessionId}<br/>x-role: iphone or android]
+    G --> H{Mac session live?}
+    H -- No --> I[Relay closes mobile socket<br/>4002 session unavailable]
+    H -- Yes --> J[Relay binds mobile client to that session]
+
+    E --> K[Relay forwards secure control messages]
+    J --> K
+    K --> L[Mac and mobile client exchange signed handshake]
+    L --> M[Both sides derive AES-256-GCM session keys]
+
+    M --> N[Mobile client sends encrypted app messages]
+    M --> O[Mac sends encrypted Codex and bridge responses]
+    N --> P[Relay forwards ciphertext to Mac]
+    O --> Q[Relay forwards ciphertext to mobile client]
+
+    P --> R[Bridge decrypts and routes locally]
+    R --> S[Codex app-server / git / workspace handlers]
+    S --> O
+
+    Q --> T[Mobile client decrypts and renders timeline]
+
+    D --> U[Relay stores per-session notification secret]
+    U --> V[Push registration/completion endpoints only work while live Mac session exists]
+
+    D --> W{Mac reconnects?}
+    W -- Yes --> X[Relay replaces older Mac socket<br/>4001 to old connection]
+    G --> Y{Mobile client reconnects?}
+    Y -- Yes --> Z[Relay replaces older mobile socket<br/>4003 to old connection]
+
+    X --> E
+    Z --> J
+
+    D --> AA{Mac disconnects?}
+    AA -- Yes --> AB[Relay closes mobile socket(s)<br/>4002 Mac disconnected]
+    AB --> AC[Empty session cleaned up after delay]
+
+    T --> AD[Later app reopen]
+    AD --> AE[Mobile client calls POST /v1/trusted/session/resolve]
+    AE --> AF[Relay verifies trusted-device signature, nonce, and freshness]
+    AF --> AG[Relay returns current live sessionId for that Mac]
+    AG --> G
+```
+
+## Protocol Notes
+
+- WebSocket path: `/relay/{sessionId}`
+- required header: `x-role: mac`, `x-role: iphone`, or `x-role: android`
+- close code `4000`: invalid session or role
+- close code `4001`: previous Mac connection replaced
+- close code `4002`: session unavailable / Mac disconnected
+- close code `4003`: previous mobile connection replaced
+
+Optional HTTP endpoints:
+
+- `GET /health`
+- `POST /v1/trusted/session/resolve`
+- `POST /v1/push/session/register-device`
+- `POST /v1/push/session/notify-completion`
+
+The trusted-session resolve endpoint is intended for mobile clients that have already completed the first QR bootstrap. It returns the current live sess
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,300p' phodex-bridge/src/desktop-ipc-action-follower.js`</summary>
+```
+Chunk ID: 364737
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2320
+Output:
+// FILE: desktop-ipc-action-follower.js
+// Purpose: Mirrors live Codex Desktop IPC pending actions to the phone and routes replies back to the desktop runtime.
+// Layer: CLI helper
+// Exports: createDesktopIpcActionFollower, projectPendingDesktopActions
+// Depends on: net, os, path
+
+const net = require("net");
+const os = require("os");
+const path = require("path");
+
+const FRAME_HEADER_BYTES = 4;
+const MAX_FRAME_BYTES = 256 * 1024 * 1024;
+const REQUEST_TIMEOUT_MS = 10_000;
+const DESKTOP_RESUME_METHODS = new Set(["thread/read", "thread/resume"]);
+const ACTION_METHODS = new Set([
+  "item/commandExecution/requestApproval",
+  "item/fileChange/requestApproval",
+  "item/fileRead/requestApproval",
+  "item/tool/requestUserInput",
+]);
+const REPLY_METHOD_BY_ACTION_METHOD = new Map([
+  ["item/commandExecution/requestApproval", "thread-follower-command-approval-decision"],
+  ["item/fileChange/requestApproval", "thread-follower-file-approval-decision"],
+  ["item/fileRead/requestApproval", "thread-follower-file-approval-decision"],
+  ["item/tool/requestUserInput", "thread-follower-submit-user-input"],
+]);
+const METHOD_VERSION_BY_NAME = new Map([
+  ["initialize", 1],
+  ["thread-follower-command-approval-decision", 1],
+  ["thread-follower-file-approval-decision", 1],
+  ["thread-follower-submit-user-input", 1],
+]);
+const APPROVAL_DECISIONS = new Set(["accept", "acceptForSession", "decline", "cancel"]);
+
+// Opens the Desktop IPC bus on demand and exposes Mac-owned pending actions as normal app-server requests.
+function createDesktopIpcActionFollower({
+  sendApplicationResponse,
+  readConversationState = null,
+  logPrefix = "[remodex]",
+  socketPath = resolveDefaultIpcSocketPath(),
+  netModule = net,
+  now = () => Date.now(),
+  requestTimeoutMs = REQUEST_TIMEOUT_MS,
+} = {}) {
+  const ipc = createDesktopIpcClient({
+    socketPath,
+    netModule,
+    now,
+    requestTimeoutMs,
+    logPrefix,
+    onEnvelope,
+    onDisconnect,
+  });
+  const rawStatesByThreadId = new Map();
+  const pendingRoutesByRequestId = new Map();
+  const activeThreadIds = new Set();
+  const recoveringThreadIds = new Set();
+  const queuedChangesByThreadId = new Map();
+
+  function observeInbound(rawMessage) {
+    const message = safeParseJSON(rawMessage);
+    const responseRoute = desktopRouteForResponse(message);
+    if (responseRoute) {
+      submitDesktopActionResponse(responseRoute, message);
+      return true;
+    }
+
+    const method = readString(message?.method);
+    if (!DESKTOP_RESUME_METHODS.has(method)) {
+      return false;
+    }
+
+    const threadId = readThreadId(message?.params);
+    if (!threadId) {
+      return false;
+    }
+
+    activeThreadIds.add(threadId);
+    ipc.ensureConnected();
+    return false;
+  }
+
+  function stopAll() {
+    rawStatesByThreadId.clear();
+    pendingRoutesByRequestId.clear();
+    activeThreadIds.clear();
+    recoveringThreadIds.clear();
+    queuedChangesByThreadId.clear();
+    ipc.close();
+  }
+
+  // Desktop broadcasts carry the live conversation state Litter projects from.
+  function onEnvelope(envelope) {
+    if (envelope?.type !== "broadcast" || envelope.method !== "thread-stream-state-changed") {
+      return;
+    }
+
+    const params = envelope.params || {};
+    const threadId = readString(params.conversationId) || readString(params.conversation_id);
+    if (!threadId || !activeThreadIds.has(threadId)) {
+      return;
+    }
+
+    if (recoveringThreadIds.has(threadId)) {
+      queueThreadChange(threadId, params.change);
+      return;
+    }
+
+    const previousState = rawStatesByThreadId.get(threadId) || null;
+    const nextState = applyConversationStateChange(previousState, params.change);
+    if (!nextState) {
+      if (isPatchChange(params.change)) {
+        const emptyState = createEmptyConversationState();
+        const speculativeState = applyConversationStateChange(emptyState, params.change);
+        const speculativeActions = projectPendingDesktopActions(threadId, speculativeState);
+        if (speculativeActions.length > 0) {
+          rawStatesByThreadId.set(threadId, speculativeState);
+          syncProjectedActions(threadId, speculativeActions);
+          return;
+        }
+
+        if (typeof readConversationState !== "function") {
+          return;
+        }
+
+        queueThreadChange(threadId, params.change);
+        recoverThreadBaseline(threadId);
+      }
+      return;
+    }
+
+    rawStatesByThreadId.set(threadId, nextState);
+    syncProjectedActions(threadId, projectPendingDesktopActions(threadId, nextState));
+  }
+
+  function onDisconnect() {
+    rawStatesByThreadId.clear();
+    pendingRoutesByRequestId.clear();
+    recoveringThreadIds.clear();
+    queuedChangesByThreadId.clear();
+  }
+
+  function syncProjectedActions(threadId, actions) {
+    const nextRequestIds = new Set(actions.map((action) => action.id));
+    for (const [requestId, route] of Array.from(pendingRoutesByRequestId.entries())) {
+      if (
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:46Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' CodexMobile/CodexMobile/Services/CodexService+Transport.swift`</summary>
+```
+Chunk ID: 7f6682
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2411
+Output:
+// FILE: CodexService+Transport.swift
+// Purpose: Outbound JSON-RPC transport and pending-response coordination.
+// Layer: Service
+// Exports: CodexService transport internals
+// Depends on: Network.NWConnection, URLSessionWebSocketTask, CryptoKit, Security, CodexURLSessionWebSocketDelegate
+
+import CryptoKit
+import Foundation
+import Network
+import Security
+
+// Keeps encrypted relay envelopes under one explicit ceiling across all iPhone websocket APIs.
+// Image-heavy thread history and secure-envelope overhead can legitimately exceed 4 MB while
+// reopening a chat, so the limit needs enough headroom for background `thread/read` catches too.
+let codexWebSocketMaximumMessageSizeBytes = 16 * 1024 * 1024
+
+private enum CodexRelayTransportPreference {
+    case manualTCP
+    case networkWebSocket
+
+    var logLabel: String {
+        switch self {
+        case .manualTCP:
+            return "manual TCP websocket"
+        case .networkWebSocket:
+            return "NWConnection websocket"
+        }
+    }
+}
+
+private struct CodexConnectionReadyWaitConfiguration {
+    let logLabel: String
+    let timeoutNanoseconds: UInt64
+    let timeoutMessage: String
+}
+
+private struct CodexManualWebSocketEndpoint {
+    let host: String
+    let port: NWEndpoint.Port
+    let scheme: String
+}
+
+private func codexLogPairingTransport(_ message: String) {
+    print("[PAIRING] \(message)")
+}
+
+extension CodexService {
+    // Rejects oversized relay frames before Network.framework turns them into a raw EMSGSIZE failure.
+    func validateOutgoingWebSocketMessageSize(_ text: String) throws {
+        let payloadSize = Data(text.utf8).count
+        guard payloadSize <= codexWebSocketMaximumMessageSizeBytes else {
+            throw CodexServiceError.invalidInput(
+                "This payload is too large for the relay connection. Try fewer or smaller images and retry."
+            )
+        }
+    }
+
+    // Sends an RPC request and waits for the matching response by request id.
+    // Optional per-call timeout is reserved for non-critical reads that can fail open.
+    func sendRequest(
+        method: String,
+        params: JSONValue?,
+        timeoutNanoseconds: UInt64? = nil,
+        timeoutMessage: String? = nil
+    ) async throws -> RPCMessage {
+        if let requestTransportOverride {
+            return try await requestTransportOverride(method, params)
+        }
+
+        guard isConnected, webSocketConnection != nil || webSocketTask != nil else {
+            throw CodexServiceError.disconnected
+        }
+
+        let requestID: JSONValue = .string(UUID().uuidString)
+        let requestKey = idKey(from: requestID)
+
+        let request = RPCMessage(
+            id: requestID,
+            method: method,
+            params: params,
+            includeJSONRPC: false
+        )
+
+        if method == "turn/start",
+           let collaborationMode = params?.objectValue?["collaborationMode"]?.objectValue?["mode"]?.stringValue {
+            debugRuntimeLog(
+                "rpc send turn/start collaborationMode=\(collaborationMode) thread=\(params?.objectValue?["threadId"]?.stringValue ?? "")"
+            )
+        }
+
+        try Task.checkCancellation()
+
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                pendingRequests[requestKey] = continuation
+                scheduleRequestTimeoutIfNeeded(
+                    requestKey: requestKey,
+                    method: method,
+                    timeoutNanoseconds: timeoutNanoseconds,
+                    timeoutMessage: timeoutMessage
+                )
+
+                Task {
+                    do {
+                        try await sendMessage(request)
+                    } catch {
+                        if shouldTreatSendFailureAsDisconnect(error) {
+                            handleReceiveError(error)
+                            return
+                        }
+
+                        // Avoid double-resume if the request was already completed
+                        // (for example by a disconnect race that fails all pending requests).
+                        if let pendingContinuation = pendingRequests.removeValue(forKey: requestKey) {
+                            pendingContinuation.resume(throwing: error)
+                        }
+                    }
+                }
+            }
+        } onCancel: {
+            Task { @MainActor [weak self] in
+                guard let self,
+                      let continuation = self.pendingRequests.removeValue(forKey: requestKey) else {
+                    return
+                }
+                continuation.resume(throwing: CancellationError())
+            }
+        }
+    }
+
+    // Clears a still-pending request after the caller's timeout so late responses are ignored safely.
+    func scheduleRequestTimeoutIfNeeded(
+        requestKey: String,
+        metho
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:46Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,300p' CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift`</summary>
+```
+Chunk ID: 78a076
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3634
+Output:
+// FILE: CodexService+SecureTransport.swift
+// Purpose: Performs the iPhone-side E2EE handshake, wire control routing, and encrypted envelope handling.
+// Layer: Service
+// Exports: CodexService secure transport helpers
+// Depends on: CryptoKit, Foundation, Security, Network
+
+import CryptoKit
+import Foundation
+import Security
+
+extension CodexService {
+    // Completes the secure handshake before any JSON-RPC traffic is sent over the relay.
+    func performSecureHandshake() async throws {
+        guard let sessionId = normalizedRelaySessionId,
+              let macDeviceId = normalizedRelayMacDeviceId else {
+            throw CodexSecureTransportError.invalidHandshake(
+                "The saved relay pairing is incomplete. Scan a fresh QR code to reconnect."
+            )
+        }
+
+        let trustedMac = trustedMacRegistry.records[macDeviceId]
+        // Fresh QR scans must go through bootstrap once so we verify the scanned session,
+        // instead of silently reusing an older trusted-reconnect path.
+        let handshakeMode: CodexSecureHandshakeMode = (!shouldForceQRBootstrapOnNextHandshake && trustedMac != nil)
+            ? .trustedReconnect
+            : .qrBootstrap
+        let expectedMacIdentityPublicKey: String
+        switch handshakeMode {
+        case .trustedReconnect:
+            expectedMacIdentityPublicKey = trustedMac?.macIdentityPublicKey ?? ""
+            secureConnectionState = .reconnecting
+        case .qrBootstrap:
+            guard let pairingPublicKey = normalizedRelayMacIdentityPublicKey else {
+                throw CodexSecureTransportError.invalidHandshake(
+                    "The initial pairing metadata is missing the Mac identity key. Scan a new QR code to reconnect."
+                )
+            }
+            expectedMacIdentityPublicKey = pairingPublicKey
+            secureConnectionState = .handshaking
+        }
+
+        let phoneEphemeralPrivateKey = Curve25519.KeyAgreement.PrivateKey()
+        let clientNonce = randomSecureNonce()
+        let clientHello = SecureClientHello(
+            protocolVersion: relayProtocolVersion,
+            sessionId: sessionId,
+            handshakeMode: handshakeMode,
+            phoneDeviceId: phoneIdentityState.phoneDeviceId,
+            phoneIdentityPublicKey: phoneIdentityState.phoneIdentityPublicKey,
+            phoneEphemeralPublicKey: phoneEphemeralPrivateKey.publicKey.rawRepresentation.base64EncodedString(),
+            clientNonce: clientNonce.base64EncodedString()
+        )
+        pendingHandshake = CodexPendingHandshake(
+            mode: handshakeMode,
+            transcriptBytes: Data(),
+            phoneEphemeralPrivateKey: phoneEphemeralPrivateKey,
+            phoneDeviceId: phoneIdentityState.phoneDeviceId
+        )
+        try await sendWireControlMessage(clientHello)
+
+        let serverHello = try await waitForMatchingServerHello(
+            expectedSessionId: sessionId,
+            expectedMacDeviceId: macDeviceId,
+            expectedMacIdentityPublicKey: expectedMacIdentityPublicKey,
+            expectedClientNonce: clientHello.clientNonce,
+            clientNonce: clientNonce,
+            phoneDeviceId: phoneIdentityState.phoneDeviceId,
+            phoneIdentityPublicKey: phoneIdentityState.phoneIdentityPublicKey,
+            phoneEphemeralPublicKey: clientHello.phoneEphemeralPublicKey
+        )
+        guard serverHello.protocolVersion == codexSecureProtocolVersion else {
+            presentBridgeUpdatePrompt(
+                message: "This bridge is using a different secure transport version. Update the Remodex package on your computer and try again."
+            )
+            throw CodexSecureTransportError.incompatibleVersion(
+                "This bridge is using a different secure transport version. Update Remodex on the iPhone or Mac and try again."
+            )
+        }
+        guard serverHello.sessionId == sessionId else {
+            throw CodexSecureTransportError.invalidHandshake("The secure bridge session ID did not match the saved pairing.")
+        }
+        guard serverHello.macDeviceId == macDeviceId else {
+            throw CodexSecureTransportError.invalidHandshake("The bridge reported a different Mac identity for this relay session.")
+        }
+        guard serverHello.macIdentityPublicKey == expectedMacIdentityPublicKey else {
+            throw CodexSecureTransportError.invalidHandshake("The secure Mac identity key did not match the paired device.")
+        }
+
+        let serverNonce = Data(base64EncodedOrEmpty: serverHello.serverNonce)
+        let transcriptBytes = codexSecureTranscriptBytes(
+            sessionId: sessionId,
+            protocolVersion: serverHello.protocolVersion,
+            handshakeMode: serverHello.handshakeMode,
+            keyEpoch: serverHello.keyEpoch,
+            macDeviceId: serverHello.macDeviceId,
+            phoneDeviceId: phoneIdentityState.phoneDe
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:46Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' CodexMobile/CodexMobile/Services/CodexService+ThreadsTurns.swift`</summary>
+```
+Chunk ID: fac7b2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2888
+Output:
+// FILE: CodexService+ThreadsTurns.swift
+// Purpose: Thread/turn operations exposed to the UI.
+// Layer: Service
+// Exports: CodexService thread+turn APIs
+// Depends on: CodexThread, JSONValue
+
+import Foundation
+
+private enum ThreadTurnStateSnapshotPolicy {
+    static let recentTurnLimit = 8
+    static let requestTimeoutNanoseconds: UInt64 = 30_000_000_000
+}
+
+private enum ThreadListHydrationPolicy {
+    static let requestTimeoutNanoseconds: UInt64 = 12_000_000_000
+}
+
+extension CodexService {
+    // Polling keeps recent metadata fresh; full list loads are reserved for bootstrap/explicit refresh.
+    var recentActiveThreadListLimit: Int { 70 }
+    var recentArchivedThreadListLimit: Int { 10 }
+
+    // Encodes manual approval replies using the app-server decision object shape.
+    func approvalDecisionResult(_ decision: String) -> JSONValue {
+        .object(["decision": .string(decision)])
+    }
+
+    // Returns the next pending approval for a specific thread, falling back to thread-less requests.
+    func pendingApproval(for threadId: String? = nil) -> CodexApprovalRequest? {
+        guard let normalizedThreadID = normalizedApprovalThreadIdentifier(threadId) else {
+            return pendingApprovals.first
+        }
+
+        return pendingApprovals.first(where: { $0.threadId == normalizedThreadID })
+            ?? pendingApprovals.first(where: { $0.threadId == nil })
+    }
+
+    // Preserves arrival order while replacing retried copies of the same request id.
+    func enqueuePendingApproval(_ request: CodexApprovalRequest) {
+        if let existingIndex = pendingApprovals.firstIndex(where: { $0.id == request.id }) {
+            pendingApprovals[existingIndex] = request
+            return
+        }
+
+        pendingApprovals.append(request)
+    }
+
+    // Removes the exact resolved approval request when the server confirms it is gone.
+    @discardableResult
+    func removePendingApproval(requestID: JSONValue) -> CodexApprovalRequest? {
+        let requestKey = idKey(from: requestID)
+        return removePendingApproval(id: requestKey)
+    }
+
+    // Clears all volatile approval prompts on disconnect or server switch.
+    func clearPendingApprovals() {
+        pendingApprovals.removeAll()
+    }
+
+    func listThreads(limit: Int? = nil) async throws {
+        isLoadingThreads = true
+        defer { isLoadingThreads = false }
+
+        // Sidebar metadata must be complete: capping thread/list hides older project chats.
+        async let activeThreadsFetch = fetchServerThreads(limit: limit)
+        async let archivedThreadsFetch = fetchServerThreads(limit: limit, archived: true)
+
+        let activeThreads = try await activeThreadsFetch
+        let archivedThreads: [CodexThread]
+        do {
+            archivedThreads = try await archivedThreadsFetch
+        } catch {
+            debugSyncLog("thread/list archived fetch failed (non-fatal): \(error.localizedDescription)")
+            archivedThreads = []
+        }
+
+        reconcileLocalThreadsWithServer(activeThreads, serverArchivedThreads: archivedThreads)
+
+        if activeThreadId == nil {
+            activeThreadId = firstLiveThreadID()
+        }
+    }
+
+    // Preserves the older startThread symbol used by most call sites and incremental builds.
+    func startThread(
+        preferredProjectPath: String? = nil,
+        runtimeOverride: CodexThreadRuntimeOverride? = nil
+    ) async throws -> CodexThread {
+        try await startThreadImpl(
+            preferredProjectPath: preferredProjectPath,
+            pendingComposerAction: nil,
+            runtimeOverride: runtimeOverride
+        )
+    }
+
+    // Starts a new thread and seeds a one-shot composer action for the destination thread.
+    func startThread(
+        preferredProjectPath: String? = nil,
+        pendingComposerAction: CodexPendingThreadComposerAction,
+        runtimeOverride: CodexThreadRuntimeOverride? = nil
+    ) async throws -> CodexThread {
+        try await startThreadImpl(
+            preferredProjectPath: preferredProjectPath,
+            pendingComposerAction: pendingComposerAction,
+            runtimeOverride: runtimeOverride
+        )
+    }
+
+    // Starts a new thread and stores it in local state.
+    private func startThreadImpl(
+        preferredProjectPath: String? = nil,
+        pendingComposerAction: CodexPendingThreadComposerAction? = nil,
+        runtimeOverride: CodexThreadRuntimeOverride? = nil
+    ) async throws -> CodexThread {
+        let normalizedPreferredProjectPath = CodexThreadStartProjectBinding.normalizedProjectPath(preferredProjectPath)
+        // Brand-new chats start from app defaults; per-chat overrides are inherited only on continuation.
+        let explicitServiceTier = runtimeOverride?.overridesServiceTier == true
+            ? normalizedServiceTierForSelectedModel(runtimeOverride?.serviceTier)?.rawValue
+            : runtimeServiceTierForTurn()
+        var includesS
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '260,620p' CodexMobile/CodexMobile/Services/CodexService+ThreadsTurns.swift`</summary>
+```
+Chunk ID: 13edf8
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3691
+Output:
+                try await sendTurnStart(
+                    trimmedInput,
+                    attachments: attachments,
+                    skillMentions: skillMentions,
+                    mentionMentions: mentionMentions,
+                    fileMentions: fileMentions,
+                    to: continuationThread.id,
+                    shouldAppendUserMessage: shouldAppendUserMessage,
+                    collaborationMode: effectiveCollaborationMode
+                )
+                activeThreadId = continuationThread.id
+                lastErrorMessage = nil
+                return
+            }
+            throw error
+        }
+
+        activeThreadId = initialThreadId
+    }
+
+    // Requests interruption for the active turn.
+    func interruptTurn(turnId: String?, threadId: String? = nil) async throws {
+        let normalizedThreadID = normalizedInterruptIdentifier(threadId)
+            ?? normalizedInterruptIdentifier(activeThreadId)
+
+        var normalizedTurnID = normalizedInterruptIdentifier(turnId)
+        if normalizedTurnID == nil,
+           let normalizedThreadID {
+            normalizedTurnID = normalizedInterruptIdentifier(activeTurnIdByThread[normalizedThreadID])
+        }
+        if normalizedTurnID == nil {
+            normalizedTurnID = normalizedInterruptIdentifier(activeTurnId)
+        }
+        if normalizedTurnID == nil,
+           let normalizedThreadID {
+            do {
+                normalizedTurnID = try await resolveInFlightTurnID(threadId: normalizedThreadID)
+            } catch {
+                if let serviceError = error as? CodexServiceError,
+                   case .invalidInput(_) = serviceError,
+                   protectedRunningFallbackThreadIDs.contains(normalizedThreadID),
+                   activeTurnID(for: normalizedThreadID) == nil {
+                    demoteVisibleRunningStateToProtectedFallback(for: normalizedThreadID)
+                }
+                lastErrorMessage = userFacingTurnErrorMessageForFooter(from: error)
+                throw error
+            }
+        }
+
+        guard let normalizedTurnID else {
+            throw CodexServiceError.invalidInput("turn/interrupt requires a non-empty turnId")
+        }
+
+        let resolvedThreadID = normalizedThreadID
+            ?? threadIdByTurnID[normalizedTurnID]
+            ?? normalizedInterruptIdentifier(activeThreadId)
+        if let resolvedThreadID {
+            threadIdByTurnID[normalizedTurnID] = resolvedThreadID
+        }
+
+        do {
+            try await sendInterruptRequest(
+                turnId: normalizedTurnID,
+                threadId: resolvedThreadID,
+                useSnakeCaseParams: false
+            )
+            lastErrorMessage = nil
+            return
+        } catch {
+            var finalError: Error = error
+
+            if shouldRetryInterruptWithSnakeCaseParams(error) {
+                do {
+                    try await sendInterruptRequest(
+                        turnId: normalizedTurnID,
+                        threadId: resolvedThreadID,
+                        useSnakeCaseParams: true
+                    )
+                    lastErrorMessage = nil
+                    return
+                } catch {
+                    finalError = error
+                }
+            }
+
+            if let resolvedThreadID,
+               shouldRetryInterruptWithRefreshedTurnID(finalError),
+               let refreshedTurnID = try await resolveInFlightTurnID(threadId: resolvedThreadID),
+               refreshedTurnID != normalizedTurnID {
+                do {
+                    try await sendInterruptRequest(
+                        turnId: refreshedTurnID,
+                        threadId: resolvedThreadID,
+                        useSnakeCaseParams: false
+                    )
+                    setActiveTurnID(refreshedTurnID, for: resolvedThreadID)
+                    threadIdByTurnID[refreshedTurnID] = resolvedThreadID
+                    lastErrorMessage = nil
+                    return
+                } catch {
+                    finalError = error
+                    if shouldRetryInterruptWithSnakeCaseParams(error) {
+                        do {
+                            try await sendInterruptRequest(
+                                turnId: refreshedTurnID,
+                                threadId: resolvedThreadID,
+                                useSnakeCaseParams: true
+                            )
+                            setActiveTurnID(refreshedTurnID, for: resolvedThreadID)
+                            threadIdByTurnID[refreshedTurnID] = resolvedThreadID
+                            lastErrorMessage = nil
+                            return
+                        } catch {
+                            finalError = error
+                        }
+                    }
+                }
+            }
+
+            lastErrorMessage = userFacingTurnErrorMessageForFoot
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:18:59Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "sendTurnStart|turn/start|thread/read|processIncomingText|pendingApprovals|serverRequest" CodexMobile/CodexMobile/Services CodexMobile/CodexMobile/Views/Turn | head -n 220`</summary>
+```
+Chunk ID: dba4ef
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2620
+Output:
+CodexMobile/CodexMobile/Services/CodexService+Sync.swift:191:                // Some servers can temporarily fail thread/read for fresh or stale listeners.
+CodexMobile/CodexMobile/Services/CodexService+Sync.swift:192:                // We archive only after an explicit turn/start send failure confirms missing thread.
+CodexMobile/CodexMobile/Services/CodexService+Sync.swift:193:                debugSyncLog("sync thread/read reported missing thread=\(threadId); waiting for send-time confirmation")
+CodexMobile/CodexMobile/Services/CodexService+Sync.swift:252:        // We archive only on explicit "thread not found" from thread/read/turn/start.
+CodexMobile/CodexMobile/Services/CodexService+Sync.swift:865:        // Long closed chats already have usable local rows. Avoid forcing a full thread/read
+CodexMobile/CodexMobile/Views/Turn/TurnViewModel.swift:853:    // Replaces `@query` with `@plugin` and stores the app-server mention item for turn/start.
+CodexMobile/CodexMobile/Views/Turn/TurnViewModel.swift:884:    // Replaces `$query` with `$skill` and stores the selected skill mention for turn/start.
+CodexMobile/CodexMobile/Services/CodexService+History.swift:2:// Purpose: Parses thread/read history payloads into normalized timeline messages.
+CodexMobile/CodexMobile/Services/CodexService+History.swift:592:            // After a turn is fully closed, thread/read can return the same single assistant
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:221:        processIncomingText(text)
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:640:            processIncomingText(payload.payloadText)
+CodexMobile/CodexMobile/Services/CodexService+Review.swift:44:    // Keeps review-start aligned with turn/start by recovering stale archived threads before retrying.
+CodexMobile/CodexMobile/Services/CodexService+Review.swift:152:            // Reuse the turn/start compatibility path so review runs honor the selected access mode.
+CodexMobile/CodexMobile/Services/CodexService+ThreadProjectRouting.swift:81:                // The immediate sync is safe because thread/read and thread/resume server merges
+CodexMobile/CodexMobile/Services/CodexService+Pets.swift:12:    let pendingApprovals: [String]
+CodexMobile/CodexMobile/Services/CodexService+Pets.swift:92:            pendingApprovals: pendingApprovals.map { "\($0.id):\($0.threadId ?? "")" }.sorted(),
+CodexMobile/CodexMobile/Services/CodexService+Pets.swift:242:           let activeApproval = pendingApprovals.first(where: { $0.threadId == activeThreadId }) {
+CodexMobile/CodexMobile/Services/CodexService+Pets.swift:245:        return pendingApprovals.first
+CodexMobile/CodexMobile/Services/CodexService+Transport.swift:14:// reopening a chat, so the limit needs enough headroom for background `thread/read` catches too.
+CodexMobile/CodexMobile/Services/CodexService+Transport.swift:84:        if method == "turn/start",
+CodexMobile/CodexMobile/Services/CodexService+Transport.swift:87:                "rpc send turn/start collaborationMode=\(collaborationMode) thread=\(params?.objectValue?["threadId"]?.stringValue ?? "")"
+CodexMobile/CodexMobile/Services/CodexService+WorkspaceCheckpoints.swift:118:    // Starts pre-turn checkpointing early; sendTurnStart awaits it before the runtime can mutate files.
+CodexMobile/CodexMobile/Services/CodexService+WorkspaceCheckpoints.swift:130:    // Links the async pre-send snapshot to the real turn id without delaying turn/start completion.
+CodexMobile/CodexMobile/Services/CodexService+ThreadHistoryPagination.swift:18:    // Huge desktop transcripts can make thread/read stall before the bridge can compact the payload.
+CodexMobile/CodexMobile/Services/CodexService+ThreadHistoryPagination.swift:89:            method: "thread/read",
+CodexMobile/CodexMobile/Services/CodexService+ThreadHistoryPagination.swift:98:            throw CodexServiceError.invalidResponse("thread/read response missing thread payload")
+CodexMobile/CodexMobile/Services/CodexService+ThreadHistoryPagination.swift:648:            message.localizedCaseInsensitiveContains("thread/read")
+CodexMobile/CodexMobile/Services/CodexService+Messages.swift:11:    // Transient thread/read failures should self-heal, but with a small delay so we do not
+CodexMobile/CodexMobile/Services/CodexService+Messages.swift:1058:                                debugSyncLog("legacy thread/read timed out for thread=\(threadId); showing local timeline while history is deferred")
+CodexMobile/CodexMobile/Services/CodexService+Messages.swift:1094:                        debugSyncLog("legacy thread/read timed out for thread=\(threadId); showing local timeline while history is deferred")
+CodexMobile/CodexMobile/Services/CodexService+Messages.swift:1209:    // Extracts context window usage from thread/read response if the runtime includes it.
+CodexMobile/CodexMobile/Services/CodexService+Mess
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:06Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1080,1215p' CodexMobile/CodexMobile/Services/CodexService+ThreadsTurns.swift`</summary>
+```
+Chunk ID: 2df5cb
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1469
+Output:
+                }
+
+                if let existingTurnID = activeTurnID(for: normalizedThreadID) {
+                    setActiveTurnID(nil, for: normalizedThreadID)
+                    if threadIdByTurnID[existingTurnID] == normalizedThreadID {
+                        threadIdByTurnID.removeValue(forKey: existingTurnID)
+                    }
+                    if activeTurnId == existingTurnID {
+                        activeTurnId = nil
+                    }
+                }
+                return true
+            } catch {
+                debugSyncLog("in-flight turn refresh failed thread=\(normalizedThreadID): \(error.localizedDescription)")
+                return false
+            }
+        }
+
+        turnStateRefreshTaskByThreadID[normalizedThreadID] = task
+        return await task.value
+    }
+
+    func sendTurnStart(
+        _ userInput: String,
+        attachments: [CodexImageAttachment] = [],
+        skillMentions: [CodexTurnSkillMention] = [],
+        mentionMentions: [CodexTurnMention] = [],
+        fileMentions: [String] = [],
+        to threadId: String,
+        shouldAppendUserMessage: Bool = true,
+        collaborationMode: CodexCollaborationModeKind? = nil
+    ) async throws {
+        let automaticTitleSeed = shouldAppendUserMessage
+            ? automaticThreadTitleSeedIfNeeded(
+                userInput: userInput,
+                attachments: attachments,
+                threadId: threadId
+            )
+            : nil
+        let pendingMessageId = shouldAppendUserMessage
+            ? appendUserMessage(
+                threadId: threadId,
+                text: userInput,
+                attachments: attachments,
+                fileMentions: fileMentions
+            )
+            : ""
+        activeThreadId = threadId
+        markThreadAsRunning(threadId)
+        setProtectedRunningFallback(true, for: threadId)
+        let messageStartCheckpointTask = scheduleMessageStartWorkspaceCheckpointIfPossible(
+            threadId: threadId,
+            messageId: pendingMessageId
+        )
+
+        var includeStructuredSkillItems = supportsStructuredSkillInput && !skillMentions.isEmpty
+        var includeStructuredMentionItems = supportsStructuredMentionInput && !mentionMentions.isEmpty
+        var imageURLKey = "url"
+        var effectiveCollaborationMode = supportsTurnCollaborationMode ? collaborationMode : nil
+        var didDowngradePlanModeForRuntime = false
+        var includesServiceTier = runtimeServiceTierForTurn(threadId: threadId) != nil
+
+        if collaborationMode != nil, effectiveCollaborationMode == nil {
+            debugRuntimeLog(
+                "turn/start dropping collaborationMode requested=\(collaborationMode?.rawValue ?? "") thread=\(threadId) supportsTurnCollaborationMode=\(supportsTurnCollaborationMode)"
+            )
+        }
+
+        while true {
+            do {
+                let requestParams = try buildTurnStartRequestParams(
+                    threadId: threadId,
+                    userInput: userInput,
+                    attachments: attachments,
+                    skillMentions: skillMentions,
+                    mentionMentions: mentionMentions,
+                    imageURLKey: imageURLKey,
+                    includeStructuredSkillItems: includeStructuredSkillItems,
+                    includeStructuredMentionItems: includeStructuredMentionItems,
+                    collaborationMode: effectiveCollaborationMode,
+                    includeServiceTier: includesServiceTier
+                )
+                // The pre-turn snapshot must settle before the runtime can mutate files.
+                if let messageStartCheckpointTask {
+                    await messageStartCheckpointTask.value
+                }
+                let response = try await sendRequestWithSandboxFallback(
+                    method: "turn/start",
+                    baseParams: requestParams
+                )
+                let resolvedTurnID = handleSuccessfulTurnStartResponse(
+                    response,
+                    pendingMessageId: pendingMessageId,
+                    threadId: threadId
+                )
+                if let resolvedTurnID {
+                    scheduleMessageStartWorkspaceCheckpointCopyIfPossible(
+                        threadId: threadId,
+                        messageId: pendingMessageId,
+                        turnId: resolvedTurnID
+                    )
+                }
+                scheduleAutomaticThreadTitleGenerationIfNeeded(
+                    seed: automaticTitleSeed,
+                    threadId: threadId,
+                    attachments: attachments
+                )
+                if didDowngradePlanModeForRuntime {
+                    appendSystemMessage(
+                        threadId: threadId,
+                        text: "Plan mode is not supported by this runtime. Sent as a normal turn instead."
+             
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:06Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,330p' CodexMobile/CodexMobile/Services/CodexService+Incoming.swift`</summary>
+```
+Chunk ID: 7f2ae5
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2881
+Output:
+// FILE: CodexService+Incoming.swift
+// Purpose: Inbound message decoding and event routing.
+// Layer: Service
+// Exports: CodexService inbound handlers
+// Depends on: RPCMessage
+
+import Foundation
+
+typealias IncomingParamsObject = [String: JSONValue]
+
+private struct CommandExecutionMessageContext {
+    let threadId: String
+    let turnId: String?
+    let itemId: String?
+}
+
+// Off-actor wire message classification and JSON-RPC decoding so transport callbacks
+// can parse before dispatching typed results to MainActor.
+enum WireMessagePreDecoder {
+    enum Result: Sendable {
+        case message(RPCMessage)
+        case decodeFailed
+        case invalidUTF8
+    }
+
+    struct Classification: Sendable {
+        let isSecure: Bool
+        let rpcResult: Result?
+    }
+
+    private static let secureKindValues = [
+        "\"serverHello\"", "\"secureReady\"", "\"secureError\"", "\"encryptedEnvelope\""
+    ]
+
+    static func decodeRPCMessage(from text: String) -> Result {
+        guard let data = text.data(using: .utf8) else { return .invalidUTF8 }
+        do {
+            let message = try JSONDecoder().decode(RPCMessage.self, from: data)
+            return .message(message)
+        } catch {
+            return .decodeFailed
+        }
+    }
+
+    static func classify(_ text: String) -> Classification {
+        if text.contains("\"kind\":") {
+            for value in secureKindValues {
+                if text.contains(value) {
+                    return Classification(isSecure: true, rpcResult: nil)
+                }
+            }
+        }
+        return Classification(isSecure: false, rpcResult: decodeRPCMessage(from: text))
+    }
+}
+
+extension CodexService {
+    func processIncomingText(_ text: String) {
+        guard let payloadData = text.data(using: .utf8) else {
+            return
+        }
+
+        do {
+            let message = try decoder.decode(RPCMessage.self, from: payloadData)
+            handleIncomingRPCMessage(message)
+        } catch {
+            lastErrorMessage = "Unable to decode server payload"
+        }
+    }
+
+    // Handles a pre-decoded RPC message from off-actor transport paths.
+    func handleDecodedRPCResult(_ result: WireMessagePreDecoder.Result, rawText: String) {
+        switch result {
+        case .message(let message):
+            lastRawMessage = rawText
+            handleIncomingRPCMessage(message)
+        case .decodeFailed:
+            lastErrorMessage = "Unable to decode server payload"
+        case .invalidUTF8:
+            break
+        }
+    }
+
+    func handleIncomingRPCMessage(_ message: RPCMessage) {
+        if let method = message.method {
+            let normalizedMethod = normalizedIncomingMethodName(method)
+            if let requestID = message.id {
+                handleServerRequest(method: normalizedMethod, requestID: requestID, params: message.params)
+            } else {
+                handleNotification(method: normalizedMethod, params: message.params)
+            }
+            return
+        }
+
+        guard let responseID = message.id else {
+            return
+        }
+
+        let requestKey = idKey(from: responseID)
+        guard let continuation = pendingRequests.removeValue(forKey: requestKey) else {
+            return
+        }
+
+        if let rpcError = message.error {
+            continuation.resume(throwing: CodexServiceError.rpcError(rpcError))
+        } else {
+            continuation.resume(returning: message)
+        }
+    }
+
+    // Handles server-initiated RPC requests like approval prompts.
+    func handleServerRequest(method: String, requestID: JSONValue, params: JSONValue?) {
+        if method == "item/tool/requestUserInput" || method == "tool/requestUserInput" {
+            let paramsObject = params?.objectValue
+            debugRuntimeLog(
+                "rpc request \(method) thread=\(paramsObject?["threadId"]?.stringValue ?? "") turn=\(paramsObject?["turnId"]?.stringValue ?? "") item=\(paramsObject?["itemId"]?.stringValue ?? "")"
+            )
+            handleStructuredUserInputRequest(
+                requestID: requestID,
+                paramsObject: paramsObject
+            )
+            return
+        }
+
+        if method == "item/commandExecution/requestApproval"
+            || method == "item/fileChange/requestApproval"
+            || method.hasSuffix("requestApproval") {
+            let paramsObject = params?.objectValue
+            let request = CodexApprovalRequest(
+                id: idKey(from: requestID),
+                requestID: requestID,
+                method: method,
+                command: paramsObject?["command"]?.stringValue,
+                reason: paramsObject?["reason"]?.stringValue,
+                threadId: paramsObject?["threadId"]?.stringValue,
+                turnId: paramsObject?["turnId"]?.stringValue,
+                params: params
+            )
+
+            if selectedAccessMode == .fullAccess {
+ 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:06Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' CodexMobile/CodexMobile/Services/CodexService+Sync.swift`</summary>
+```
+Chunk ID: 7ea393
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2535
+Output:
+// FILE: CodexService+Sync.swift
+// Purpose: Near-real-time sync loop and server-authoritative thread reconciliation.
+// Layer: Service
+// Exports: CodexService sync APIs
+// Depends on: CodexThread, CodexServiceError
+
+import Foundation
+import UIKit
+
+private final class BackgroundTaskIdentifierBox: @unchecked Sendable {
+    var taskID: UIBackgroundTaskIdentifier = .invalid
+}
+
+extension CodexService {
+    struct RunningThreadCatchupOutcome: Equatable {
+        let didRefreshTurnState: Bool
+        let isRunning: Bool
+        let didRunForcedResume: Bool
+    }
+
+    func startSyncLoop() {
+        guard canRunRealtimeSyncLoop else {
+            stopSyncLoop()
+            return
+        }
+
+        stopSyncLoop()
+        debugSyncLog("sync loop start")
+
+        // Foreground polling is intentionally more aggressive so desktop-authored changes
+        // feel closer to live on iPhone even when Codex.app itself doesn't push updates.
+        let listIntervalForegroundNs: UInt64 = 10_000_000_000
+        let listIntervalBackgroundNs: UInt64 = 75_000_000_000
+        let historyIntervalForegroundNs: UInt64 = 3_000_000_000
+        let historyIntervalForegroundMirroredNs: UInt64 = 1_000_000_000
+        let historyIntervalBackgroundIdleNs: UInt64 = 90_000_000_000
+        let historyIntervalBackgroundRunningNs: UInt64 = 12_000_000_000
+        let watchIntervalForegroundNs: UInt64 = 2_000_000_000
+        let watchIntervalBackgroundNs: UInt64 = 15_000_000_000
+
+        threadListSyncTask = Task { [weak self] in
+            while let self, !Task.isCancelled {
+                await self.syncThreadsList()
+                await self.refreshInactiveRunningBadgeThreads()
+                let interval = self.isAppInForeground ? listIntervalForegroundNs : listIntervalBackgroundNs
+                try? await Task.sleep(nanoseconds: interval)
+            }
+        }
+
+        activeThreadSyncTask = Task { [weak self] in
+            while let self, !Task.isCancelled {
+                if let threadId = self.activeThreadId {
+                    let hasActiveOrRunningTurn = self.threadHasActiveOrRunningTurn(threadId)
+                    let wantsMirroredRunningCatchup = self.shouldPrioritizeMirroredRunningCatchup(threadId)
+                    await self.syncActiveThreadState(threadId: threadId)
+                    let interval: UInt64
+                    if self.isAppInForeground {
+                        interval = wantsMirroredRunningCatchup
+                            ? historyIntervalForegroundMirroredNs
+                            : historyIntervalForegroundNs
+                    } else if hasActiveOrRunningTurn {
+                        interval = historyIntervalBackgroundRunningNs
+                    } else {
+                        interval = historyIntervalBackgroundIdleNs
+                    }
+                    try? await Task.sleep(nanoseconds: interval)
+                    continue
+                }
+                let interval = self.isAppInForeground ? historyIntervalForegroundNs : historyIntervalBackgroundIdleNs
+                try? await Task.sleep(nanoseconds: interval)
+            }
+        }
+
+        runningThreadWatchSyncTask = Task { [weak self] in
+            while let self, !Task.isCancelled {
+                await self.refreshInactiveRunningBadgeThreads()
+                let interval = self.isAppInForeground ? watchIntervalForegroundNs : watchIntervalBackgroundNs
+                try? await Task.sleep(nanoseconds: interval)
+            }
+        }
+
+        requestImmediateSync(threadId: activeThreadId)
+    }
+
+    func stopSyncLoop() {
+        threadListSyncTask?.cancel()
+        threadListSyncTask = nil
+
+        activeThreadSyncTask?.cancel()
+        activeThreadSyncTask = nil
+
+        runningThreadWatchSyncTask?.cancel()
+        runningThreadWatchSyncTask = nil
+    }
+
+    func setForegroundState(_ isForeground: Bool) {
+        guard isAppInForeground != isForeground else {
+            return
+        }
+
+        isAppInForeground = isForeground
+        if isForeground {
+            if isConnected && isInitialized {
+                startSyncLoop()
+                requestImmediateSync(threadId: activeThreadId)
+                // Re-check bridge-managed state when the app becomes active again.
+                Task { @MainActor [weak self] in
+                    await self?.refreshBridgeManagedState(allowAvailableBridgeUpdatePrompt: true)
+                }
+            } else {
+                stopSyncLoop()
+            }
+        } else {
+            if isConnected && isInitialized {
+                startSyncLoop()
+                requestImmediateSync(threadId: activeThreadId)
+            } else {
+                stopSyncLoop()
+            }
+        }
+        updateBackgroundRunGraceTask()
+    }
+
+    func requestImmediateSync(threadId: String? = nil) {
+        guard canRunRealtimeSyncLoop else {
+            return
+        
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:13Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "connect\(|connectToRelay|trusted.*resolve|resolveTrusted|pairing|performSecureHandshake|startSyncLoop|initialize|thread/list" CodexMobile/CodexMobile/Services/CodexService+Connection.swift CodexMobile/CodexMobile/Services/CodexService+TrustedPairPresentation.swift CodexMobile/CodexMobile/Services/CodexService+Status.swift CodexMobile/CodexMobile/Services/CodexService.swift`</summary>
+```
+Chunk ID: 7e0ad1
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1547
+Output:
+CodexMobile/CodexMobile/Services/CodexService.swift:72:    // Waits for URLSession to confirm the websocket handshake before connect() continues.
+CodexMobile/CodexMobile/Services/CodexService.swift:470:    // Keeps the trusted-session HTTP lookup cancellable so manual retry can preempt a stuck resolve.
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:12:    // Only close codes that prove the saved pairing/session can no longer be reused
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:23:    // Models how one socket failure should affect reconnect state, pairing persistence, and UI copy.
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:31:    // Opens the WebSocket and performs initialize/initialized handshake.
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:32:    func connect(
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:96:            try await performSecureHandshake()
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:100:            try await initializeSession()
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:108:            startSyncLoop()
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:130:            await disconnect(preserveReconnectIntent: shouldAutoReconnectOnForeground)
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:139:    func disconnect(preserveReconnectIntent: Bool = false) async {
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:219:    // Clears all remembered relay metadata when the pairing itself is no longer trustworthy.
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:248:    func clearStaleSavedRelaySessionForTrustedReconnect() {
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:305:    func initializeSession() async throws {
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:323:            let initializeResponse = try await sendRequest(
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:324:                method: "initialize",
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:329:            learnTurnPaginationSupportFromInitializeResponse(initializeResponse)
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:330:            // A successful modern initialize means the runtime accepted the experimental
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:334:            debugRuntimeLog("initialize success experimentalApi=true")
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:356:                let initializeResponse = try await sendRequest(
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:357:                    method: "initialize",
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:362:                learnTurnPaginationSupportFromInitializeResponse(initializeResponse)
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:370:            debugRuntimeLog("initialize fallback experimentalApi=false")
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:373:        try await sendNotification(method: "initialized", params: nil)
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:377:    // Converts a bridge-declared "your iPhone app is too old" initialize failure into
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:437:    // Classifies socket failures so transient relay hiccups reconnect, while dead pairings are forgotten.
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:634:        await disconnect(preserveReconnectIntent: preserveReconnectIntent)
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:670:            clearStaleSavedRelaySessionForTrustedReconnect()
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:687:        // stale live sessions recover through trusted resolve instead of immediate QR.
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:690:                ?? "This relay pairing is no longer valid. Scan a new QR code to reconnect.")
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:693:        let isBenignDisconnect = isBenignBackgroundDisconnect(error)
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:728:    // Detects runtimes that still reject `initialize.capabilities`.
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:752:    // Uses the documented experimental listing endpoint instead of assuming initialize implies plan support.
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:846:    func isBenignBackgroundDisconnect(_ error: Error) -> Bool {
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:870:    func shouldTreatSendFailureAsDisconnect(_ error: Error) -> Bool {
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:871: 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:13Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,320p' CodexMobile/CodexMobile/Services/CodexService+Connection.swift`</summary>
+```
+Chunk ID: 604a4e
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3332
+Output:
+// FILE: CodexService+Connection.swift
+// Purpose: Connection lifecycle and initialization handshake.
+// Layer: Service
+// Exports: CodexService connection APIs
+// Depends on: Network.NWConnection, UIKit
+
+import Foundation
+import Network
+import UIKit
+
+extension CodexService {
+    // Only close codes that prove the saved pairing/session can no longer be reused
+    // should force a QR reset. Temporary delivery loss uses the dedicated `4004`
+    // close so `4002` can stay available for "session unavailable right now" cases.
+    private static let permanentRelayCloseCodeRawValues: Set<UInt16> = [4000, 4001, 4003]
+    private static let explicitRelayDropCloseCodeRawValues: Set<UInt16> = [4004]
+    private static let maxTrustedReconnectFailures = 3
+    private static let connectionBootstrapRequestTimeoutNanoseconds: UInt64 = 12_000_000_000
+    private static let planModeProbeTimeoutNanoseconds: UInt64 = 5_000_000_000
+    private static let trustedReconnectRecoveryMessage =
+        "Secure reconnect could not be restored from the saved session. Try reconnecting again."
+
+    // Models how one socket failure should affect reconnect state, pairing persistence, and UI copy.
+    private struct ReceiveErrorDisposition {
+        let shouldClearSavedRelaySession: Bool
+        let shouldAutoReconnectOnForeground: Bool
+        let connectionRecoveryState: CodexConnectionRecoveryState
+        let lastErrorMessage: String?
+    }
+
+    // Opens the WebSocket and performs initialize/initialized handshake.
+    func connect(
+        serverURL: String,
+        token: String,
+        role: String? = nil,
+        performInitialSync: Bool = true
+    ) async throws {
+        guard !isConnecting else {
+            lastErrorMessage = "Connection already in progress"
+            throw CodexServiceError.invalidInput("Connection already in progress")
+        }
+
+        isConnecting = true
+        defer { isConnecting = false }
+
+        await prepareForConnectionAttempt(preserveReconnectIntent: true)
+
+        let normalizedServerURL = serverURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let url = try validateConnectionURL(normalizedServerURL)
+        try await requestLocalNetworkAuthorizationIfNeeded(for: url)
+        let serverIdentity = canonicalServerIdentity(for: url)
+        if let previousIdentity = connectedServerIdentity, previousIdentity != serverIdentity {
+            resetThreadRuntimeStateForServerSwitch()
+        }
+        connectedServerIdentity = serverIdentity
+
+        let trimmedToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        let transport: CodexWebSocketTransport
+        do {
+            transport = try await establishWebSocketConnection(url: url, token: trimmedToken, role: role)
+        } catch {
+            let friendlyMessage = userFacingConnectError(
+                error: error,
+                attemptedURL: normalizedServerURL,
+                host: url.host
+            )
+            if isRecoverableTransientConnectionError(error) || isRetryableSavedSessionConnectError(error) {
+                connectionRecoveryState = .retrying(attempt: 0, message: recoveryStatusMessage(for: error))
+                lastErrorMessage = retryableSessionUnavailableMessage(forConnectError: error)
+                throw error
+            } else {
+                lastErrorMessage = friendlyMessage
+            }
+            throw CodexServiceError.invalidInput(friendlyMessage)
+        }
+        switch transport {
+        case .network(let connection):
+            usesManualWebSocketTransport = false
+            webSocketConnection = connection
+            startReceiveLoop(with: connection)
+        case .manualTCP(let connection):
+            usesManualWebSocketTransport = true
+            manualWebSocketReadBuffer = Data()
+            webSocketConnection = connection
+            startManualReceiveLoop(with: connection)
+        case .urlSession(let session, let task):
+            usesManualWebSocketTransport = false
+            webSocketSession = session
+            webSocketTask = task
+            startReceiveLoop(with: task)
+        }
+        clearHydrationCaches()
+        let isTrustedReconnectAttempt = hasTrustedReconnectContext
+
+        do {
+            try await performSecureHandshake()
+
+            isConnected = true
+            lastErrorMessage = nil
+            try await initializeSession()
+            shouldAutoReconnectOnForeground = false
+            connectionRecoveryState = .idle
+            trustedReconnectFailureCount = 0
+            if secureSession != nil {
+                secureConnectionState = .encrypted
+            }
+
+            startSyncLoop()
+            // Push registration is best-effort and talks to the bridge, so it must not
+            // hold the main connect path hostage when the managed backend is slow.
+            Task { @MainActor [weak self] in
+                await se
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:13Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' phodex-bridge/src/secure-device-state.js`</summary>
+```
+Chunk ID: 179c74
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1974
+Output:
+// FILE: secure-device-state.js
+// Purpose: Persists canonical bridge identity, trusted-phone state, and last seen iPhone app version for local QR pairing.
+// Layer: CLI helper
+// Exports: loadOrCreateBridgeDeviceState, readBridgeDeviceState, resetBridgeDeviceState, rememberTrustedPhone, rememberLastSeenPhoneAppVersion, getTrustedPhonePublicKey, resolveBridgeRelaySession
+// Depends on: fs, os, path, crypto, child_process
+
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { randomUUID, generateKeyPairSync } = require("crypto");
+const { execFileSync } = require("child_process");
+
+const DEFAULT_STORE_DIR = path.join(os.homedir(), ".remodex");
+const DEFAULT_STORE_FILE = path.join(DEFAULT_STORE_DIR, "device-state.json");
+const KEYCHAIN_SERVICE = "com.remodex.bridge.device-state";
+const KEYCHAIN_ACCOUNT = "default";
+let hasLoggedKeychainMismatch = false;
+
+// Loads the canonical bridge state or bootstraps a fresh one when no trusted state exists yet.
+function loadOrCreateBridgeDeviceState() {
+  const fileRecord = readCanonicalFileStateRecord();
+  const keychainRecord = readKeychainStateRecord();
+
+  if (fileRecord.state) {
+    reconcileLegacyKeychainMirror(fileRecord.state, keychainRecord);
+    return fileRecord.state;
+  }
+
+  if (fileRecord.error) {
+    if (keychainRecord.state) {
+      warnOnce(
+        "[remodex] Recovering the canonical device-state.json from the legacy Keychain pairing mirror."
+      );
+      writeBridgeDeviceState(keychainRecord.state);
+      return keychainRecord.state;
+    }
+    throw corruptedStateError("device-state.json", fileRecord.error);
+  }
+
+  if (keychainRecord.error) {
+    warnOnce(
+      "[remodex] Ignoring unreadable legacy Keychain pairing mirror; generating a fresh canonical device-state.json."
+    );
+    const nextState = createBridgeDeviceState();
+    writeBridgeDeviceState(nextState);
+    return nextState;
+  }
+
+  if (keychainRecord.state) {
+    writeBridgeDeviceState(keychainRecord.state);
+    return keychainRecord.state;
+  }
+
+  const nextState = createBridgeDeviceState();
+  writeBridgeDeviceState(nextState);
+  return nextState;
+}
+
+function readBridgeDeviceState() {
+  const fileRecord = readCanonicalFileStateRecord();
+  if (fileRecord.state) {
+    return fileRecord.state;
+  }
+
+  const keychainRecord = readKeychainStateRecord();
+  return keychainRecord.state || null;
+}
+
+// Removes the saved bridge identity/trust state so the next `remodex up` requires a fresh QR pairing.
+function resetBridgeDeviceState() {
+  const removedCanonicalFile = deleteCanonicalFileState();
+  const removedKeychainMirror = deleteKeychainStateString();
+  return {
+    hadState: removedCanonicalFile || removedKeychainMirror,
+    removedCanonicalFile,
+    removedKeychainMirror,
+  };
+}
+
+// Generates a fresh relay session for every bridge launch so QR pairing stays explicit per-run.
+function resolveBridgeRelaySession(state, { persist = true } = {}) {
+  return {
+    deviceState: state,
+    isPersistent: false,
+    sessionId: randomUUID(),
+  };
+}
+
+// Persists the trusted iPhone identity so reconnects can be authenticated during the current pairing flow.
+function rememberTrustedPhone(state, phoneDeviceId, phoneIdentityPublicKey, { persist = true } = {}) {
+  const normalizedDeviceId = normalizeNonEmptyString(phoneDeviceId);
+  const normalizedPublicKey = normalizeNonEmptyString(phoneIdentityPublicKey);
+  if (!normalizedDeviceId || !normalizedPublicKey) {
+    return state;
+  }
+
+  // Remodex supports one trusted iPhone per Mac, so a new trust record replaces old ones.
+  const nextState = normalizeBridgeDeviceState({
+    ...state,
+    trustedPhones: {
+      [normalizedDeviceId]: normalizedPublicKey,
+    },
+  });
+  if (persist) {
+    writeBridgeDeviceState(nextState);
+  }
+  return nextState;
+}
+
+function rememberLastSeenPhoneAppVersion(state, phoneAppVersion, { persist = true } = {}) {
+  const normalizedPhoneAppVersion = normalizeNonEmptyString(phoneAppVersion);
+  if (!normalizedPhoneAppVersion) {
+    return state;
+  }
+
+  const nextState = normalizeBridgeDeviceState({
+    ...state,
+    lastSeenPhoneAppVersion: normalizedPhoneAppVersion,
+  });
+  if (persist) {
+    writeBridgeDeviceState(nextState);
+  }
+  return nextState;
+}
+
+function getTrustedPhonePublicKey(state, phoneDeviceId) {
+  const normalizedDeviceId = normalizeNonEmptyString(phoneDeviceId);
+  if (!normalizedDeviceId) {
+    return null;
+  }
+  return state.trustedPhones?.[normalizedDeviceId] || null;
+}
+
+function hasTrustedPhones(state) {
+  return Object.keys(state?.trustedPhones || {}).length > 0;
+}
+
+function createBridgeDeviceState() {
+  const { publicKey, privateKey } = generateKeyPairSync("ed25519");
+  const privateJwk = privateKey.export({ format: "jwk" });
+  const publicJwk = publicKey.export({ format: "jwk" });
+
+  return {
+    version: 1,
+    macDeviceId: randomUUID(),
+    macIdentityPublicKey: base64UrlToBase64(publi
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:16Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '305,390p' CodexMobile/CodexMobile/Services/CodexService+Connection.swift && sed -n '430,530p' CodexMobile/CodexMobile/Services/CodexService+Connection.swift`</summary>
+```
+Chunk ID: 8ba617
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2094
+Output:
+    func initializeSession() async throws {
+        let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
+        let clientInfo: JSONValue = .object([
+            "name": .string("codexmobile_ios"),
+            "title": .string("CodexMobile iOS"),
+            "version": .string(appVersion),
+        ])
+
+        // Ask for experimental APIs up front so plan mode can use `collaborationMode`
+        // on runtimes that support it, while keeping a legacy handshake fallback.
+        let modernParams: JSONValue = .object([
+            "clientInfo": clientInfo,
+            "capabilities": .object([
+                "experimentalApi": .bool(true),
+            ]),
+        ])
+
+        do {
+            let initializeResponse = try await sendRequest(
+                method: "initialize",
+                params: modernParams,
+                timeoutNanoseconds: Self.connectionBootstrapRequestTimeoutNanoseconds,
+                timeoutMessage: "Connection timed out while reconnecting. Try again."
+            )
+            learnTurnPaginationSupportFromInitializeResponse(initializeResponse)
+            // A successful modern initialize means the runtime accepted the experimental
+            // capability negotiation. Keep plan-mode sends enabled unless the runtime
+            // explicitly rejects `collaborationMode` on a turn request later.
+            supportsTurnCollaborationMode = true
+            debugRuntimeLog("initialize success experimentalApi=true")
+
+            let runtimeReportedPlanSupport = await runtimeSupportsPlanCollaborationMode()
+            debugRuntimeLog("collaborationMode/list plan=\(runtimeReportedPlanSupport)")
+            if !runtimeReportedPlanSupport {
+                debugRuntimeLog(
+                    "collaborationMode/list did not report plan; will still attempt collaborationMode until runtime rejects it"
+                )
+            }
+        } catch {
+            if let incompatibleAppVersionError = incompatibleBridgeAppVersionError(from: error) {
+                throw incompatibleAppVersionError
+            }
+
+            guard shouldRetryInitializeWithoutCapabilities(error) else {
+                throw error
+            }
+
+            let legacyParams: JSONValue = .object([
+                "clientInfo": clientInfo,
+            ])
+            do {
+                let initializeResponse = try await sendRequest(
+                    method: "initialize",
+                    params: legacyParams,
+                    timeoutNanoseconds: Self.connectionBootstrapRequestTimeoutNanoseconds,
+                    timeoutMessage: "Connection timed out while reconnecting. Try again."
+                )
+                learnTurnPaginationSupportFromInitializeResponse(initializeResponse)
+            } catch {
+                if let incompatibleAppVersionError = incompatibleBridgeAppVersionError(from: error) {
+                    throw incompatibleAppVersionError
+                }
+                throw error
+            }
+            supportsTurnCollaborationMode = false
+            debugRuntimeLog("initialize fallback experimentalApi=false")
+        }
+
+        try await sendNotification(method: "initialized", params: nil)
+        isInitialized = true
+    }
+
+    // Converts a bridge-declared "your iPhone app is too old" initialize failure into
+    // a direct connect error and surfaces the app-update recovery sheet.
+    func incompatibleBridgeAppVersionError(from error: Error) -> CodexServiceError? {
+        guard let serviceError = error as? CodexServiceError,
+              case .rpcError(let rpcError) = serviceError else {
+            return nil
+        }
+
+        let dataObject = rpcError.data?.objectValue
+        let errorCode = dataObject?["errorCode"]?.stringValue?.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard errorCode == "ios_app_update_required" else {
+            return nil
+        }
+
+                "This computer bridge requires Remodex iPhone \(minimumSupportedAppVersion) or newer. Update the iPhone app, then reconnect."
+            )
+        }
+
+        return .invalidInput("This computer bridge requires a newer Remodex iPhone app. Update the app, then reconnect.")
+    }
+
+    // Classifies socket failures so transient relay hiccups reconnect, while dead pairings are forgotten.
+    func handleReceiveError(
+        _ error: Error,
+        relayCloseCode: NWProtocolWebSocket.CloseCode? = nil
+    ) {
+        if Task.isCancelled {
+            return
+        }
+
+        cancelCurrentSocketConnection()
+
+        let disposition = receiveErrorDisposition(for: error, relayCloseCode: relayCloseCode)
+        isConnected = false
+        isInitialized = false
+        shouldAutoReconnectOnForeground = disposition.shouldAutoReconnectOnForeground
+        if disposition.shouldClearSavedRelaySession {
+            clearSavedRelaySession()
+        } el
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "trusted/session/resolve|resolve.*trusted|liveSession|preferredTrusted|hasTrustedReconnectContext|connectSaved|rememberRelayPairing|relaySessionId" CodexMobile/CodexMobile | head -n 220`</summary>
+```
+Chunk ID: b860e5
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 34137
+Output:
+Total output lines: 54
+
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:93:        let isTrustedReconnectAttempt = hasTrustedReconnectContext
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:221:        SecureStore.deleteValue(for: CodexSecureKeys.relaySessionId)
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:227:        relaySessionId = nil
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:235:        if let trustedMac = preferredTrustedMacRecord {
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:236:            secureConnectionState = .liveSessionUnresolved
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:249:        guard let trustedMac = preferredTrustedMacRecord else {
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:254:        SecureStore.deleteValue(for: CodexSecureKeys.relaySessionId)
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:256:        relaySessionId = nil
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:260:        secureConnectionState = .liveSessionUnresolved
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:268:        let targetDeviceId = deviceId ?? preferredTrustedMacDeviceId
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:297:        if preferredTrustedMacDeviceId != nil {
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:638:    var hasTrustedReconnectContext: Bool {
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:671:        } else if preferredTrustedMacRecord != nil {
+CodexMobile/CodexMobile/Services/CodexService+Connection.swift:672:            secureConnectionState = .liveSessionUnresolved
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:260:    func rememberRelayPairing(_ payload: CodexPairingQRPayload) {
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:261:        SecureStore.writeString(payload.sessionId, for: CodexSecureKeys.relaySessionId)
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:267:        relaySessionId = payload.sessionId
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:313:        } else if let trustedMac = preferredTrustedMacRecord {
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:314:            secureConnectionState = .liveSessionUnresolved
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:327:        let resolver = trustedSessionResolverOverride ?? { [weak self] in
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:458:            components.path = "/v1/trusted/session/resolve"
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:466:            rootComponents.path = "/v1/trusted/session/resolve"
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:666:        guard let trustedMac = preferredTrustedMacRecord else {
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:780:            secureConnectionState = .liveSessionUnresolved
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:803:        SecureStore.writeString(resolved.sessionId, for: CodexSecureKeys.relaySessionId)
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:808:        relaySessionId = resolved.sessionId
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:822:            trustedMac.displayName = resolved.displayName ?? trustedMac.displayName
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:826:            trustedMacRegistry.records[resolved.macDeviceId] = trustedMac
+CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift:835:        if let trustedRelayURL = preferredTrustedMacRecord?.relayURL?.trimmingCharacters(in: .whitespacesAndNewlines),
+CodexMobile/CodexMobile/Services/DesktopHandoffService.swift:166:    // Prefers a freshly resolved trusted session so display wake still works when the saved live session is gone.
+CodexMobile/CodexMobile/Services/CodexService.swift:427:    var relaySessionId: String?
+CodexMobile/CodexMobile/Services/CodexService.swift:557:        return preferredTrustedMacRecord == nil ? .unknown : .macOS
+CodexMobile/CodexMobile/Services/CodexService.swift:565:        guard preferredTrustedMacRecord != nil,
+CodexMobile/CodexMobile/Services/CodexService.swift:867:        self.relaySessionId = SecureStore.readString(for: CodexSecureKeys.relaySessionId)
+CodexMobile/CodexMobile/Services/CodexService.swift:886:        } else if let trustedMac = preferredTrustedMacRecord {
+CodexMobile/CodexMobile/Services/CodexService.swift:887:            self.secureConnectionState = .liveSessionUnresolved
+CodexMobile/CodexMobile/Services/CodexService.swift:915:        relaySessionId?
+CodexMobile/CodexMobile/Services/CodexService.swift:945:    var preferred
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '320,860p' CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift && sed -n '380,505p' CodexMobile/CodexMobile/Views/Home/ContentViewModel.swift`</summary>
+```
+Chunk ID: e0003a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 7260
+Output:
+            secureConnectionState = .notPaired
+            secureMacFingerprint = nil
+        }
+    }
+
+    // Used by: ContentViewModel trusted reconnect path.
+    func resolveTrustedMacSession() async throws -> CodexTrustedSessionResolveResponse {
+        let resolver = trustedSessionResolverOverride ?? { [weak self] in
+            guard let self else {
+                throw CancellationError()
+            }
+            return try await self.resolveTrustedMacSessionImpl()
+        }
+        let resolveTaskID = UUID()
+        let task = Task {
+            try await resolver()
+        }
+
+        trustedSessionResolveTask = task
+        trustedSessionResolveTaskID = resolveTaskID
+        defer {
+            if trustedSessionResolveTaskID == resolveTaskID {
+                trustedSessionResolveTask = nil
+                trustedSessionResolveTaskID = nil
+            }
+        }
+
+        return try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+        }
+    }
+
+    // Lets manual reconnect / fresh QR pairing preempt a stuck trusted-session HTTP lookup.
+    func cancelTrustedSessionResolve() {
+        trustedSessionResolveTask?.cancel()
+        trustedSessionResolveTask = nil
+        trustedSessionResolveTaskID = nil
+    }
+
+    // Persists the resolved live relay session and resets replay cursors when the live session changed.
+    func applyResolvedTrustedSession(_ resolved: CodexTrustedSessionResolveResponse, relayURL: String) {
+        let previousSessionId = normalizedRelaySessionId
+        let shouldResetReplayCursor = previousSessionId == nil || previousSessionId != resolved.sessionId
+        if shouldResetReplayCursor {
+            SecureStore.writeString("0", for: CodexSecureKeys.relayLastAppliedBridgeOutboundSeq)
+            lastAppliedBridgeOutboundSeq = 0
+        }
+        rememberResolvedTrustedSession(resolved, relayURL: relayURL)
+    }
+
+    // Resolves a short manual pairing code through the best-known relay for this app instance.
+    func resolvePairingCode(_ code: String) async throws -> CodexPairingQRPayload {
+        let normalizedCode = code
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .uppercased()
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: " ", with: "")
+        guard !normalizedCode.isEmpty else {
+            throw CodexSecureTransportError.invalidQR("Enter a valid pairing code.")
+        }
+
+        guard let relayURL = preferredPairingCodeRelayURL,
+              let resolveURL = pairingCodeResolveURL(from: relayURL) else {
+            throw CodexSecureTransportError.invalidQR(
+                "This iPhone does not know which relay to ask for that pairing code yet. Scan the QR code instead."
+            )
+        }
+
+        var request = URLRequest(url: resolveURL)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 8
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(["code": normalizedCode])
+
+        let session = trustedSessionResolveURLSession(for: resolveURL)
+        defer { session.invalidateAndCancel() }
+
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            throw CodexSecureTransportError.invalidQR("Could not reach the relay for this pairing code. Try again or scan the QR code.")
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw CodexSecureTransportError.invalidQR("The relay returned an invalid response for this pairing code.")
+        }
+
+        if (200..<300).contains(httpResponse.statusCode),
+           let resolved = try? JSONDecoder().decode(CodexPairingCodeResolveResponse.self, from: data),
+           resolved.ok {
+            return CodexPairingQRPayload(
+                v: resolved.v,
+                relay: relayURL,
+                sessionId: resolved.sessionId,
+                macDeviceId: resolved.macDeviceId,
+                macIdentityPublicKey: resolved.macIdentityPublicKey,
+                expiresAt: resolved.expiresAt
+            )
+        }
+
+        let errorResponse = try? JSONDecoder().decode(CodexRelayErrorResponse.self, from: data)
+        switch errorResponse?.code {
+        case "pairing_code_expired":
+            throw CodexSecureTransportError.invalidQR("This pairing code has expired. Generate a new one from the computer bridge.")
+        case "pairing_code_unavailable":
+            throw CodexSecureTransportError.invalidQR("That pairing code is not available right now. Make sure your computer bridge is running and try again.")
+        default:
+            if httpResponse.statusCode
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:29Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' phodex-bridge/bin/remodex.js`</summary>
+```
+Chunk ID: e7bdde
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1594
+Output:
+#!/usr/bin/env node
+// FILE: remodex.js
+// Purpose: CLI surface for foreground bridge runs, pairing reset, thread resume, and macOS service control.
+// Layer: CLI binary
+// Exports: none
+// Depends on: ../src
+
+const {
+  getMacOSBridgeServiceStatus,
+  printMacOSBridgePairingQr,
+  printMacOSBridgeServiceStatus,
+  readBridgeConfig,
+  resetMacOSBridgePairing,
+  runMacOSBridgeService,
+  startBridge,
+  startMacOSBridgeService,
+  stopMacOSBridgeService,
+  resetBridgePairing,
+  openLastActiveThread,
+  watchThreadRollout,
+} = require("../src");
+const { version } = require("../package.json");
+
+const defaultDeps = {
+  getMacOSBridgeServiceStatus,
+  printMacOSBridgePairingQr,
+  printMacOSBridgeServiceStatus,
+  readBridgeConfig,
+  resetMacOSBridgePairing,
+  runMacOSBridgeService,
+  startBridge,
+  startMacOSBridgeService,
+  stopMacOSBridgeService,
+  resetBridgePairing,
+  openLastActiveThread,
+  watchThreadRollout,
+};
+
+if (require.main === module) {
+  void main();
+}
+
+// ─── ENTRY POINT ─────────────────────────────────────────────
+
+async function main({
+  argv = process.argv,
+  platform = process.platform,
+  consoleImpl = console,
+  exitImpl = process.exit,
+  deps = defaultDeps,
+} = {}) {
+  const { command, jsonOutput, watchThreadId } = parseCliArgs(argv.slice(2));
+
+  if (isVersionCommand(command)) {
+    emitVersion({ jsonOutput, consoleImpl });
+    return;
+  }
+
+  if (command === "up") {
+    if (platform === "darwin") {
+      consoleImpl.log("[remodex] Starting bridge and pairing QR...");
+      const result = await deps.startMacOSBridgeService({
+        waitForPairing: true,
+      });
+      deps.printMacOSBridgePairingQr({
+        pairingSession: result.pairingSession,
+      });
+      return;
+    }
+
+    deps.startBridge();
+    return;
+  }
+
+  if (command === "run") {
+    deps.startBridge();
+    return;
+  }
+
+  if (command === "run-service") {
+    deps.runMacOSBridgeService();
+    return;
+  }
+
+  if (command === "start") {
+    assertMacOSCommand(command, {
+      platform,
+      consoleImpl,
+      exitImpl,
+    });
+    deps.readBridgeConfig();
+    const result = await deps.startMacOSBridgeService({
+      waitForPairing: false,
+    });
+    emitResult({
+      payload: {
+        ok: true,
+        currentVersion: version,
+        plistPath: result?.plistPath,
+        pairingSession: result?.pairingSession,
+      },
+      message: "[remodex] macOS bridge service is running.",
+      jsonOutput,
+      consoleImpl,
+    });
+    return;
+  }
+
+  if (command === "restart") {
+    assertMacOSCommand(command, {
+      platform,
+      consoleImpl,
+      exitImpl,
+    });
+    deps.readBridgeConfig();
+    const result = await deps.startMacOSBridgeService({
+      waitForPairing: false,
+    });
+    emitResult({
+      payload: {
+        ok: true,
+        currentVersion: version,
+        plistPath: result?.plistPath,
+        pairingSession: result?.pairingSession,
+      },
+      message: "[remodex] macOS bridge service restarted.",
+      jsonOutput,
+      consoleImpl,
+    });
+    return;
+  }
+
+  if (command === "stop") {
+    assertMacOSCommand(command, {
+      platform,
+      consoleImpl,
+      exitImpl,
+    });
+    deps.stopMacOSBridgeService();
+    emitResult({
+      payload: {
+        ok: true,
+        currentVersion: version,
+      },
+      message: "[remodex] macOS bridge service stopped.",
+      jsonOutput,
+      consoleImpl,
+    });
+    return;
+  }
+
+  if (command === "status") {
+    assertMacOSCommand(command, {
+      platform,
+      consoleImpl,
+      exitImpl,
+    });
+    if (jsonOutput) {
+      emitJson({
+        ...deps.getMacOSBridgeServiceStatus(),
+        currentVersion: version,
+      });
+      return;
+    }
+    deps.printMacOSBridgeServiceStatus();
+    return;
+  }
+
+  if (command === "reset-pairing") {
+    try {
+      if (platform === "darwin") {
+        deps.resetMacOSBridgePairing();
+        emitResult({
+          payload: {
+            ok: true,
+            currentVersion: version,
+            platform: "darwin",
+          },
+          message: "[remodex] Stopped the macOS bridge service and cleared the saved pairing state. Run `remodex up` to pair again.",
+          jsonOutput,
+          consoleImpl,
+        });
+      } else {
+        deps.resetBridgePairing();
+        emitResult({
+          payload: {
+            ok: true,
+            currentVersion: version,
+            platform,
+          },
+          message: "[remodex] Cleared the saved pairing state. Run `remodex up` to pair again.",
+          jsonOutput,
+          consoleImpl,
+        });
+      }
+    } catch (error) {
+      consoleImpl.error(`[remodex] ${(error && error.message) || "Failed to clear the saved pairing state."}`);
+      exitImpl(1);
+    }
+    return;
+  }
+
+  if (command === "resume") {
+    try {
+      const state = deps.openLastActiveThread();
+      emitResult({
+   
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:29Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,320p' phodex-bridge/src/macos-launch-agent.js`</summary>
+```
+Chunk ID: a6e169
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2396
+Output:
+// FILE: macos-launch-agent.js
+// Purpose: Owns macOS-only launchd install/start/stop/status helpers for the background Remodex bridge.
+// Layer: CLI helper
+// Exports: start/stop/status helpers plus the launchd service runner used by `remodex up`.
+// Depends on: child_process, fs, os, path, ./bridge, ./daemon-state, ./codex-desktop-refresher, ./qr, ./secure-device-state
+
+const { execFileSync } = require("child_process");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { startBridge } = require("./bridge");
+const { readBridgeConfig } = require("./codex-desktop-refresher");
+const { printQR } = require("./qr");
+const { resetBridgeDeviceState } = require("./secure-device-state");
+const {
+  clearBridgeStatus,
+  clearPairingSession,
+  ensureRemodexLogsDir,
+  ensureRemodexStateDir,
+  readBridgeStatus,
+  readDaemonConfig,
+  readPairingSession,
+  resolveBridgeStderrLogPath,
+  resolveBridgeStdoutLogPath,
+  resolveRemodexStateDir,
+  writeBridgeStatus,
+  writeDaemonConfig,
+  writePairingSession,
+} = require("./daemon-state");
+
+const SERVICE_LABEL = "com.remodex.bridge";
+const DEFAULT_PAIRING_WAIT_TIMEOUT_MS = 10_000;
+const DEFAULT_PAIRING_WAIT_INTERVAL_MS = 200;
+
+// Runs the bridge inside launchd while keeping QR rendering in the foreground CLI command.
+function runMacOSBridgeService({ env = process.env } = {}) {
+  assertDarwinPlatform();
+  const config = readDaemonConfig({ env });
+  if (!config?.relayUrl) {
+    const message = "No relay URL configured for the macOS bridge service.";
+    // Clear any stale QR so the CLI does not keep showing a pairing payload for a dead service.
+    clearPairingSession({ env });
+    writeBridgeStatus({
+      state: "error",
+      connectionStatus: "error",
+      pid: process.pid,
+      lastError: message,
+    }, { env });
+    console.error(`[remodex] ${message}`);
+    return;
+  }
+
+  startBridge({
+    config,
+    printPairingQr: false,
+    onPairingSession(pairingSession) {
+      writePairingSession(pairingSession, { env });
+    },
+    onBridgeStatus(status) {
+      writeBridgeStatus(
+        mergeBridgeStatusForDaemon(status, readBridgeStatus({ env })),
+        { env }
+      );
+    },
+  });
+}
+
+// Prepares config + launchd state and optionally waits for the fresh pairing payload written by the service.
+async function startMacOSBridgeService({
+  env = process.env,
+  platform = process.platform,
+  fsImpl = fs,
+  execFileSyncImpl = execFileSync,
+  osImpl = os,
+  nodePath = process.execPath,
+  cliPath = path.resolve(__dirname, "..", "bin", "remodex.js"),
+  waitForPairing = false,
+  pairingTimeoutMs = DEFAULT_PAIRING_WAIT_TIMEOUT_MS,
+  pairingPollIntervalMs = DEFAULT_PAIRING_WAIT_INTERVAL_MS,
+} = {}) {
+  assertDarwinPlatform(platform);
+  const config = readBridgeConfig({ env });
+  assertRelayConfigured(config);
+  const startedAt = Date.now();
+
+  writeDaemonConfig(config, { env, fsImpl });
+  clearPairingSession({ env, fsImpl });
+  clearBridgeStatus({ env, fsImpl });
+  ensureRemodexStateDir({ env, fsImpl, osImpl });
+  ensureRemodexLogsDir({ env, fsImpl, osImpl });
+
+  const plistPath = writeLaunchAgentPlist({
+    env,
+    fsImpl,
+    osImpl,
+    nodePath,
+    cliPath,
+  });
+  restartLaunchAgent({
+    env,
+    execFileSyncImpl,
+    plistPath,
+  });
+
+  if (!waitForPairing) {
+    return {
+      plistPath,
+      pairingSession: null,
+    };
+  }
+
+  const pairingSession = await waitForFreshPairingSession({
+    env,
+    fsImpl,
+    startedAt,
+    timeoutMs: pairingTimeoutMs,
+    intervalMs: pairingPollIntervalMs,
+  });
+  return {
+    plistPath,
+    pairingSession,
+  };
+}
+
+function stopMacOSBridgeService({
+  env = process.env,
+  platform = process.platform,
+  execFileSyncImpl = execFileSync,
+  fsImpl = fs,
+} = {}) {
+  assertDarwinPlatform(platform);
+  bootoutLaunchAgent({
+    env,
+    execFileSyncImpl,
+    ignoreMissing: true,
+  });
+  clearPairingSession({ env, fsImpl });
+  clearBridgeStatus({ env, fsImpl });
+}
+
+// Revokes pairing immediately on macOS by stopping the daemon before rotating identity/trust state.
+function resetMacOSBridgePairing({
+  env = process.env,
+  platform = process.platform,
+  execFileSyncImpl = execFileSync,
+  fsImpl = fs,
+  resetBridgePairingImpl = resetBridgeDeviceState,
+} = {}) {
+  assertDarwinPlatform(platform);
+  stopMacOSBridgeService({
+    env,
+    platform,
+    execFileSyncImpl,
+    fsImpl,
+  });
+  return resetBridgePairingImpl();
+}
+
+function getMacOSBridgeServiceStatus({
+  env = process.env,
+  platform = process.platform,
+  execFileSyncImpl = execFileSync,
+  fsImpl = fs,
+} = {}) {
+  assertDarwinPlatform(platform);
+  const launchd = readLaunchAgentState({ env, execFileSyncImpl });
+  return {
+    label: SERVICE_LABEL,
+    platform: "darwin",
+    installed: fsImpl.existsSync(resolveLaunchAgentPlistPath({ env })),
+    launchdLoaded: launchd.loaded,
+    launchdPid: launchd.pid,
+    daemonConfig: readDaemonConfig({ env, fsImpl }),
+  
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:29Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' phodex-bridge/src/codex-desktop-refresher.js`</summary>
+```
+Chunk ID: 0ae537
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2083
+Output:
+// FILE: codex-desktop-refresher.js
+// Purpose: Debounced Mac desktop refresh controller for Codex.app after phone-authored conversation changes.
+// Layer: CLI helper
+// Exports: CodexDesktopRefresher, readBridgeConfig
+// Depends on: child_process, path, ./rollout-watch, ./daemon-state
+
+const { execFile } = require("child_process");
+const fs = require("fs");
+const path = require("path");
+const { readDaemonConfig } = require("./daemon-state");
+const { createThreadRolloutActivityWatcher } = require("./rollout-watch");
+
+const DEFAULT_BUNDLE_ID = "com.openai.codex";
+const DEFAULT_APP_PATH = "/Applications/Codex.app";
+const DEFAULT_DEBOUNCE_MS = 1200;
+const DEFAULT_FALLBACK_NEW_THREAD_MS = 2_000;
+const DEFAULT_MID_RUN_REFRESH_THROTTLE_MS = 3_000;
+const DEFAULT_ROLLOUT_LOOKUP_TIMEOUT_MS = 5_000;
+const DEFAULT_ROLLOUT_IDLE_TIMEOUT_MS = 10_000;
+const DEFAULT_CUSTOM_REFRESH_FAILURE_THRESHOLD = 3;
+const REFRESH_SCRIPT_PATH = path.join(__dirname, "scripts", "codex-refresh.applescript");
+const NEW_THREAD_DEEP_LINK = "codex://threads/new";
+
+class CodexDesktopRefresher {
+  constructor({
+    enabled = true,
+    debounceMs = DEFAULT_DEBOUNCE_MS,
+    refreshCommand = "",
+    bundleId = DEFAULT_BUNDLE_ID,
+    appPath = DEFAULT_APP_PATH,
+    logPrefix = "[remodex]",
+    fallbackNewThreadMs = DEFAULT_FALLBACK_NEW_THREAD_MS,
+    midRunRefreshThrottleMs = DEFAULT_MID_RUN_REFRESH_THROTTLE_MS,
+    rolloutLookupTimeoutMs = DEFAULT_ROLLOUT_LOOKUP_TIMEOUT_MS,
+    rolloutIdleTimeoutMs = DEFAULT_ROLLOUT_IDLE_TIMEOUT_MS,
+    now = () => Date.now(),
+    refreshExecutor = null,
+    watchThreadRolloutFactory = createThreadRolloutActivityWatcher,
+    refreshBackend = null,
+    customRefreshFailureThreshold = DEFAULT_CUSTOM_REFRESH_FAILURE_THRESHOLD,
+  } = {}) {
+    this.enabled = enabled;
+    this.debounceMs = debounceMs;
+    this.refreshCommand = refreshCommand;
+    this.bundleId = bundleId;
+    this.appPath = appPath;
+    this.logPrefix = logPrefix;
+    this.fallbackNewThreadMs = fallbackNewThreadMs;
+    this.midRunRefreshThrottleMs = midRunRefreshThrottleMs;
+    this.rolloutLookupTimeoutMs = rolloutLookupTimeoutMs;
+    this.rolloutIdleTimeoutMs = rolloutIdleTimeoutMs;
+    this.now = now;
+    this.refreshExecutor = refreshExecutor;
+    this.watchThreadRolloutFactory = watchThreadRolloutFactory;
+    this.refreshBackend = refreshBackend
+      || (this.refreshCommand ? "command" : (this.refreshExecutor ? "command" : "applescript"));
+    this.customRefreshFailureThreshold = customRefreshFailureThreshold;
+
+    this.mode = "idle";
+    this.pendingNewThread = false;
+    this.pendingRefreshKinds = new Set();
+    this.pendingCompletionRefresh = false;
+    this.pendingCompletionTurnId = null;
+    this.pendingCompletionTargetUrl = "";
+    this.pendingCompletionTargetThreadId = "";
+    this.pendingTargetUrl = "";
+    this.pendingTargetThreadId = "";
+    this.lastRefreshAt = 0;
+    this.lastRefreshSignature = "";
+    this.lastTurnIdRefreshed = null;
+    this.lastMidRunRefreshAt = 0;
+    this.refreshTimer = null;
+    this.refreshRunning = false;
+    this.fallbackTimer = null;
+    this.activeWatcher = null;
+    this.activeWatchedThreadId = null;
+    this.watchStartAt = 0;
+    this.lastRolloutSize = null;
+    this.stopWatcherAfterRefreshThreadId = null;
+    this.runtimeRefreshAvailable = enabled;
+    this.consecutiveRefreshFailures = 0;
+    this.unavailableLogged = false;
+  }
+
+  handleInbound(rawMessage) {
+    const parsed = safeParseJSON(rawMessage);
+    if (!parsed) {
+      return;
+    }
+
+    const method = parsed.method;
+    if (method === "thread/start") {
+      const target = resolveInboundTarget(method, parsed);
+      if (target?.threadId) {
+        this.queueRefresh("phone", target, `phone ${method}`);
+        this.ensureWatcher(target.threadId);
+        return;
+      }
+
+      this.pendingNewThread = true;
+      this.mode = "pending_new_thread";
+      this.clearPendingTarget();
+      this.scheduleNewThreadFallback();
+      return;
+    }
+
+    if (method === "turn/start") {
+      const target = resolveInboundTarget(method, parsed);
+      if (!target) {
+        return;
+      }
+
+      this.queueRefresh("phone", target, `phone ${method}`);
+      if (target.threadId) {
+        this.ensureWatcher(target.threadId);
+      }
+    }
+  }
+
+  handleOutbound(rawMessage) {
+    const parsed = safeParseJSON(rawMessage);
+    if (!parsed) {
+      return;
+    }
+
+    const method = parsed.method;
+    if (method === "turn/completed") {
+      this.clearFallbackTimer();
+      const turnId = extractTurnId(parsed);
+      if (turnId && turnId === this.lastTurnIdRefreshed) {
+        this.log(`refresh skipped (debounced): completion already refreshed for ${turnId}`);
+        return;
+      }
+
+      const target = resolveOutboundTarget(method, parsed);
+      this.queueCompletionRefresh(target, turnId, `codex ${method}`);
+      return;
+    }
+
+    if (method === "thread/started"
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:32Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '260,620p' phodex-bridge/src/codex-desktop-refresher.js`</summary>
+```
+Chunk ID: 557e80
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2711
+Output:
+      this.clearPendingTarget();
+    }
+    this.refreshRunning = true;
+    this.log(
+      `refresh running: ${Array.from(pendingRefreshKinds).join("+")}${targetThreadId ? ` thread=${targetThreadId}` : ""}`
+    );
+
+    let didRefresh = false;
+    try {
+      const refreshSignature = `${targetUrl || "app"}|${targetThreadId || "no-thread"}`;
+      if (
+        !shouldForceCompletionRefresh
+        && refreshSignature === this.lastRefreshSignature
+        && this.now() - this.lastRefreshAt < this.debounceMs
+      ) {
+        this.log(`refresh skipped (duplicate target): ${refreshSignature}`);
+      } else {
+        await this.executeRefresh(targetUrl);
+        this.lastRefreshAt = this.now();
+        this.lastRefreshSignature = refreshSignature;
+        this.consecutiveRefreshFailures = 0;
+        didRefresh = true;
+      }
+      if (completionTurnId && didRefresh) {
+        this.lastTurnIdRefreshed = completionTurnId;
+      }
+    } catch (error) {
+      this.handleRefreshFailure(error);
+    } finally {
+      this.refreshRunning = false;
+      if (
+        didRefresh
+        && stopWatcherAfterRefreshThreadId
+        && stopWatcherAfterRefreshThreadId === this.activeWatchedThreadId
+      ) {
+        this.stopWatcher();
+        this.mode = this.pendingNewThread ? "pending_new_thread" : "idle";
+      }
+      // A completion refresh can queue while another refresh is still running,
+      // so retry whenever either queue still has work.
+      if (this.hasPendingRefreshWork()) {
+        this.scheduleRefresh("pending follow-up refresh");
+      }
+    }
+  }
+
+  executeRefresh(targetUrl) {
+    if (this.refreshExecutor) {
+      return this.refreshExecutor(targetUrl || "");
+    }
+
+    if (this.refreshCommand) {
+      return execFilePromise("/bin/sh", ["-lc", this.refreshCommand]);
+    }
+
+    return execFilePromise("osascript", [
+      REFRESH_SCRIPT_PATH,
+      this.bundleId,
+      this.appPath,
+      targetUrl || "",
+    ]);
+  }
+
+  clearPendingState() {
+    this.pendingNewThread = false;
+    this.pendingRefreshKinds.clear();
+    this.pendingCompletionRefresh = false;
+    this.pendingCompletionTurnId = null;
+    this.clearPendingCompletionTarget();
+    this.clearPendingTarget();
+    this.stopWatcherAfterRefreshThreadId = null;
+  }
+
+  clearRefreshTimer() {
+    if (!this.refreshTimer) {
+      return;
+    }
+
+    clearTimeout(this.refreshTimer);
+    this.refreshTimer = null;
+  }
+
+  // Schedules a single low-cost fallback when a brand new thread id is still unknown.
+  scheduleNewThreadFallback() {
+    if (!this.canRefresh()) {
+      return;
+    }
+
+    if (this.fallbackTimer) {
+      return;
+    }
+
+    this.fallbackTimer = setTimeout(() => {
+      this.fallbackTimer = null;
+      if (!this.pendingNewThread || this.pendingTargetThreadId) {
+        return;
+      }
+
+      this.noteRefreshTarget({ threadId: null, url: NEW_THREAD_DEEP_LINK });
+      this.pendingRefreshKinds.add("phone");
+      this.scheduleRefresh("fallback thread/start");
+    }, this.fallbackNewThreadMs);
+  }
+
+  clearFallbackTimer() {
+    if (!this.fallbackTimer) {
+      return;
+    }
+
+    clearTimeout(this.fallbackTimer);
+    this.fallbackTimer = null;
+  }
+
+  // Keeps one lightweight rollout watcher alive for the current Remodex-controlled thread.
+  ensureWatcher(threadId) {
+    if (!this.canRefresh() || !threadId) {
+      return;
+    }
+
+    if (this.activeWatchedThreadId === threadId && this.activeWatcher) {
+      return;
+    }
+
+    this.stopWatcher();
+    this.activeWatchedThreadId = threadId;
+    this.watchStartAt = this.now();
+    this.lastRolloutSize = null;
+    this.mode = "watching_thread";
+    this.activeWatcher = this.watchThreadRolloutFactory({
+      threadId,
+      lookupTimeoutMs: this.rolloutLookupTimeoutMs,
+      idleTimeoutMs: this.rolloutIdleTimeoutMs,
+      onEvent: (event) => this.handleWatcherEvent(event),
+      onIdle: () => {
+        this.log(`rollout watcher idle thread=${threadId}`);
+        this.stopWatcher();
+        this.mode = this.pendingNewThread ? "pending_new_thread" : "idle";
+      },
+      onTimeout: () => {
+        this.log(`rollout watcher timeout thread=${threadId}`);
+        this.stopWatcher();
+        this.mode = this.pendingNewThread ? "pending_new_thread" : "idle";
+      },
+      onError: (error) => {
+        this.log(`rollout watcher failed thread=${threadId}: ${error.message}`);
+        this.stopWatcher();
+        this.mode = this.pendingNewThread ? "pending_new_thread" : "idle";
+      },
+    });
+  }
+
+  stopWatcher() {
+    if (!this.activeWatcher) {
+      this.activeWatchedThreadId = null;
+      this.watchStartAt = 0;
+      this.lastRolloutSize = null;
+      return;
+    }
+
+    this.activeWatcher.stop();
+    this.activeWatcher = null;
+    this.activeWatchedThreadId = null;
+    this.watchStartAt = 0;
+    this.lastRolloutSize = null;
+  }
+
+  // Converts rollout growth into occasional refreshes without spamming the desktop.
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:38Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '70,190p' relay/relay.js && sed -n '320,430p' relay/relay.js`</summary>
+```
+Chunk ID: 1d11fe
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2132
+Output:
+  wss.on("close", () => clearInterval(heartbeat));
+
+  wss.on("connection", (ws, req) => {
+    const urlPath = req.url || "";
+    const match = urlPath.match(/^\/relay\/([^/?]+)/);
+    const sessionId = match?.[1];
+    const role = normalizeRelayRole(req.headers["x-role"]);
+    relayMetrics.acceptedConnections += 1;
+    ws._relaySessionId = sessionId;
+    ws._relayRole = role;
+
+    if (!sessionId || (role !== "mac" && !isRelayMobileRole(role))) {
+      ws.close(4000, "Missing sessionId or invalid x-role header");
+      return;
+    }
+
+    ws._relayAlive = true;
+    ws.on("pong", () => {
+      ws._relayAlive = true;
+    });
+
+    // Only the Mac host is allowed to create a fresh session room.
+    if (isRelayMobileRole(role) && !sessions.has(sessionId)) {
+      ws.close(CLOSE_CODE_SESSION_UNAVAILABLE, "Mac session not available");
+      return;
+    }
+
+    if (!sessions.has(sessionId)) {
+      sessions.set(sessionId, {
+        mac: null,
+        macRegistration: null,
+        clients: new Set(),
+        cleanupTimer: null,
+        macAbsenceTimer: null,
+        notificationSecret: null,
+      });
+    }
+
+    const session = sessions.get(sessionId);
+
+    if (isRelayMobileRole(role) && !canAcceptMobileClientConnection(session)) {
+      ws.close(CLOSE_CODE_SESSION_UNAVAILABLE, "Mac session not available");
+      return;
+    }
+
+    if (session.cleanupTimer) {
+      clearTimeoutFn(session.cleanupTimer);
+      session.cleanupTimer = null;
+    }
+
+    if (role === "mac") {
+      clearMacAbsenceTimer(session, { clearTimeoutFn });
+      // The relay keeps a per-session push secret so first-time device registration
+      // cannot be claimed by someone who only knows the session id.
+      session.notificationSecret = readHeaderString(req.headers["x-notification-secret"]);
+      session.macRegistration = readMacRegistrationHeaders(req.headers, sessionId);
+      if (session.mac && session.mac.readyState === WebSocket.OPEN) {
+        session.mac.close(4001, "Replaced by new Mac connection");
+      }
+      session.mac = ws;
+      registerLiveMacSession(session.macRegistration);
+      console.log(`[relay] Mac connected -> ${relaySessionLogLabel(sessionId)}`);
+    } else {
+      // Keep one live mobile RPC client per session to avoid competing sockets.
+      for (const existingClient of session.clients) {
+        if (existingClient === ws) {
+          continue;
+        }
+        if (
+          existingClient.readyState === WebSocket.OPEN
+          || existingClient.readyState === WebSocket.CONNECTING
+        ) {
+          existingClient.close(
+            CLOSE_CODE_IPHONE_REPLACED,
+            "Replaced by newer mobile connection"
+          );
+        }
+        session.clients.delete(existingClient);
+      }
+
+      session.clients.add(ws);
+      console.log(
+        `[relay] Mobile connected (${role}) -> ${relaySessionLogLabel(sessionId)} `
+        + `(${session.clients.size} client(s))`
+      );
+    }
+
+    ws.on("message", (data) => {
+      const msg = typeof data === "string" ? data : data.toString("utf-8");
+      if (role === "mac" && applyMacRegistrationMessage(session, sessionId, msg)) {
+        return;
+      }
+
+      if (role === "mac") {
+        for (const client of session.clients) {
+          if (client.readyState === WebSocket.OPEN) {
+            relayMetrics.macMessagesRelayed += 1;
+            client.send(msg);
+          }
+        }
+      } else if (session.mac?.readyState === WebSocket.OPEN) {
+        relayMetrics.mobileMessagesRelayed += 1;
+        session.mac.send(msg);
+      } else {
+        // The relay cannot prove a buffered request really reached the bridge after
+        // a reconnect, so fail fast with an explicit retry-required close instead
+        // of silently dropping queued client work during a later flush.
+        relayMetrics.mobileMessagesRejectedDuringMacAbsence += 1;
+        ws.close(CLOSE_CODE_MAC_ABSENCE_BUFFER_FULL, "Mac temporarily unavailable");
+      }
+    });
+
+    ws.on("close", () => {
+      relayMetrics.closedConnections += 1;
+      if (role === "mac") {
+        if (session.mac === ws) {
+          session.mac = null;
+          unregisterLiveMacSession(session.macRegistration, sessionId);
+          console.log(`[relay] Mac disconnected -> ${relaySessionLogLabel(sessionId)}`);
+          if (session.clients.size > 0) {
+            scheduleMacAbsenceTimeout(sessionId, {
+// Resolves the current live relay session for a previously trusted Mac without exposing the session id publicly.
+function resolveTrustedMacSession({
+  macDeviceId,
+  phoneDeviceId,
+  phoneIdentityPublicKey,
+  timestamp,
+  nonce,
+  signature,
+  now = Date.now(),
+} = {}) {
+  const normalizedMacDeviceId = normalizeNonEmptyString(macDeviceId);
+  const normalizedPhoneDeviceId = normalizeNonEmptyString(phoneDeviceId);
+  const normalizedPhoneIdentityPublicKey = normalizeNonEmptyString(phoneIdentityPublicKey);
+  const normalizedN
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:38Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,240p' phodex-bridge/src/session-state.js && sed -n '1,260p' phodex-bridge/src/rollout-live-mirror.js`</summary>
+```
+Chunk ID: 8549e6
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1966
+Output:
+// FILE: session-state.js
+// Purpose: Persists the latest active Remodex thread so the user can reopen it on the Mac for handoff.
+// Layer: CLI helper
+// Exports: rememberActiveThread, openLastActiveThread, readLastActiveThread
+// Depends on: fs, os, path, child_process
+
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { execFileSync } = require("child_process");
+
+const STATE_DIR = path.join(os.homedir(), ".remodex");
+const STATE_FILE = path.join(STATE_DIR, "last-thread.json");
+const DEFAULT_BUNDLE_ID = "com.openai.codex";
+
+function rememberActiveThread(threadId, source) {
+  if (!threadId || typeof threadId !== "string") {
+    return false;
+  }
+
+  const payload = {
+    threadId,
+    source: source || "unknown",
+    updatedAt: new Date().toISOString(),
+  };
+
+  fs.mkdirSync(STATE_DIR, { recursive: true });
+  fs.writeFileSync(STATE_FILE, JSON.stringify(payload, null, 2));
+  return true;
+}
+
+function openLastActiveThread({ bundleId = DEFAULT_BUNDLE_ID } = {}) {
+  const state = readState();
+  const threadId = state?.threadId;
+  if (!threadId) {
+    throw new Error("No remembered Remodex thread found yet.");
+  }
+
+  const targetUrl = `codex://threads/${threadId}`;
+  execFileSync("open", ["-b", bundleId, targetUrl], { stdio: "ignore" });
+  return state;
+}
+
+function readState() {
+  if (!fs.existsSync(STATE_FILE)) {
+    return null;
+  }
+
+  const raw = fs.readFileSync(STATE_FILE, "utf8");
+  return JSON.parse(raw);
+}
+
+module.exports = {
+  rememberActiveThread,
+  openLastActiveThread,
+  readLastActiveThread: readState,
+};
+// FILE: rollout-live-mirror.js
+// Purpose: Mirrors desktop-origin rollout activity back into live bridge notifications for iPhone catch-up.
+// Layer: CLI helper
+// Exports: createRolloutLiveMirrorController
+// Depends on: fs, crypto, path, ./rollout-watch, ./codex-home
+
+const fs = require("fs");
+const crypto = require("crypto");
+const path = require("path");
+const {
+  findRecentRolloutFileForContextRead,
+  resolveSessionsRoot,
+} = require("./rollout-watch");
+const { resolveCodexGeneratedImagesRoot } = require("./codex-home");
+
+const DEFAULT_POLL_INTERVAL_MS = 700;
+const DEFAULT_LOOKUP_TIMEOUT_MS = 5_000;
+const DEFAULT_IDLE_TIMEOUT_MS = 60_000;
+const DESKTOP_RESUME_METHODS = new Set(["thread/read", "thread/resume"]);
+
+// Observes desktop-authored rollout files and replays the currently active run as
+// bridge notifications so the phone can render live thinking/tool activity.
+function createRolloutLiveMirrorController({
+  sendApplicationResponse,
+  logPrefix = "[remodex]",
+  fsModule = fs,
+  now = () => Date.now(),
+  setIntervalFn = setInterval,
+  clearIntervalFn = clearInterval,
+  pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
+  lookupTimeoutMs = DEFAULT_LOOKUP_TIMEOUT_MS,
+  idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS,
+} = {}) {
+  const mirrorsByThreadId = new Map();
+
+  function observeInbound(rawMessage) {
+    const request = safeParseJSON(rawMessage);
+    const method = readString(request?.method);
+    if (!DESKTOP_RESUME_METHODS.has(method)) {
+      return;
+    }
+
+    const threadId = readThreadId(request?.params);
+    if (!threadId) {
+      return;
+    }
+
+    const existingMirror = mirrorsByThreadId.get(threadId);
+    if (existingMirror) {
+      existingMirror.bump();
+      return;
+    }
+
+    let mirror;
+    mirror = createThreadRolloutLiveMirror({
+      threadId,
+      sendApplicationResponse,
+      logPrefix,
+      fsModule,
+      now,
+      setIntervalFn,
+      clearIntervalFn,
+      pollIntervalMs,
+      lookupTimeoutMs,
+      idleTimeoutMs,
+      onStop() {
+        if (mirrorsByThreadId.get(threadId) === mirror) {
+          mirrorsByThreadId.delete(threadId);
+        }
+      },
+    });
+    mirrorsByThreadId.set(threadId, mirror);
+  }
+
+  function stopAll() {
+    for (const mirror of mirrorsByThreadId.values()) {
+      mirror.stop();
+    }
+    mirrorsByThreadId.clear();
+  }
+
+  return {
+    observeInbound,
+    stopAll,
+  };
+}
+
+// Tails one thread rollout and emits synthetic app-server-like notifications for
+// the currently active desktop-origin run only.
+function createThreadRolloutLiveMirror({
+  threadId,
+  sendApplicationResponse,
+  logPrefix,
+  fsModule,
+  now,
+  setIntervalFn,
+  clearIntervalFn,
+  pollIntervalMs,
+  lookupTimeoutMs,
+  idleTimeoutMs,
+  onStop = () => {},
+}) {
+  const startedAt = now();
+  const state = createMirrorState(threadId);
+
+  let isStopped = false;
+  let rolloutPath = null;
+  let lastSize = 0;
+  let partialLine = "";
+  let lastActivityAt = startedAt;
+  let didBootstrap = false;
+
+  const intervalId = setIntervalFn(tick, pollIntervalMs);
+  tick();
+
+  function tick() {
+    if (isStopped) {
+      return;
+    }
+
+    try {
+      const currentTime = now();
+
+      if (!rolloutPath) {
+        if (currentTime - startedAt >= lookupTimeoutMs) {
+          stop();
+          return;
+        }
+
+        rolloutPath = findRecentRolloutFileForContextRead(r
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:38Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,240p' phodex-bridge/src/rollout-watch.js`</summary>
+```
+Chunk ID: a4ac23
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1646
+Output:
+// FILE: rollout-watch.js
+// Purpose: Shared rollout-file lookup/watch helpers for CLI inspection, desktop refresh, and usage fallbacks.
+// Layer: CLI helper
+// Exports: watchThreadRollout, createThreadRolloutActivityWatcher
+// Depends on: fs, os, path, ./session-state
+
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { readLastActiveThread } = require("./session-state");
+
+const DEFAULT_WATCH_INTERVAL_MS = 1_000;
+const DEFAULT_LOOKUP_TIMEOUT_MS = 5_000;
+const DEFAULT_IDLE_TIMEOUT_MS = 10_000;
+const DEFAULT_TRANSIENT_ERROR_RETRY_LIMIT = 2;
+const DEFAULT_INITIAL_USAGE_SCAN_BYTES = 128 * 1024;
+const DEFAULT_TURN_LOOKUP_SCAN_BYTES = 16 * 1024;
+const DEFAULT_THREAD_LOOKUP_SCAN_BYTES = 512 * 1024;
+const DEFAULT_CONTEXT_READ_SCAN_BYTES = 512 * 1024;
+const DEFAULT_CONTEXT_READ_CANDIDATE_LIMIT = 128;
+const DEFAULT_RECENT_ROLLOUT_CANDIDATE_LIMIT = 24;
+const DEFAULT_RECENT_ROLLOUT_LOOKBACK_MS = 15 * 60 * 1000;
+
+// Polls one rollout file until it materializes and then reports size growth.
+function createThreadRolloutActivityWatcher({
+  threadId,
+  turnId = "",
+  intervalMs = DEFAULT_WATCH_INTERVAL_MS,
+  lookupTimeoutMs = DEFAULT_LOOKUP_TIMEOUT_MS,
+  idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS,
+  initialUsageScanBytes = DEFAULT_INITIAL_USAGE_SCAN_BYTES,
+  now = () => Date.now(),
+  fsModule = fs,
+  transientErrorRetryLimit = DEFAULT_TRANSIENT_ERROR_RETRY_LIMIT,
+  onEvent = () => {},
+  onUsage = () => {},
+  onIdle = () => {},
+  onTimeout = () => {},
+  onError = () => {},
+} = {}) {
+  const resolvedThreadId = resolveThreadId(threadId);
+  const sessionsRoot = resolveSessionsRoot();
+  const startedAt = now();
+
+  let isStopped = false;
+  let rolloutPath = null;
+  let lastSize = null;
+  let lastGrowthAt = startedAt;
+  let transientErrorCount = 0;
+  let usageScanOffset = 0;
+  let partialUsageLine = "";
+  let lastUsageSignature = null;
+
+  const tick = () => {
+    if (isStopped) {
+      return;
+    }
+
+    try {
+      const currentTime = now();
+
+      if (!rolloutPath) {
+        if (currentTime - startedAt >= lookupTimeoutMs) {
+          onTimeout({ threadId: resolvedThreadId });
+          stop();
+          return;
+        }
+
+        rolloutPath = findRecentRolloutFileForWatch(sessionsRoot, {
+          threadId: resolvedThreadId,
+          fsModule,
+          startedAt,
+          turnId,
+        });
+        if (!rolloutPath) {
+          transientErrorCount = 0;
+          return;
+        }
+
+        lastSize = readFileSize(rolloutPath, fsModule);
+        lastGrowthAt = currentTime;
+        transientErrorCount = 0;
+        const initialScanStart = Math.max(0, lastSize - initialUsageScanBytes);
+        const initialUsageResult = readRolloutUsageChunk({
+          filePath: rolloutPath,
+          start: initialScanStart,
+          endExclusive: lastSize,
+          carry: "",
+          fsModule,
+          skipLeadingPartial: initialScanStart > 0,
+        });
+        usageScanOffset = lastSize;
+        partialUsageLine = initialUsageResult.partialLine;
+        emitUsageIfChanged(initialUsageResult.usage, "materialized");
+        onEvent({
+          reason: "materialized",
+          threadId: resolvedThreadId,
+          rolloutPath,
+          size: lastSize,
+        });
+        return;
+      }
+
+      const nextSize = readFileSize(rolloutPath, fsModule);
+      transientErrorCount = 0;
+      if (nextSize > lastSize) {
+        lastSize = nextSize;
+        lastGrowthAt = currentTime;
+        const usageResult = readRolloutUsageChunk({
+          filePath: rolloutPath,
+          start: usageScanOffset,
+          endExclusive: nextSize,
+          carry: partialUsageLine,
+          fsModule,
+        });
+        usageScanOffset = nextSize;
+        partialUsageLine = usageResult.partialLine;
+        emitUsageIfChanged(usageResult.usage, "growth");
+        onEvent({
+          reason: "growth",
+          threadId: resolvedThreadId,
+          rolloutPath,
+          size: nextSize,
+        });
+        return;
+      }
+
+      if (currentTime - lastGrowthAt >= idleTimeoutMs) {
+        onIdle({
+          threadId: resolvedThreadId,
+          rolloutPath,
+          size: lastSize,
+        });
+        stop();
+      }
+    } catch (error) {
+      if (isRetryableFilesystemError(error) && transientErrorCount < transientErrorRetryLimit) {
+        transientErrorCount += 1;
+        return;
+      }
+
+      onError(error);
+      stop();
+    }
+  };
+
+  const intervalId = setInterval(tick, intervalMs);
+  tick();
+
+  // Emits only when the rollout produced a newer token-count snapshot.
+  function emitUsageIfChanged(usage, reason) {
+    if (!usage) {
+      return;
+    }
+
+    const nextSignature = `${usage.tokensUsed}|${usage.tokenLimit}`;
+    if (nextSignature === lastUsageSignature) {
+      return;
+    }
+
+    lastUsageSignature = nextSignature;
+    onUsage({
+      reason,
+      threadId: resolvedThreadId,
+      rolloutPath,
+      usage,
+
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:44Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git rev-parse HEAD`</summary>
+```
+Chunk ID: e5cd4e
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 11
+Output:
+4bf799fdb6bbbddb5c54db118d0b7157b1eacc53
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba README.md | sed -n '35,85p'`</summary>
+```
+Chunk ID: 0bcc25
+Wall time: 0.0779 seconds
+Process exited with code 0
+Original token count: 1034
+Output:
+    35	If you want the public-repo distribution model explained clearly, read [SELF_HOSTING_MODEL.md](SELF_HOSTING_MODEL.md).
+    36	
+    37	> **I am very early in this project. Expect bugs.**
+    38	>
+    39	> I am not actively accepting contributions yet. If you still want to help, read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+    40	
+    41	## Get the App
+    42	
+    43	The app is live on the [App Store](https://apps.apple.com/us/app/remodex-remote-ai-coding/id6760243963).
+    44	
+    45	Build the iOS app from source in Xcode, install your own signed build on-device, then use the in-app onboarding flow to pair by scanning the QR from `remodex up`.
+    46	
+    47	If you scan the pairing QR with a generic camera or QR reader before installing the app, your device may treat the QR payload as plain text and open a web search instead of pairing.
+    48	
+    49	## Architecture
+    50	
+    51	```
+    52	┌──────────────┐       Paired session   ┌───────────────┐       stdin/stdout       ┌─────────────┐
+    53	│  Remodex iOS │ ◄────────────────────► │ remodex (Mac) │ ◄──────────────────────► │ codex       │
+    54	│  app         │    WebSocket bridge    │ bridge        │    JSON-RPC              │ app-server  │
+    55	└──────────────┘                        └───────────────┘                          └─────────────┘
+    56	                                               │                                         │
+    57	                                               │  AppleScript route bounce                │ JSONL rollout
+    58	                                               ▼                                         ▼
+    59	                                        ┌─────────────┐                           ┌─────────────┐
+    60	                                        │  Codex.app  │ ◄─── reads from ──────── │  ~/.codex/  │
+    61	                                        │  (desktop)  │      disk on navigate     │  sessions   │
+    62	                                        └─────────────┘                           └─────────────┘
+    63	```
+    64	
+    65	1. Run `remodex up` on your Mac
+    66	2. On macOS, Remodex installs/starts a lightweight background bridge service and prints a QR for first-time pairing or recovery
+    67	3. Scan the QR once with the Remodex iOS app to trust that Mac
+    68	4. After the first handshake, the iPhone can resolve the Mac's live session through the configured relay and reconnect automatically
+    69	5. Your phone sends instructions to Codex through the bridge and receives responses in real-time
+    70	6. The bridge handles git operations and local session persistence on your Mac
+    71	7. `Codex.app` can read the same thread history from disk, but it is not a true live mirror unless you enable the optional refresh workaround
+    72	
+    73	## Repository Structure
+    74	
+    75	This repo contains the local bridge, the iOS app target, and their tests:
+    76	
+    77	```
+    78	├── phodex-bridge/                # Node.js bridge package used by `remodex`
+    79	│   ├── bin/                      # CLI entrypoints
+    80	│   └── src/                      # Bridge runtime, git/workspace handlers, refresh helpers
+    81	├── CodexMobile/                  # Xcode project root
+    82	│   ├── CodexMobile/              # App source target
+    83	│   │   ├── Services/             # Connection, sync, incoming-event, git, and persistence logic
+    84	│   │   ├── Views/                # SwiftUI screens and timeline/sidebar components
+    85	│   │   ├── Models/               # RPC, thread, message, and UI models
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba phodex-bridge/src/bridge.js | sed -n '150,210p'; nl -ba phodex-bridge/src/bridge.js | sed -n '390,570p'`</summary>
+```
+Chunk ID: 21b790
+Wall time: 0.0777 seconds
+Process exited with code 0
+Original token count: 2318
+Output:
+   150	  let lastPublishedBridgeStatus = null;
+   151	  let lastConnectionStatus = null;
+   152	  let codexLaunchState = config.codexEndpoint ? "connected" : "starting";
+   153	  let codexHandshakeState = config.codexEndpoint ? "warm" : "cold";
+   154	  const forwardedInitializeRequestIds = new Set();
+   155	  const bridgeManagedCodexRequestWaiters = new Map();
+   156	  const forwardedRequestMethodsById = new Map();
+   157	  const relaySanitizedResponseMethodsById = new Map();
+   158	  const trackedForwardedRequestMethods = new Set([
+   159	    "account/login/start",
+   160	    "account/login/cancel",
+   161	    "account/logout",
+   162	  ]);
+   163	  const relaySanitizedRequestMethods = new Set([
+   164	    "thread/read",
+   165	    "thread/resume",
+   166	    "thread/turns/list",
+   167	  ]);
+   168	  const forwardedRequestMethodTTLms = 2 * 60_000;
+   169	  const pendingAuthLogin = {
+   170	    loginId: null,
+   171	    authUrl: null,
+   172	    requestId: null,
+   173	    startedAt: 0,
+   174	  };
+   175	  const secureTransport = createBridgeSecureTransport({
+   176	    sessionId,
+   177	    relayUrl: relayBaseUrl,
+   178	    deviceState,
+   179	    onTrustedPhoneUpdate(nextDeviceState) {
+   180	      deviceState = nextDeviceState;
+   181	      sendRelayRegistrationUpdate(nextDeviceState);
+   182	    },
+   183	  });
+   184	  // Keeps one stable sender identity across reconnects so buffered replay state
+   185	  // reflects what actually made it onto the current relay socket.
+   186	  function sendRelayWireMessage(wireMessage) {
+   187	    if (socket?.readyState !== WebSocket.OPEN) {
+   188	      return false;
+   189	    }
+   190	
+   191	    socket.send(wireMessage);
+   192	    return true;
+   193	  }
+   194	  // Only the spawned local runtime needs rollout mirroring; a real endpoint
+   195	  // already provides the authoritative live stream for resumed threads.
+   196	  const rolloutLiveMirror = !config.codexEndpoint
+   197	    ? createRolloutLiveMirrorController({
+   198	      sendApplicationResponse,
+   199	    })
+   200	    : null;
+   201	  const desktopIpcActionFollower = !config.codexEndpoint
+   202	    ? createDesktopIpcActionFollower({
+   203	      sendApplicationResponse,
+   204	      socketPath: config.desktopIpcSocketPath || undefined,
+   205	    })
+   206	    : null;
+   207	  let contextUsageWatcher = null;
+   208	  let watchedContextUsageKey = null;
+   209	
+   210	  const codex = createCodexTransport({
+   390	        "x-role": "mac",
+   391	        "x-notification-secret": notificationSecret,
+   392	        ...buildMacRegistrationHeaders(deviceState, pairingSession),
+   393	      },
+   394	    });
+   395	    socket = nextSocket;
+   396	
+   397	    nextSocket.on("open", () => {
+   398	      markRelayActivity();
+   399	      clearReconnectTimer();
+   400	      reconnectAttempt = 0;
+   401	      startRelayWatchdog(nextSocket);
+   402	      logConnectionStatus("connected");
+   403	      secureTransport.bindLiveSendWireMessage(sendRelayWireMessage);
+   404	      sendRelayRegistrationUpdate(deviceState);
+   405	    });
+   406	
+   407	    nextSocket.on("message", (data) => {
+   408	      markRelayActivity();
+   409	      const message = typeof data === "string" ? data : data.toString("utf8");
+   410	      if (secureTransport.handleIncomingWireMessage(message, {
+   411	        sendControlMessage(controlMessage) {
+   412	          if (nextSocket.readyState === WebSocket.OPEN) {
+   413	            nextSocket.send(JSON.stringify(controlMessage));
+   414	          }
+   415	        },
+   416	        onApplicationMessage(plaintextMessage) {
+   417	          handleApplicationMessage(plaintextMessage);
+   418	        },
+   419	      })) {
+   420	        return;
+   421	      }
+   422	    });
+   423	
+   424	    nextSocket.on("ping", () => {
+   425	      markRelayActivity();
+   426	    });
+   427	
+   428	    nextSocket.on("pong", () => {
+   429	      markRelayActivity();
+   430	    });
+   431	
+   432	    nextSocket.on("close", (code) => {
+   433	      if (socket === nextSocket) {
+   434	        clearRelayWatchdog();
+   435	      }
+   436	      logConnectionStatus("disconnected");
+   437	      if (socket === nextSocket) {
+   438	        socket = null;
+   439	      }
+   440	      stopContextUsageWatcher();
+   441	      rolloutLiveMirror?.stopAll();
+   442	      desktopIpcActionFollower?.stopAll();
+   443	      desktopRefresher.handleTransportReset();
+   444	      scheduleRelayReconnect(code);
+   445	    });
+   446	
+   447	    nextSocket.on("error", () => {
+   448	      if (socket === nextSocket) {
+   449	        clearRelayWatchdog();
+   450	      }
+   451	      logConnectionStatus("disconnected");
+   452	    });
+   453	  }
+   454	
+   455	  const pairingPayload = secureTransport.createPairingPayload();
+   456	  const pairingSession = {
+   457	    pairingPayload,
+   458	    pairingCode: createShortPairingCode({ 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba phodex-bridge/src/secure-transport.js | sed -n '40,125p'; nl -ba phodex-bridge/src/secure-transport.js | sed -n '300,420p'`</summary>
+```
+Chunk ID: 88df51
+Wall time: 0.0836 seconds
+Process exited with code 0
+Original token count: 2087
+Output:
+    40	  onTrustedPhoneUpdate = null,
+    41	}) {
+    42	  let currentDeviceState = deviceState;
+    43	  let pendingHandshake = null;
+    44	  let activeSession = null;
+    45	  let liveSendWireMessage = null;
+    46	  // Tracks the highest bridge seq the phone has definitely acked, so replay
+    47	  // decisions never depend on best-effort local socket writes.
+    48	  let lastRelayedBridgeOutboundSeq = 0;
+    49	  let currentPairingExpiresAt = Date.now() + MAX_PAIRING_AGE_MS;
+    50	  let nextKeyEpoch = 1;
+    51	  let nextBridgeOutboundSeq = 1;
+    52	  let outboundBufferBytes = 0;
+    53	  const outboundBuffer = [];
+    54	
+    55	  function createPairingPayload() {
+    56	    currentPairingExpiresAt = Date.now() + MAX_PAIRING_AGE_MS;
+    57	    return {
+    58	      v: PAIRING_QR_VERSION,
+    59	      relay: relayUrl,
+    60	      sessionId,
+    61	      macDeviceId: currentDeviceState.macDeviceId,
+    62	      macIdentityPublicKey: currentDeviceState.macIdentityPublicKey,
+    63	      expiresAt: currentPairingExpiresAt,
+    64	    };
+    65	  }
+    66	
+    67	  function handleIncomingWireMessage(rawMessage, { sendControlMessage, onApplicationMessage }) {
+    68	    const parsed = safeParseJSON(rawMessage);
+    69	    if (!parsed || typeof parsed !== "object") {
+    70	      return false;
+    71	    }
+    72	
+    73	    const kind = normalizeNonEmptyString(parsed.kind);
+    74	    if (!kind) {
+    75	      if (parsed.method || parsed.id != null) {
+    76	        sendControlMessage(createSecureError({
+    77	          code: "update_required",
+    78	          message: "This bridge requires the latest Remodex iPhone app for secure pairing.",
+    79	        }));
+    80	        return true;
+    81	      }
+    82	      return false;
+    83	    }
+    84	
+    85	    switch (kind) {
+    86	    case "clientHello":
+    87	      handleClientHello(parsed, sendControlMessage);
+    88	      return true;
+    89	    case "clientAuth":
+    90	      handleClientAuth(parsed, sendControlMessage);
+    91	      return true;
+    92	    case "resumeState":
+    93	      handleResumeState(parsed);
+    94	      return true;
+    95	    case "encryptedEnvelope":
+    96	      return handleEncryptedEnvelope(parsed, sendControlMessage, onApplicationMessage);
+    97	    default:
+    98	      return false;
+    99	    }
+   100	  }
+   101	
+   102	  function queueOutboundApplicationMessage(payloadText, sendWireMessage) {
+   103	    const normalizedPayload = normalizeNonEmptyString(payloadText);
+   104	    if (!normalizedPayload) {
+   105	      return;
+   106	    }
+   107	
+   108	    const bufferEntry = {
+   109	      bridgeOutboundSeq: nextBridgeOutboundSeq,
+   110	      payloadText: normalizedPayload,
+   111	      sizeBytes: Buffer.byteLength(normalizedPayload, "utf8"),
+   112	    };
+   113	    nextBridgeOutboundSeq += 1;
+   114	    outboundBuffer.push(bufferEntry);
+   115	    outboundBufferBytes += bufferEntry.sizeBytes;
+   116	    trimOutboundBuffer();
+   117	
+   118	    const liveSessionSender = activeSession?.sendWireMessage;
+   119	    const effectiveSendWireMessage = typeof liveSessionSender === "function"
+   120	      ? liveSessionSender
+   121	      : sendWireMessage;
+   122	    if (activeSession?.isResumed && typeof effectiveSendWireMessage === "function") {
+   123	      sendBufferedEntry(bufferEntry, effectiveSendWireMessage);
+   124	    }
+   125	  }
+   300	    );
+   301	    if (!phoneVerified) {
+   302	      pendingHandshake = null;
+   303	      sendControlMessage(createSecureError({
+   304	        code: "invalid_phone_signature",
+   305	        message: "The iPhone secure signature could not be verified.",
+   306	      }));
+   307	      return;
+   308	    }
+   309	
+   310	    const sharedSecret = diffieHellman({
+   311	      privateKey: createPrivateKey({
+   312	        key: {
+   313	          crv: "X25519",
+   314	          d: base64ToBase64Url(pendingHandshake.macEphemeralPrivateKey),
+   315	          kty: "OKP",
+   316	          x: base64ToBase64Url(pendingHandshake.macEphemeralPublicKey),
+   317	        },
+   318	        format: "jwk",
+   319	      }),
+   320	      publicKey: createPublicKey({
+   321	        key: {
+   322	          crv: "X25519",
+   323	          kty: "OKP",
+   324	          x: base64ToBase64Url(pendingHandshake.phoneEphemeralPublicKey),
+   325	        },
+   326	        format: "jwk",
+   327	      }),
+   328	    });
+   329	    const salt = createHash("sha256").update(pendingHandshake.transcriptBytes).digest();
+   330	    const infoPrefix = [
+   331	      HANDSHAKE_TAG,
+   332	      pendingHandshake.sessionId,
+   333	      currentDeviceState.macDeviceId,
+   334	      pendingHandshake.phoneDeviceId,
+   335	      String(pendingHandshake.keyEpoch),
+   336	    ].join("|");
+   337	
+   338	    activeSession = {
+   339	      sessionId: pendingHandshake.sessionId,
+   340	      keyEpoch: pendingHandshake.keyEp
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:19:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift | sed -n '1,190p'; nl -ba CodexMobile/CodexMobile/Services/CodexService+SecureTransport.swift | sed -n '620,660p'`</summary>
+```
+Chunk ID: 0c5e9c
+Wall time: 0.0769 seconds
+Process exited with code 0
+Original token count: 3288
+Output:
+     1	// FILE: CodexService+SecureTransport.swift
+     2	// Purpose: Performs the iPhone-side E2EE handshake, wire control routing, and encrypted envelope handling.
+     3	// Layer: Service
+     4	// Exports: CodexService secure transport helpers
+     5	// Depends on: CryptoKit, Foundation, Security, Network
+     6	
+     7	import CryptoKit
+     8	import Foundation
+     9	import Security
+    10	
+    11	extension CodexService {
+    12	    // Completes the secure handshake before any JSON-RPC traffic is sent over the relay.
+    13	    func performSecureHandshake() async throws {
+    14	        guard let sessionId = normalizedRelaySessionId,
+    15	              let macDeviceId = normalizedRelayMacDeviceId else {
+    16	            throw CodexSecureTransportError.invalidHandshake(
+    17	                "The saved relay pairing is incomplete. Scan a fresh QR code to reconnect."
+    18	            )
+    19	        }
+    20	
+    21	        let trustedMac = trustedMacRegistry.records[macDeviceId]
+    22	        // Fresh QR scans must go through bootstrap once so we verify the scanned session,
+    23	        // instead of silently reusing an older trusted-reconnect path.
+    24	        let handshakeMode: CodexSecureHandshakeMode = (!shouldForceQRBootstrapOnNextHandshake && trustedMac != nil)
+    25	            ? .trustedReconnect
+    26	            : .qrBootstrap
+    27	        let expectedMacIdentityPublicKey: String
+    28	        switch handshakeMode {
+    29	        case .trustedReconnect:
+    30	            expectedMacIdentityPublicKey = trustedMac?.macIdentityPublicKey ?? ""
+    31	            secureConnectionState = .reconnecting
+    32	        case .qrBootstrap:
+    33	            guard let pairingPublicKey = normalizedRelayMacIdentityPublicKey else {
+    34	                throw CodexSecureTransportError.invalidHandshake(
+    35	                    "The initial pairing metadata is missing the Mac identity key. Scan a new QR code to reconnect."
+    36	                )
+    37	            }
+    38	            expectedMacIdentityPublicKey = pairingPublicKey
+    39	            secureConnectionState = .handshaking
+    40	        }
+    41	
+    42	        let phoneEphemeralPrivateKey = Curve25519.KeyAgreement.PrivateKey()
+    43	        let clientNonce = randomSecureNonce()
+    44	        let clientHello = SecureClientHello(
+    45	            protocolVersion: relayProtocolVersion,
+    46	            sessionId: sessionId,
+    47	            handshakeMode: handshakeMode,
+    48	            phoneDeviceId: phoneIdentityState.phoneDeviceId,
+    49	            phoneIdentityPublicKey: phoneIdentityState.phoneIdentityPublicKey,
+    50	            phoneEphemeralPublicKey: phoneEphemeralPrivateKey.publicKey.rawRepresentation.base64EncodedString(),
+    51	            clientNonce: clientNonce.base64EncodedString()
+    52	        )
+    53	        pendingHandshake = CodexPendingHandshake(
+    54	            mode: handshakeMode,
+    55	            transcriptBytes: Data(),
+    56	            phoneEphemeralPrivateKey: phoneEphemeralPrivateKey,
+    57	            phoneDeviceId: phoneIdentityState.phoneDeviceId
+    58	        )
+    59	        try await sendWireControlMessage(clientHello)
+    60	
+    61	        let serverHello = try await waitForMatchingServerHello(
+    62	            expectedSessionId: sessionId,
+    63	            expectedMacDeviceId: macDeviceId,
+    64	            expectedMacIdentityPublicKey: expectedMacIdentityPublicKey,
+    65	            expectedClientNonce: clientHello.clientNonce,
+    66	            clientNonce: clientNonce,
+    67	            phoneDeviceId: phoneIdentityState.phoneDeviceId,
+    68	            phoneIdentityPublicKey: phoneIdentityState.phoneIdentityPublicKey,
+    69	            phoneEphemeralPublicKey: clientHello.phoneEphemeralPublicKey
+    70	        )
+    71	        guard serverHello.protocolVersion == codexSecureProtocolVersion else {
+    72	            presentBridgeUpdatePrompt(
+    73	                message: "This bridge is using a different secure transport version. Update the Remodex package on your computer and try again."
+    74	            )
+    75	            throw CodexSecureTransportError.incompatibleVersion(
+    76	                "This bridge is using a different secure transport version. Update Remodex on the iPhone or Mac and try again."
+    77	            )
+    78	        }
+    79	        guard serverHello.sessionId == sessionId else {
+    80	            throw CodexSecureTransportError.invalidHandshake("The secure bridge session ID did not match the saved pairing.")
+    81	        }
+    82	        guard serverHello.macDeviceId == macDeviceId else {
+    83	            throw CodexSecureTransportError.invalidHandshake("The bridge reported a different Mac identity for this relay session.")
+    84	        }
+    85	        guard serverHello.macIdentityPublicKey == expect
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:00Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba CodexMobile/CodexMobile/Services/CodexService+Transport.swift | sed -n '52,150p'`</summary>
+```
+Chunk ID: 4c86cd
+Wall time: 0.0578 seconds
+Process exited with code 0
+Original token count: 1134
+Output:
+    52	            throw CodexServiceError.invalidInput(
+    53	                "This payload is too large for the relay connection. Try fewer or smaller images and retry."
+    54	            )
+    55	        }
+    56	    }
+    57	
+    58	    // Sends an RPC request and waits for the matching response by request id.
+    59	    // Optional per-call timeout is reserved for non-critical reads that can fail open.
+    60	    func sendRequest(
+    61	        method: String,
+    62	        params: JSONValue?,
+    63	        timeoutNanoseconds: UInt64? = nil,
+    64	        timeoutMessage: String? = nil
+    65	    ) async throws -> RPCMessage {
+    66	        if let requestTransportOverride {
+    67	            return try await requestTransportOverride(method, params)
+    68	        }
+    69	
+    70	        guard isConnected, webSocketConnection != nil || webSocketTask != nil else {
+    71	            throw CodexServiceError.disconnected
+    72	        }
+    73	
+    74	        let requestID: JSONValue = .string(UUID().uuidString)
+    75	        let requestKey = idKey(from: requestID)
+    76	
+    77	        let request = RPCMessage(
+    78	            id: requestID,
+    79	            method: method,
+    80	            params: params,
+    81	            includeJSONRPC: false
+    82	        )
+    83	
+    84	        if method == "turn/start",
+    85	           let collaborationMode = params?.objectValue?["collaborationMode"]?.objectValue?["mode"]?.stringValue {
+    86	            debugRuntimeLog(
+    87	                "rpc send turn/start collaborationMode=\(collaborationMode) thread=\(params?.objectValue?["threadId"]?.stringValue ?? "")"
+    88	            )
+    89	        }
+    90	
+    91	        try Task.checkCancellation()
+    92	
+    93	        return try await withTaskCancellationHandler {
+    94	            try await withCheckedThrowingContinuation { continuation in
+    95	                pendingRequests[requestKey] = continuation
+    96	                scheduleRequestTimeoutIfNeeded(
+    97	                    requestKey: requestKey,
+    98	                    method: method,
+    99	                    timeoutNanoseconds: timeoutNanoseconds,
+   100	                    timeoutMessage: timeoutMessage
+   101	                )
+   102	
+   103	                Task {
+   104	                    do {
+   105	                        try await sendMessage(request)
+   106	                    } catch {
+   107	                        if shouldTreatSendFailureAsDisconnect(error) {
+   108	                            handleReceiveError(error)
+   109	                            return
+   110	                        }
+   111	
+   112	                        // Avoid double-resume if the request was already completed
+   113	                        // (for example by a disconnect race that fails all pending requests).
+   114	                        if let pendingContinuation = pendingRequests.removeValue(forKey: requestKey) {
+   115	                            pendingContinuation.resume(throwing: error)
+   116	                        }
+   117	                    }
+   118	                }
+   119	            }
+   120	        } onCancel: {
+   121	            Task { @MainActor [weak self] in
+   122	                guard let self,
+   123	                      let continuation = self.pendingRequests.removeValue(forKey: requestKey) else {
+   124	                    return
+   125	                }
+   126	                continuation.resume(throwing: CancellationError())
+   127	            }
+   128	        }
+   129	    }
+   130	
+   131	    // Clears a still-pending request after the caller's timeout so late responses are ignored safely.
+   132	    func scheduleRequestTimeoutIfNeeded(
+   133	        requestKey: String,
+   134	        method: String,
+   135	        timeoutNanoseconds: UInt64?,
+   136	        timeoutMessage: String?
+   137	    ) {
+   138	        guard let timeoutNanoseconds, timeoutNanoseconds > 0 else {
+   139	            return
+   140	        }
+   141	
+   142	        Task { @MainActor [weak self] in
+   143	            try? await Task.sleep(nanoseconds: timeoutNanoseconds)
+   144	            guard let self,
+   145	                  let continuation = self.pendingRequests.removeValue(forKey: requestKey) else {
+   146	                return
+   147	            }
+   148	            let message = timeoutMessage ?? "\(method) timed out while loading this chat."
+   149	            continuation.resume(
+   150	                throwing: CodexServiceError.invalidInput(message)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:00Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba CodexMobile/CodexMobile/Services/CodexService+ThreadsTurns.swift | sed -n '1102,1185p'`</summary>
+```
+Chunk ID: 2fcbb5
+Wall time: 0.0551 seconds
+Process exited with code 0
+Original token count: 1099
+Output:
+  1102	    func sendTurnStart(
+  1103	        _ userInput: String,
+  1104	        attachments: [CodexImageAttachment] = [],
+  1105	        skillMentions: [CodexTurnSkillMention] = [],
+  1106	        mentionMentions: [CodexTurnMention] = [],
+  1107	        fileMentions: [String] = [],
+  1108	        to threadId: String,
+  1109	        shouldAppendUserMessage: Bool = true,
+  1110	        collaborationMode: CodexCollaborationModeKind? = nil
+  1111	    ) async throws {
+  1112	        let automaticTitleSeed = shouldAppendUserMessage
+  1113	            ? automaticThreadTitleSeedIfNeeded(
+  1114	                userInput: userInput,
+  1115	                attachments: attachments,
+  1116	                threadId: threadId
+  1117	            )
+  1118	            : nil
+  1119	        let pendingMessageId = shouldAppendUserMessage
+  1120	            ? appendUserMessage(
+  1121	                threadId: threadId,
+  1122	                text: userInput,
+  1123	                attachments: attachments,
+  1124	                fileMentions: fileMentions
+  1125	            )
+  1126	            : ""
+  1127	        activeThreadId = threadId
+  1128	        markThreadAsRunning(threadId)
+  1129	        setProtectedRunningFallback(true, for: threadId)
+  1130	        let messageStartCheckpointTask = scheduleMessageStartWorkspaceCheckpointIfPossible(
+  1131	            threadId: threadId,
+  1132	            messageId: pendingMessageId
+  1133	        )
+  1134	
+  1135	        var includeStructuredSkillItems = supportsStructuredSkillInput && !skillMentions.isEmpty
+  1136	        var includeStructuredMentionItems = supportsStructuredMentionInput && !mentionMentions.isEmpty
+  1137	        var imageURLKey = "url"
+  1138	        var effectiveCollaborationMode = supportsTurnCollaborationMode ? collaborationMode : nil
+  1139	        var didDowngradePlanModeForRuntime = false
+  1140	        var includesServiceTier = runtimeServiceTierForTurn(threadId: threadId) != nil
+  1141	
+  1142	        if collaborationMode != nil, effectiveCollaborationMode == nil {
+  1143	            debugRuntimeLog(
+  1144	                "turn/start dropping collaborationMode requested=\(collaborationMode?.rawValue ?? "") thread=\(threadId) supportsTurnCollaborationMode=\(supportsTurnCollaborationMode)"
+  1145	            )
+  1146	        }
+  1147	
+  1148	        while true {
+  1149	            do {
+  1150	                let requestParams = try buildTurnStartRequestParams(
+  1151	                    threadId: threadId,
+  1152	                    userInput: userInput,
+  1153	                    attachments: attachments,
+  1154	                    skillMentions: skillMentions,
+  1155	                    mentionMentions: mentionMentions,
+  1156	                    imageURLKey: imageURLKey,
+  1157	                    includeStructuredSkillItems: includeStructuredSkillItems,
+  1158	                    includeStructuredMentionItems: includeStructuredMentionItems,
+  1159	                    collaborationMode: effectiveCollaborationMode,
+  1160	                    includeServiceTier: includesServiceTier
+  1161	                )
+  1162	                // The pre-turn snapshot must settle before the runtime can mutate files.
+  1163	                if let messageStartCheckpointTask {
+  1164	                    await messageStartCheckpointTask.value
+  1165	                }
+  1166	                let response = try await sendRequestWithSandboxFallback(
+  1167	                    method: "turn/start",
+  1168	                    baseParams: requestParams
+  1169	                )
+  1170	                let resolvedTurnID = handleSuccessfulTurnStartResponse(
+  1171	                    response,
+  1172	                    pendingMessageId: pendingMessageId,
+  1173	                    threadId: threadId
+  1174	                )
+  1175	                if let resolvedTurnID {
+  1176	                    scheduleMessageStartWorkspaceCheckpointCopyIfPossible(
+  1177	                        threadId: threadId,
+  1178	                        messageId: pendingMessageId,
+  1179	                        turnId: resolvedTurnID
+  1180	                    )
+  1181	                }
+  1182	                scheduleAutomaticThreadTitleGenerationIfNeeded(
+  1183	                    seed: automaticTitleSeed,
+  1184	                    threadId: threadId,
+  1185	                    attachments: attachments
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:00Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba CodexMobile/CodexMobile/Services/CodexService+Incoming.swift | sed -n '58,210p'`</summary>
+```
+Chunk ID: 17eba5
+Wall time: 0.0425 seconds
+Process exited with code 0
+Original token count: 1640
+Output:
+    58	    func processIncomingText(_ text: String) {
+    59	        guard let payloadData = text.data(using: .utf8) else {
+    60	            return
+    61	        }
+    62	
+    63	        do {
+    64	            let message = try decoder.decode(RPCMessage.self, from: payloadData)
+    65	            handleIncomingRPCMessage(message)
+    66	        } catch {
+    67	            lastErrorMessage = "Unable to decode server payload"
+    68	        }
+    69	    }
+    70	
+    71	    // Handles a pre-decoded RPC message from off-actor transport paths.
+    72	    func handleDecodedRPCResult(_ result: WireMessagePreDecoder.Result, rawText: String) {
+    73	        switch result {
+    74	        case .message(let message):
+    75	            lastRawMessage = rawText
+    76	            handleIncomingRPCMessage(message)
+    77	        case .decodeFailed:
+    78	            lastErrorMessage = "Unable to decode server payload"
+    79	        case .invalidUTF8:
+    80	            break
+    81	        }
+    82	    }
+    83	
+    84	    func handleIncomingRPCMessage(_ message: RPCMessage) {
+    85	        if let method = message.method {
+    86	            let normalizedMethod = normalizedIncomingMethodName(method)
+    87	            if let requestID = message.id {
+    88	                handleServerRequest(method: normalizedMethod, requestID: requestID, params: message.params)
+    89	            } else {
+    90	                handleNotification(method: normalizedMethod, params: message.params)
+    91	            }
+    92	            return
+    93	        }
+    94	
+    95	        guard let responseID = message.id else {
+    96	            return
+    97	        }
+    98	
+    99	        let requestKey = idKey(from: responseID)
+   100	        guard let continuation = pendingRequests.removeValue(forKey: requestKey) else {
+   101	            return
+   102	        }
+   103	
+   104	        if let rpcError = message.error {
+   105	            continuation.resume(throwing: CodexServiceError.rpcError(rpcError))
+   106	        } else {
+   107	            continuation.resume(returning: message)
+   108	        }
+   109	    }
+   110	
+   111	    // Handles server-initiated RPC requests like approval prompts.
+   112	    func handleServerRequest(method: String, requestID: JSONValue, params: JSONValue?) {
+   113	        if method == "item/tool/requestUserInput" || method == "tool/requestUserInput" {
+   114	            let paramsObject = params?.objectValue
+   115	            debugRuntimeLog(
+   116	                "rpc request \(method) thread=\(paramsObject?["threadId"]?.stringValue ?? "") turn=\(paramsObject?["turnId"]?.stringValue ?? "") item=\(paramsObject?["itemId"]?.stringValue ?? "")"
+   117	            )
+   118	            handleStructuredUserInputRequest(
+   119	                requestID: requestID,
+   120	                paramsObject: paramsObject
+   121	            )
+   122	            return
+   123	        }
+   124	
+   125	        if method == "item/commandExecution/requestApproval"
+   126	            || method == "item/fileChange/requestApproval"
+   127	            || method.hasSuffix("requestApproval") {
+   128	            let paramsObject = params?.objectValue
+   129	            let request = CodexApprovalRequest(
+   130	                id: idKey(from: requestID),
+   131	                requestID: requestID,
+   132	                method: method,
+   133	                command: paramsObject?["command"]?.stringValue,
+   134	                reason: paramsObject?["reason"]?.stringValue,
+   135	                threadId: paramsObject?["threadId"]?.stringValue,
+   136	                turnId: paramsObject?["turnId"]?.stringValue,
+   137	                params: params
+   138	            )
+   139	
+   140	            if selectedAccessMode == .fullAccess {
+   141	                Task { @MainActor [weak self] in
+   142	                    guard let self else { return }
+   143	                    do {
+   144	                        debugRuntimeLog("auto-approve triggered method=\(method)")
+   145	                        try await sendResponse(
+   146	                            id: requestID,
+   147	                            result: approvalDecisionResult("accept")
+   148	                        )
+   149	                    } catch {
+   150	                        debugRuntimeLog("auto-approve failed method=\(method): \(error.localizedDescription)")
+   151	                        enqueuePendingApproval(request)
+   152	                    }
+   153	                }
+   154	                return
+   155	            }
+   156	
+   157	            enqueuePendingApproval(request)
+   158	            return
+   159	        }
+   160	
+   161	        switch method {
+   162	        default:
+   163	            Task { [requestID] in
+   164	                try? await sendErrorResponse(
+   165	                    id: requestID,
+   166	                  
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:00Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba CodexMobile/CodexMobile/Services/CodexService+Sync.swift | sed -n '12,105p'`</summary>
+```
+Chunk ID: 9e0277
+Wall time: 0.0471 seconds
+Process exited with code 0
+Original token count: 1114
+Output:
+    12	}
+    13	
+    14	extension CodexService {
+    15	    struct RunningThreadCatchupOutcome: Equatable {
+    16	        let didRefreshTurnState: Bool
+    17	        let isRunning: Bool
+    18	        let didRunForcedResume: Bool
+    19	    }
+    20	
+    21	    func startSyncLoop() {
+    22	        guard canRunRealtimeSyncLoop else {
+    23	            stopSyncLoop()
+    24	            return
+    25	        }
+    26	
+    27	        stopSyncLoop()
+    28	        debugSyncLog("sync loop start")
+    29	
+    30	        // Foreground polling is intentionally more aggressive so desktop-authored changes
+    31	        // feel closer to live on iPhone even when Codex.app itself doesn't push updates.
+    32	        let listIntervalForegroundNs: UInt64 = 10_000_000_000
+    33	        let listIntervalBackgroundNs: UInt64 = 75_000_000_000
+    34	        let historyIntervalForegroundNs: UInt64 = 3_000_000_000
+    35	        let historyIntervalForegroundMirroredNs: UInt64 = 1_000_000_000
+    36	        let historyIntervalBackgroundIdleNs: UInt64 = 90_000_000_000
+    37	        let historyIntervalBackgroundRunningNs: UInt64 = 12_000_000_000
+    38	        let watchIntervalForegroundNs: UInt64 = 2_000_000_000
+    39	        let watchIntervalBackgroundNs: UInt64 = 15_000_000_000
+    40	
+    41	        threadListSyncTask = Task { [weak self] in
+    42	            while let self, !Task.isCancelled {
+    43	                await self.syncThreadsList()
+    44	                await self.refreshInactiveRunningBadgeThreads()
+    45	                let interval = self.isAppInForeground ? listIntervalForegroundNs : listIntervalBackgroundNs
+    46	                try? await Task.sleep(nanoseconds: interval)
+    47	            }
+    48	        }
+    49	
+    50	        activeThreadSyncTask = Task { [weak self] in
+    51	            while let self, !Task.isCancelled {
+    52	                if let threadId = self.activeThreadId {
+    53	                    let hasActiveOrRunningTurn = self.threadHasActiveOrRunningTurn(threadId)
+    54	                    let wantsMirroredRunningCatchup = self.shouldPrioritizeMirroredRunningCatchup(threadId)
+    55	                    await self.syncActiveThreadState(threadId: threadId)
+    56	                    let interval: UInt64
+    57	                    if self.isAppInForeground {
+    58	                        interval = wantsMirroredRunningCatchup
+    59	                            ? historyIntervalForegroundMirroredNs
+    60	                            : historyIntervalForegroundNs
+    61	                    } else if hasActiveOrRunningTurn {
+    62	                        interval = historyIntervalBackgroundRunningNs
+    63	                    } else {
+    64	                        interval = historyIntervalBackgroundIdleNs
+    65	                    }
+    66	                    try? await Task.sleep(nanoseconds: interval)
+    67	                    continue
+    68	                }
+    69	                let interval = self.isAppInForeground ? historyIntervalForegroundNs : historyIntervalBackgroundIdleNs
+    70	                try? await Task.sleep(nanoseconds: interval)
+    71	            }
+    72	        }
+    73	
+    74	        runningThreadWatchSyncTask = Task { [weak self] in
+    75	            while let self, !Task.isCancelled {
+    76	                await self.refreshInactiveRunningBadgeThreads()
+    77	                let interval = self.isAppInForeground ? watchIntervalForegroundNs : watchIntervalBackgroundNs
+    78	                try? await Task.sleep(nanoseconds: interval)
+    79	            }
+    80	        }
+    81	
+    82	        requestImmediateSync(threadId: activeThreadId)
+    83	    }
+    84	
+    85	    func stopSyncLoop() {
+    86	        threadListSyncTask?.cancel()
+    87	        threadListSyncTask = nil
+    88	
+    89	        activeThreadSyncTask?.cancel()
+    90	        activeThreadSyncTask = nil
+    91	
+    92	        runningThreadWatchSyncTask?.cancel()
+    93	        runningThreadWatchSyncTask = nil
+    94	    }
+    95	
+    96	    func setForegroundState(_ isForeground: Bool) {
+    97	        guard isAppInForeground != isForeground else {
+    98	            return
+    99	        }
+   100	
+   101	        isAppInForeground = isForeground
+   102	        if isForeground {
+   103	            if isConnected && isInitialized {
+   104	                startSyncLoop()
+   105	                requestImmediateSync(threadId: activeThreadId)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba phodex-bridge/src/codex-transport.js | sed -n '1,120p'`</summary>
+```
+Chunk ID: ccd0b1
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1016
+Output:
+     1	// FILE: codex-transport.js
+     2	// Purpose: Abstracts the Codex-side transport so the bridge can talk to either a spawned app-server or an existing WebSocket endpoint.
+     3	// Layer: CLI helper
+     4	// Exports: createCodexTransport
+     5	// Depends on: child_process, fs, path, ws
+     6	
+     7	const { spawn } = require("child_process");
+     8	const fs = require("fs");
+     9	const path = require("path");
+    10	const WebSocket = require("ws");
+    11	
+    12	function createCodexTransport({
+    13	  endpoint = "",
+    14	  env = process.env,
+    15	  appPath = "",
+    16	  spawnImpl = spawn,
+    17	  WebSocketImpl = WebSocket,
+    18	} = {}) {
+    19	  if (endpoint) {
+    20	    return createWebSocketTransport({ endpoint, WebSocketImpl });
+    21	  }
+    22	
+    23	  return createSpawnTransport({ env, appPath, spawnImpl });
+    24	}
+    25	
+    26	function createSpawnTransport({ env, appPath, spawnImpl = spawn }) {
+    27	  const launchPlans = createCodexLaunchPlans({ env, appPath });
+    28	  let launchIndex = -1;
+    29	  let activeLaunch = null;
+    30	  let codex = null;
+    31	  let stdoutBuffer = "";
+    32	  let stderrBuffer = "";
+    33	  let didRequestShutdown = false;
+    34	  let didReportError = false;
+    35	  const listeners = createListenerBag();
+    36	
+    37	  spawnNextLaunch();
+    38	
+    39	  return {
+    40	    mode: "spawn",
+    41	    describe() {
+    42	      return activeLaunch?.description || launchPlans[0]?.description || "`codex app-server`";
+    43	    },
+    44	    send(message) {
+    45	      if (!codex.stdin.writable || codex.stdin.destroyed || codex.stdin.writableEnded) {
+    46	        return;
+    47	      }
+    48	
+    49	      codex.stdin.write(message.endsWith("\n") ? message : `${message}\n`);
+    50	    },
+    51	    onMessage(handler) {
+    52	      listeners.onMessage = handler;
+    53	    },
+    54	    onClose(handler) {
+    55	      listeners.onClose = handler;
+    56	    },
+    57	    onError(handler) {
+    58	      listeners.onError = handler;
+    59	    },
+    60	    onStarted(handler) {
+    61	      listeners.onStarted = handler;
+    62	    },
+    63	    shutdown() {
+    64	      didRequestShutdown = true;
+    65	      shutdownCodexProcess(codex);
+    66	    },
+    67	  };
+    68	
+    69	  // Retries the launch once with the bundled desktop binary when the shell-visible
+    70	  // `codex` command is unavailable in daemon environments like launchd.
+    71	  function spawnNextLaunch() {
+    72	    launchIndex += 1;
+    73	    activeLaunch = launchPlans[launchIndex] || null;
+    74	    if (!activeLaunch) {
+    75	      return;
+    76	    }
+    77	
+    78	    stdoutBuffer = "";
+    79	    stderrBuffer = "";
+    80	    codex = spawnImpl(activeLaunch.command, activeLaunch.args, activeLaunch.options);
+    81	    attachChildListeners(codex, activeLaunch);
+    82	  }
+    83	
+    84	  function attachChildListeners(child, launch) {
+    85	    child.on("spawn", () => {
+    86	      if (child !== codex) {
+    87	        return;
+    88	      }
+    89	
+    90	      listeners.emitStarted({
+    91	        mode: "spawn",
+    92	        launchDescription: launch.description,
+    93	      });
+    94	    });
+    95	    child.on("error", (error) => {
+    96	      if (child !== codex) {
+    97	        return;
+    98	      }
+    99	
+   100	      if (!didRequestShutdown && shouldRetryLaunchError(error, launchIndex, launchPlans)) {
+   101	        spawnNextLaunch();
+   102	        return;
+   103	      }
+   104	
+   105	      didReportError = true;
+   106	      listeners.emitError(error);
+   107	    });
+   108	    child.on("close", (code, signal) => {
+   109	      if (child !== codex) {
+   110	        return;
+   111	      }
+   112	
+   113	      if (!didRequestShutdown && !didReportError && code !== 0) {
+   114	        didReportError = true;
+   115	        listeners.emitError(createCodexCloseError({
+   116	          code,
+   117	          signal,
+   118	          stderrBuffer,
+   119	          launchDescription: launch.description,
+   120	        }));
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba relay/relay.js | sed -n '70,180p'; nl -ba relay/relay.js | sed -n '320,392p'`</summary>
+```
+Chunk ID: 103c7c
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2018
+Output:
+    70	  wss.on("close", () => clearInterval(heartbeat));
+    71	
+    72	  wss.on("connection", (ws, req) => {
+    73	    const urlPath = req.url || "";
+    74	    const match = urlPath.match(/^\/relay\/([^/?]+)/);
+    75	    const sessionId = match?.[1];
+    76	    const role = normalizeRelayRole(req.headers["x-role"]);
+    77	    relayMetrics.acceptedConnections += 1;
+    78	    ws._relaySessionId = sessionId;
+    79	    ws._relayRole = role;
+    80	
+    81	    if (!sessionId || (role !== "mac" && !isRelayMobileRole(role))) {
+    82	      ws.close(4000, "Missing sessionId or invalid x-role header");
+    83	      return;
+    84	    }
+    85	
+    86	    ws._relayAlive = true;
+    87	    ws.on("pong", () => {
+    88	      ws._relayAlive = true;
+    89	    });
+    90	
+    91	    // Only the Mac host is allowed to create a fresh session room.
+    92	    if (isRelayMobileRole(role) && !sessions.has(sessionId)) {
+    93	      ws.close(CLOSE_CODE_SESSION_UNAVAILABLE, "Mac session not available");
+    94	      return;
+    95	    }
+    96	
+    97	    if (!sessions.has(sessionId)) {
+    98	      sessions.set(sessionId, {
+    99	        mac: null,
+   100	        macRegistration: null,
+   101	        clients: new Set(),
+   102	        cleanupTimer: null,
+   103	        macAbsenceTimer: null,
+   104	        notificationSecret: null,
+   105	      });
+   106	    }
+   107	
+   108	    const session = sessions.get(sessionId);
+   109	
+   110	    if (isRelayMobileRole(role) && !canAcceptMobileClientConnection(session)) {
+   111	      ws.close(CLOSE_CODE_SESSION_UNAVAILABLE, "Mac session not available");
+   112	      return;
+   113	    }
+   114	
+   115	    if (session.cleanupTimer) {
+   116	      clearTimeoutFn(session.cleanupTimer);
+   117	      session.cleanupTimer = null;
+   118	    }
+   119	
+   120	    if (role === "mac") {
+   121	      clearMacAbsenceTimer(session, { clearTimeoutFn });
+   122	      // The relay keeps a per-session push secret so first-time device registration
+   123	      // cannot be claimed by someone who only knows the session id.
+   124	      session.notificationSecret = readHeaderString(req.headers["x-notification-secret"]);
+   125	      session.macRegistration = readMacRegistrationHeaders(req.headers, sessionId);
+   126	      if (session.mac && session.mac.readyState === WebSocket.OPEN) {
+   127	        session.mac.close(4001, "Replaced by new Mac connection");
+   128	      }
+   129	      session.mac = ws;
+   130	      registerLiveMacSession(session.macRegistration);
+   131	      console.log(`[relay] Mac connected -> ${relaySessionLogLabel(sessionId)}`);
+   132	    } else {
+   133	      // Keep one live mobile RPC client per session to avoid competing sockets.
+   134	      for (const existingClient of session.clients) {
+   135	        if (existingClient === ws) {
+   136	          continue;
+   137	        }
+   138	        if (
+   139	          existingClient.readyState === WebSocket.OPEN
+   140	          || existingClient.readyState === WebSocket.CONNECTING
+   141	        ) {
+   142	          existingClient.close(
+   143	            CLOSE_CODE_IPHONE_REPLACED,
+   144	            "Replaced by newer mobile connection"
+   145	          );
+   146	        }
+   147	        session.clients.delete(existingClient);
+   148	      }
+   149	
+   150	      session.clients.add(ws);
+   151	      console.log(
+   152	        `[relay] Mobile connected (${role}) -> ${relaySessionLogLabel(sessionId)} `
+   153	        + `(${session.clients.size} client(s))`
+   154	      );
+   155	    }
+   156	
+   157	    ws.on("message", (data) => {
+   158	      const msg = typeof data === "string" ? data : data.toString("utf-8");
+   159	      if (role === "mac" && applyMacRegistrationMessage(session, sessionId, msg)) {
+   160	        return;
+   161	      }
+   162	
+   163	      if (role === "mac") {
+   164	        for (const client of session.clients) {
+   165	          if (client.readyState === WebSocket.OPEN) {
+   166	            relayMetrics.macMessagesRelayed += 1;
+   167	            client.send(msg);
+   168	          }
+   169	        }
+   170	      } else if (session.mac?.readyState === WebSocket.OPEN) {
+   171	        relayMetrics.mobileMessagesRelayed += 1;
+   172	        session.mac.send(msg);
+   173	      } else {
+   174	        // The relay cannot prove a buffered request really reached the bridge after
+   175	        // a reconnect, so fail fast with an explicit retry-required close instead
+   176	        // of silently dropping queued client work during a later flush.
+   177	        relayMetrics.mobileMessagesRejectedDuringMacAbsence += 1;
+   178	        ws.close(CLOSE_CODE_MAC_ABSENCE_BUFFER_FULL, "Mac temporarily unavailable");
+   179	      }
+   180	    });
+   320	// Resolves the current live relay session for a previously trusted Mac without exposing the session id publicly.
+   321	function resolveTrustedMacSession({
+   3
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba phodex-bridge/src/codex-desktop-refresher.js | sed -n '35,95p'; nl -ba phodex-bridge/src/codex-desktop-refresher.js | sed -n '260,385p'`</summary>
+```
+Chunk ID: 0636a1
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1781
+Output:
+    35	    rolloutIdleTimeoutMs = DEFAULT_ROLLOUT_IDLE_TIMEOUT_MS,
+    36	    now = () => Date.now(),
+    37	    refreshExecutor = null,
+    38	    watchThreadRolloutFactory = createThreadRolloutActivityWatcher,
+    39	    refreshBackend = null,
+    40	    customRefreshFailureThreshold = DEFAULT_CUSTOM_REFRESH_FAILURE_THRESHOLD,
+    41	  } = {}) {
+    42	    this.enabled = enabled;
+    43	    this.debounceMs = debounceMs;
+    44	    this.refreshCommand = refreshCommand;
+    45	    this.bundleId = bundleId;
+    46	    this.appPath = appPath;
+    47	    this.logPrefix = logPrefix;
+    48	    this.fallbackNewThreadMs = fallbackNewThreadMs;
+    49	    this.midRunRefreshThrottleMs = midRunRefreshThrottleMs;
+    50	    this.rolloutLookupTimeoutMs = rolloutLookupTimeoutMs;
+    51	    this.rolloutIdleTimeoutMs = rolloutIdleTimeoutMs;
+    52	    this.now = now;
+    53	    this.refreshExecutor = refreshExecutor;
+    54	    this.watchThreadRolloutFactory = watchThreadRolloutFactory;
+    55	    this.refreshBackend = refreshBackend
+    56	      || (this.refreshCommand ? "command" : (this.refreshExecutor ? "command" : "applescript"));
+    57	    this.customRefreshFailureThreshold = customRefreshFailureThreshold;
+    58	
+    59	    this.mode = "idle";
+    60	    this.pendingNewThread = false;
+    61	    this.pendingRefreshKinds = new Set();
+    62	    this.pendingCompletionRefresh = false;
+    63	    this.pendingCompletionTurnId = null;
+    64	    this.pendingCompletionTargetUrl = "";
+    65	    this.pendingCompletionTargetThreadId = "";
+    66	    this.pendingTargetUrl = "";
+    67	    this.pendingTargetThreadId = "";
+    68	    this.lastRefreshAt = 0;
+    69	    this.lastRefreshSignature = "";
+    70	    this.lastTurnIdRefreshed = null;
+    71	    this.lastMidRunRefreshAt = 0;
+    72	    this.refreshTimer = null;
+    73	    this.refreshRunning = false;
+    74	    this.fallbackTimer = null;
+    75	    this.activeWatcher = null;
+    76	    this.activeWatchedThreadId = null;
+    77	    this.watchStartAt = 0;
+    78	    this.lastRolloutSize = null;
+    79	    this.stopWatcherAfterRefreshThreadId = null;
+    80	    this.runtimeRefreshAvailable = enabled;
+    81	    this.consecutiveRefreshFailures = 0;
+    82	    this.unavailableLogged = false;
+    83	  }
+    84	
+    85	  handleInbound(rawMessage) {
+    86	    const parsed = safeParseJSON(rawMessage);
+    87	    if (!parsed) {
+    88	      return;
+    89	    }
+    90	
+    91	    const method = parsed.method;
+    92	    if (method === "thread/start") {
+    93	      const target = resolveInboundTarget(method, parsed);
+    94	      if (target?.threadId) {
+    95	        this.queueRefresh("phone", target, `phone ${method}`);
+   260	      this.clearPendingTarget();
+   261	    }
+   262	    this.refreshRunning = true;
+   263	    this.log(
+   264	      `refresh running: ${Array.from(pendingRefreshKinds).join("+")}${targetThreadId ? ` thread=${targetThreadId}` : ""}`
+   265	    );
+   266	
+   267	    let didRefresh = false;
+   268	    try {
+   269	      const refreshSignature = `${targetUrl || "app"}|${targetThreadId || "no-thread"}`;
+   270	      if (
+   271	        !shouldForceCompletionRefresh
+   272	        && refreshSignature === this.lastRefreshSignature
+   273	        && this.now() - this.lastRefreshAt < this.debounceMs
+   274	      ) {
+   275	        this.log(`refresh skipped (duplicate target): ${refreshSignature}`);
+   276	      } else {
+   277	        await this.executeRefresh(targetUrl);
+   278	        this.lastRefreshAt = this.now();
+   279	        this.lastRefreshSignature = refreshSignature;
+   280	        this.consecutiveRefreshFailures = 0;
+   281	        didRefresh = true;
+   282	      }
+   283	      if (completionTurnId && didRefresh) {
+   284	        this.lastTurnIdRefreshed = completionTurnId;
+   285	      }
+   286	    } catch (error) {
+   287	      this.handleRefreshFailure(error);
+   288	    } finally {
+   289	      this.refreshRunning = false;
+   290	      if (
+   291	        didRefresh
+   292	        && stopWatcherAfterRefreshThreadId
+   293	        && stopWatcherAfterRefreshThreadId === this.activeWatchedThreadId
+   294	      ) {
+   295	        this.stopWatcher();
+   296	        this.mode = this.pendingNewThread ? "pending_new_thread" : "idle";
+   297	      }
+   298	      // A completion refresh can queue while another refresh is still running,
+   299	      // so retry whenever either queue still has work.
+   300	      if (this.hasPendingRefreshWork()) {
+   301	        this.scheduleRefresh("pending follow-up refresh");
+   302	      }
+   303	    }
+   304	  }
+   305	
+   306	  executeRefresh(targetUrl) {
+   307	    if (this.refreshExecutor) {
+   308	      return this.refreshExecutor(targetUrl || "");
+   309	    }
+   310	
+   311	    if (this.refreshCommand) {
+   312	      return execFilePromise("/bin/sh", ["-lc", this.refreshCommand]);
+   313	    }
+   314	
+   3
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba phodex-bridge/src/macos-launch-agent.js | sed -n '40,115p'`</summary>
+```
+Chunk ID: 0c6435
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 631
+Output:
+    40	    const message = "No relay URL configured for the macOS bridge service.";
+    41	    // Clear any stale QR so the CLI does not keep showing a pairing payload for a dead service.
+    42	    clearPairingSession({ env });
+    43	    writeBridgeStatus({
+    44	      state: "error",
+    45	      connectionStatus: "error",
+    46	      pid: process.pid,
+    47	      lastError: message,
+    48	    }, { env });
+    49	    console.error(`[remodex] ${message}`);
+    50	    return;
+    51	  }
+    52	
+    53	  startBridge({
+    54	    config,
+    55	    printPairingQr: false,
+    56	    onPairingSession(pairingSession) {
+    57	      writePairingSession(pairingSession, { env });
+    58	    },
+    59	    onBridgeStatus(status) {
+    60	      writeBridgeStatus(
+    61	        mergeBridgeStatusForDaemon(status, readBridgeStatus({ env })),
+    62	        { env }
+    63	      );
+    64	    },
+    65	  });
+    66	}
+    67	
+    68	// Prepares config + launchd state and optionally waits for the fresh pairing payload written by the service.
+    69	async function startMacOSBridgeService({
+    70	  env = process.env,
+    71	  platform = process.platform,
+    72	  fsImpl = fs,
+    73	  execFileSyncImpl = execFileSync,
+    74	  osImpl = os,
+    75	  nodePath = process.execPath,
+    76	  cliPath = path.resolve(__dirname, "..", "bin", "remodex.js"),
+    77	  waitForPairing = false,
+    78	  pairingTimeoutMs = DEFAULT_PAIRING_WAIT_TIMEOUT_MS,
+    79	  pairingPollIntervalMs = DEFAULT_PAIRING_WAIT_INTERVAL_MS,
+    80	} = {}) {
+    81	  assertDarwinPlatform(platform);
+    82	  const config = readBridgeConfig({ env });
+    83	  assertRelayConfigured(config);
+    84	  const startedAt = Date.now();
+    85	
+    86	  writeDaemonConfig(config, { env, fsImpl });
+    87	  clearPairingSession({ env, fsImpl });
+    88	  clearBridgeStatus({ env, fsImpl });
+    89	  ensureRemodexStateDir({ env, fsImpl, osImpl });
+    90	  ensureRemodexLogsDir({ env, fsImpl, osImpl });
+    91	
+    92	  const plistPath = writeLaunchAgentPlist({
+    93	    env,
+    94	    fsImpl,
+    95	    osImpl,
+    96	    nodePath,
+    97	    cliPath,
+    98	  });
+    99	  restartLaunchAgent({
+   100	    env,
+   101	    execFileSyncImpl,
+   102	    plistPath,
+   103	  });
+   104	
+   105	  if (!waitForPairing) {
+   106	    return {
+   107	      plistPath,
+   108	      pairingSession: null,
+   109	    };
+   110	  }
+   111	
+   112	  const pairingSession = await waitForFreshPairingSession({
+   113	    env,
+   114	    fsImpl,
+   115	    startedAt,
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:17Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba /Users/xiayanghui/.codex/memories/MEMORY.md | sed -n '87,105p'`</summary>
+```
+Chunk ID: fece03
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 457
+Output:
+    87	## Task 9: 对比 `remodex` 后确认继续走 CodexMobile，并把 desktop IPC 缺席改回“mobile 可继续执行”
+    88	
+    89	### rollout_summary_files
+    90	
+    91	- rollout_summaries/2026-05-07T09-51-09-8csE-codexmobile_remodex_compare_and_desktop_ipc_fallback_fix.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/07/rollout-2026-05-07T17-51-09-019e01d9-2a8f-7a60-8755-384b1c4cd4e0.jsonl, updated_at=2026-05-07T17:53:19+00:00, thread_id=019e01d9-2a8f-7a60-8755-384b1c4cd4e0, compared `remodex`, then restored background execution when desktop owner is unavailable so mobile can continue and sync later)
+    92	
+    93	### keywords
+    94	
+    95	- CodexMobile, remodex, desktop-ipc, no-client-found, thread/loaded/list, notLoaded, inactive_thread_unsubscribed, background fallback, no loaded desktop owner
+    96	
+    97	## Task 10: 解释 CodexMobile 的 IPC 链路，并澄清 `createThread` 只是能力声明不是现成实现
+    98	
+    99	### rollout_summary_files
+   100	
+   101	- rollout_summaries/2026-05-07T23-18-04-Zich-codexmobile_ipc_create_thread_capability_explanation.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/08/rollout-2026-05-08T07-18-04-019e04bb-ea0a-7942-b22a-77a5ad7ed299.jsonl, updated_at=2026-05-07T23:22:20+00:00, thread_id=019e04bb-ea0a-7942-b22a-77a5ad7ed299, explained the PWA -> local Node bridge -> desktop IPC/app-server chain and why `createThread: true` cannot be added by flipping a status flag)
+   102	
+   103	### keywords
+   104	
+   105	- CodexMobile, IPC, desktop-ipc, app-server, node bridge, JSON-RPC, createThread, createThreadReason, backgroundCodex, headless-local, thread-follower-start-turn, thread-follower-set-collaboration-mode, socket
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:17Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba /Users/xiayanghui/.codex/memories/rollout_summaries/2026-05-07T09-51-09-8csE-codexmobile_remodex_compare_and_desktop_ipc_fallback_fix.md | sed -n '1,70p'`</summary>
+```
+Chunk ID: d3441d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1887
+Output:
+     1	thread_id: 019e01d9-2a8f-7a60-8755-384b1c4cd4e0
+     2	updated_at: 2026-05-07T17:53:19+00:00
+     3	rollout_path: /Users/xiayanghui/.codex/archived_sessions/rollout-2026-05-07T17-51-09-019e01d9-2a8f-7a60-8755-384b1c4cd4e0.jsonl
+     4	cwd: /Users/xiayanghui/编程项目/CodexMobile
+     5	git_branch: codex/refactor-architecture-modules
+     6	
+     7	# Mobile can execute without the desktop owner being open; desktop IPC should be treated as a sync/real-time path, not a hard prerequisite.
+     8	
+     9	Rollout context: The user compared `CodexMobile` to `remodex`, installed `remodex` locally, inspected its architecture, and then asked to optimize `CodexMobile` based on the stronger UI/interaction ideas while preserving their current workflow. The later part of the rollout shifted into debugging a mobile-vs-desktop sync issue around `desktop-ipc`, `thread/loaded/list`, and `no-client-found` behavior.
+    10	
+    11	## Task 1: Compare `CodexMobile` vs `remodex` and decide whether to keep using our project
+    12	
+    13	Outcome: success
+    14	
+    15	Preference signals:
+    16	- The user asked whether to continue using their current project or switch to `remodex`, then later confirmed they liked the latter's feel but still cared about their own sync/workflow constraints. This suggests they value a tool that matches their own Codex workflow over a generic prettier app.
+    17	- The user repeatedly steered toward mobile UX improvements only after asking to preserve current capabilities like desktop sync, skills, and their existing local workflow. That implies future UI suggestions should be framed as incremental improvements to the current app, not a full migration.
+    18	
+    19	Key steps:
+    20	- Inspected the local `CodexMobile` README and package scripts to understand its current capabilities: PWA, local Node bridge, skills, files, ASR, git, and Tailscale/private-network use.
+    21	- Queried the GitHub repo metadata for `remodex` and inspected its package/README structure: Swift iOS app, Mac bridge, relay, App Store distribution, E2EE pairing, trusted reconnect, live streaming, and Git actions.
+    22	- Compared the two architectures and concluded that `remodex` is stronger on native iOS feel and transport/security, while `CodexMobile` is more tailored to the user's actual workflow and local integrations.
+    23	
+    24	Failures and how to do differently:
+    25	- None major in the comparison phase; the main lesson was to compare against the user's real workflow needs, not just app polish or GitHub popularity.
+    26	
+    27	Reusable knowledge:
+    28	- `CodexMobile` is a local PWA + Node bridge designed around the user's own machine, skills, files, ASR, quota, and private-network access; the project is already deeply embedded in their workflow.
+    29	- `remodex` is a native iOS + Mac bridge + relay stack with E2EE pairing, trusted reconnect, background launchd service on macOS, and a real App Store distribution path.
+    30	- The user’s acceptance criteria are not just “nice UI,” but also desktop sync, local workflow integration, and low-maintenance private-network use.
+    31	
+    32	References:
+    33	- README excerpts from `CodexMobile` showing skills, lark-cli, ASR, quota, and Tailscale/private-network deployment.
+    34	- `remodex` README / `SELF_HOSTING_MODEL.md` showing iOS app, bridge, relay, E2EE pairing, and trusted reconnect.
+    35	- GitHub metadata: `Emanuele-web04/remodex`, ~2.8k stars, Apache-2.0, Swift primary language.
+    36	
+    37	## Task 2: Debug desktop sync / `desktop-ipc` behavior and stop blocking mobile execution
+    38	
+    39	Outcome: success
+    40	
+    41	Preference signals:
+    42	- The user explicitly corrected the direction after the agent tried to block execution when the desktop owner was missing: “我本来就是想实现如果电脑端没打开 移动端也是可以正常发消息执行的，等电脑端打开就同步上了.” This is the clearest durable preference in the rollout.
+    43	- The user also noted that restarting the client fixed the earlier issue, which implies they expect the system to be resilient to desktop availability changes rather than treat them as fatal.
+    44	- When the agent proposed a stricter failure path, the user immediately pushed back. Future similar cases should default to “mobile can continue, desktop sync can catch up later” unless the user explicitly asks for hard blocking.
+    45	
+    46	Key steps:
+    47	- Checked `/api/status` and confirmed the live backend reported `desktop-ipc connected`, while the active desktop bridge mode was still `desktop-ipc` with `createThread=false` and `backgroundCodex=true`.
+    48	- Inspected Codex Desktop logs and found repeated `inactive_thread_unsubscribed` entries for the affected thread IDs, which explained why `thread-follower-start-turn` could return `no-client-found
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:20:52Z)**_
+
+我看完了。remodex 的核心不是“手机直接跑 Codex”，而是：
+
+`iPhone App -> relay WebSocket -> Mac 上的 remodex bridge -> codex app-server -> Mac 本地 ~/.codex/session JSONL`
+
+**运行链路**
+1. Mac 上跑 `remodex up`，macOS 下会写入/启动 `launchd` 后台服务，真正执行的是 Node bridge。这个 bridge 会连接 relay，并启动本机 `codex app-server`，或者连接已有 endpoint。
+2. iPhone 第一次扫码，QR 里有 `relay URL / sessionId / Mac deviceId / Mac public key`。后续不靠固定 sessionId，而是用可信设备签名去 relay 的 `/v1/trusted/session/resolve` 找当前 Mac 的 live session。
+3. 手机发消息时，Swift 侧 `sendRequest("turn/start", ...)` 先包装 JSON-RPC，再通过 E2EE envelope 发给 relay。relay 不解密，只按 session 转发给 Mac bridge。
+4. Mac bridge 解密后，先拦截一部分本地能力，比如 git、workspace、desktop、voice、auth；普通 Codex 消息最后原样写进 `codex app-server` 的 stdin/stdout JSON-RPC 通道。
+5. `codex app-server` 返回 `turn/started`、delta、approval request、`turn/completed` 等事件后，bridge 再加密推回手机；手机解密后按 request id 完成 pending request，或按 notification 更新时间线。
+
+**同步信息流**
+- 实时流：`codex app-server stdout -> bridge -> encrypted relay -> iPhone -> handleNotification`，这是主链路。
+- 补偿同步：iOS 端有轮询 sync loop，前台大约 `thread/list` 10 秒、当前 thread history 3 秒，运行中/镜像状态更激进，用来补桌面端或断线后的状态。
+- 断线补发：bridge 的 secure transport 会给 Mac->Phone 出站消息加 `bridgeOutboundSeq`，手机保存最后处理过的 seq，重连后发 `resumeState`，bridge 按 seq replay 缺失消息。
+- 桌面 Codex.app 同步：它不是 Remodex 的实时主控端。Remodex 主要跑 `codex app-server`，Codex.app 只是读同一份 `~/.codex` 历史；可选 AppleScript/deeplink refresh 只是“让桌面 UI 跳过去/刷新一下”，不是强实时镜像。
+
+**关键结论**
+remodex 强在三点：原生 iOS 体验、E2EE relay/trusted reconnect、Mac 后台 daemon 保活。它的 relay 只是转发层，不跑 Codex、不碰仓库、不解密内容。真正执行仍在 Mac bridge 上。
+
+对 CodexMobile 来说，最值得学的是：`可信重连 + seq replay + relay 只做密文转发 + 手机端事件 reducer/轮询补偿`。但别照抄它的“Mac bridge 必须在线才能发新请求”模型；你之前明确要的是桌面端 UI 不在也能继续执行，之后再同步回来，这一点我们自己的 fallback 方向更贴你的工作流。
+
+我参考的当前 remodex HEAD 是 `4bf799fdb6bbbddb5c54db118d0b7157b1eacc53`。主要源码：  
+[README architecture](https://github.com/Emanuele-web04/remodex/blob/4bf799fdb6bbbddb5c54db118d0b7157b1eacc53/README.md#L49-L71), [bridge routing](https://github.com/Emanuele-web04/remodex/blob/4bf799fdb6bbbddb5c54db118d0b7157b1eacc53/phodex-bridge/src/bridge.js#L521-L570), [codex transport](https://github.com/Emanuele-web04/remodex/blob/4bf799fdb6bbbddb5c54db118d0b7157b1eacc53/phodex-bridge/src/codex-transport.js#L12-L50), [secure replay](https://github.com/Emanuele-web04/remodex/blob/4bf799fdb6bbbddb5c54db118d0b7157b1eacc53/phodex-bridge/src/secure-transport.js#L383-L403), [iOS sendRequest](https://github.com/Emanuele-web04/remodex/blob/4bf799fdb6bbbddb5c54db118d0b7157b1eacc53/CodexMobile/CodexMobile/Services/CodexService%2BTransport.swift#L58-L105), [iOS inbound reducer](https://github.com/Emanuele-web04/remodex/blob/4bf799fdb6bbbddb5c54db118d0b7157b1eacc53/CodexMobile/CodexMobile/Services/CodexService%2BIncoming.swift#L84-L210), [relay forwarding](https://github.com/Emanuele-web04/remodex/blob/4bf799fdb6bbbddb5c54db118d0b7157b1eacc53/relay/relay.js#L72-L180).
+
+
+
+---
+
+_**User (2026-05-11 04:23:04Z)**_
+
+但是现在我们的fallback的运行状态有问题啊，我想你重新设计，可以学习一下remodex的思路，但是要按我说的，如果codex桌面端在线，还就还是ipc同步 实现live mirror，如果不在线那就走codex后台运行，等codex桌面端重新打开，之前手机端运行的记录也能同步上。你看看能不能实现
+
+
+---
+
+_**Agent (gpt-5.5 2026-05-11 04:23:16Z)**_
+
+我会按“桌面在线走 IPC live mirror，桌面不在线走后台 Codex，桌面回来后补同步”的产品口径重新梳理，不把 remodex 的 Mac 必须在线模型照搬。先读当前 fallback/running 状态的实现和最近相关记忆，再下手改。
+
+_**Agent (gpt-5.5 2026-05-11 04:23:16Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,220p' '/Users/xiayanghui/.codex/plugins/cache/openai-curated/superpowers/63976030/skills/systematic-debugging/SKILL.md'`</summary>
+```
+Chunk ID: 23f40a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1593
+Output:
+---
+name: systematic-debugging
+description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+---
+
+# Systematic Debugging
+
+## Overview
+
+Random fixes waste time and create new bugs. Quick patches mask underlying issues.
+
+**Core principle:** ALWAYS find root cause before attempting fixes. Symptom fixes are failure.
+
+**Violating the letter of this process is violating the spirit of debugging.**
+
+## The Iron Law
+
+```
+NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
+```
+
+If you haven't completed Phase 1, you cannot propose fixes.
+
+## When to Use
+
+Use for ANY technical issue:
+- Test failures
+- Bugs in production
+- Unexpected behavior
+- Performance problems
+- Build failures
+- Integration issues
+
+**Use this ESPECIALLY when:**
+- Under time pressure (emergencies make guessing tempting)
+- "Just one quick fix" seems obvious
+- You've already tried multiple fixes
+- Previous fix didn't work
+- You don't fully understand the issue
+
+**Don't skip when:**
+- Issue seems simple (simple bugs have root causes too)
+- You're in a hurry (rushing guarantees rework)
+- Manager wants it fixed NOW (systematic is faster than thrashing)
+
+## The Four Phases
+
+You MUST complete each phase before proceeding to the next.
+
+### Phase 1: Root Cause Investigation
+
+**BEFORE attempting ANY fix:**
+
+1. **Read Error Messages Carefully**
+   - Don't skip past errors or warnings
+   - They often contain the exact solution
+   - Read stack traces completely
+   - Note line numbers, file paths, error codes
+
+2. **Reproduce Consistently**
+   - Can you trigger it reliably?
+   - What are the exact steps?
+   - Does it happen every time?
+   - If not reproducible → gather more data, don't guess
+
+3. **Check Recent Changes**
+   - What changed that could cause this?
+   - Git diff, recent commits
+   - New dependencies, config changes
+   - Environmental differences
+
+4. **Gather Evidence in Multi-Component Systems**
+
+   **WHEN system has multiple components (CI → build → signing, API → service → database):**
+
+   **BEFORE proposing fixes, add diagnostic instrumentation:**
+   ```
+   For EACH component boundary:
+     - Log what data enters component
+     - Log what data exits component
+     - Verify environment/config propagation
+     - Check state at each layer
+
+   Run once to gather evidence showing WHERE it breaks
+   THEN analyze evidence to identify failing component
+   THEN investigate that specific component
+   ```
+
+   **Example (multi-layer system):**
+   ```bash
+   # Layer 1: Workflow
+   echo "=== Secrets available in workflow: ==="
+   echo "IDENTITY: ${IDENTITY:+SET}${IDENTITY:-UNSET}"
+
+   # Layer 2: Build script
+   echo "=== Env vars in build script: ==="
+   env | grep IDENTITY || echo "IDENTITY not in environment"
+
+   # Layer 3: Signing script
+   echo "=== Keychain state: ==="
+   security list-keychains
+   security find-identity -v
+
+   # Layer 4: Actual signing
+   codesign --sign "$IDENTITY" --verbose=4 "$APP"
+   ```
+
+   **This reveals:** Which layer fails (secrets → workflow ✓, workflow → build ✗)
+
+5. **Trace Data Flow**
+
+   **WHEN error is deep in call stack:**
+
+   See `root-cause-tracing.md` in this directory for the complete backward tracing technique.
+
+   **Quick version:**
+   - Where does bad value originate?
+   - What called this with bad value?
+   - Keep tracing up until you find the source
+   - Fix at source, not at symptom
+
+### Phase 2: Pattern Analysis
+
+**Find the pattern before fixing:**
+
+1. **Find Working Examples**
+   - Locate similar working code in same codebase
+   - What works that's similar to what's broken?
+
+2. **Compare Against References**
+   - If implementing pattern, read reference implementation COMPLETELY
+   - Don't skim - read every line
+   - Understand the pattern fully before applying
+
+3. **Identify Differences**
+   - What's different between working and broken?
+   - List every difference, however small
+   - Don't assume "that can't matter"
+
+4. **Understand Dependencies**
+   - What other components does this need?
+   - What settings, config, environment?
+   - What assumptions does it make?
+
+### Phase 3: Hypothesis and Testing
+
+**Scientific method:**
+
+1. **Form Single Hypothesis**
+   - State clearly: "I think X is the root cause because Y"
+   - Write it down
+   - Be specific, not vague
+
+2. **Test Minimally**
+   - Make the SMALLEST possible change to test hypothesis
+   - One variable at a time
+   - Don't fix multiple things at once
+
+3. **Verify Before Continuing**
+   - Did it work? Yes → Phase 4
+   - Didn't work? Form NEW hypothesis
+   - DON'T add more fixes on top
+
+4. **When You Don't Know**
+   - Say "I don't understand X"
+   - Don't pretend to know
+   - Ask for help
+   - Research more
+
+### Phase 4: Implementation
+
+**Fix the root cause, not the symptom:**
+
+1. **Create Failing Test Case**
+   - Simplest possible reproduction
+   - Automated test if possible
+   - One-off test script
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:16Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "fallback|desktop-ipc|desktopIpc|backgroundCodex|mobileOnly|running|live mirror|mirror|no-client-found|inactive_thread|protectedRunning|activeRuns|thread/read|turn/completed|turn/started" server client/src shared /Users/xiayanghui/.codex/memories/MEMORY.md | head -n 260`</summary>
+```
+Chunk ID: a62388
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 8610
+Output:
+shared/session-title.js:66:export function provisionalSessionTitle(message, fallback = DEFAULT_TITLE) {
+shared/session-title.js:68:  return title && !weakTitle(title) ? title : fallback;
+shared/session-title.js:71:export function sessionTitleFromConversation({ userMessage, assistantMessage } = {}, fallback = DEFAULT_TITLE) {
+shared/session-title.js:80:  return userTitle || assistantTitle || fallback;
+/Users/xiayanghui/.codex/memories/MEMORY.md:3:scope: `CodexMobile` 手机端 composer 控件、`/plan` 协作模式、repo-local skill 发现、自动标题、普通对话/发送链路排障、desktop IPC fallback、draft/new-thread send、abort 状态卡片、后端保守拆分、移动端 Git 面板、macOS 自启动与 Tailscale/LAN 访问；适用于这个 repo 的 live 前后端联调、app-server 行为核验、私网访问解释和公开仓库卫生，不适用于泛化移动端产品设计。
+/Users/xiayanghui/.codex/memories/MEMORY.md:4:applies_to: cwd=/Users/xiayanghui/编程项目/CodexMobile; reuse_rule=适合复用到这个 `CodexMobile` 仓库里与 composer、`/plan`、`/api/status`、`thread/*` app-server 能力、本地 Node 服务、README 功能口径、Git HTTP API、launchd、Tailscale/LAN origin 行为有关的任务；具体端口、running process、模型列表和代码结构都要按当前 checkout/live server 重验
+/Users/xiayanghui/.codex/memories/MEMORY.md:30:- rollout_summaries/2026-05-05T11-35-49-5GrC-codexmobile_auto_thread_title_hook_gpt_5_4_mini.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T19-35-49-019df7ec-42b4-7602-94d6-e06d2430e6c0.jsonl, updated_at=2026-05-05T12:01:30+00:00, thread_id=019df7ec-42b4-7602-94d6-e06d2430e6c0, traced `name`/`preview` fallback and added async auto-title writeback for new draft sessions)
+/Users/xiayanghui/.codex/memories/MEMORY.md:34:- thread naming, preview fallback, thread/name/set, gpt-5.4-mini, auto title, session-title, draft session, sanitizeGeneratedTitle, node --test, EADDRINUSE
+/Users/xiayanghui/.codex/memories/MEMORY.md:44:- ordinary conversations, hidden-sessions.json, mobile-sessions.json, refreshCodexCache, Documents/Codex, activeRuns, /api/chat/abort, runCodexTurn, lark-cli, NO_PROXY, thread/archive, app-server timeout, turn/completed
+/Users/xiayanghui/.codex/memories/MEMORY.md:85:- CodexMobile, /plan, 计划模式, collaborationMode, composer-shortcuts, prepareComposerSubmission, queue drafts, turn/start, thread-follower-set-collaboration-mode, desktop IPC, server/chat-service.js, server/codex-runner.js, desktop-ipc-client.js, node --test, npm run build
+/Users/xiayanghui/.codex/memories/MEMORY.md:91:- rollout_summaries/2026-05-07T09-51-09-8csE-codexmobile_remodex_compare_and_desktop_ipc_fallback_fix.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/07/rollout-2026-05-07T17-51-09-019e01d9-2a8f-7a60-8755-384b1c4cd4e0.jsonl, updated_at=2026-05-07T17:53:19+00:00, thread_id=019e01d9-2a8f-7a60-8755-384b1c4cd4e0, compared `remodex`, then restored background execution when desktop owner is unavailable so mobile can continue and sync later)
+/Users/xiayanghui/.codex/memories/MEMORY.md:95:- CodexMobile, remodex, desktop-ipc, no-client-found, thread/loaded/list, notLoaded, inactive_thread_unsubscribed, background fallback, no loaded desktop owner
+/Users/xiayanghui/.codex/memories/MEMORY.md:105:- CodexMobile, IPC, desktop-ipc, app-server, node bridge, JSON-RPC, createThread, createThreadReason, backgroundCodex, headless-local, thread-follower-start-turn, thread-follower-set-collaboration-mode, socket
+/Users/xiayanghui/.codex/memories/MEMORY.md:121:- rollout_summaries/2026-05-07T22-50-04-YESW-codexmobile_mobile_abort_status_card_stuck_processing.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/08/rollout-2026-05-08T06-50-04-019e04a2-46ed-7d82-97b7-cc7f6625873e.jsonl, updated_at=2026-05-07T22:54:57+00:00, thread_id=019e04a2-46ed-7d82-97b7-cc7f6625873e, completed optimistic running activity messages immediately after abort so the status card stops synchronously)
+/Users/xiayanghui/.codex/memories/MEMORY.md:125:- CodexMobile, abort, status card, 正在处理, 已中止, completeLocalAbortMessages, completeActivityMessagesForTurn, useTurnSubmission, activeRuns
+/Users/xiayanghui/.codex/memories/MEMORY.md:137:## Task 14: 解释当前线程为什么先走 fallback、并确认 thread rehome 不能只改 SQLite
+/Users/xiayanghui/.codex/memories/MEMORY.md:141:- rollout_summaries/2026-05-08T02-32-56-k2gV-codexmobile_ipc_fallback_analysis_and_thread_project_rehome.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/08/rollout-2026-05-08T10-32-56-019e056e-5134-76f1-9dca-896a72c7d5a1.jsonl, updated_at=2026-0
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '137,166p' /Users/xiayanghui/.codex/memories/MEMORY.md`</summary>
+```
+Chunk ID: 107b61
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 629
+Output:
+## Task 14: 解释当前线程为什么先走 fallback、并确认 thread rehome 不能只改 SQLite
+
+### rollout_summary_files
+
+- rollout_summaries/2026-05-08T02-32-56-k2gV-codexmobile_ipc_fallback_analysis_and_thread_project_rehome.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/08/rollout-2026-05-08T10-32-56-019e056e-5134-76f1-9dca-896a72c7d5a1.jsonl, updated_at=2026-05-08T02:48:21+00:00, thread_id=019e056e-5134-76f1-9dca-896a72c7d5a1, verified the real IPC-vs-background conditions for the current thread, then proved session rehome still follows rollout `session_meta.cwd` even after SQLite edits)
+
+### keywords
+
+- CodexMobile, IPC, fallback, desktop-ipc, headless-local, thread owner, mobileOnly=false, refreshCodexCache, getSession, session_meta, cwd, state_5.sqlite, thread/read, projectPath, JSONL, rehome
+
+## Task 15: 重新部署 CodexMobile 本机桥接服务，并验证 3321 与 Tailscale 入口恢复
+
+### rollout_summary_files
+
+- rollout_summaries/2026-05-07T23-09-22-MZt0-codexmobile_redeploy_launchagent_3321.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/08/rollout-2026-05-08T07-09-22-019e04b3-f43b-7721-a526-aec05a87ffda.jsonl, updated_at=2026-05-07T23:12:02+00:00, thread_id=019e04b3-f43b-7721-a526-aec05a87ffda, rebuilt the repo, reinstalled `com.codexmobile.bridge`, restored port 3321, and revalidated the Tailscale Serve endpoint after a service outage)
+
+### keywords
+
+- CodexMobile, LaunchAgent, com.codexmobile.bridge, 3321, Tailscale Serve, /api/status, npm run mac:autostart, npm run smoke, launchctl, lsof, EADDRINUSE, heap out of memory
+
+## Task 16: 当线程其实没在跑时，直接清掉移动端残留的“正在处理中”状态
+
+### rollout_summary_files
+
+- rollout_summaries/2026-05-08T04-55-00-6EMU-codexmobile_clear_stuck_mobile_processing_state.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/08/rollout-2026-05-08T12-55-00-019e05f0-61ab-7fa3-95d3-6f324af51398.jsonl, updated_at=2026-05-08T05:03:18+00:00, thread_id=019e05f0-61ab-7fa3-95d3-6f324af51398, changed `/api/chat/abort` so a stale thread can still emit `chat-aborted` and clear the mobile UI even after the backend run is already gone)
+
+### keywords
+
+- CodexMobile, 正在处理中, stale state, chat-aborted, abortChat, abortCodexTurn, activeRuns, /api/chat/abort, turn-1778216026881-12c83f5bfc4228, scripts/run-server.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' server/chat-service.js`</summary>
+```
+Chunk ID: 591e09
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1996
+Output:
+/**
+ * 组装聊天业务：队列、桌面桥接/后台 fallback、图片与自动标题等子能力。
+ *
+ * Keywords: chat-service, desktop-bridge, codex-turn, queue, attachments
+ *
+ * Exports:
+ * - createChatService — 创建可注入依赖的聊天服务实例。
+ * - normalizeSelectedSkills — 再导出自 chat-request-prep。
+ *
+ * Inward（本模块依赖/组装的关键符号）: chat-queue、chat-delivery、chat-request-prep、chat-image-handler、desktop-turn-monitor、runtime-debug。
+ *
+ * Outward（谁在用/调用场景）: HTTP 聊天路由或上层服务装配。
+ *
+ * 不负责: Codex CLI 进程细节（由 codex-runner 等承担）。
+ */
+import {
+  registerProjectlessThread as registerProjectlessThreadInCodexState
+} from './codex-config.js';
+import { registerMobileSession as registerMobileSessionInIndex } from './mobile-session-index.js';
+import { createChatQueue } from './chat-queue.js';
+import {
+  assertDesktopBridgeAvailable,
+  backgroundFallbackBridge,
+  desktopIpcCanUseBackgroundFallback,
+  runQueuedHeadlessChatJob,
+  sendViaDesktopIpc
+} from './chat-delivery.js';
+import {
+  prepareChatRequest,
+  projectlessThreadWorkingDirectory
+} from './chat-request-prep.js';
+import { createChatImageHandler } from './chat-image-handler.js';
+import { createChatAutoNamer } from './chat-auto-title.js';
+import { createDesktopTurnMonitor } from './desktop-turn-monitor.js';
+import {
+  compactActiveRuns,
+  runtimeDebugLine
+} from './runtime-debug.js';
+
+export { normalizeSelectedSkills } from './chat-request-prep.js';
+
+export function createChatService({
+  imagePromptState,
+  defaultReasoningEffort = 'xhigh',
+  getProject,
+  getSession,
+  getCacheSnapshot,
+  getDesktopBridgeStatus,
+  listProjectSessions,
+  readSessionMessages = async () => ({ messages: [] }),
+  refreshCodexCache,
+  renameSession,
+  broadcast,
+  runCodexTurn,
+  steerCodexTurn,
+  startDesktopFollowerTurn,
+  steerDesktopFollowerTurn,
+  interruptDesktopFollowerTurn,
+  setDesktopFollowerModelAndReasoning,
+  setDesktopFollowerCollaborationMode,
+  abortCodexTurn,
+  getActiveRuns,
+  runImageTurn,
+  isImageRequest,
+  useLegacyImageGenerator,
+  maybeAutoNameSession,
+  registerProjectlessThread = registerProjectlessThreadInCodexState,
+  registerMobileSession = registerMobileSessionInIndex,
+  rememberLiveSession = () => null,
+  desktopOwnerRetryDelays = [250, 700, 1500]
+}) {
+  const chatQueue = createChatQueue();
+  const getConversationQueue = chatQueue.getConversationQueue;
+  const rememberConversationAlias = chatQueue.rememberConversationAlias;
+  const rememberTurn = chatQueue.rememberTurn;
+  const rememberTurnEvent = chatQueue.rememberTurnEvent;
+  const resolveConversationKey = chatQueue.resolveConversationKey;
+  const chatImage = createChatImageHandler({
+    imagePromptState,
+    runImageTurn,
+    isImageRequest,
+    listProjectSessions,
+    refreshCodexCache,
+    broadcast,
+    rememberTurn,
+    emitJobEvent: (job, payload) => emitJobEvent(job, payload)
+  });
+  const desktopTurnMonitor = createDesktopTurnMonitor({
+    readSessionMessages,
+    refreshCodexCache,
+    rememberTurn,
+    broadcast
+  });
+
+  function sessionHasActiveWork(sessionId) {
+    return (
+      chatQueue.sessionHasActiveWork(sessionId, [
+        ...getActiveRuns(),
+        ...chatImage.getActiveImageRuns(),
+        ...desktopTurnMonitor.getActiveRuns()
+      ]) ||
+      desktopTurnMonitor.hasActiveWork(sessionId)
+    );
+  }
+
+  function activeLocalRunForAbort({ turnId = '', sessionId = '', previousSessionId = '' } = {}) {
+    const ids = new Set([turnId, sessionId, previousSessionId].map((value) => String(value || '').trim()).filter(Boolean));
+    if (!ids.size) {
+      return null;
+    }
+    return getActiveRuns().find((run) => (
+      run?.status === 'running' &&
+      [run.turnId, run.sessionId, run.previousSessionId].some((value) => ids.has(String(value || '').trim()))
+    )) || null;
+  }
+
+  function emitJobEvent(job, payload) {
+    const enriched = { projectId: job.project.id, ...payload };
+    rememberTurnEvent(enriched);
+    broadcast(enriched);
+  }
+
+  const { scheduleAutoNameCompletedSession } = createChatAutoNamer({
+    getTurn: chatQueue.getTurn,
+    refreshCodexCache,
+    getSession,
+    maybeAutoNameSession,
+    renameSession,
+    broadcast
+  });
+
+  async function steerQueuedDraft(query = {}) {
+    const draft = chatQueue.removeQueuedDraft(query);
+    if (!draft) {
+      return null;
+    }
+    const sessionId = String(query.sessionId || draft.sessionId || '').trim();
+    if (!sessionId) {
+      const error = new Error('没有可发送到当前任务的线程。');
+      error.statusCode = 409;
+      throw error;
+    }
+    return sendChat({
+      projectId: query.projectId || draft.projectId,
+      sessionId,
+      message: draft.text,
+      attachments: draft.attachments,
+      selectedSkills: draft.selectedSkills,
+      fileMentions: draft.fileMentions,
+      
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,280p' server/desktop-turn-monitor.js`</summary>
+```
+Chunk ID: 0e0506
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1936
+Output:
+/**
+ * 观测桌面 follower 回合进度，与移动端 run 状态对齐并 emit 事件。
+ *
+ * Keywords: desktop-turn-monitor, follower, codex-bridge, activity
+ *
+ * Exports:
+ * - createDesktopTurnMonitor — 工厂，聚合 IPC 与本地 run 状态。
+ *
+ * Inward（本模块依赖/组装的关键符号）: shared/message-identity、桌面 IPC 辅助。
+ *
+ * Outward（谁在用/调用场景）: chat-service 装配并在回合中订阅。
+ *
+ * 不负责: 解析桌面 thread JSON（见 desktop-thread-projector）。
+ */
+import { userMessageIdentity } from '../shared/message-identity.js';
+
+function normalizeText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function runKeys(run = {}) {
+  return [
+    run.turnId,
+    run.clientTurnId,
+    run.sessionId,
+    run.previousSessionId,
+    run.draftSessionId
+  ].filter(Boolean);
+}
+
+function hasAssistantAfterUser(messages = [], userMessage = '') {
+  const expected = userMessageIdentity(userMessage);
+  if (!expected) {
+    return false;
+  }
+  let matchedUser = false;
+  for (const message of messages) {
+    if (message?.role === 'user' && userMessageIdentity(message.content) === expected) {
+      matchedUser = true;
+      continue;
+    }
+    if (matchedUser && message?.role === 'assistant' && normalizeText(message.content)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function createDesktopTurnMonitor({
+  readSessionMessages,
+  refreshCodexCache,
+  rememberTurn,
+  broadcast,
+  now = () => new Date().toISOString(),
+  setTimer = setTimeout,
+  clearTimer = clearTimeout,
+  pollDelays = [700, 1000, 1500, 2500, 4000, 6500, 10000, 15000, 22000, 30000],
+  maxPolls = 80,
+  logger = console
+} = {}) {
+  const runsByKey = new Map();
+  const activeRuns = new Set();
+
+  function rememberForRun(run, patch) {
+    const ids = [run.turnId, run.clientTurnId].filter(Boolean);
+    for (const turnId of [...new Set(ids)]) {
+      rememberTurn?.(turnId, {
+        projectId: run.projectId,
+        sessionId: run.sessionId,
+        previousSessionId: run.previousSessionId || null,
+        source: 'desktop-ipc',
+        ...patch
+      });
+    }
+  }
+
+  function publicRun(run) {
+    return {
+      source: 'desktop-ipc',
+      projectId: run.projectId,
+      sessionId: run.sessionId,
+      previousSessionId: run.previousSessionId || null,
+      turnId: run.turnId,
+      clientTurnId: run.clientTurnId || null,
+      startedAt: run.startedAt,
+      status: run.status,
+      steerable: false
+    };
+  }
+
+  function registerRun(run) {
+    activeRuns.add(run);
+    for (const key of runKeys(run)) {
+      runsByKey.set(key, run);
+    }
+  }
+
+  function unregisterRun(run) {
+    activeRuns.delete(run);
+    for (const key of runKeys(run)) {
+      if (runsByKey.get(key) === run) {
+        runsByKey.delete(key);
+      }
+    }
+    if (run.timer) {
+      clearTimer(run.timer);
+      run.timer = null;
+    }
+  }
+
+  async function completeRun(run, result = {}) {
+    if (run.status !== 'running') {
+      return;
+    }
+    run.status = 'completed';
+    unregisterRun(run);
+    const completedAt = now();
+    rememberForRun(run, {
+      status: 'completed',
+      label: '任务已完成',
+      completedAt,
+      hadAssistantText: true,
+      context: result.context || null
+    });
+    broadcast?.({
+      type: 'chat-complete',
+      source: 'desktop-ipc',
+      projectId: run.projectId,
+      sessionId: run.sessionId,
+      previousSessionId: run.previousSessionId || undefined,
+      turnId: run.turnId,
+      clientTurnId: run.clientTurnId || undefined,
+      hadAssistantText: true,
+      context: result.context || null,
+      startedAt: run.startedAt,
+      completedAt
+    });
+    try {
+      const snapshot = await refreshCodexCache?.();
+      if (snapshot) {
+        broadcast?.({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
+      }
+    } catch (error) {
+      logger?.warn?.('[desktop-ipc] sync refresh after monitor completion failed:', error.message);
+    }
+  }
+
+  async function failRun(run, error) {
+    if (run.status !== 'running') {
+      return;
+    }
+    run.status = 'failed';
+    unregisterRun(run);
+    const completedAt = now();
+    const detail = error?.message || '桌面端执行状态同步超时';
+    rememberForRun(run, {
+      status: 'failed',
+      label: '任务失败',
+      error: detail,
+      completedAt
+    });
+    broadcast?.({
+      type: 'chat-error',
+      source: 'desktop-ipc',
+      projectId: run.projectId,
+      sessionId: run.sessionId,
+      previousSessionId: run.previousSessionId || undefined,
+      turnId: run.turnId,
+      clientTurnId: run.clientTurnId || undefined,
+      error: detail,
+      completedAt
+    });
+  }
+
+  async function pollRun(run) {
+    if (run.status !== 'running') {
+      return;
+    }
+    run.pollCount += 1;
+    try {
+      const result = await readSessionMessages(run.sessionId, { lim
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:26Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '260,620p' server/chat-service.js && sed -n '1,320p' server/chat-delivery.js`</summary>
+```
+Chunk ID: 785fa2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 5499
+Output:
+    });
+    const queueKey = resolveConversationKey(selectedSessionId, draftSessionId, requestedSessionId);
+    const existingConversationState = getConversationQueue(queueKey);
+    let selectedSessionResolvedFromBackgroundAlias = false;
+    if (!selectedSessionId && draftSessionId && existingConversationState.sessionId) {
+      selectedSessionId = existingConversationState.sessionId;
+      conversationSessionId = selectedSessionId;
+      selectedSessionResolvedFromBackgroundAlias = true;
+    }
+    const shouldHoldInLocalQueue =
+      sendMode === 'queue' &&
+      conversationSessionId &&
+      sessionHasActiveWork(conversationSessionId);
+
+    runtimeDebugLine('sendChat.enter', {
+      remoteAddress,
+      sendMode,
+      imagePrompt: Boolean(imagePrompt),
+      bridgeMode: bridge?.mode,
+      bridgeConnected: bridge?.connected,
+      selectedSessionId,
+      draftSessionId,
+      conversationSessionId,
+      turnId,
+      queueKey,
+      shouldHoldInLocalQueue,
+      selectedSessionResolvedFromBackgroundAlias,
+      headlessRuns: compactActiveRuns(getActiveRuns()),
+      desktopTurnRuns: compactActiveRuns(desktopTurnMonitor.getActiveRuns()),
+      imageRuns: compactActiveRuns(chatImage.getActiveImageRuns())
+    });
+
+    if (shouldHoldInLocalQueue) {
+      const queued = enqueueChatJob({
+        queueKey,
+        project,
+        selectedSessionId,
+        draftSessionId,
+        executionProjectPath: project.path,
+        turnId,
+        codexMessage,
+        displayMessage,
+        visibleMessage,
+        attachments,
+        selectedSkills,
+        fileMentions,
+        model: modelForTurn,
+        reasoningEffort: reasoningEffortForTurn,
+        serviceTier: serviceTierForTurn,
+        permissionMode: body.permissionMode || 'bypassPermissions',
+        collaborationMode
+      }, { forceQueued: true, autoStart: false });
+      runtimeDebugLine('sendChat.exit', { branch: 'hold-local-queue', delivery: 'queued', turnId });
+      return {
+        accepted: true,
+        queued,
+        sessionId: selectedSessionId,
+        draftSessionId,
+        turnId,
+        delivery: 'queued',
+        desktopBridge: bridge
+      };
+    }
+
+    if (bridge?.mode === 'desktop-ipc' && !imagePrompt) {
+      runtimeDebugLine('sendChat.branch', { branch: 'try-desktop-ipc', bridgeMode: bridge?.mode });
+      if (!selectedSessionId && desktopIpcCanUseBackgroundFallback(bridge)) {
+        bridge = backgroundFallbackBridge(bridge, '桌面端还不能从手机新建真实桌面线程，已改用后台 Codex 新建。');
+        runtimeDebugLine('sendChat.bridge', {
+          reason: 'no-session-background-fallback',
+          bridgeModeAfter: bridge?.mode
+        });
+      } else {
+        try {
+          const result = await sendViaDesktopIpc({
+            bridge,
+            project,
+            selectedSessionId,
+            draftSessionId,
+            turnId,
+            sendMode,
+            codexMessage,
+            visibleMessage,
+            attachments,
+            selectedSkills,
+            model: modelForTurn,
+            reasoningEffort: reasoningEffortForTurn,
+            serviceTier: serviceTierForTurn,
+            permissionMode: body.permissionMode || 'bypassPermissions',
+            collaborationMode,
+            getSession,
+            rememberTurn,
+            broadcast,
+            setDesktopFollowerModelAndReasoning,
+            setDesktopFollowerCollaborationMode,
+            steerDesktopFollowerTurn,
+            startDesktopFollowerTurn,
+            interruptDesktopFollowerTurn,
+            desktopOwnerRetryDelays
+          });
+          desktopTurnMonitor.startRun({
+            projectId: project.id,
+            sessionId: result.sessionId,
+            previousSessionId: draftSessionId || selectedSessionId || null,
+            draftSessionId,
+            turnId: result.turnId,
+            clientTurnId: result.clientTurnId || turnId,
+            userMessage: visibleMessage,
+            startedAt: new Date().toISOString()
+          });
+          runtimeDebugLine('sendChat.exit', {
+            branch: 'desktop-ipc',
+            delivery: result?.delivery || 'desktop-ipc',
+            sessionId: result.sessionId,
+            turnId: result.turnId || turnId
+          });
+          return result;
+        } catch (error) {
+          const canFallBackToBackground =
+            error?.code === 'CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE' &&
+            desktopIpcCanUseBackgroundFallback(bridge);
+          if (!canFallBackToBackground) {
+            throw error;
+          }
+          bridge = backgroundFallbackBridge(
+            bridge,
+            selectedSessionResolvedFromBackgroundAlias
+              ? undefined
+              : '桌面端当前没有接管这个线程，已改用后台 Codex 继续执行。'
+          );
+          runtimeDebugLine('sendChat.bridge', {
+            reason: 'desktop-ipc-error-f
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:32Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '320,760p' server/chat-delivery.js`</summary>
+```
+Chunk ID: 763d7a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 711
+Output:
+          content: visibleContent,
+          timestamp: updatedAt
+        }
+      ]
+    };
+    rememberLiveSession?.(sessionRecord);
+    metadataUpdates.push(
+      Promise.all([
+        job.project?.projectless
+          ? registerProjectlessThread(payload.sessionId, job.project.path)
+          : Promise.resolve(null),
+        registerMobileSession(sessionRecord)
+      ]).catch((error) => {
+        console.warn('[sessions] Failed to register background thread:', error.message);
+      })
+    );
+  }
+
+  runCodexTurn(
+    {
+      sessionId,
+      draftSessionId: job.draftSessionId,
+      projectPath: job.executionProjectPath || job.project.path,
+      message: job.codexMessage,
+      attachments: job.attachments,
+      selectedSkills: job.selectedSkills,
+      model: job.model,
+      reasoningEffort: job.reasoningEffort,
+      serviceTier: job.serviceTier,
+      permissionMode: job.permissionMode,
+      collaborationMode: job.collaborationMode,
+      turnId: job.turnId
+    },
+    (payload) => {
+      const eventPayload = {
+        ...payload,
+        source: payload?.source || 'headless-local'
+      };
+      if (eventPayload.sessionId) {
+        state.sessionId = eventPayload.sessionId;
+        rememberConversationAlias(queueKey, eventPayload.sessionId);
+      }
+      if (eventPayload.previousSessionId) {
+        rememberConversationAlias(queueKey, eventPayload.previousSessionId);
+      }
+      if (eventPayload.type === 'thread-started') {
+        rememberStartedBackgroundThread(eventPayload);
+      } else if (eventPayload.type === 'chat-started') {
+        rememberStartedBackgroundThread(eventPayload);
+      }
+      emitJobEvent(job, eventPayload);
+    }
+  ).then(async (finalSessionId) => {
+    if (finalSessionId) {
+      state.sessionId = finalSessionId;
+      rememberConversationAlias(queueKey, finalSessionId);
+    }
+    rememberTurn(job.turnId, {
+      projectId: job.project.id,
+      sessionId: finalSessionId || sessionId || job.selectedSessionId || job.draftSessionId || null,
+      previousSessionId: job.draftSessionId || job.selectedSessionId || null
+    });
+    if (job.draftSessionId) {
+      scheduleAutoNameCompletedSession({
+        sessionId: finalSessionId || sessionId || job.selectedSessionId || null,
+        turnId: job.turnId,
+        userMessage: job.displayMessage
+      });
+    }
+  }).finally(async () => {
+    try {
+      if (metadataUpdates.length) {
+        await Promise.allSettled(metadataUpdates);
+      }
+      const snapshot = await refreshCodexCache();
+      broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
+    } catch (error) {
+      console.warn('[sync] Failed to refresh after chat:', error.message);
+    } finally {
+      state.running = false;
+      if (state.jobs.length) {
+        onQueueDrained?.();
+      }
+    }
+  });
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:40Z)**_
+
+我已经看到当前后端有两套运行态：`desktopTurnMonitor` 只管 IPC 回合，`runCodexTurn/getActiveRuns` 管后台 headless；问题很可能出在 fallback 之后“运行态来源/完成态”没有形成统一的镜像状态。现在继续沿 `runCodexTurn -> websocket/status -> 前端 runningById` 查一遍数据流。
+
+_**Agent (gpt-5.5 2026-05-11 04:23:40Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,340p' server/codex-runner.js`</summary>
+```
+Chunk ID: f9defd
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2842
+Output:
+/**
+ * 启动与管理 Codex CLI 子进程，解析流式输出并驱动一轮对话回合。
+ *
+ * Keywords: codex-runner, subprocess, streaming, abort, steer
+ *
+ * Exports:
+ * - statusLabel / shouldCompleteTurnFromAppServerItem — 状态与回合完成判定辅助。
+ * - runCodexTurn — 主演示路径：跑一轮 Codex。
+ * - abortCodexTurn / getActiveRuns / steerCodexTurn — 控制运行中回合。
+ *
+ * Inward（本模块依赖/组装的关键符号）: Node child_process、服务层配置、runtime-debug。
+ *
+ * Outward（谁在用/调用场景）: chat-delivery、push、状态 API。
+ *
+ * 不负责: HTTP 请求解析。
+ */
+import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { normalizeServiceTier } from '../shared/service-tier.js';
+import { createCodexAppServerClient, defaultServerRequestResult } from './codex-app-server.js';
+import { buildCodexTurnInput, imageMarkdownFromCodexImageGeneration } from './codex-native-images.js';
+import { buildCodexLarkCliContext } from './lark-cli.js';
+import { detectFeishuSkillKeys } from './feishu-skills.js';
+
+const activeRuns = new Map();
+const NON_ASCII_PATH_PATTERN = /[^\u0000-\u007F]/;
+const DEFAULT_TURN_TIMEOUT_MS = 30 * 60 * 1000;
+const DEFAULT_TURN_INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
+const TURN_TIMEOUT_MS = parseTurnTimeoutMs(process.env.CODEXMOBILE_TURN_TIMEOUT_MS, DEFAULT_TURN_TIMEOUT_MS);
+const TURN_INACTIVITY_TIMEOUT_MS = parseTurnTimeoutMs(
+  process.env.CODEXMOBILE_TURN_INACTIVITY_TIMEOUT_MS,
+  DEFAULT_TURN_INACTIVITY_TIMEOUT_MS
+);
+
+function parseTurnTimeoutMs(value, fallbackMs = DEFAULT_TURN_TIMEOUT_MS) {
+  const timeoutMs = Number(value);
+  if (Number.isFinite(timeoutMs) && timeoutMs > 0) {
+    return Math.max(1000, Math.floor(timeoutMs));
+  }
+  return fallbackMs;
+}
+
+function formatTimeoutDuration(timeoutMs) {
+  if (timeoutMs >= 60_000) {
+    return `${Math.round(timeoutMs / 60_000)} 分钟`;
+  }
+  return `${Math.round(timeoutMs / 1000)} 秒`;
+}
+
+function turnTimeoutError() {
+  const error = new Error(`Codex turn timed out after ${formatTimeoutDuration(TURN_TIMEOUT_MS)}`);
+  error.code = 'CODEXMOBILE_TURN_TIMEOUT';
+  return error;
+}
+
+function turnInactivityTimeoutError() {
+  const error = new Error(`Codex turn had no activity for ${formatTimeoutDuration(TURN_INACTIVITY_TIMEOUT_MS)}`);
+  error.code = 'CODEXMOBILE_TURN_INACTIVITY_TIMEOUT';
+  return error;
+}
+
+function isTurnTimeoutError(error) {
+  return error?.code === 'CODEXMOBILE_TURN_TIMEOUT';
+}
+
+function isTurnInactivityTimeoutError(error) {
+  return error?.code === 'CODEXMOBILE_TURN_INACTIVITY_TIMEOUT';
+}
+
+async function ensureAsciiWorkingDirectory(projectPath) {
+  if (process.platform !== 'win32' || !NON_ASCII_PATH_PATTERN.test(projectPath)) {
+    return projectPath;
+  }
+
+  const resolved = path.resolve(projectPath);
+  const driveRoot = path.parse(resolved).root || 'C:\\';
+  const aliasRoot = path.join(driveRoot, 'codex_project_aliases');
+  const aliasName = crypto.createHash('sha1').update(resolved.toLowerCase()).digest('hex');
+  const aliasPath = path.join(aliasRoot, aliasName);
+
+  await fs.mkdir(aliasRoot, { recursive: true });
+  try {
+    const stats = await fs.lstat(aliasPath);
+    if (stats.isDirectory() || stats.isSymbolicLink()) {
+      return aliasPath;
+    }
+    await fs.rm(aliasPath, { recursive: true, force: true });
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  await fs.symlink(resolved, aliasPath, 'junction');
+  return aliasPath;
+}
+
+function mapPermissionMode(permissionMode) {
+  if (permissionMode === 'bypassPermissions') {
+    return { sandboxMode: 'danger-full-access', approvalPolicy: 'never' };
+  }
+  if (permissionMode === 'acceptEdits') {
+    return { sandboxMode: 'workspace-write', approvalPolicy: 'never' };
+  }
+  return { sandboxMode: 'workspace-write', approvalPolicy: 'never' };
+}
+
+function normalizeReasoningEffort(reasoningEffort) {
+  const value = String(reasoningEffort || '').trim();
+  return ['minimal', 'low', 'medium', 'high', 'xhigh'].includes(value) ? value : undefined;
+}
+
+function textFromContent(content) {
+  if (typeof content === 'string') {
+    return content;
+  }
+  if (!Array.isArray(content)) {
+    return '';
+  }
+  return content
+    .map((part) => {
+      if (typeof part === 'string') {
+        return part;
+      }
+      if (part?.type === 'output_text' || part?.type === 'input_text' || part?.type === 'text') {
+        return part.text || '';
+      }
+      return part?.text || '';
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+function contentFromItem(item) {
+  if (!item) {
+    return '';
+  }
+  const contentText = textFromContent(item.content);
+  if (contentText) {
+    return contentText;
+  }
+  if (typeof item.text === 'string') {
+    return item.text;
+  }
+  if (typeof item.aggregated_output === 'string') {
+    return item.aggregated_output;
+  }
+  if (typ
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:40Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,280p' client/src/app/AppState.js && sed -n '1,320p' client/src/app/useAppWebSocket.js`</summary>
+```
+Chunk ID: c1917c
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3402
+Output:
+/**
+ * 轻量 UI 状态机：侧栏、预览、文档面板、Git 面板、Toast、主题等纯客户端 reducer 与初始状态。
+ *
+ * Keywords: ui-state, reducer, theme-preference
+ *
+ * Exports:
+ * - `THEME_KEY` — localStorage 中主题偏好键名。
+ * - `createInitialUiState` — 从 storage 读取主题等字段构造初始 state。
+ * - `appReducer` — `ui/*` action 分发的 reducer。
+ *
+ * Inward: `localStorage`（可注入）。
+ *
+ * Outward: `App.jsx` 与依赖 `THEME_KEY` 的面板/预览组件。
+ */
+
+export const THEME_KEY = 'codexmobile.theme';
+const THEME_VALUES = new Set(['light', 'dark', 'system']);
+
+function normalizeThemePreference(value) {
+  return THEME_VALUES.has(value) ? value : 'light';
+}
+
+export function createInitialUiState({ storage = globalThis.localStorage } = {}) {
+  return {
+    drawerOpen: false,
+    previewImage: null,
+    docsOpen: false,
+    docsBusy: false,
+    docsError: '',
+    gitPanel: { open: false, action: 'commit' },
+    toasts: [],
+    theme: normalizeThemePreference(storage?.getItem?.(THEME_KEY))
+  };
+}
+
+function resolveValue(value, current) {
+  return typeof value === 'function' ? value(current) : value;
+}
+
+export function appReducer(state, action) {
+  switch (action.type) {
+    case 'ui/drawerOpen':
+      return { ...state, drawerOpen: resolveValue(action.value, state.drawerOpen) };
+    case 'ui/previewImage':
+      return { ...state, previewImage: resolveValue(action.value, state.previewImage) };
+    case 'ui/docsOpen':
+      return { ...state, docsOpen: resolveValue(action.value, state.docsOpen) };
+    case 'ui/docsBusy':
+      return { ...state, docsBusy: resolveValue(action.value, state.docsBusy) };
+    case 'ui/docsError':
+      return { ...state, docsError: resolveValue(action.value, state.docsError) };
+    case 'ui/gitPanel':
+      return { ...state, gitPanel: resolveValue(action.value, state.gitPanel) };
+    case 'ui/toasts':
+      return { ...state, toasts: resolveValue(action.value, state.toasts) };
+    case 'ui/theme':
+      return { ...state, theme: normalizeThemePreference(resolveValue(action.value, state.theme)) };
+    default:
+      return state;
+  }
+}
+/**
+ * WebSocket 入站处理：按桌面线程等来源过滤/合并状态与消息，并暴露 `useAppWebSocket` 建立连接与分发副作用。
+ *
+ * Keywords: websocket, desktop-thread, activity-sync, session-rename
+ *
+ * Exports:
+ * - 若干 `is*` / `should*` 纯函数 — 判定外部线程 payload、是否插入状态/活动/助手消息、重连后是否刷新等。
+ * - `useAppWebSocket` — 订阅 WS、应用 payload 到会话与 context 的 hook。
+ *
+ * Inward: `api`（REST 与 `websocketUrl`）、`session-live-refresh`、`activity-model`、`context-status`。
+ *
+ * Outward: `App.jsx` 根编排。
+ */
+
+import { apiFetch, getToken, websocketUrl } from '../api.js';
+import {
+  applySessionRenameToProjectSessions
+} from '../session-live-refresh.js';
+import {
+  upsertActivityMessage,
+  upsertAssistantMessage,
+  upsertStatusMessage
+} from '../chat/activity-model.js';
+import { sameUserMessageContent } from '../chat/message-identity.js';
+import { mergeContextStatus, normalizeContextStatus } from './context-status.js';
+
+const EXTERNAL_THREAD_SOURCES = new Set(['desktop-ipc', 'desktop-thread', 'headless-local']);
+
+export function isExternalThreadPayload(payload = {}) {
+  return EXTERNAL_THREAD_SOURCES.has(payload?.source);
+}
+
+export function isDesktopThreadStatusPayload(payload = {}) {
+  return isExternalThreadPayload(payload);
+}
+
+export function shouldRenderStatusMessageForPayload(payload = {}) {
+  if (isExternalThreadPayload(payload)) {
+    return false;
+  }
+  return true;
+}
+
+export function shouldRenderActivityMessageForPayload(payload = {}) {
+  return !isExternalThreadPayload(payload);
+}
+
+export function shouldRenderAssistantMessageForPayload(payload = {}) {
+  return !isExternalThreadPayload(payload);
+}
+
+export function shouldRefreshDesktopThreadForPayload(payload = {}) {
+  if (!isExternalThreadPayload(payload)) {
+    return false;
+  }
+  if (payload.type === 'chat-complete') {
+    return true;
+  }
+  return payload.type === 'status-update' && payload.kind === 'turn' && ['completed', 'failed'].includes(payload.status);
+}
+
+export function shouldCompleteLocalTurnBeforeRefresh(payload = {}) {
+  if (!shouldRefreshDesktopThreadForPayload(payload)) {
+    return false;
+  }
+  if (payload.type === 'chat-complete') {
+    return true;
+  }
+  return payload.type === 'status-update' && payload.kind === 'turn' && payload.status === 'completed';
+}
+
+export function shouldRefreshCurrentSessionAfterReconnect(session = null) {
+  const sessionId = String(session?.id || '').trim();
+  return Boolean(sessionId && !sessionId.startsWith('draft-'));
+}
+
+export function useAppWebSocket({
+  useEffect,
+  authenticated,
+  defaultStatus,
+  wsRef,
+  selectedProjectRef,
+  selectedSessionRef,
+  setConnectionState,
+  
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:40Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,280p' client/src/app/useSessionLivePolling.js && sed -n '1,280p' client/src/session-live-refresh.js`</summary>
+```
+Chunk ID: 72bd55
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3429
+Output:
+/**
+ * 当会话仍有运行中活动时，定时拉取消息流签名并合并桌面活动 runtime，保持选中线程与服务端一致。
+ *
+ * Keywords: live-polling, session-messages, running-activity
+ *
+ * Exports:
+ * - `useSessionLivePolling` — 基于认证与选中会话驱动轮询的 effect hook。
+ *
+ * Inward: `api`、`session-live-refresh`、`activity-model` 签名、`session-utils`。
+ *
+ * Outward: `App.jsx` 与会话实时展示链路配合。
+ */
+
+import { useEffect } from 'react';
+import { apiFetch } from '../api.js';
+import {
+  messageStreamSignature
+} from '../chat/activity-model.js';
+import {
+  mergeLiveSelectedThreadMessages,
+  shouldPollSelectedSessionMessages,
+  syncDesktopActivityRuntimeFromMessages
+} from '../session-live-refresh.js';
+import { mergeContextStatus } from './context-status.js';
+import {
+  hasRunningKey,
+  isDraftSession,
+  isLiveThreadRuntime,
+  selectedRunKeys,
+  sessionMessagesApiPath
+} from './session-utils.js';
+
+export function useSessionLivePolling({
+  authenticated,
+  selectedSession,
+  hasRunningActivity,
+  running,
+  desktopBridge,
+  threadRuntimeById,
+  defaultStatus,
+  sessionLivePollRef,
+  selectedSessionRef,
+  runningByIdRef,
+  messagesRef,
+  markRun,
+  clearRun,
+  markSessionCompleteNotice,
+  setContextStatus,
+  setMessages
+}) {
+  useEffect(() => {
+    if (!authenticated || !selectedSession?.id || isDraftSession(selectedSession)) {
+      return undefined;
+    }
+
+    const sessionId = selectedSession.id;
+    let stopped = false;
+    async function pollSelectedSession() {
+      if (stopped || sessionLivePollRef.current) {
+        return;
+      }
+      const hasSelectedRunning = hasRunningKey(
+        runningByIdRef.current || {},
+        selectedRunKeys(selectedSessionRef.current || selectedSession)
+      );
+      const selectedRunRuntime = selectedRunKeys(selectedSessionRef.current || selectedSession)
+        .map((key) => threadRuntimeById?.[key])
+        .find(isLiveThreadRuntime) || null;
+      const hasDesktopThreadRuntime =
+        selectedRunRuntime?.source === 'desktop-thread' ||
+        selectedRunRuntime?.source === 'desktop-ipc' ||
+        selectedRunRuntime?.source === 'headless-local';
+      const hasExternalThreadRefresh = Boolean(hasDesktopThreadRuntime);
+      if (!shouldPollSelectedSessionMessages({
+        hasSelectedRunning,
+        desktopBridge,
+        hasExternalThreadRefresh
+      })) {
+        return;
+      }
+      sessionLivePollRef.current = true;
+      try {
+        const data = await apiFetch(sessionMessagesApiPath(sessionId));
+        if (!stopped && selectedSessionRef.current?.id === sessionId && Array.isArray(data.messages)) {
+          syncDesktopActivityRuntimeFromMessages({
+            messages: data.messages,
+            sessionId,
+            selectedRunRuntime,
+            markRun,
+            clearRun,
+            markSessionCompleteNotice
+          });
+          setContextStatus((current) => mergeContextStatus(current, data.context || defaultStatus.context, defaultStatus.context));
+          setMessages((current) =>
+            messageStreamSignature(current) === messageStreamSignature(data.messages)
+              ? current
+              : mergeLiveSelectedThreadMessages(current, data.messages)
+          );
+        }
+      } catch {
+        // Keep the currently rendered conversation if a transient poll fails.
+      } finally {
+        sessionLivePollRef.current = false;
+      }
+    }
+
+    const intervalMs = hasRunningActivity || running ? 700 : 1600;
+    const timer = window.setInterval(pollSelectedSession, intervalMs);
+    pollSelectedSession();
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+    };
+  }, [
+    authenticated,
+    selectedSession?.id,
+    hasRunningActivity,
+    running,
+    desktopBridge,
+    threadRuntimeById
+  ]);
+}
+/**
+ * 选中会话的实时消息合并、桌面运行中活动载荷、轮询条件与项目名称同步。
+ *
+ * Keywords: session, live-refresh, polling, merge-messages, desktop-runtime
+ *
+ * Exports:
+ * - desktopRunningActivityPayload — 从消息列表提取运行中活动载荷。
+ * - syncDesktopActivityRuntimeFromMessages — 同步运行时快照。
+ * - shouldPollSelectedSessionMessages — 是否应对当前会话轮询消息。
+ * - mergeLiveSelectedThreadMessages — 合并本地与已加载消息。
+ * - applySessionRenameToProjectSessions — 重命名写回 projects map。
+ *
+ * Inward: chat/message-identity、app/runtime-debug-client。
+ *
+ * Outward: App 选中会话刷新、WebSocket 与轮询协调。
+ */
+
+import { sameUserMessageContent } from './chat/message-identity.js';
+import { clientRuntimeDebug } from './app/runtime-debug-client.js';
+
+function normalizeText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function isPendingLocalMessage(message) {
+  const id = String(message?.id || '');
+  if (id.startsWit
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:46Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '280,620p' client/src/app/useAppWebSocket.js && rg -n "function markRun|const markRun|runningById|threadRuntimeById|syncActiveRunsFromStatus|markTurnCompleted|clearRun" client/src/app client/src/App.jsx client/src/app/App.jsx`</summary>
+```
+Chunk ID: 341d00
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3632
+Output:
+          }
+          notifyFromPayload(payload);
+          if (payload.kind === 'turn' && payload.status === 'completed') {
+            markSessionCompleteNotice(payload);
+            clearRun(payload);
+          }
+          if (payload.status === 'queued' && payloadMatchesCurrentConversation(payload)) {
+            loadQueueDrafts(selectedSessionRef.current).catch(() => null);
+          }
+          if (!payloadMatchesCurrentConversation(payload)) {
+            return;
+          }
+          if (shouldRefreshDesktopThreadForPayload(payload)) {
+            if (shouldCompleteLocalTurnBeforeRefresh(payload)) {
+              markTurnCompleted(payload);
+            }
+            scheduleTurnRefresh(payload);
+            return;
+          }
+          if (payload.kind === 'turn' && payload.status === 'completed') {
+            markTurnCompleted(payload);
+            return;
+          }
+          if (!shouldRenderStatusMessageForPayload(payload)) {
+            return;
+          }
+          setMessages((current) => upsertStatusMessage(current, payload));
+          return;
+        }
+        if (payload.type === 'activity-update') {
+          if (payload.status === 'running' || payload.status === 'queued') {
+            markRun(payload);
+          }
+          notifyFromPayload(payload);
+          if (!payloadMatchesCurrentConversation(payload)) {
+            return;
+          }
+          if (!shouldRenderActivityMessageForPayload(payload)) {
+            return;
+          }
+          setMessages((current) => upsertActivityMessage(current, payload));
+          return;
+        }
+        if (payload.type === 'context-status-update') {
+          markRun(payload);
+          if (payloadMatchesCurrentConversation(payload)) {
+            setContextStatus((current) => mergeContextStatus(current, payload, defaultStatus.context));
+          }
+          return;
+        }
+        if (payload.type === 'chat-complete' || payload.type === 'chat-error' || payload.type === 'chat-aborted') {
+          notifyFromPayload(payload);
+          loadQueueDrafts(selectedSessionRef.current).catch(() => null);
+          if (payload.type === 'chat-complete') {
+            markSessionCompleteNotice(payload);
+            clearRun(payload);
+          }
+          if (!payloadMatchesCurrentConversation(payload)) {
+            clearRun(payload);
+            return;
+          }
+          if (payload.type === 'chat-complete') {
+            if (payload.context) {
+              setContextStatus((current) => mergeContextStatus(current, payload.context, defaultStatus.context));
+            }
+            if (shouldRefreshDesktopThreadForPayload(payload)) {
+              if (shouldCompleteLocalTurnBeforeRefresh(payload)) {
+                markTurnCompleted(payload);
+              }
+              scheduleTurnRefresh(payload);
+              return;
+            }
+            markTurnCompleted(payload);
+            scheduleTurnRefresh(payload);
+            return;
+          }
+          clearRun(payload);
+          if (payload.type === 'chat-error' && payload.error) {
+            setMessages((current) =>
+              upsertStatusMessage(current, {
+                ...payload,
+                status: 'failed',
+                label: '任务失败',
+                detail: payload.error
+              })
+            );
+          } else if (payload.type === 'chat-aborted') {
+            setMessages((current) =>
+              upsertStatusMessage(current, {
+                ...payload,
+                status: 'completed',
+                label: '已中止'
+              })
+            );
+          }
+          return;
+        }
+        if (payload.type === 'sync-complete' && payload.projects) {
+          setProjects(payload.projects);
+          const project = selectedProjectRef.current;
+          if (!project?.id) {
+            const preferred =
+              payload.projects.find((item) => item.name.toLowerCase() === 'codexmobile') ||
+              payload.projects.find((item) => item.path.toLowerCase().includes('codexmobile')) ||
+              payload.projects[0] ||
+              null;
+            if (preferred) {
+              setSelectedProject(preferred);
+              setExpandedProjectIds((current) => ({ ...current, [preferred.id]: true }));
+              loadSessions(preferred, {
+                chooseLatest: true,
+                preserveSelection: false
+              }).catch(() => null);
+            }
+            return;
+          }
+          if (project?.id) {
+            apiFetch(`/api/projects/${encodeURIComponent(project.id)}/sessions`)
+              .then((data) => {
+                const nextSessions = data.sessions || [];
+                setSessionsByProject((current) => ({ ...current, [project.id]: nextSessions }));
+                const currentSession = selectedSessionRef.current;
+                const refreshedSession = nextSessions.find((session) =>
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:51Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,440p' client/src/app/useTurnRuntime.js && sed -n '330,520p' client/src/app/useTurnSubmission.js`</summary>
+```
+Chunk ID: 954a70
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 4711
+Output:
+/**
+ * 回合运行期副作用：根据 WS/轮询结果合并消息与 context，维护本地 running 活动与 turn 完成收尾。
+ *
+ * Keywords: turn-runtime, polling, activity-merge, running-keys
+ *
+ * Exports:
+ * - `runtimeKeysForPayload` / `completeMessagesForTurnCompletion` — payload 与会话对齐、轮次完成时的消息补齐。
+ * - `useTurnRuntime` — 订阅运行中 turn 的状态更新与消息合并的 hook。
+ *
+ * Inward: `api`、`activity-model`、`context-status`、`session-utils`、`runtime-debug-client`。
+ *
+ * Outward: `App.jsx` 编排会话与聊天数据流。
+ */
+
+import { useCallback, useEffect } from 'react';
+import { apiFetch } from '../api.js';
+import {
+  completeActivityMessagesForTurn,
+  hasAssistantMessageForTurn,
+  mergeLoadedMessagesPreservingActivity,
+  upsertStatusMessage
+} from '../chat/activity-model.js';
+import { mergeContextStatus } from './context-status.js';
+import {
+  externalThreadRuntimeById,
+  hasVisibleAssistantForTurn,
+  isDraftSession,
+  payloadRunKeys,
+  sessionMessagesApiPath,
+  shouldClearRuntimeWhenNoActiveRuns,
+  shouldDropRunningActivityMissingFromActiveRuns,
+  shouldDropRunningActivityWhenNoActiveRuns,
+  shouldPreserveLocalRunsFromStatus
+} from './session-utils.js';
+import { clientRuntimeDebug } from './runtime-debug-client.js';
+
+export function runtimeKeysForPayload(payload, currentSession = null) {
+  const keys = new Set(payloadRunKeys(payload));
+  if (currentSession) {
+    const sameProject = !payload?.projectId || !currentSession.projectId || payload.projectId === currentSession.projectId;
+    const matchesCurrent =
+      keys.has(currentSession.id) ||
+      keys.has(currentSession.turnId) ||
+      (payload?.turnId && currentSession.turnId === payload.turnId) ||
+      (currentSession.draft && sameProject);
+    if (matchesCurrent) {
+      if (currentSession.id) {
+        keys.add(currentSession.id);
+      }
+      if (currentSession.turnId) {
+        keys.add(currentSession.turnId);
+      }
+    }
+  }
+  return Array.from(keys).filter(Boolean);
+}
+
+export function completeMessagesForTurnCompletion(current, payload, detail = '结果同步中') {
+  const completedAt = payload?.completedAt || payload?.timestamp || new Date().toISOString();
+  const completedPayload = { ...payload, completedAt };
+  const messagesWithCompletedActivity = completeActivityMessagesForTurn(current, completedPayload);
+  if (hasAssistantMessageForTurn(current, payload)) {
+    return messagesWithCompletedActivity;
+  }
+  return upsertStatusMessage(messagesWithCompletedActivity, {
+    ...completedPayload,
+    kind: 'turn',
+    status: 'completed',
+    label: '任务已完成',
+    detail
+  });
+}
+
+export function useTurnRuntime({
+  defaultStatus,
+  activePollsRef,
+  turnRefreshTimersRef,
+  selectedSessionRef,
+  runningByIdRef,
+  setRunningById,
+  setThreadRuntimeById,
+  setCompletedSessionIds,
+  setMessages,
+  setContextStatus
+}) {
+  useEffect(
+    () => () => {
+      for (const timer of turnRefreshTimersRef.current.values()) {
+        window.clearTimeout(timer);
+      }
+      turnRefreshTimersRef.current.clear();
+    },
+    [turnRefreshTimersRef]
+  );
+
+  function runtimeKeysForCurrentPayload(payload) {
+    return runtimeKeysForPayload(payload, selectedSessionRef.current);
+  }
+
+  function markRun(payload) {
+    const keys = runtimeKeysForCurrentPayload(payload);
+    if (!keys.length) {
+      return;
+    }
+    setRunningById((current) => {
+      const next = { ...current };
+      for (const key of keys) {
+        next[key] = true;
+      }
+      runningByIdRef.current = next;
+      return next;
+    });
+    setThreadRuntimeById((current) => {
+      const next = { ...current };
+      for (const key of keys) {
+        next[key] = {
+          status: 'running',
+          steerable: payload.steerable !== false,
+          updatedAt: payload.timestamp || payload.startedAt || new Date().toISOString(),
+          source: payload.source || null,
+          sessionId: payload.sessionId || null,
+          turnId: payload.turnId || payload.clientTurnId || null
+        };
+      }
+      return next;
+    });
+    clientRuntimeDebug('markRun', {
+      keys,
+      source: payload.source || null,
+      sessionId: payload.sessionId || null,
+      turnId: payload.turnId || payload.clientTurnId || null
+    });
+  }
+
+  function clearRun(payload) {
+    const keys = runtimeKeysForCurrentPayload(payload);
+    if (!keys.length) {
+      return;
+    }
+    setRunningById((current) => {
+      const next = { ...current };
+      for (const key of keys) {
+        delete next[key];
+      }
+      runningByIdRef.current = next;
+      return next;
+    });
+    setThreadRuntimeById((current) => {
+      const next = { ...current };
+      for (const key of keys) {
+        if (next[key]?.status === 'running') {
+          delete next[key];
+        }
+      }
+      return next;
+    });
+    clientRuntimeDebug('clearRun', {
+   
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:55Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "export async function runCodexTurn|activeRuns\.set|activeRuns\.delete|emit\(\{|chat-started|chat-complete|thread-started|source|previousSessionId" server/codex-runner.js`</summary>
+```
+Chunk ID: a377ae
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 364
+Output:
+303:  emit({
+330:  emit({
+419:  emit({
+531:  emit({
+591:    emit({
+669:    emit({
+691:      emit({
+751:    emit({ type: 'turn-failed', sessionId, turnId, error });
+752:    emit({ type: 'chat-error', sessionId, turnId, error });
+762:  emit({
+787:export async function runCodexTurn({ sessionId, draftSessionId, projectPath, message, attachments = [], selectedSkills = [], model, reasoningEffort, serviceTier, permissionMode, collaborationMode = null, turnId: providedTurnId }, emit) {
+820:    previousSessionId: draftSessionId || sessionId || null,
+824:  activeRuns.set(turnId, run);
+827:  let previousSessionId = draftSessionId || sessionId || null;
+880:          const fromSessionId = previousSessionId || currentSessionId || draftSessionId || params.thread.id;
+883:          run.previousSessionId = fromSessionId;
+884:          emit({
+885:            type: 'thread-started',
+887:            previousSessionId: fromSessionId,
+918:          emit({ type: 'turn-complete', sessionId: currentSessionId, turnId, usage: state.usage, ...timing });
+945:    emit({
+946:      type: 'chat-started',
+948:      previousSessionId,
+1021:      emit({
+1022:        type: 'chat-complete',
+1024:        previousSessionId,
+1056:    emit({
+1089:      activeRuns.delete(turnId);
+1099:    (run.turnId === identifier || run.sessionId === identifier || run.previousSessionId === identifier)
+1131:      previousSessionId: run.previousSessionId,
+1136:      source: 'headless-local',
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:23:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '760,1110p' server/codex-runner.js && sed -n '1110,1155p' server/codex-runner.js`</summary>
+```
+Chunk ID: 2c33f2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3588
+Output:
+  const planContent = String(params.planContent || '').trim();
+  const requestId = String(message?.id || (requestTurnId ? `implement-plan:${requestTurnId}` : '')).trim();
+  emit({
+    type: 'activity-update',
+    sessionId: requestThreadId || sessionId,
+    turnId,
+    messageId: requestId || `${turnId}-plan-implementation`,
+    kind: 'plan_implementation',
+    label: '等待确认执行计划',
+    status: 'running',
+    detail: planContent,
+    timestamp: new Date().toISOString(),
+    planImplementation: {
+      requestId: requestId || (requestTurnId ? `implement-plan:${requestTurnId}` : ''),
+      turnId: requestTurnId || turnId,
+      planContent,
+      completed: false
+    }
+  });
+}
+
+function abortError() {
+  const error = new Error('aborted');
+  error.name = 'AbortError';
+  return error;
+}
+
+export async function runCodexTurn({ sessionId, draftSessionId, projectPath, message, attachments = [], selectedSkills = [], model, reasoningEffort, serviceTier, permissionMode, collaborationMode = null, turnId: providedTurnId }, emit) {
+  const workingDirectory = await ensureAsciiWorkingDirectory(projectPath);
+  const { sandboxMode, approvalPolicy } = mapPermissionMode(permissionMode);
+  const feishuSkillKeys = detectFeishuSkillKeys(message);
+  const normalizedReasoningEffort = normalizeReasoningEffort(reasoningEffort);
+  const normalizedServiceTier = normalizeServiceTier(serviceTier);
+  const modelReasoningEffort =
+    feishuSkillKeys.length && normalizedReasoningEffort === 'xhigh' ? 'low' : normalizedReasoningEffort;
+  const larkCliContext = await buildCodexLarkCliContext(message).catch((error) => {
+    console.warn('[lark-cli] Codex context disabled:', error.message);
+    return { enabled: false, env: { ...process.env }, instruction: '' };
+  });
+  const abortController = new AbortController();
+  const turnId = providedTurnId || crypto.randomUUID();
+  const state = {
+    hadAssistantText: false,
+    failed: false,
+    usage: null,
+    context: {},
+    agentMessages: new Map(),
+    commandOutputs: new Map(),
+    items: new Map(),
+    fallbackCompletionTimer: null,
+    turnCompletionResolved: false,
+    scheduleFallbackTurnCompletion: null
+  };
+  const run = {
+    thread: null,
+    client: null,
+    appTurnId: null,
+    abortController,
+    turnId,
+    sessionId: sessionId || draftSessionId || null,
+    previousSessionId: draftSessionId || sessionId || null,
+    startedAt: new Date().toISOString(),
+    status: 'running'
+  };
+  activeRuns.set(turnId, run);
+
+  let currentSessionId = sessionId || null;
+  let previousSessionId = draftSessionId || sessionId || null;
+  let client = null;
+  let completionResolve = null;
+  let completionReject = null;
+  const completionPromise = new Promise((resolve, reject) => {
+    completionResolve = resolve;
+    completionReject = reject;
+  });
+  function resolveTurnCompletion(turn = {}) {
+    if (state.turnCompletionResolved) {
+      return;
+    }
+    state.turnCompletionResolved = true;
+    completionResolve(turn);
+  }
+  state.scheduleFallbackTurnCompletion = (turn = {}) => {
+    if (state.turnCompletionResolved || state.fallbackCompletionTimer) {
+      return;
+    }
+    state.fallbackCompletionTimer = setTimeout(() => resolveTurnCompletion(turn), 750);
+    if (typeof state.fallbackCompletionTimer.unref === 'function') {
+      state.fallbackCompletionTimer.unref();
+    }
+  };
+  const abortPromise = new Promise((_, reject) => {
+    abortController.signal.addEventListener('abort', () => reject(abortError()), { once: true });
+  });
+  let turnTimeoutTimer = null;
+  let turnInactivityTimeoutTimer = null;
+  let resetTurnInactivityTimeout = () => {};
+
+  try {
+    if (larkCliContext.enabled && larkCliContext.env) {
+      larkCliContext.env.CODEXMOBILE_TURN_ID = turnId;
+      larkCliContext.env.CODEXMOBILE_SESSION_ID = sessionId || draftSessionId || '';
+    }
+
+    client = await createCodexAppServerClient({
+      env: larkCliContext.env || { ...process.env },
+      cwd: workingDirectory,
+      clientInfo: { name: 'CodexMobile', title: null, version: '0.1.0' },
+      allowHeadlessLocal: true,
+      onServerRequest: async (appMessage) => {
+        resetTurnInactivityTimeout();
+        if (appMessage?.method === 'item/plan/requestImplementation') {
+          emitPlanImplementationRequest(appMessage, currentSessionId || sessionId || draftSessionId, turnId, emit);
+        }
+        return defaultServerRequestResult(appMessage);
+      },
+      onNotification: (appMessage) => {
+        resetTurnInactivityTimeout();
+        const params = appMessage.params || {};
+        if (appMessage.method === 'thread/started' && params.thread?.id) {
+          const fromSessionId = previousSessionId || currentSessionId || draftSessionId || params.thread.id;
+          currentSessionId = params.thread.id;
+          run.sessionId = currentSessionId;
+          run.previousSessionId = fromSessionId;
+          emit(
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:24:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '330,510p' client/src/app/session-utils.js && sed -n '1,240p' client/src/app-state.test.mjs && sed -n '1090,1145p' server/codex-runner.js`</summary>
+```
+Chunk ID: 81d19d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3728
+Output:
+}
+
+export function autoTitlePatch(title, phase = 'provisional') {
+  return title ? { title, titleLocked: false, titleAutoGenerated: phase } : {};
+}
+
+export function payloadRunKeys(payload) {
+  return [payload?.turnId, payload?.clientTurnId, payload?.sessionId, payload?.previousSessionId].filter(Boolean);
+}
+
+export function selectedRunKeys(session) {
+  return [session?.id, session?.turnId].filter(Boolean);
+}
+
+export function upsertSessionInProject(current, projectId, session, replaceId = null) {
+  if (!projectId || !session) {
+    return current;
+  }
+  const existing = current[projectId] || [];
+  const filtered = existing.filter((item) => item.id !== session.id && (!replaceId || item.id !== replaceId));
+  return {
+    ...current,
+    [projectId]: [session, ...filtered]
+  };
+}
+
+export function hasRunningKey(runningById, keys) {
+  return keys.some((key) => Boolean(runningById[key]));
+}
+
+export function sessionRunKeys(session) {
+  return [session?.id, session?.turnId, session?.previousSessionId].filter(Boolean);
+}
+
+export function isExternalThreadRuntimeSource(value) {
+  return ['desktop-thread', 'desktop-ipc', 'headless-local'].includes(String(value || ''));
+}
+
+export function isExternalThreadRuntime(runtime) {
+  return runtime?.status === 'running' && isExternalThreadRuntimeSource(runtime?.source);
+}
+
+export function isSessionIndexRuntime(runtime) {
+  return runtime?.fromSessionIndex === true;
+}
+
+export function isLiveThreadRuntime(runtime) {
+  return Boolean(runtime && !isSessionIndexRuntime(runtime));
+}
+
+export function isPersistentDesktopThreadRuntime(runtime) {
+  return runtime?.status === 'running' && String(runtime?.source || '') === 'desktop-thread' && !isSessionIndexRuntime(runtime);
+}
+
+export function shouldClearRuntimeWhenNoActiveRuns(runtime) {
+  return runtime?.status === 'running' && !isExternalThreadRuntime(runtime);
+}
+
+export function externalThreadRuntimeById(threadRuntimeById = {}) {
+  const next = {};
+  for (const [key, runtime] of Object.entries(threadRuntimeById || {})) {
+    if (isExternalThreadRuntime(runtime)) {
+      next[key] = runtime;
+    }
+  }
+  return next;
+}
+
+function allProjectSessions(sessionsByProject = {}) {
+  return Object.values(sessionsByProject || {}).flatMap((sessions) =>
+    Array.isArray(sessions) ? sessions : []
+  );
+}
+
+function runtimeFromSession(session) {
+  if (!session?.id || session.runtime?.status !== 'running') {
+    return null;
+  }
+  return {
+    ...session.runtime,
+    status: 'running',
+    fromSessionIndex: true,
+    source: session.runtime.source || 'desktop-thread',
+    sessionId: session.runtime.sessionId || session.id,
+    turnId: session.runtime.turnId || session.turnId || null,
+    updatedAt: session.runtime.updatedAt || session.updatedAt || null,
+    steerable: session.runtime.steerable === true
+  };
+}
+
+export function reconcileThreadRuntimeWithSessions(threadRuntimeById = {}, sessionsByProject = {}) {
+  const sessions = allProjectSessions(sessionsByProject);
+  if (!sessions.length) {
+    return threadRuntimeById || {};
+  }
+
+  const loadedSessionIds = new Set(sessions.map((session) => session?.id).filter(Boolean));
+  const next = { ...(threadRuntimeById || {}) };
+  for (const [key, runtime] of Object.entries(next)) {
+    const sessionId = runtime?.sessionId || (loadedSessionIds.has(key) ? key : '');
+    if (sessionId && loadedSessionIds.has(sessionId) && isSessionIndexRuntime(runtime)) {
+      delete next[key];
+    }
+  }
+
+  for (const session of sessions) {
+    const runtime = runtimeFromSession(session);
+    if (!runtime) {
+      continue;
+    }
+    for (const key of [session.id, runtime.turnId].filter(Boolean)) {
+      if (!next[key] || isSessionIndexRuntime(next[key])) {
+        next[key] = runtime;
+      }
+    }
+  }
+
+  return next;
+}
+
+export function runningByIdWithSelectedActivity(runningById = {}, selectedSession = null, hasRunningActivity = false) {
+  if (!hasRunningActivity || !selectedSession?.id) {
+    return runningById || {};
+  }
+  const next = { ...(runningById || {}) };
+  for (const key of sessionRunKeys(selectedSession)) {
+    next[key] = true;
+  }
+  return next;
+}
+
+export function sessionRunBadgeState(session, {
+  runningById = {},
+  threadRuntimeById = {},
+  completedSessionIds = {}
+} = {}) {
+  if (!session?.id) {
+    return null;
+  }
+  const keys = sessionRunKeys(session);
+  const runtimes = keys.map((key) => threadRuntimeById?.[key]).filter(isLiveThreadRuntime);
+  if (runtimes.some((runtime) => runtime?.status === 'running') || hasRunningKey(runningById, keys)) {
+    return 'running';
+  }
+  if (runtimes.some((runtime) => runtime?.status === 'failed')) {
+    return 'failed';
+  }
+  if (runtimes.some((runtime) => runtime?.status === 'completed') || Boolean(completedSessionIds?.[session.id])) {
+    return 'complete';
+  }
+  return null;
+}
+
+export function shouldPreserveLocalRunsFromStatus({
+  activePollCount = 0,
+  turnRefreshTimerC
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:24:18Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,250p' client/src/app/useTurnSubmission.js && sed -n '500,590p' client/src/app-state.test.mjs`</summary>
+```
+Chunk ID: ef71f3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2069
+Output:
+/**
+ * 封装用户回合提交：校验选择、拼装请求、乐观更新消息列表、错误与中断处理及必要时轮询 turn 状态。
+ *
+ * Keywords: turn-submission, optimistic-ui, session-messages, composer-send
+ *
+ * Exports:
+ * - `useTurnSubmission` — 绑定发送/队列所需状态与回调的 React hook。
+ *
+ * Inward: `api`；会话与活动合并逻辑（`session-utils`、`turn-submission-utils`、`activity-model`、`context-status`）。
+ *
+ * Outward: `App.jsx` 根组件注入 Composer 与聊天侧发送行为。
+ */
+
+import { apiFetch } from '../api.js';
+import { contentWithAttachmentPreviews } from '../chat/MarkdownContent.jsx';
+import { serviceTierForModelSpeed } from '../composer/composer-options.js';
+import {
+  dismissPlanImplementationPrompts,
+  mergeLoadedMessagesPreservingActivity,
+  upsertStatusMessage
+} from '../chat/activity-model.js';
+import { mergeContextStatus } from './context-status.js';
+import {
+  autoTitlePatch,
+  createClientTurnId,
+  createDraftSession,
+  hasVisibleAssistantForTurn,
+  isDraftSession,
+  sessionMessagesApiPath,
+  titleFromFirstMessage
+} from './session-utils.js';
+import {
+  displayMessageForTurn,
+  completeLocalAbortMessages,
+  implementationPromptForPlan,
+  localHandoffStatusPayload,
+  prepareComposerSubmission,
+  projectForTurnSelection,
+  realSessionIdFromTurn,
+  restoredComposerText,
+  sessionForTurnSelection,
+  selectedSkillsForPaths,
+  shouldPollTurnEndpointAfterSend,
+  turnMatchesSelection,
+  userMessageMetadataForSendMode
+} from './turn-submission-utils.js';
+
+export function useTurnSubmission({
+  defaultStatus,
+  defaultReasoningEffort,
+  selectedProject,
+  selectedProjectRef,
+  selectedSession,
+  selectedSessionRef,
+  projects,
+  selectedSkillPaths,
+  status,
+  permissionMode,
+  selectedModel,
+  selectedModelSpeed,
+  selectedReasoningEffort,
+  input,
+  attachments,
+  fileMentions,
+  activePollsRef,
+  runningById,
+  runningByIdRef,
+  setInput,
+  setAttachments,
+  setFileMentions,
+  setSelectedSession,
+  setExpandedProjectIds,
+  setSessionsByProject,
+  setMessages,
+  setContextStatus,
+  upsertSessionInProject,
+  markRun,
+  clearRun,
+  markSessionCompleteNotice,
+  markTurnCompleted,
+  scheduleTurnRefresh,
+  loadQueueDrafts
+}) {
+  function applyTurnSession(turn, optimisticSessionId, projectId, previousSessionId) {
+    const realSessionId = realSessionIdFromTurn(turn);
+    if (!realSessionId) {
+      return null;
+    }
+
+    const currentSession = selectedSessionRef.current;
+    const nextSession = {
+      ...(currentSession || {}),
+      id: realSessionId,
+      projectId,
+      title: currentSession?.title || '新对话',
+      turnId: turn.turnId || currentSession?.turnId || null,
+      updatedAt: turn.completedAt || turn.updatedAt || new Date().toISOString(),
+      draft: false
+    };
+
+    if (turnMatchesSelection(currentSession, { turnId: turn.turnId, optimisticSessionId, realSessionId, previousSessionId })) {
+      selectedSessionRef.current = nextSession;
+    }
+    setSelectedSession((current) => {
+      if (!current) {
+        return nextSession;
+      }
+      if (!turnMatchesSelection(current, { turnId: turn.turnId, optimisticSessionId, realSessionId, previousSessionId })) {
+        return current;
+      }
+      return { ...current, ...nextSession };
+    });
+    setSessionsByProject((current) =>
+      upsertSessionInProject(current, projectId, nextSession, previousSessionId || optimisticSessionId)
+    );
+    setMessages((current) =>
+      current.map((message) =>
+        message.turnId === turn.turnId || message.sessionId === optimisticSessionId || message.sessionId === previousSessionId
+          ? { ...message, sessionId: realSessionId }
+          : message
+      )
+    );
+    if (turn.status === 'running' || turn.status === 'queued') {
+      markRun({ turnId: turn.turnId, sessionId: realSessionId, previousSessionId: previousSessionId || optimisticSessionId });
+    }
+    return realSessionId;
+  }
+
+  async function loadTurnMessages(realSessionId, turnId, optimisticSessionId, previousSessionId) {
+    if (!realSessionId) {
+      return false;
+    }
+    const current = selectedSessionRef.current;
+    if (
+      current &&
+      current.id !== realSessionId &&
+      current.id !== optimisticSessionId &&
+      current.id !== previousSessionId &&
+      current.turnId !== turnId
+    ) {
+      return false;
+    }
+    const data = await apiFetch(sessionMessagesApiPath(realSessionId));
+    if (data.messages?.length && hasVisibleAssistantForTurn(data.messages, { turnId })) {
+      setContextStatus((currentContext) => mergeContextStatus(currentContext, data.context || defaultStatus.context, defaultStatus.context));
+      setMessages((currentMessages) =>
+        mergeLoadedMessagesPreservingActivity(currentMessages, data.messages, {
+          sessionId: realSessionId,
+          previousSessionId,
+          turnId
+        })
+      );
+      return 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:24:21Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "shouldPollTurnEndpointAfterSend|headless-local|desktop-ipc" client/src/turn-submission-utils.js client/src/turn-submission-utils.test.mjs`</summary>
+```
+Chunk ID: 79a843
+Wall time: 0.0000 seconds
+Process exited with code 2
+Original token count: 126
+Output:
+rg: client/src/turn-submission-utils.js: No such file or directory (os error 2)
+client/src/turn-submission-utils.test.mjs:20:  shouldPollTurnEndpointAfterSend,
+client/src/turn-submission-utils.test.mjs:153:    shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'desktop-ipc' } }),
+client/src/turn-submission-utils.test.mjs:157:    shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'headless-local' } }),
+client/src/turn-submission-utils.test.mjs:161:    shouldPollTurnEndpointAfterSend({}),
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:24:24Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "function shouldPollTurnEndpointAfterSend|shouldPollTurnEndpointAfterSend" client/src -g '*.js' -g '*.jsx'`</summary>
+```
+Chunk ID: f5ee7c
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 110
+Output:
+client/src/app/turn-submission-utils.js:10: * - 轮询与中止 — `shouldPollTurnEndpointAfterSend`、`localHandoffStatusPayload`、`completeLocalAbortMessages`。
+client/src/app/turn-submission-utils.js:129:export function shouldPollTurnEndpointAfterSend(result = {}) {
+client/src/app/useTurnSubmission.js:43:  shouldPollTurnEndpointAfterSend,
+client/src/app/useTurnSubmission.js:371:      if (shouldPollTurnEndpointAfterSend(result)) {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:24:29Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '115,145p' client/src/app/turn-submission-utils.js && sed -n '145,170p' client/src/turn-submission-utils.test.mjs`</summary>
+```
+Chunk ID: 7f9990
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 349
+Output:
+  const value = String(nextText || '').trim();
+  if (!value) {
+    return current;
+  }
+  const base = String(current || '').trimEnd();
+  if (!base) {
+    return value;
+  }
+  if (base.includes(value)) {
+    return current;
+  }
+  return `${base}\n${value}`;
+}
+
+export function shouldPollTurnEndpointAfterSend(result = {}) {
+  return !['desktop-ipc', 'headless-local'].includes(result?.desktopBridge?.mode);
+}
+
+export function localHandoffStatusPayload({ sessionId, previousSessionId = null, turnId, timestamp = new Date().toISOString() } = {}) {
+  return {
+    sessionId,
+    previousSessionId,
+    turnId,
+    kind: 'turn',
+    status: 'running',
+    label: '后台启动中',
+    detail: '',
+    timestamp,
+    startedAt: timestamp,
+    transient: true,
+    source: 'local-handoff'
+  assert.equal(next[0].status, 'completed');
+  assert.equal(next[0].label, '已中止');
+  assert.equal(next[0].activities[0].status, 'completed');
+  assert.equal(next[0].completedAt, '2026-05-08T02:00:05.000Z');
+});
+
+test('external thread handoff uses thread refresh instead of client turn polling', () => {
+  assert.equal(
+    shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'desktop-ipc' } }),
+    false
+  );
+  assert.equal(
+    shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'headless-local' } }),
+    false
+  );
+  assert.equal(
+    shouldPollTurnEndpointAfterSend({}),
+    true
+  );
+});
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:24:36Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,320p' server/chat-queue.js && rg -n "turns/:turnId|chat/turns|getTurn" server -g '*.js'`</summary>
+```
+Chunk ID: 354963
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2101
+Output:
+/**
+ * 聊天发送侧回合队列：去重、限深与挂起 Codex 运行时的 session 关联。
+ *
+ * Keywords: chat-queue, turn-queue, recent-turns, session-binding
+ *
+ * Exports:
+ * - createChatQueue — 工厂，维护内存队列与泄漏防护。
+ *
+ * Inward（本模块依赖/组装的关键符号）: Node crypto（job id）、纯内存结构。
+ *
+ * Outward（谁在用/调用场景）: chat-service。
+ *
+ * 不负责: 持久化队列。
+ */
+import crypto from 'node:crypto';
+
+const DEFAULT_MAX_RECENT_TURNS = 80;
+
+function payloadReferencesSession(payload, sessionId) {
+  return [
+    payload?.sessionId,
+    payload?.previousSessionId,
+    payload?.draftSessionId,
+    payload?.selectedSessionId
+  ].some((value) => value && value === sessionId);
+}
+
+function serializeQueueJob(job) {
+  return {
+    id: job.draftId || job.turnId,
+    turnId: job.turnId,
+    projectId: job.project?.id || job.projectId || null,
+    text: job.displayMessage,
+    attachments: Array.isArray(job.attachments) ? job.attachments : [],
+    selectedSkills: Array.isArray(job.selectedSkills) ? job.selectedSkills : [],
+    fileMentions: Array.isArray(job.fileMentions) ? job.fileMentions : [],
+    collaborationMode: job.collaborationMode?.mode === 'plan' ? 'plan' : null,
+    createdAt: job.createdAt || new Date().toISOString(),
+    sessionId: job.selectedSessionId || null,
+    draftSessionId: job.draftSessionId || null
+  };
+}
+
+export function createChatQueue({ maxRecentTurns = DEFAULT_MAX_RECENT_TURNS } = {}) {
+  const recentTurns = new Map();
+  const conversationQueues = new Map();
+  const sessionQueueKeys = new Map();
+
+  function rememberTurn(turnId, patch) {
+    if (!turnId) {
+      return null;
+    }
+    const existing = recentTurns.get(turnId) || { turnId, createdAt: new Date().toISOString() };
+    const next = {
+      ...existing,
+      ...patch,
+      turnId,
+      updatedAt: new Date().toISOString()
+    };
+    recentTurns.set(turnId, next);
+
+    if (recentTurns.size > maxRecentTurns) {
+      const oldest = [...recentTurns.entries()].sort(
+        (a, b) => new Date(a[1].updatedAt || a[1].createdAt || 0) - new Date(b[1].updatedAt || b[1].createdAt || 0)
+      )[0]?.[0];
+      if (oldest) {
+        recentTurns.delete(oldest);
+      }
+    }
+    return next;
+  }
+
+  function rememberTurnEvent(payload) {
+    if (!payload?.turnId) {
+      return;
+    }
+
+    const patch = {
+      projectId: payload.projectId,
+      sessionId: payload.sessionId || undefined,
+      previousSessionId: payload.previousSessionId || undefined
+    };
+
+    if (payload.type === 'chat-started') {
+      patch.status = 'running';
+      patch.startedAt = payload.startedAt || new Date().toISOString();
+      patch.label = '正在思考';
+    } else if (payload.type === 'thread-started') {
+      patch.status = 'running';
+      patch.label = '正在思考';
+    } else if (payload.type === 'status-update') {
+      patch.status = payload.status || 'running';
+      patch.kind = payload.kind || undefined;
+      patch.label = payload.label || undefined;
+      patch.detail = payload.detail || undefined;
+    } else if (payload.type === 'assistant-update') {
+      patch.status = 'running';
+      patch.hadAssistantText = true;
+      patch.assistantPreview = payload.content || '';
+      patch.messageId = payload.messageId || undefined;
+      patch.label = '正在回复';
+    } else if (payload.type === 'context-status-update') {
+      patch.status = payload.status || 'running';
+      patch.context = payload;
+      patch.label = '背景信息已同步';
+    } else if (payload.type === 'chat-complete') {
+      patch.status = 'completed';
+      patch.completedAt = payload.completedAt || new Date().toISOString();
+      patch.hadAssistantText = Boolean(payload.hadAssistantText);
+      patch.usage = payload.usage || null;
+      patch.context = payload.context || null;
+      patch.label = '任务已完成';
+    } else if (payload.type === 'chat-error') {
+      patch.status = 'failed';
+      patch.error = payload.error || '任务失败';
+      patch.label = '任务失败';
+    } else if (payload.type === 'chat-aborted') {
+      patch.status = 'aborted';
+      patch.label = '已中止';
+    } else {
+      return;
+    }
+
+    if (payload.startedAt) {
+      patch.startedAt = payload.startedAt;
+    }
+    if (payload.completedAt) {
+      patch.completedAt = payload.completedAt;
+    }
+    if (payload.durationMs) {
+      patch.durationMs = payload.durationMs;
+    }
+
+    rememberTurn(payload.turnId, patch);
+  }
+
+  function rememberConversationAlias(queueKey, sessionId) {
+    if (queueKey && sessionId) {
+      sessionQueueKeys.set(sessionId, queueKey);
+    }
+  }
+
+  function resolveConversationKey(...ids) {
+    for (const id of ids) {
+      if (id && sessionQueueKeys.has(id)) {
+        return sessionQueueKeys.get(id);
+      }
+    }
+    const queueKey = ids.find(Boolean) || crypto.randomUUID();
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:24:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,340p' server/desktop-ipc-client.js && sed -n '1,260p' server/codex-app-server.js`</summary>
+```
+Chunk ID: 5cb7e3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 4778
+Output:
+/**
+ * 与 Codex 桌面端 Unix domain socket 的 IPC 帧协议客户端与便捷方法。
+ *
+ * Keywords: desktop-ipc, unix-socket, net-socket, follower-turn
+ *
+ * Exports:
+ * - desktopIpcMethodVersion / desktopIpcSocketPath / getDesktopIpcSocketStatus。
+ * - DesktopIpcClient — 连接与请求封装。
+ * - probeDesktopIpc / startDesktopFollowerTurn / steerDesktopFollowerTurn / interruptDesktopFollowerTurn 等。
+ *
+ * Inward（本模块依赖/组装的关键符号）: node:net、平台相关 socket 路径约定。
+ *
+ * Outward（谁在用/调用场景）: chat-delivery、codex-app-server、测试。
+ *
+ * 不负责: HTTP 层。
+ */
+import crypto from 'node:crypto';
+import fsSync from 'node:fs';
+import net from 'node:net';
+import os from 'node:os';
+import path from 'node:path';
+
+const MAX_FRAME_BYTES = 256 * 1024 * 1024;
+const DEFAULT_TIMEOUT_MS = 15_000;
+const DESKTOP_IPC_METHOD_VERSIONS = new Map([
+  ['thread-archived', 2],
+  ['thread-unarchived', 1],
+  ['thread-follower-start-turn', 1],
+  ['thread-follower-compact-thread', 1],
+  ['thread-follower-steer-turn', 1],
+  ['thread-follower-interrupt-turn', 1],
+  ['thread-follower-set-model-and-reasoning', 1],
+  ['thread-follower-set-collaboration-mode', 1],
+  ['thread-follower-edit-last-user-turn', 1],
+  ['thread-follower-command-approval-decision', 1],
+  ['thread-follower-file-approval-decision', 1],
+  ['thread-follower-permissions-request-approval-response', 1],
+  ['thread-follower-submit-user-input', 1],
+  ['thread-follower-submit-mcp-server-elicitation-response', 1],
+  ['thread-follower-set-queued-follow-ups-state', 1]
+]);
+
+export function desktopIpcMethodVersion(method) {
+  return DESKTOP_IPC_METHOD_VERSIONS.get(method) || 0;
+}
+
+export function desktopIpcSocketPath() {
+  if (process.platform === 'win32') {
+    return String.raw`\\.\pipe\codex-ipc`;
+  }
+  const uid = process.getuid?.();
+  return path.join(os.tmpdir(), 'codex-ipc', uid ? `ipc-${uid}.sock` : 'ipc.sock');
+}
+
+function frameFor(payload) {
+  const json = JSON.stringify(payload);
+  const size = Buffer.byteLength(json, 'utf8');
+  const frame = Buffer.alloc(4 + size);
+  frame.writeUInt32LE(size, 0);
+  frame.write(json, 4, 'utf8');
+  return frame;
+}
+
+function ipcError(message, code = 'CODEXMOBILE_DESKTOP_IPC_ERROR') {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
+
+export function getDesktopIpcSocketStatus(sockPath = desktopIpcSocketPath()) {
+  if (process.platform === 'win32') {
+    return { ok: true, socketPath: sockPath, reason: null };
+  }
+  try {
+    const stat = fsSync.statSync(sockPath);
+    if (!stat.isSocket()) {
+      return { ok: false, socketPath: sockPath, reason: `桌面端 IPC 路径不是 socket: ${sockPath}` };
+    }
+    return { ok: true, socketPath: sockPath, reason: null };
+  } catch (error) {
+    return {
+      ok: false,
+      socketPath: sockPath,
+      reason: error.code === 'ENOENT'
+        ? `桌面端 IPC socket 不存在: ${sockPath}`
+        : `无法访问桌面端 IPC socket: ${error.message}`
+    };
+  }
+}
+
+export class DesktopIpcClient {
+  constructor({ clientType = 'codexmobile', socketPath = desktopIpcSocketPath() } = {}) {
+    this.clientType = clientType;
+    this.socketPath = socketPath;
+    this.clientId = 'initializing-client';
+    this.socket = null;
+    this.buffer = Buffer.alloc(0);
+    this.nextFrameSize = null;
+    this.pending = new Map();
+  }
+
+  async connect({ timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+    if (this.socket?.writable) {
+      return this;
+    }
+    const status = getDesktopIpcSocketStatus(this.socketPath);
+    if (!status.ok) {
+      throw ipcError(status.reason || '桌面端 Codex IPC 未连接', 'CODEXMOBILE_DESKTOP_IPC_UNAVAILABLE');
+    }
+    await new Promise((resolve, reject) => {
+      const socket = net.createConnection(this.socketPath);
+      const timeout = setTimeout(() => {
+        socket.destroy();
+        reject(ipcError('连接桌面端 Codex IPC 超时', 'CODEXMOBILE_DESKTOP_IPC_TIMEOUT'));
+      }, timeoutMs);
+      socket.once('connect', () => {
+        clearTimeout(timeout);
+        this.socket = socket;
+        socket.on('data', (chunk) => this.handleData(chunk));
+        socket.on('close', () => this.rejectAll(ipcError('桌面端 Codex IPC 已断开', 'CODEXMOBILE_DESKTOP_IPC_CLOSED')));
+        socket.on('error', (error) => this.rejectAll(error));
+        resolve();
+      });
+      socket.once('error', (error) => {
+        clearTimeout(timeout);
+        reject(error);
+      });
+    });
+
+    const initialized = await this.request('initialize', { clientType: this.clientType }, { timeoutMs });
+    if (initialized?.resultType !== 'success' || initialized?.method !== 'initialize') {
+      throw ipcError(initialized?.error || '桌面端 Codex IPC 初始化失败');
+    }
+    this.clientId = initialized.result?.clientId || this.clientId;
+    return this;
+  }
+
+  async request(method, params =
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:24:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,360p' server/desktop-thread-projector.js`</summary>
+```
+Chunk ID: 3e7412
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2841
+Output:
+/**
+ * 将桌面 Codex thread/turn 结构投影为移动端聊天消息流（含计划/活动/附件）。
+ *
+ * Keywords: desktop-thread, message-projection, activity, plan
+ *
+ * Exports:
+ * - implementedPlanContentFromMessage / sanitizeVisibleUserMessage — 计划与用户消息清洗。
+ * - extractProposedPlanContent / planTitleFromContent / planMessageFromContent — 计划块构造。
+ * - upsertDesktopActivity / removeFallbackActivitiesCoveredByRaw / sortDesktopActivitySteps。
+ * - messagesFromDesktopThread — thread → messages[]。
+ *
+ * Inward（本模块依赖/组装的关键符号）: codex-native-images、codex-runner.statusLabel。
+ *
+ * Outward（谁在用/调用场景）: session-message-reader、codex-data 再导出。
+ *
+ * 不负责: 读取 thread JSON 文件。
+ */
+import crypto from 'node:crypto';
+import fsSync from 'node:fs';
+import path from 'node:path';
+import { imageMarkdownFromCodexImageGeneration } from './codex-native-images.js';
+import { statusLabel } from './codex-runner.js';
+
+const DESKTOP_IMAGE_ROOT = path.join(process.cwd(), '.codexmobile', 'desktop-images');
+const INTERNAL_PROMPT_MARKERS = [
+  'CodexMobile iOS/PWA 回复要求：',
+  'CodexMobile 已接入飞书官方 lark-cli。',
+  'CodexMobile 已接入飞书官方 lark-cli'
+];
+const IMPLEMENT_PLAN_PROMPT_PREFIX = 'PLEASE IMPLEMENT THIS PLAN:';
+const IMPLEMENT_PLAN_REQUEST_PREFIX = 'implement-plan:';
+const GUIDED_USER_LABEL = '已引导对话';
+
+function guidedUserMetadata(enabled) {
+  return enabled
+    ? {
+      guided: true,
+      guideLabel: GUIDED_USER_LABEL,
+      kind: 'guided_user'
+    }
+    : {};
+}
+
+function normalizedPlanText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+export function implementedPlanContentFromMessage(message) {
+  const value = String(message || '').trim();
+  if (!value.startsWith(IMPLEMENT_PLAN_PROMPT_PREFIX)) {
+    return '';
+  }
+  return value.slice(IMPLEMENT_PLAN_PROMPT_PREFIX.length).trim();
+}
+
+function hasImplementedPlanContent(implementedPlanContents, content) {
+  return implementedPlanContents.has(normalizedPlanText(content));
+}
+
+export function sanitizeVisibleUserMessage(message) {
+  const value = String(message || '').trim();
+  if (!value) {
+    return '';
+  }
+  if (value.startsWith(IMPLEMENT_PLAN_PROMPT_PREFIX)) {
+    return '执行计划';
+  }
+  let cutAt = value.length;
+  for (const marker of INTERNAL_PROMPT_MARKERS) {
+    const index = value.indexOf(marker);
+    if (index > 0) {
+      cutAt = Math.min(cutAt, index);
+    }
+  }
+  return value.slice(0, cutAt).trim() || value;
+}
+
+export function extractProposedPlanContent(message) {
+  const value = String(message || '').trim();
+  if (!value) {
+    return '';
+  }
+  const match = value.match(/<proposed_plan\b[^>]*>([\s\S]*?)<\/proposed_plan>/i);
+  return match ? String(match[1] || '').trim() : '';
+}
+
+export function planTitleFromContent(content) {
+  const lines = String(content || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const heading = lines
+    .map((line) => line.match(/^#{1,6}\s+(.+)$/)?.[1]?.trim())
+    .find(Boolean);
+  if (heading) {
+    return heading.replace(/[*_`]/g, '').trim() || '计划';
+  }
+  const plainLead = lines.find((line) => !/^[-*+]\s+/.test(line) && !/^\d+[.)]\s+/.test(line));
+  if (plainLead && plainLead.length <= 60) {
+    return plainLead.replace(/[*_`#]/g, '').trim() || '计划';
+  }
+  return '计划';
+}
+
+export function planMessageFromContent({ id, content, timestamp, turnId, sessionId }) {
+  const planContent = String(content || '').trim();
+  if (!planContent) {
+    return null;
+  }
+  return {
+    id,
+    role: 'plan',
+    content: planContent,
+    title: planTitleFromContent(planContent),
+    timestamp,
+    turnId,
+    sessionId
+  };
+}
+
+export function planRequestMessageFromContent({
+  id,
+  requestId,
+  content,
+  timestamp,
+  turnId,
+  sessionId,
+  completed = false
+}) {
+  const planContent = String(content || '').trim();
+  if (!planContent) {
+    return null;
+  }
+  const requestTurnId = String(turnId || '').trim();
+  return {
+    id,
+    role: 'plan_request',
+    content: completed ? '计划已确认执行' : '实施此计划?',
+    status: completed ? 'completed' : 'running',
+    timestamp,
+    turnId: requestTurnId || turnId,
+    sessionId,
+    planImplementation: {
+      requestId: requestId || (requestTurnId ? `${IMPLEMENT_PLAN_REQUEST_PREFIX}${requestTurnId}` : ''),
+      turnId: requestTurnId || turnId,
+      planContent,
+      completed: Boolean(completed)
+    }
+  };
+}
+
+function implementedPlanContentsFromTurns(turns) {
+  const implementedPlanContents = new Set();
+  for (const turn of turns || []) {
+    for (const item of Array.isArray(turn?.items) ? turn.items : []) {
+      if (item?.type !== 'userMessage') {
+        continue;
+      }
+      const implementedPlanContent = implementedPlanContentFromMessage(textFromDesktopUserInp
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:24:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "desktop-thread-projector|thread-stream-state-changed|stream-state|conversationState|conversation" server client/src -g '*.js' -g '*.mjs'`</summary>
+```
+Chunk ID: 993f18
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1763
+Output:
+client/src/app-state.test.mjs:276:test('new conversation project resolution prefers explicit drawer choice', () => {
+client/src/app-state.test.mjs:285:test('draft sessions preserve the chosen conversation scope', () => {
+server/chat-service.test.mjs:157:    startDesktopFollowerTurn: async (conversationId, params) => {
+server/chat-service.test.mjs:158:      started = { conversationId, params };
+server/chat-service.test.mjs:172:  assert.equal(started.conversationId, 'thread-1');
+server/chat-service.test.mjs:226:    interruptDesktopFollowerTurn: async (conversationId) => {
+server/chat-service.test.mjs:227:      interrupted.push(conversationId);
+server/chat-service.test.mjs:266:    interruptDesktopFollowerTurn: async (conversationId) => {
+server/chat-service.test.mjs:267:      interrupted.push(conversationId);
+server/chat-service.test.mjs:304:    interruptDesktopFollowerTurn: async (conversationId) => {
+server/chat-service.test.mjs:305:      interrupted.push(conversationId);
+server/chat-service.test.mjs:353:    interruptDesktopFollowerTurn: async (conversationId) => {
+server/chat-service.test.mjs:354:      interrupted.push(conversationId);
+server/chat-service.test.mjs:384:    setDesktopFollowerCollaborationMode: async (conversationId, collaborationMode) => {
+server/chat-service.test.mjs:385:      collaborationUpdate = { conversationId, collaborationMode };
+server/chat-service.test.mjs:388:    setDesktopFollowerModelAndReasoning: async (conversationId, model, reasoningEffort) => {
+server/chat-service.test.mjs:389:      modelUpdate = { conversationId, model, reasoningEffort };
+server/chat-service.test.mjs:392:    startDesktopFollowerTurn: async (conversationId, params) => {
+server/chat-service.test.mjs:393:      started = { conversationId, params };
+server/chat-service.test.mjs:410:    conversationId: 'thread-1',
+server/chat-service.test.mjs:415:    conversationId: 'thread-1',
+server/chat-service.test.mjs:440:    setDesktopFollowerCollaborationMode: async (conversationId, collaborationMode) => {
+server/chat-service.test.mjs:441:      collaborationUpdate = { conversationId, collaborationMode };
+server/chat-service.test.mjs:444:    startDesktopFollowerTurn: async (conversationId, params) => {
+server/chat-service.test.mjs:445:      started = { conversationId, params };
+server/chat-service.test.mjs:458:    conversationId: 'thread-1',
+server/chat-service.test.mjs:580:    startDesktopFollowerTurn: async (conversationId, params) => {
+server/chat-service.test.mjs:581:      started = { conversationId, params };
+server/chat-service.test.mjs:601:  assert.equal(started.conversationId, 'thread-1');
+server/chat-service.test.mjs:674:    startDesktopFollowerTurn: async (conversationId, params) => {
+server/chat-service.test.mjs:675:      desktopStarted = { conversationId, params };
+server/chat-service.test.mjs:698:  assert.equal(desktopStarted.conversationId, 'background-thread-1');
+server/desktop-ipc-client.js:281:export async function startDesktopFollowerTurn(conversationId, turnStartParams, options = {}) {
+server/desktop-ipc-client.js:283:    conversationId,
+server/desktop-ipc-client.js:288:export async function steerDesktopFollowerTurn(conversationId, { input, attachments = [], restoreMessage = {} }, options = {}) {
+server/desktop-ipc-client.js:290:    conversationId,
+server/desktop-ipc-client.js:297:export async function interruptDesktopFollowerTurn(conversationId, options = {}) {
+server/desktop-ipc-client.js:299:    conversationId
+server/desktop-ipc-client.js:303:export async function setDesktopFollowerCollaborationMode(conversationId, collaborationMode, options = {}) {
+server/desktop-ipc-client.js:305:    conversationId,
+server/desktop-ipc-client.js:310:export async function setDesktopFollowerModelAndReasoning(conversationId, model, reasoningEffort, options = {}) {
+server/desktop-ipc-client.js:312:    conversationId,
+server/desktop-ipc-client.js:318:export async function broadcastDesktopThreadArchived(conversationId, { hostId = 'local', cwd = null, timeoutMs = 1500 } = {}) {
+server/desktop-ipc-client.js:324:      conversationId,
+server/desktop-ipc-client.js:339:  conversationId,
+server/desktop-ipc-client.js:351:      conversationId,
+server/chat-image-handler.js:123:    conversationSessionId,
+server/chat-image-handler.js:133:    const previousSessionId = imageSessionId === conversationSessionId ? draftSessionId : conversationSessionId;
+server/chat-queue.js:46:  const conversationQueues = new Map();
+server/chat-queue.js:157:    if (!conversationQueues.has(queueKey)) {
+server/chat-queue.js:158:      conversationQueues.set(queueKey, {
+server/chat-queue.js:164:    return conversationQueues.get(queueKey);
+server/chat-queue.js:232:    for (const state of conversationQueues.values()) {
+server/chat-request-prep.js:162:  const conversationSessionId = selectedSessionId || draftSessionId || null;
+server/chat-request-prep.js:183:   
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:24:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' server/session-message-reader.js`</summary>
+```
+Chunk ID: 88457d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2106
+Output:
+/**
+ * 读取 rollout/session JSONL，拼装消息列表、分页与桌面/协作活动投影入口。
+ *
+ * Keywords: session-messages, rollout-jsonl, pagination, desktop-thread
+ *
+ * Exports:
+ * - messagesFromRolloutJsonl / publicContextState / publicRuntimeState — 解析与脱敏视图。
+ * - readRolloutContextState / paginateMessages / isoFromEpochSeconds — IO 与分页工具。
+ * - createSessionMessageReader — 可注入 fs 与会话依赖的读数器。
+ *
+ * Inward（本模块依赖/组装的关键符号）: codex-app-server、desktop-activity-parser、desktop-thread-projector。
+ *
+ * Outward（谁在用/调用场景）: codex-data.readSessionMessages、API 层。
+ *
+ * 不负责: 写入会话文件。
+ */
+import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
+import readline from 'node:readline';
+import { readDesktopThread as defaultReadDesktopThread } from './codex-app-server.js';
+import {
+  readDesktopCollabActivities as defaultReadDesktopCollabActivities,
+  readRawSessionActivities as defaultReadRawSessionActivities
+} from './desktop-activity-parser.js';
+import {
+  extractProposedPlanContent,
+  implementedPlanContentFromMessage,
+  messagesFromDesktopThread as defaultMessagesFromDesktopThread,
+  planMessageFromContent,
+  planRequestMessageFromContent,
+  removeFallbackActivitiesCoveredByRaw as defaultRemoveFallbackActivitiesCoveredByRaw,
+  sanitizeVisibleUserMessage,
+  sortDesktopActivitySteps as defaultSortDesktopActivitySteps,
+  upsertDesktopActivity as defaultUpsertDesktopActivity
+} from './desktop-thread-projector.js';
+import {
+  filterDeletedMessages as defaultFilterDeletedMessages,
+  readDeletedMessageIds as defaultReadDeletedMessageIds
+} from './session-local-state.js';
+
+const ROLLOUT_CONTEXT_READ_BYTES = Math.max(
+  64 * 1024,
+  Number(process.env.CODEXMOBILE_ROLLOUT_CONTEXT_READ_BYTES) || 1024 * 1024
+);
+const GUIDED_USER_LABEL = '已引导对话';
+
+function guidedUserMetadata(enabled) {
+  return enabled
+    ? {
+      guided: true,
+      guideLabel: GUIDED_USER_LABEL,
+      kind: 'guided_user'
+    }
+    : {};
+}
+
+function positiveNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function epochSecondsFromIso(value) {
+  const ms = Date.parse(value || '');
+  return Number.isFinite(ms) ? ms / 1000 : null;
+}
+
+function responseMessageText(content) {
+  if (typeof content === 'string') {
+    return content.trim();
+  }
+  if (!Array.isArray(content)) {
+    return '';
+  }
+  return content
+    .map((item) => item?.text || item?.content || '')
+    .filter(Boolean)
+    .join('')
+    .trim();
+}
+
+function ensureRolloutTurn(turns, sessionId, timestamp) {
+  if (turns.length) {
+    return turns.at(-1);
+  }
+  const turn = {
+    id: `${sessionId}-turn-1`,
+    startedAt: epochSecondsFromIso(timestamp)
+  };
+  turns.push(turn);
+  return turn;
+}
+
+export function messagesFromRolloutJsonl(content, sessionId) {
+  const messages = [];
+  const turns = [];
+  const implementedPlanContents = new Set();
+  const userCountsByTurn = new Map();
+  const lines = String(content || '').split(/\r?\n/);
+
+  for (const line of lines) {
+    if (!line.trim()) {
+      continue;
+    }
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    const timestamp = entry.timestamp || new Date().toISOString();
+    if (entry.type === 'turn_context') {
+      turns.push({
+        id: entry.payload?.turn_id || `${sessionId}-turn-${turns.length + 1}`,
+        startedAt: epochSecondsFromIso(timestamp)
+      });
+      continue;
+    }
+    if (entry.type !== 'response_item' || entry.payload?.type !== 'message') {
+      continue;
+    }
+    const role = entry.payload.role;
+    if (role !== 'user' && role !== 'assistant') {
+      continue;
+    }
+    if (role === 'assistant' && entry.payload.phase === 'commentary') {
+      continue;
+    }
+    const contentText = responseMessageText(entry.payload.content);
+    if (!contentText) {
+      continue;
+    }
+    const implementedPlanContent = role === 'user' ? implementedPlanContentFromMessage(contentText) : '';
+    if (implementedPlanContent) {
+      implementedPlanContents.add(implementedPlanContent.replace(/\s+/g, ' ').trim());
+    }
+    const turn = ensureRolloutTurn(turns, sessionId, timestamp);
+    let userIndex = -1;
+    if (role === 'user') {
+      userIndex = userCountsByTurn.get(turn.id) || 0;
+      userCountsByTurn.set(turn.id, userIndex + 1);
+    }
+    if (role === 'assistant') {
+      const proposedPlan = extractProposedPlanContent(contentText);
+      if (proposedPlan) {
+        const baseId = entry.payload.id || `${turn.id}-assistant-${messages.length + 1}`;
+        const planMessage = planMessageFromContent({
+          id: `${baseId}-plan`,
+          content: proposedPlan,
+          timestamp,
+          turnId: turn.id,
+          sessionId
+        });
+        const requestMessage 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:01Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "export async function getDesktopBridgeStatus|getDesktopBridgeStatus" server/codex-app-server.js server/index.js server/codex-data.js`</summary>
+```
+Chunk ID: 44e373
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 102
+Output:
+server/codex-app-server.js:9: * - getDesktopBridgeStatus — 当前桥接健康与能力摘要。
+server/codex-app-server.js:368:export async function getDesktopBridgeStatus({ force = false } = {}) {
+server/index.js:45:import { getDesktopBridgeStatus } from './codex-app-server.js';
+server/index.js:191:  getDesktopBridgeStatus,
+server/index.js:290:  const desktopBridge = await getDesktopBridgeStatus();
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:04Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '350,430p' server/codex-app-server.js`</summary>
+```
+Chunk ID: 9d09f5
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 719
+Output:
+
+function isArchivedOrDeletedDesktopThread(thread = null) {
+  if (!thread || typeof thread !== 'object') {
+    return true;
+  }
+  const status = String(thread.status || '').toLowerCase();
+  const archivedAt = String(thread.archivedAt || thread.deletedAt || thread.archived_at || thread.deleted_at || '').trim();
+  const deletedFlag = Boolean(thread.deleted) || Boolean(thread.isDeleted) || status === 'deleted' || status === 'archived';
+  const archivedFlag = Boolean(thread.archived) || Boolean(thread.isArchived) || status === 'archived';
+  return deletedFlag || archivedFlag || Boolean(archivedAt);
+}
+
+export async function createCodexAppServerClient(options = {}) {
+  const client = new CodexAppServerClient(options);
+  await client.initialize();
+  return client;
+}
+
+export async function getDesktopBridgeStatus({ force = false } = {}) {
+  const now = Date.now();
+  if (!force && bridgeStatusCache && now - bridgeStatusCache.checkedAt < BRIDGE_STATUS_CACHE_MS) {
+    return bridgeStatusCache.status;
+  }
+  const transport = resolveAppServerTransport(process.env, { allowHeadlessLocal: true });
+  const ipc = await probeDesktopIpc({ timeoutMs: 1200 }).catch((error) => ({
+    connected: false,
+    mode: 'desktop-ipc',
+    socketPath: null,
+    reason: error.message
+  }));
+  if (ipc.connected) {
+    const status = {
+      strict: true,
+      connected: true,
+      mode: 'desktop-ipc',
+      reason: null,
+      socketPath: ipc.socketPath || null,
+      checkedAt: new Date(now).toISOString(),
+      capabilities: {
+        read: true,
+        sendToOpenDesktopThread: true,
+        createThread: false,
+        createThreadReason: '当前 Codex Desktop IPC 只暴露已有线程接管入口，还没有开放外部新建桌面线程入口。',
+        createThreadViaBackground: true,
+        backgroundCodex: true
+      }
+    };
+    bridgeStatusCache = { checkedAt: now, status };
+    return status;
+  }
+  const base = {
+    strict: transport.strict,
+    connected: false,
+    mode: transport.mode,
+    reason: transport.reason || ipc.reason,
+    socketPath: transport.sockPath || null,
+    checkedAt: new Date(now).toISOString(),
+    capabilities: {
+      read: false,
+      sendToOpenDesktopThread: false,
+      createThread: false
+    }
+  };
+  if (transport.mode === 'unavailable') {
+    bridgeStatusCache = { checkedAt: now, status: base };
+    return base;
+  }
+
+  const client = new CodexAppServerClient({
+    clientInfo: { name: 'CodexMobileBridgeProbe', title: null, version: '0.1.0' },
+    transport
+  });
+  try {
+    await client.initialize();
+    await client.request('thread/loaded/list', { limit: 1 }, { timeoutMs: 1500 }).catch(() => null);
+    const status = {
+      ...base,
+      connected: true,
+      reason: transport.mode === 'isolated-dev' || transport.mode === 'headless-local' ? transport.reason : null,
+      capabilities: {
+        read: true,
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '430,500p' server/codex-app-server.js`</summary>
+```
+Chunk ID: bd42ca
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 559
+Output:
+        read: true,
+        sendToOpenDesktopThread: transport.mode === 'desktop-proxy',
+        createThread: transport.mode !== 'isolated-dev',
+        headless: transport.mode === 'headless-local',
+        backgroundCodex: transport.mode === 'headless-local'
+      }
+    };
+    bridgeStatusCache = { checkedAt: now, status };
+    return status;
+  } catch (error) {
+    const status = {
+      ...base,
+      connected: false,
+      reason: error.message || transport.reason || '桌面端 Codex app-server 连接失败'
+    };
+    bridgeStatusCache = { checkedAt: now, status };
+    return status;
+  } finally {
+    client.close();
+  }
+}
+
+export async function listDesktopThreads({ limit = 1000, pageSize = 100 } = {}) {
+  const client = await createCodexAppServerClient({
+    clientInfo: { name: 'CodexMobileList', title: null, version: '0.1.0' },
+    allowReadOnlyIsolated: true
+  });
+  try {
+    const threads = [];
+    let cursor = null;
+    while (threads.length < limit) {
+      const response = await client.request('thread/list', {
+        cursor,
+        limit: Math.min(pageSize, limit - threads.length),
+        sortKey: 'updated_at',
+        sortDirection: 'desc',
+        archived: false
+      }, { timeoutMs: 20_000 });
+      const rawData = Array.isArray(response?.data) ? response.data : [];
+      const data = rawData.filter((thread) => !isArchivedOrDeletedDesktopThread(thread));
+      threads.push(...data);
+      cursor = response?.nextCursor || null;
+      if (!cursor || !rawData.length) {
+        break;
+      }
+    }
+    return threads;
+  } finally {
+    client.close();
+  }
+}
+
+export async function readDesktopThread(threadId, { includeTurns = true } = {}) {
+  const client = await createCodexAppServerClient({
+    clientInfo: { name: 'CodexMobileRead', title: null, version: '0.1.0' },
+    allowReadOnlyIsolated: true
+  });
+  try {
+    return await client.request('thread/read', {
+      threadId,
+      includeTurns
+    }, { timeoutMs: 20_000 });
+  } finally {
+    client.close();
+  }
+}
+
+export async function setDesktopThreadName(threadId, name) {
+  const client = await createCodexAppServerClient({
+    clientInfo: { name: 'CodexMobileRename', title: null, version: '0.1.0' },
+    allowHeadlessLocal: true
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,180p' client/src/app-websocket-events.test.mjs && sed -n '180,280p' client/src/app-websocket-events.test.mjs && sed -n '1,220p' client/src/turn-submission-utils.test.mjs`</summary>
+```
+Chunk ID: 93db14
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2447
+Output:
+/**
+ * 测试 app/useAppWebSocket.js：各类 WS 载荷是否应刷新线程或渲染本地消息。
+ * Keywords: websocket, payload-guards, tests
+ * Exports: 无导出 / 内含用例
+ * Inward: app/useAppWebSocket.js
+ */
+
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {
+  shouldCompleteLocalTurnBeforeRefresh,
+  shouldRefreshDesktopThreadForPayload,
+  shouldRefreshCurrentSessionAfterReconnect,
+  shouldRenderActivityMessageForPayload,
+  shouldRenderAssistantMessageForPayload,
+  shouldRenderStatusMessageForPayload
+} from './app/useAppWebSocket.js';
+
+test('desktop IPC status updates drive runtime without rendering local activity cards', () => {
+  assert.equal(
+    shouldRenderStatusMessageForPayload({
+      type: 'status-update',
+      source: 'desktop-ipc',
+      kind: 'turn',
+      status: 'running'
+    }),
+    false
+  );
+  assert.equal(
+    shouldRenderStatusMessageForPayload({
+      type: 'status-update',
+      source: 'desktop-ipc',
+      kind: 'turn',
+      status: 'completed'
+    }),
+    false
+  );
+  assert.equal(
+    shouldRenderStatusMessageForPayload({
+      type: 'status-update',
+      source: 'headless-local',
+      kind: 'turn',
+      status: 'running'
+    }),
+    false
+  );
+  assert.equal(
+    shouldRenderStatusMessageForPayload({
+      type: 'status-update',
+      source: 'headless-local',
+      kind: 'reasoning',
+      status: 'running'
+    }),
+    false
+  );
+});
+
+test('external thread terminal events refresh after completing local turn state', () => {
+  assert.equal(
+    shouldRefreshDesktopThreadForPayload({
+      type: 'chat-complete',
+      source: 'desktop-ipc'
+    }),
+    true
+  );
+  assert.equal(
+    shouldRefreshDesktopThreadForPayload({
+      type: 'status-update',
+      source: 'desktop-ipc',
+      kind: 'turn',
+      status: 'completed'
+    }),
+    true
+  );
+  assert.equal(
+    shouldRefreshDesktopThreadForPayload({
+      type: 'chat-complete',
+      source: 'headless-local'
+    }),
+    true
+  );
+  assert.equal(
+    shouldCompleteLocalTurnBeforeRefresh({
+      type: 'chat-complete',
+      source: 'desktop-ipc'
+    }),
+    true
+  );
+  assert.equal(
+    shouldCompleteLocalTurnBeforeRefresh({
+      type: 'status-update',
+      source: 'desktop-ipc',
+      kind: 'turn',
+      status: 'completed'
+    }),
+    true
+  );
+  assert.equal(
+    shouldCompleteLocalTurnBeforeRefresh({
+      type: 'status-update',
+      source: 'desktop-ipc',
+      kind: 'turn',
+      status: 'failed'
+    }),
+    false
+  );
+});
+
+test('headless fallback activity and assistant updates are read from the thread like IPC', () => {
+  assert.equal(
+    shouldRenderActivityMessageForPayload({
+      type: 'activity-update',
+      source: 'headless-local',
+      status: 'running'
+    }),
+    false
+  );
+  assert.equal(
+    shouldRenderAssistantMessageForPayload({
+      type: 'assistant-update',
+      source: 'headless-local',
+      content: '完成'
+    }),
+    false
+  );
+  assert.equal(
+    shouldRenderActivityMessageForPayload({
+      type: 'activity-update',
+      status: 'running'
+    }),
+    true
+  );
+});
+
+test('websocket reconnect refresh skips drafts and restores real selected sessions', () => {
+  assert.equal(shouldRefreshCurrentSessionAfterReconnect({ id: 'thread-1' }), true);
+  assert.equal(shouldRefreshCurrentSessionAfterReconnect({ id: 'draft-project-1' }), false);
+  assert.equal(shouldRefreshCurrentSessionAfterReconnect(null), false);
+});
+/**
+ * 测试 app/turn-submission-utils.js：发步元数据、会话选择与轮询条件等工具。
+ * Keywords: turn-submission, composer, tests
+ * Exports: 无导出 / 内含用例
+ * Inward: app/turn-submission-utils.js
+ */
+
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {
+  displayMessageForTurn,
+  completeLocalAbortMessages,
+  implementationPromptForPlan,
+  prepareComposerSubmission,
+  projectForTurnSelection,
+  realSessionIdFromTurn,
+  restoredComposerText,
+  sessionForTurnSelection,
+  selectedSkillsForPaths,
+  shouldPollTurnEndpointAfterSend,
+  turnMatchesSelection,
+  userMessageMetadataForSendMode
+} from './app/turn-submission-utils.js';
+
+test('realSessionIdFromTurn ignores draft and codex placeholder sessions', () => {
+  assert.equal(realSessionIdFromTurn({ sessionId: 'thread-1' }), 'thread-1');
+  assert.equal(realSessionIdFromTurn({ sessionId: 'draft-project-1' }), null);
+  assert.equal(realSessionIdFromTurn({ sessionId: 'codex-local-1' }), null);
+  assert.equal(realSessionIdFromTurn({ sessionId: '' }), null);
+});
+
+test('turnMatchesSelection accepts optimistic, real, previous, turn, and draft matches', () => {
+  const ids = {
+    turnId: 'turn-1',
+    optimisticSessionId: 'draft-1',
+    realSessionId: 'thread-1',
+    previousSessionId: 'old-thread'
+  };
+  assert.equal(turnMatchesSelection({ id: 'draft-1' }, ids), true);
+  assert.equal(turnMatchesSelection({ id: 'thread-1' }, ids), true);
+  assert.equal
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:29Z)**_
+
+根因基本锁定：我们把 `headless-local` 当成了“外部线程源”，所以 fallback 期间 WS 的 activity/assistant/status 被前端过滤，发送后也不轮询 `/api/chat/turns/:id`；一旦错过 `chat-complete` 或 activeRuns 窗口，状态就容易卡。我要把它改回“本机后台运行源”：手机实时渲染、轮询兜底、`activeRuns` 为空时可以清理。
+
+_**Agent (gpt-5.5 2026-05-11 04:25:30Z)**_
+
+<tool-use data-tool-type="task" data-tool-name="update_plan"><details>
+<summary>Tool use: **update_plan**</summary>
+**Agent task list:**
+- [X] Trace current fallback state flow
+- [⚡] Patch headless-local runtime semantics
+- [ ] Update focused tests for new routing model
+- [ ] Run targeted tests and build
+
+```
+Plan updated
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:33Z)**_
+
+接下来只改前端运行态分类和对应测试：`desktop-ipc` 仍走线程刷新/live mirror；`headless-local` 改成本机后台流式源，WS 正常渲染并启用 turn 轮询兜底。
+
+_**Agent (gpt-5.5 2026-05-11 04:25:35Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `client/src/app/useAppWebSocket.js`**
+
+```diff
+@@
+-const EXTERNAL_THREAD_SOURCES = new Set(['desktop-ipc', 'desktop-thread', 'headless-local']);
++const EXTERNAL_THREAD_SOURCES = new Set(['desktop-ipc', 'desktop-thread']);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:38Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `client/src/app/session-utils.js`**
+
+```diff
+@@
+ export function isExternalThreadRuntimeSource(value) {
+-  return ['desktop-thread', 'desktop-ipc', 'headless-local'].includes(String(value || ''));
++  return ['desktop-thread', 'desktop-ipc'].includes(String(value || ''));
+ }
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:43Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `client/src/session-live-refresh.js`**
+
+```diff
+@@
+ function isDesktopRuntimeSource(value) {
+-  return value === 'desktop-thread' || value === 'desktop-ipc' || value === 'headless-local';
++  return value === 'desktop-thread' || value === 'desktop-ipc';
+ }
+ 
+ function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
+-  return Boolean(bridge?.connected && ['desktop-ipc', 'headless-local'].includes(bridge?.mode));
++  return Boolean(bridge?.connected && bridge?.mode === 'desktop-ipc');
+ }
+```
+
+
+```
+apply_patch verification failed: Failed to find expected lines in /Users/xiayanghui/编程项目/CodexMobile/client/src/session-live-refresh.js:
+function isDesktopRuntimeSource(value) {
+  return value === 'desktop-thread' || value === 'desktop-ipc' || value === 'headless-local';
+}
+
+function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
+  return Boolean(bridge?.connected && ['desktop-ipc', 'headless-local'].includes(bridge?.mode));
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:50Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "isDesktopRuntimeSource|desktopBridgeUsesExternalThreadRefresh" client/src/session-live-refresh.js`</summary>
+```
+Chunk ID: 7fdba9
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 116
+Output:
+53:function isDesktopRuntimeSource(value) {
+126:function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
+165:  if (!Array.isArray(messages) || selectedRunRuntime?.status !== 'running' || !isDesktopRuntimeSource(selectedRunRuntime?.source)) {
+230:  if (selectedRunRuntime?.status === 'running' && isDesktopRuntimeSource(selectedRunRuntime?.source)) {
+255:  return desktopBridgeUsesExternalThreadRefresh(desktopBridge) && Boolean(hasExternalThreadRefresh);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:50Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '45,145p' client/src/session-live-refresh.js`</summary>
+```
+Chunk ID: 0425ed
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 945
+Output:
+function loadedHasAssistantForActivity(loaded, activity) {
+  const keys = new Set(messageRunKeys(activity));
+  if (!keys.size) {
+    return false;
+  }
+  return loaded.some((item) => item?.role === 'assistant' && messageMatchesRunKeys(item, keys) && normalizeText(item.content));
+}
+
+function isDesktopRuntimeSource(value) {
+  return value === 'desktop-thread' || value === 'desktop-ipc' || value === 'headless-local';
+}
+
+function messageMatchesRunKeys(message, keys) {
+  if (!keys.size) {
+    return false;
+  }
+  return messageRunKeys(message).some((key) => keys.has(key));
+}
+
+function completeLocalActivityMessage(message, loaded = []) {
+  const keys = new Set(messageRunKeys(message));
+  const assistant = loaded.find((item) => item?.role === 'assistant' && messageMatchesRunKeys(item, keys) && normalizeText(item.content));
+  if (!assistant && !['running', 'queued'].includes(String(message?.status || ''))) {
+    return message;
+  }
+  return {
+    ...message,
+    status: message.status === 'failed' ? 'failed' : 'completed',
+    label: message.status === 'failed' ? message.label : '过程已同步',
+    content: message.status === 'failed' ? message.content : '过程已同步',
+    completedAt: message.completedAt || assistant?.timestamp || new Date().toISOString(),
+    activities: Array.isArray(message.activities)
+      ? message.activities.map((activity) =>
+        ['running', 'queued'].includes(String(activity?.status || ''))
+          ? { ...activity, status: 'completed' }
+          : activity
+      )
+      : message.activities
+  };
+}
+
+function activityInsertIndex(loaded, activity) {
+  const keys = new Set(messageRunKeys(activity));
+  const index = loaded.findIndex((message) => message?.role === 'assistant' && messageMatchesRunKeys(message, keys));
+  return index >= 0 ? index : loaded.length;
+}
+
+function preserveLocalActivityMessages(current = [], loaded = []) {
+  const loadedIds = new Set(loaded.map((message) => String(message?.id || '')).filter(Boolean));
+  const preserved = current
+    .filter((message) => message?.role === 'activity' && !loadedIds.has(String(message?.id || '')))
+    .filter((message) => {
+      const keys = new Set(messageRunKeys(message));
+      if (!keys.size) {
+        return false;
+      }
+      if (loaded.some((item) => item?.role === 'activity' && messageMatchesRunKeys(item, keys))) {
+        return false;
+      }
+      if (isTransientActivityMessage(message) && loadedHasAssistantForActivity(loaded, message)) {
+        return false;
+      }
+      return loaded.some((item) => messageMatchesRunKeys(item, keys)) || ['running', 'queued'].includes(String(message?.status || ''));
+    })
+    .map((message) =>
+      isTransientActivityMessage(message)
+        ? message
+        : completeLocalActivityMessage(message, loaded)
+    );
+
+  if (!preserved.length) {
+    return loaded;
+  }
+
+  const result = [...loaded];
+  for (const activity of preserved.sort((a, b) => activityInsertIndex(result, a) - activityInsertIndex(result, b))) {
+    result.splice(activityInsertIndex(result, activity), 0, activity);
+  }
+  return result;
+}
+
+function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
+  return Boolean(bridge?.connected && ['desktop-ipc', 'headless-local'].includes(bridge?.mode));
+}
+
+export function desktopRunningActivityPayload(messages = [], sessionId = '', selectedRunRuntime = null) {
+  if (!Array.isArray(messages)) {
+    return null;
+  }
+  const targetSessionId = String(sessionId || '');
+  const runningActivity = messages
+    .filter((message) => {
+      if (message?.role !== 'activity' || String(message?.kind || '') !== 'desktop') {
+        return false;
+      }
+      if (!isRunningStatus(message?.status)) {
+        return false;
+      }
+      if (!targetSessionId) {
+        return true;
+      }
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:54Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `client/src/session-live-refresh.js`**
+
+```diff
+@@
+ function isDesktopRuntimeSource(value) {
+-  return value === 'desktop-thread' || value === 'desktop-ipc' || value === 'headless-local';
++  return value === 'desktop-thread' || value === 'desktop-ipc';
+ }
+@@
+ function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
+-  return Boolean(bridge?.connected && ['desktop-ipc', 'headless-local'].includes(bridge?.mode));
++  return Boolean(bridge?.connected && bridge?.mode === 'desktop-ipc');
+ }
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:25:58Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `client/src/app/turn-submission-utils.js`**
+
+```diff
+@@
+ export function shouldPollTurnEndpointAfterSend(result = {}) {
+-  return !['desktop-ipc', 'headless-local'].includes(result?.desktopBridge?.mode);
++  return result?.desktopBridge?.mode !== 'desktop-ipc';
+ }
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:26:08Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `client/src/app-websocket-events.test.mjs`**
+
+```diff
+@@
+-test('desktop IPC status updates drive runtime without rendering local activity cards', () => {
++test('desktop IPC status updates drive runtime without rendering local activity cards', () => {
+   assert.equal(
+     shouldRenderStatusMessageForPayload({
+       type: 'status-update',
+@@
+     }),
+     false
+   );
++});
++
++test('headless fallback status updates render like local background work', () => {
+   assert.equal(
+     shouldRenderStatusMessageForPayload({
+       type: 'status-update',
+@@
+       kind: 'turn',
+       status: 'running'
+     }),
+-    false
++    true
+   );
+   assert.equal(
+     shouldRenderStatusMessageForPayload({
+       type: 'status-update',
+@@
+       kind: 'reasoning',
+       status: 'running'
+     }),
+-    false
++    true
+   );
+ });
+ 
+ test('external thread terminal events refresh after completing local turn state', () => {
+@@
+   assert.equal(
+     shouldRefreshDesktopThreadForPayload({
+       type: 'chat-complete',
+       source: 'headless-local'
+     }),
+-    true
++    false
+   );
+@@
+-test('headless fallback activity and assistant updates are read from the thread like IPC', () => {
++test('headless fallback activity and assistant updates render from the local live stream', () => {
+   assert.equal(
+     shouldRenderActivityMessageForPayload({
+       type: 'activity-update',
+       source: 'headless-local',
+       status: 'running'
+     }),
+-    false
++    true
+   );
+   assert.equal(
+     shouldRenderAssistantMessageForPayload({
+       type: 'assistant-update',
+       source: 'headless-local',
+       content: '完成'
+     }),
+-    false
++    true
+   );
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:26:12Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `client/src/turn-submission-utils.test.mjs`**
+
+```diff
+@@
+-test('external thread handoff uses thread refresh instead of client turn polling', () => {
++test('only desktop IPC handoff skips client turn polling', () => {
+   assert.equal(
+     shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'desktop-ipc' } }),
+     false
+   );
+   assert.equal(
+     shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'headless-local' } }),
+-    false
++    true
+   );
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:26:21Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `client/src/app-state.test.mjs`**
+
+```diff
+@@
+-test('empty activeRuns status keeps desktop thread running activity', () => {
++test('empty activeRuns status keeps only desktop-owned running activity', () => {
+@@
+   assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
+     role: 'activity',
+     kind: 'turn',
+     status: 'running',
+     source: 'headless-local'
+-  }), false);
++  }), true);
+@@
+   assert.equal(shouldClearRuntimeWhenNoActiveRuns({
+     status: 'running',
+     source: 'headless-local'
+-  }), false);
++  }), true);
+@@
+-    'headless-turn-1': { status: 'running', source: 'headless-local' },
++    'headless-turn-1': { status: 'running', source: 'headless-local' },
+@@
+-  assert.deepEqual(Object.keys(preserved), ['desktop-thread-1', 'desktop-ipc-turn-1', 'headless-turn-1']);
++  assert.deepEqual(Object.keys(preserved), ['desktop-thread-1', 'desktop-ipc-turn-1']);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:26:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "headless-local|external thread|desktop-owned|shouldPollTurnEndpointAfterSend|EXTERNAL_THREAD|isExternalThreadRuntimeSource|desktopBridgeUsesExternalThreadRefresh" client/src/*.test.mjs client/src/app/*.test.mjs client/src/**/*.test.mjs client/src -g '*.js' -g '*.mjs'`</summary>
+```
+Chunk ID: 853e60
+Wall time: 0.0000 seconds
+Process exited with code 1
+Original token count: 13
+Output:
+zsh:1: no matches found: client/src/app/*.test.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:26:29Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "headless-local|external thread|desktop-owned|shouldPollTurnEndpointAfterSend|EXTERNAL_THREAD|isExternalThreadRuntimeSource|desktopBridgeUsesExternalThreadRefresh" client/src`</summary>
+```
+Chunk ID: 679709
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1061
+Output:
+client/src/turn-submission-utils.test.mjs:20:  shouldPollTurnEndpointAfterSend,
+client/src/turn-submission-utils.test.mjs:153:    shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'desktop-ipc' } }),
+client/src/turn-submission-utils.test.mjs:157:    shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'headless-local' } }),
+client/src/turn-submission-utils.test.mjs:161:    shouldPollTurnEndpointAfterSend({}),
+client/src/session-live-refresh.js:126:function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
+client/src/session-live-refresh.js:255:  return desktopBridgeUsesExternalThreadRefresh(desktopBridge) && Boolean(hasExternalThreadRefresh);
+client/src/send-state.test.mjs:99:      mode: 'headless-local',
+client/src/topbar-status.test.mjs:36:      selectedRuntime: { status: 'running', source: 'headless-local' }
+client/src/topbar-status.test.mjs:54:    bridgeConnectionLabel('connected', { connected: true, mode: 'headless-local' }).label,
+client/src/app-websocket-events.test.mjs:44:      source: 'headless-local',
+client/src/app-websocket-events.test.mjs:53:      source: 'headless-local',
+client/src/app-websocket-events.test.mjs:61:test('external thread terminal events refresh after completing local turn state', () => {
+client/src/app-websocket-events.test.mjs:81:      source: 'headless-local'
+client/src/app-websocket-events.test.mjs:116:      source: 'headless-local',
+client/src/app-websocket-events.test.mjs:124:      source: 'headless-local',
+client/src/session-live-refresh.test.mjs:39:test('shouldPollSelectedSessionMessages allows headless fallback sessions to refresh like external threads', () => {
+client/src/session-live-refresh.test.mjs:51:      desktopBridge: { connected: true, mode: 'headless-local' },
+client/src/session-live-refresh.test.mjs:390:        source: 'headless-local',
+client/src/session-live-refresh.test.mjs:398:  assert.equal(calls[0][1].source, 'headless-local');
+client/src/session-live-refresh.test.mjs:401:test('syncDesktopActivityRuntimeFromMessages treats headless-local runtime as external thread state', () => {
+client/src/session-live-refresh.test.mjs:419:        source: 'headless-local',
+client/src/session-live-refresh.test.mjs:428:  assert.equal(calls[0][1].source, 'headless-local');
+client/src/session-live-refresh.test.mjs:429:  assert.equal(calls[1][1].source, 'headless-local');
+client/src/app/useAppWebSocket.js:27:const EXTERNAL_THREAD_SOURCES = new Set(['desktop-ipc', 'desktop-thread']);
+client/src/app/useAppWebSocket.js:30:  return EXTERNAL_THREAD_SOURCES.has(payload?.source);
+client/src/app/turn-submission-utils.js:10: * - 轮询与中止 — `shouldPollTurnEndpointAfterSend`、`localHandoffStatusPayload`、`completeLocalAbortMessages`。
+client/src/app/turn-submission-utils.js:129:export function shouldPollTurnEndpointAfterSend(result = {}) {
+client/src/app/useSessionLivePolling.js:72:        selectedRunRuntime?.source === 'headless-local';
+client/src/app/useTurnSubmission.js:43:  shouldPollTurnEndpointAfterSend,
+client/src/app/useTurnSubmission.js:358:          : resultBridgeMode === 'headless-local'
+client/src/app/useTurnSubmission.js:359:            ? 'headless-local'
+client/src/app/useTurnSubmission.js:371:      if (shouldPollTurnEndpointAfterSend(result)) {
+client/src/app/session-utils.js:364:export function isExternalThreadRuntimeSource(value) {
+client/src/app/session-utils.js:369:  return runtime?.status === 'running' && isExternalThreadRuntimeSource(runtime?.source);
+client/src/app/session-utils.js:508:  return !isExternalThreadRuntimeSource(message?.source);
+client/src/app-state.test.mjs:121:test('empty activeRuns status keeps only desktop-owned running activity', () => {
+client/src/app-state.test.mjs:136:    source: 'headless-local'
+client/src/app-state.test.mjs:154:    source: 'headless-local'
+client/src/app-state.test.mjs:197:    'headless-turn-1': { status: 'running', source: 'headless-local' },
+client/src/app-state.test.mjs:308:        'thread-1': { status: 'running', source: 'headless-local' }
+client/src/panels/topbar-status.js:31:  return source === 'headless-local' || source === 'background' || source === 'local';
+client/src/panels/topbar-status.js:61:  if (desktopBridge?.mode === 'headless-local') {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:27:30Z)**_
+
+我接着把剩下的“headless-local 被当成外部桌面线程”的地方收口。现在方向已经很清楚：桌面 IPC 是 live mirror 的外部源；fallback headless 是本机后台运行源，状态要直接吃 WebSocket/turn polling，不能再等桌面线程刷新。
+
+_**Agent (gpt-5.5 2026-05-11 04:27:30Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "headless-local|desktopBridgeUsesExternalThreadRefresh|isDesktopRuntimeSource|hasDesktopThreadRuntime|external thread|external threads" client/src/session-live-refresh.test.mjs client/src/app-state.test.mjs client/src/app/useSessionLivePolling.js client/src/session-live-refresh.js client/src/app/useAppWebSocket.js client/src/app/session-utils.js client/src/app/turn-submission-utils.js`</summary>
+```
+Chunk ID: 9f24b9
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 538
+Output:
+client/src/session-live-refresh.js:53:function isDesktopRuntimeSource(value) {
+client/src/session-live-refresh.js:126:function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
+client/src/session-live-refresh.js:165:  if (!Array.isArray(messages) || selectedRunRuntime?.status !== 'running' || !isDesktopRuntimeSource(selectedRunRuntime?.source)) {
+client/src/session-live-refresh.js:230:  if (selectedRunRuntime?.status === 'running' && isDesktopRuntimeSource(selectedRunRuntime?.source)) {
+client/src/session-live-refresh.js:255:  return desktopBridgeUsesExternalThreadRefresh(desktopBridge) && Boolean(hasExternalThreadRefresh);
+client/src/app-state.test.mjs:136:    source: 'headless-local'
+client/src/app-state.test.mjs:154:    source: 'headless-local'
+client/src/app-state.test.mjs:197:    'headless-turn-1': { status: 'running', source: 'headless-local' },
+client/src/app-state.test.mjs:308:        'thread-1': { status: 'running', source: 'headless-local' }
+client/src/app/useSessionLivePolling.js:69:      const hasDesktopThreadRuntime =
+client/src/app/useSessionLivePolling.js:72:        selectedRunRuntime?.source === 'headless-local';
+client/src/app/useSessionLivePolling.js:73:      const hasExternalThreadRefresh = Boolean(hasDesktopThreadRuntime);
+client/src/session-live-refresh.test.mjs:39:test('shouldPollSelectedSessionMessages allows headless fallback sessions to refresh like external threads', () => {
+client/src/session-live-refresh.test.mjs:51:      desktopBridge: { connected: true, mode: 'headless-local' },
+client/src/session-live-refresh.test.mjs:390:        source: 'headless-local',
+client/src/session-live-refresh.test.mjs:398:  assert.equal(calls[0][1].source, 'headless-local');
+client/src/session-live-refresh.test.mjs:401:test('syncDesktopActivityRuntimeFromMessages treats headless-local runtime as external thread state', () => {
+client/src/session-live-refresh.test.mjs:419:        source: 'headless-local',
+client/src/session-live-refresh.test.mjs:428:  assert.equal(calls[0][1].source, 'headless-local');
+client/src/session-live-refresh.test.mjs:429:  assert.equal(calls[1][1].source, 'headless-local');
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:27:30Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,120p' client/src/session-live-refresh.test.mjs`</summary>
+```
+Chunk ID: 2f0bb2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1208
+Output:
+/**
+ * 测试 session-live-refresh.js：轮询条件、消息合并、运行中活动与重命名同步。
+ * Keywords: session-refresh, polling, tests
+ * Exports: 无导出 / 内含用例
+ * Inward: session-live-refresh.js
+ */
+
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {
+  applySessionRenameToProjectSessions,
+  desktopRunningActivityPayload,
+  mergeLiveSelectedThreadMessages,
+  shouldPollSelectedSessionMessages,
+  syncDesktopActivityRuntimeFromMessages
+} from './session-live-refresh.js';
+
+test('shouldPollSelectedSessionMessages keeps normal running sessions protected', () => {
+  assert.equal(
+    shouldPollSelectedSessionMessages({
+      hasSelectedRunning: true,
+      desktopBridge: { connected: true, mode: 'desktop-proxy' }
+    }),
+    false
+  );
+});
+
+test('shouldPollSelectedSessionMessages allows desktop-ipc running sessions to refresh', () => {
+  assert.equal(
+    shouldPollSelectedSessionMessages({
+      hasSelectedRunning: true,
+      desktopBridge: { connected: true, mode: 'desktop-ipc' },
+      hasExternalThreadRefresh: true
+    }),
+    true
+  );
+});
+
+test('shouldPollSelectedSessionMessages allows headless fallback sessions to refresh like external threads', () => {
+  assert.equal(
+    shouldPollSelectedSessionMessages({
+      hasSelectedRunning: true,
+      desktopBridge: { connected: true, mode: 'desktop-ipc' },
+      hasExternalThreadRefresh: true
+    }),
+    true
+  );
+  assert.equal(
+    shouldPollSelectedSessionMessages({
+      hasSelectedRunning: true,
+      desktopBridge: { connected: true, mode: 'headless-local' },
+      hasExternalThreadRefresh: true
+    }),
+    true
+  );
+});
+
+test('shouldPollSelectedSessionMessages protects local streaming runs when desktop-ipc is only a global bridge', () => {
+  assert.equal(
+    shouldPollSelectedSessionMessages({
+      hasSelectedRunning: true,
+      desktopBridge: { connected: true, mode: 'desktop-ipc' },
+      hasExternalThreadRefresh: false
+    }),
+    false
+  );
+});
+
+test('mergeLiveSelectedThreadMessages preserves local pending send until desktop thread contains it', () => {
+  const current = [
+    { id: 'old-user', role: 'user', content: '之前的问题', timestamp: '2026-05-07T06:00:00.000Z' },
+    { id: 'old-assistant', role: 'assistant', content: '之前的回答', timestamp: '2026-05-07T06:00:01.000Z' },
+    { id: 'local-1', role: 'user', content: '手机刚发的新消息', timestamp: '2026-05-07T06:01:00.000Z' },
+    { id: 'status-1', role: 'activity', status: 'running', content: '已交给桌面端处理', timestamp: '2026-05-07T06:01:00.000Z' }
+  ];
+  const loaded = current.slice(0, 2);
+
+  const merged = mergeLiveSelectedThreadMessages(current, loaded);
+
+  assert.deepEqual(merged.map((message) => message.id), ['old-user', 'old-assistant', 'local-1', 'status-1']);
+});
+
+test('mergeLiveSelectedThreadMessages switches to desktop messages once the desktop thread catches up', () => {
+  const current = [
+    { id: 'old-user', role: 'user', content: '之前的问题', timestamp: '2026-05-07T06:00:00.000Z' },
+    { id: 'local-1', role: 'user', content: '手机刚发的新消息', timestamp: '2026-05-07T06:01:00.000Z' },
+    { id: 'status-1', role: 'activity', status: 'running', content: '已交给桌面端处理', timestamp: '2026-05-07T06:01:00.000Z' }
+  ];
+  const loaded = [
+    { id: 'old-user', role: 'user', content: '之前的问题', timestamp: '2026-05-07T06:00:00.000Z' },
+    { id: 'desktop-user', role: 'user', content: '手机刚发的新消息', timestamp: '2026-05-07T06:01:00.000Z' },
+    { id: 'desktop-activity', role: 'activity', status: 'running', content: '正在处理本地任务', timestamp: '2026-05-07T06:01:01.000Z' }
+  ];
+
+  const merged = mergeLiveSelectedThreadMessages(current, loaded);
+
+  assert.deepEqual(merged.map((message) => message.id), ['old-user', 'desktop-user', 'desktop-activity']);
+});
+
+test('mergeLiveSelectedThreadMessages keeps transient handoff running until real output catches up', () => {
+  const current = [
+    { id: 'local-1', role: 'user', content: '手机新建线程', timestamp: '2026-05-07T06:01:00.000Z', turnId: 'turn-1' },
+    {
+      id: 'status-turn-1',
+      role: 'activity',
+      status: 'running',
+      transient: true,
+      label: '后台启动中',
+      content: '后台启动中',
+      timestamp: '2026-05-07T06:01:00.000Z',
+      turnId: 'turn-1',
+      activities: [{ id: 'handoff', kind: 'turn', label: '后台启动中', status: 'running' }]
+    }
+  ];
+
+  const loadedUserOnly = [
+    { id: 'desktop-user', role: 'user', content: '手机新建线程', timestamp: '2026-05-07T06:01:00.000Z', turnId: 'turn-1' }
+  ];
+  const withUserOnly = mergeLiveSelectedThreadMessages(current, loadedUserOnly);
+  assert.deepEqual(withUserOnly.map((message) => message.id), ['desktop-user', 'status-turn-1']);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:27:30Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '360,430p' client/src/session-live-refresh.test.mjs`</summary>
+```
+Chunk ID: 308740
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 481
+Output:
+      },
+      clearRun: (payload) => calls.push(['clear', payload])
+    }),
+    'cleared'
+  );
+
+  assert.deepEqual(calls, [['clear', {
+    source: 'desktop-ipc',
+    sessionId: 'thread-1',
+    turnId: 'desktop-turn-1'
+  }]]);
+});
+
+test('syncDesktopActivityRuntimeFromMessages preserves headless source while marking running thread activity', () => {
+  const calls = [];
+  assert.equal(
+    syncDesktopActivityRuntimeFromMessages({
+      messages: [
+        {
+          role: 'activity',
+          kind: 'desktop',
+          status: 'running',
+          sessionId: 'thread-1',
+          turnId: 'headless-turn-1',
+          startedAt: '2026-05-08T07:03:00.000Z'
+        }
+      ],
+      sessionId: 'thread-1',
+      selectedRunRuntime: {
+        status: 'running',
+        source: 'headless-local',
+        turnId: 'headless-turn-1'
+      },
+      markRun: (payload) => calls.push(['mark', payload])
+    }),
+    'marked'
+  );
+
+  assert.equal(calls[0][1].source, 'headless-local');
+});
+
+test('syncDesktopActivityRuntimeFromMessages treats headless-local runtime as external thread state', () => {
+  const calls = [];
+  assert.equal(
+    syncDesktopActivityRuntimeFromMessages({
+      messages: [
+        {
+          role: 'activity',
+          kind: 'desktop',
+          status: 'completed',
+          sessionId: 'thread-1',
+          turnId: 'headless-turn-1',
+          completedAt: '2026-05-08T07:04:00.000Z',
+          timestamp: '2026-05-08T07:04:00.000Z'
+        }
+      ],
+      sessionId: 'thread-1',
+      selectedRunRuntime: {
+        status: 'running',
+        source: 'headless-local',
+        turnId: 'headless-turn-1'
+      },
+      clearRun: (payload) => calls.push(['clear', payload]),
+      markSessionCompleteNotice: (payload) => calls.push(['complete', payload])
+    }),
+    'completed'
+  );
+
+  assert.equal(calls[0][1].source, 'headless-local');
+  assert.equal(calls[1][1].source, 'headless-local');
+});
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:27:30Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '285,330p' client/src/app-state.test.mjs`</summary>
+```
+Chunk ID: 850985
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 375
+Output:
+test('draft sessions preserve the chosen conversation scope', () => {
+  const normal = { id: '__codexmobile_projectless__', projectless: true, name: '普通对话' };
+  const draft = createDraftSession(normal);
+
+  assert.equal(draft.projectId, normal.id);
+  assert.equal(draft.draft, true);
+  assert.match(draft.id, /^draft-__codexmobile_projectless__-/);
+});
+
+test('titleFromFirstMessage uses the shared provisional title helper', () => {
+  assert.equal(titleFromFirstMessage('帮我看一下移动端新对话逻辑'), '移动端新对话逻辑');
+});
+
+test('sessionRunBadgeState ignores session index runtime but honors live runtime', () => {
+  const session = {
+    id: 'thread-1',
+    runtime: { status: 'running', turnId: 'turn-1', updatedAt: '2026-05-08T02:00:00.000Z' }
+  };
+
+  assert.equal(sessionRunBadgeState(session), null);
+  assert.equal(
+    sessionRunBadgeState(session, {
+      threadRuntimeById: {
+        'thread-1': { status: 'running', source: 'headless-local' }
+      }
+    }),
+    'running'
+  );
+});
+
+test('sessionRunBadgeState reads active runs by session id', () => {
+  const session = { id: 'thread-2' };
+
+  assert.equal(
+    sessionRunBadgeState(session, { runningById: { 'thread-2': true } }),
+    'running'
+  );
+});
+
+test('session runtime reconciliation keeps index hints out of the live running badge', () => {
+  const runtimeById = reconcileThreadRuntimeWithSessions({}, {
+    projectA: [
+      {
+        id: 'thread-1',
+        runtime: {
+          status: 'running',
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:27:30Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,140p' client/src/app/useSessionLivePolling.js`</summary>
+```
+Chunk ID: 10a13b
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 957
+Output:
+/**
+ * 当会话仍有运行中活动时，定时拉取消息流签名并合并桌面活动 runtime，保持选中线程与服务端一致。
+ *
+ * Keywords: live-polling, session-messages, running-activity
+ *
+ * Exports:
+ * - `useSessionLivePolling` — 基于认证与选中会话驱动轮询的 effect hook。
+ *
+ * Inward: `api`、`session-live-refresh`、`activity-model` 签名、`session-utils`。
+ *
+ * Outward: `App.jsx` 与会话实时展示链路配合。
+ */
+
+import { useEffect } from 'react';
+import { apiFetch } from '../api.js';
+import {
+  messageStreamSignature
+} from '../chat/activity-model.js';
+import {
+  mergeLiveSelectedThreadMessages,
+  shouldPollSelectedSessionMessages,
+  syncDesktopActivityRuntimeFromMessages
+} from '../session-live-refresh.js';
+import { mergeContextStatus } from './context-status.js';
+import {
+  hasRunningKey,
+  isDraftSession,
+  isLiveThreadRuntime,
+  selectedRunKeys,
+  sessionMessagesApiPath
+} from './session-utils.js';
+
+export function useSessionLivePolling({
+  authenticated,
+  selectedSession,
+  hasRunningActivity,
+  running,
+  desktopBridge,
+  threadRuntimeById,
+  defaultStatus,
+  sessionLivePollRef,
+  selectedSessionRef,
+  runningByIdRef,
+  messagesRef,
+  markRun,
+  clearRun,
+  markSessionCompleteNotice,
+  setContextStatus,
+  setMessages
+}) {
+  useEffect(() => {
+    if (!authenticated || !selectedSession?.id || isDraftSession(selectedSession)) {
+      return undefined;
+    }
+
+    const sessionId = selectedSession.id;
+    let stopped = false;
+    async function pollSelectedSession() {
+      if (stopped || sessionLivePollRef.current) {
+        return;
+      }
+      const hasSelectedRunning = hasRunningKey(
+        runningByIdRef.current || {},
+        selectedRunKeys(selectedSessionRef.current || selectedSession)
+      );
+      const selectedRunRuntime = selectedRunKeys(selectedSessionRef.current || selectedSession)
+        .map((key) => threadRuntimeById?.[key])
+        .find(isLiveThreadRuntime) || null;
+      const hasDesktopThreadRuntime =
+        selectedRunRuntime?.source === 'desktop-thread' ||
+        selectedRunRuntime?.source === 'desktop-ipc' ||
+        selectedRunRuntime?.source === 'headless-local';
+      const hasExternalThreadRefresh = Boolean(hasDesktopThreadRuntime);
+      if (!shouldPollSelectedSessionMessages({
+        hasSelectedRunning,
+        desktopBridge,
+        hasExternalThreadRefresh
+      })) {
+        return;
+      }
+      sessionLivePollRef.current = true;
+      try {
+        const data = await apiFetch(sessionMessagesApiPath(sessionId));
+        if (!stopped && selectedSessionRef.current?.id === sessionId && Array.isArray(data.messages)) {
+          syncDesktopActivityRuntimeFromMessages({
+            messages: data.messages,
+            sessionId,
+            selectedRunRuntime,
+            markRun,
+            clearRun,
+            markSessionCompleteNotice
+          });
+          setContextStatus((current) => mergeContextStatus(current, data.context || defaultStatus.context, defaultStatus.context));
+          setMessages((current) =>
+            messageStreamSignature(current) === messageStreamSignature(data.messages)
+              ? current
+              : mergeLiveSelectedThreadMessages(current, data.messages)
+          );
+        }
+      } catch {
+        // Keep the currently rendered conversation if a transient poll fails.
+      } finally {
+        sessionLivePollRef.current = false;
+      }
+    }
+
+    const intervalMs = hasRunningActivity || running ? 700 : 1600;
+    const timer = window.setInterval(pollSelectedSession, intervalMs);
+    pollSelectedSession();
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+    };
+  }, [
+    authenticated,
+    selectedSession?.id,
+    hasRunningActivity,
+    running,
+    desktopBridge,
+    threadRuntimeById
+  ]);
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:27:39Z)**_
+
+剩下两个测试其实暴露了旧模型的名字：它们把 headless fallback 当成“外部线程刷新”。我会把这块语义改成：只有 desktop-thread / desktop-ipc 走会话消息轮询镜像，headless-local 交给后台 live stream 和 turn endpoint。
+
+_**Agent (gpt-5.5 2026-05-11 04:27:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '120,215p' client/src/app-state.test.mjs`</summary>
+```
+Chunk ID: a601e6
+Wall time: 0.0001 seconds
+Process exited with code 0
+Original token count: 751
+Output:
+
+test('empty activeRuns status keeps only desktop-owned running activity', () => {
+  assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
+    role: 'activity',
+    kind: 'desktop',
+    status: 'running'
+  }), false);
+  assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
+    role: 'activity',
+    kind: 'turn',
+    status: 'running'
+  }), true);
+  assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
+    role: 'activity',
+    kind: 'turn',
+    status: 'running',
+    source: 'headless-local'
+  }), true);
+  assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
+    role: 'activity',
+    kind: 'turn',
+    status: 'running',
+    transient: true
+  }), false);
+  assert.equal(shouldClearRuntimeWhenNoActiveRuns({
+    status: 'running',
+    source: 'desktop-thread'
+  }), false);
+  assert.equal(shouldClearRuntimeWhenNoActiveRuns({
+    status: 'running',
+    source: 'desktop-ipc'
+  }), false);
+  assert.equal(shouldClearRuntimeWhenNoActiveRuns({
+    status: 'running',
+    source: 'headless-local'
+  }), true);
+  assert.equal(shouldClearRuntimeWhenNoActiveRuns({
+    status: 'running',
+    source: 'codexmobile'
+  }), true);
+});
+
+test('activeRuns status drops stale mobile running activity from other turns', () => {
+  const activeRunKeys = new Set(['active-session', 'active-turn']);
+
+  assert.equal(shouldDropRunningActivityMissingFromActiveRuns({
+    role: 'activity',
+    kind: 'turn',
+    status: 'running',
+    sessionId: 'stale-session',
+    turnId: 'stale-turn'
+  }, activeRunKeys), true);
+  assert.equal(shouldDropRunningActivityMissingFromActiveRuns({
+    role: 'activity',
+    kind: 'turn',
+    status: 'running',
+    sessionId: 'active-session',
+    turnId: 'active-turn'
+  }, activeRunKeys), false);
+  assert.equal(shouldDropRunningActivityMissingFromActiveRuns({
+    role: 'activity',
+    kind: 'desktop',
+    status: 'running',
+    sessionId: 'stale-desktop'
+  }, activeRunKeys), false);
+});
+
+test('activeRuns status merge can preserve external desktop runtimes beside mobile runs', () => {
+  const desktopRuntime = {
+    status: 'running',
+    source: 'desktop-thread',
+    sessionId: 'desktop-thread-1',
+    turnId: 'desktop-turn-1'
+  };
+  const preserved = externalThreadRuntimeById({
+    'desktop-thread-1': desktopRuntime,
+    'desktop-ipc-turn-1': { status: 'running', source: 'desktop-ipc' },
+    'headless-turn-1': { status: 'running', source: 'headless-local' },
+    'mobile-turn-1': { status: 'running', source: 'codexmobile' },
+    'completed-thread': { status: 'completed', source: 'desktop-thread' }
+  });
+
+  assert.deepEqual(Object.keys(preserved), ['desktop-thread-1', 'desktop-ipc-turn-1']);
+  assert.equal(preserved['desktop-thread-1'], desktopRuntime);
+});
+
+test('selected desktop activity counts as running for composer controls', () => {
+  assert.equal(selectedSessionIsRunning({
+    running: false,
+    hasRunningActivity: true
+  }), true);
+  assert.equal(selectedSessionIsRunning({
+    running: false,
+    hasRunningActivity: false
+  }), false);
+});
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:27:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '140,275p' client/src/session-live-refresh.js`</summary>
+```
+Chunk ID: ceaa86
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1117
+Output:
+      if (!isRunningStatus(message?.status)) {
+        return false;
+      }
+      if (!targetSessionId) {
+        return true;
+      }
+      return messageRunKeys(message).includes(targetSessionId);
+    })
+    .at(-1);
+
+  if (!runningActivity) {
+    return null;
+  }
+
+  return {
+    source: selectedRunRuntime?.source || 'desktop-thread',
+    sessionId: runningActivity.sessionId || targetSessionId || null,
+    turnId: runningActivity.turnId || selectedRunRuntime?.turnId || runningActivity.sessionId || targetSessionId || null,
+    startedAt: runningActivity.startedAt || runningActivity.timestamp || null,
+    timestamp: runningActivity.timestamp || runningActivity.startedAt || new Date().toISOString(),
+    steerable: false
+  };
+}
+
+function desktopCompletedActivityPayload(messages = [], sessionId = '', selectedRunRuntime = null) {
+  if (!Array.isArray(messages) || selectedRunRuntime?.status !== 'running' || !isDesktopRuntimeSource(selectedRunRuntime?.source)) {
+    return null;
+  }
+  const targetSessionId = String(sessionId || '');
+  const targetTurnId = String(selectedRunRuntime?.turnId || '');
+  const completedActivity = messages
+    .filter((message) => {
+      if (message?.role !== 'activity' || String(message?.kind || '') !== 'desktop') {
+        return false;
+      }
+      if (String(message?.status || '') !== 'completed') {
+        return false;
+      }
+      const keys = messageRunKeys(message);
+      if (targetTurnId && keys.includes(targetTurnId)) {
+        return true;
+      }
+      return targetSessionId ? keys.includes(targetSessionId) : true;
+    })
+    .at(-1);
+
+  if (!completedActivity) {
+    return null;
+  }
+
+  return {
+    source: selectedRunRuntime.source || 'desktop-thread',
+    sessionId: completedActivity.sessionId || targetSessionId || null,
+    turnId: completedActivity.turnId || selectedRunRuntime.turnId || null,
+    completedAt: completedActivity.completedAt || completedActivity.timestamp || new Date().toISOString(),
+    timestamp: completedActivity.timestamp || completedActivity.completedAt || new Date().toISOString()
+  };
+}
+
+export function syncDesktopActivityRuntimeFromMessages({
+  messages = [],
+  sessionId = '',
+  selectedRunRuntime = null,
+  markRun = null,
+  clearRun = null,
+  markSessionCompleteNotice = null
+} = {}) {
+  const payload = desktopRunningActivityPayload(messages, sessionId, selectedRunRuntime);
+  if (payload) {
+    markRun?.(payload);
+    clientRuntimeDebug('desktopActivityRuntimeSync', { sessionId, outcome: 'marked', source: payload.source });
+    return 'marked';
+  }
+
+  const completedPayload = desktopCompletedActivityPayload(messages, sessionId, selectedRunRuntime);
+  if (completedPayload) {
+    clearRun?.({
+      source: selectedRunRuntime.source || 'desktop-thread',
+      sessionId,
+      turnId: selectedRunRuntime.turnId || null
+    });
+    markSessionCompleteNotice?.(completedPayload);
+    clientRuntimeDebug('desktopActivityRuntimeSync', {
+      sessionId,
+      outcome: 'completed',
+      source: selectedRunRuntime?.source
+    });
+    return 'completed';
+  }
+
+  if (selectedRunRuntime?.status === 'running' && isDesktopRuntimeSource(selectedRunRuntime?.source)) {
+    clearRun?.({
+      source: selectedRunRuntime.source || 'desktop-thread',
+      sessionId,
+      turnId: selectedRunRuntime.turnId || null
+    });
+    clientRuntimeDebug('desktopActivityRuntimeSync', {
+      sessionId,
+      outcome: 'cleared',
+      source: selectedRunRuntime?.source
+    });
+    return 'cleared';
+  }
+
+  return 'idle';
+}
+
+export function shouldPollSelectedSessionMessages({
+  hasSelectedRunning = false,
+  desktopBridge = null,
+  hasExternalThreadRefresh = false
+} = {}) {
+  if (!hasSelectedRunning) {
+    return true;
+  }
+  return desktopBridgeUsesExternalThreadRefresh(desktopBridge) && Boolean(hasExternalThreadRefresh);
+}
+
+export function mergeLiveSelectedThreadMessages(current = [], loaded = []) {
+  if (!Array.isArray(loaded)) {
+    return Array.isArray(current) ? current : [];
+  }
+  if (!Array.isArray(current) || !current.length) {
+    return loaded;
+  }
+
+  const loadedUsers = loaded.filter((message) => message?.role === 'user');
+  const hasUncaughtLocalUser = current.some((message) =>
+    message?.role === 'user' &&
+    isPendingLocalMessage(message) &&
+    !loadedUsers.some((loadedMessage) => sameUserMessageContent(message.content, loadedMessage.content))
+  );
+
+  if (!hasUncaughtLocalUser) {
+    return preserveLocalActivityMessages(current, loaded);
+  }
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:27:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '215,270p' client/src/session-live-refresh.js`</summary>
+```
+Chunk ID: bc0995
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 427
+Output:
+  if (completedPayload) {
+    clearRun?.({
+      source: selectedRunRuntime.source || 'desktop-thread',
+      sessionId,
+      turnId: selectedRunRuntime.turnId || null
+    });
+    markSessionCompleteNotice?.(completedPayload);
+    clientRuntimeDebug('desktopActivityRuntimeSync', {
+      sessionId,
+      outcome: 'completed',
+      source: selectedRunRuntime?.source
+    });
+    return 'completed';
+  }
+
+  if (selectedRunRuntime?.status === 'running' && isDesktopRuntimeSource(selectedRunRuntime?.source)) {
+    clearRun?.({
+      source: selectedRunRuntime.source || 'desktop-thread',
+      sessionId,
+      turnId: selectedRunRuntime.turnId || null
+    });
+    clientRuntimeDebug('desktopActivityRuntimeSync', {
+      sessionId,
+      outcome: 'cleared',
+      source: selectedRunRuntime?.source
+    });
+    return 'cleared';
+  }
+
+  return 'idle';
+}
+
+export function shouldPollSelectedSessionMessages({
+  hasSelectedRunning = false,
+  desktopBridge = null,
+  hasExternalThreadRefresh = false
+} = {}) {
+  if (!hasSelectedRunning) {
+    return true;
+  }
+  return desktopBridgeUsesExternalThreadRefresh(desktopBridge) && Boolean(hasExternalThreadRefresh);
+}
+
+export function mergeLiveSelectedThreadMessages(current = [], loaded = []) {
+  if (!Array.isArray(loaded)) {
+    return Array.isArray(current) ? current : [];
+  }
+  if (!Array.isArray(current) || !current.length) {
+    return loaded;
+  }
+
+  const loadedUsers = loaded.filter((message) => message?.role === 'user');
+  const hasUncaughtLocalUser = current.some((message) =>
+    message?.role === 'user' &&
+    isPendingLocalMessage(message) &&
+    !loadedUsers.some((loadedMessage) => sameUserMessageContent(message.content, loadedMessage.content))
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:27:53Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/app/useSessionLivePolling.js`**
+
+```diff
+@@
+       const selectedRunRuntime = selectedRunKeys(selectedSessionRef.current || selectedSession)
+         .map((key) => threadRuntimeById?.[key])
+         .find(isLiveThreadRuntime) || null;
+       const hasDesktopThreadRuntime =
+         selectedRunRuntime?.source === 'desktop-thread' ||
+-        selectedRunRuntime?.source === 'desktop-ipc' ||
+-        selectedRunRuntime?.source === 'headless-local';
++        selectedRunRuntime?.source === 'desktop-ipc';
+       const hasExternalThreadRefresh = Boolean(hasDesktopThreadRuntime);
+```
+
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/session-live-refresh.test.mjs`**
+
+```diff
+@@
+-test('shouldPollSelectedSessionMessages allows headless fallback sessions to refresh like external threads', () => {
++test('shouldPollSelectedSessionMessages keeps headless fallback on local live stream and turn polling', () => {
+   assert.equal(
+     shouldPollSelectedSessionMessages({
+       hasSelectedRunning: true,
+       desktopBridge: { connected: true, mode: 'desktop-ipc' },
+       hasExternalThreadRefresh: true
+@@
+     shouldPollSelectedSessionMessages({
+       hasSelectedRunning: true,
+       desktopBridge: { connected: true, mode: 'headless-local' },
+       hasExternalThreadRefresh: true
+     }),
+-    true
++    false
+   );
+ });
+@@
+-test('syncDesktopActivityRuntimeFromMessages preserves headless source while marking running thread activity', () => {
++test('syncDesktopActivityRuntimeFromMessages ignores headless runtime during desktop thread refresh', () => {
+   const calls = [];
+   assert.equal(
+     syncDesktopActivityRuntimeFromMessages({
+       messages: [
+         {
+@@
+       selectedRunRuntime: {
+         status: 'running',
+         source: 'headless-local',
+         turnId: 'headless-turn-1'
+       },
+       markRun: (payload) => calls.push(['mark', payload])
+     }),
+-    'marked'
++    'idle'
+   );
+ 
+-  assert.equal(calls[0][1].source, 'headless-local');
++  assert.deepEqual(calls, []);
+ });
+ 
+-test('syncDesktopActivityRuntimeFromMessages treats headless-local runtime as external thread state', () => {
++test('syncDesktopActivityRuntimeFromMessages leaves completed headless runtime to local completion handling', () => {
+   const calls = [];
+   assert.equal(
+     syncDesktopActivityRuntimeFromMessages({
+       messages: [
+         {
+@@
+       clearRun: (payload) => calls.push(['clear', payload]),
+       markSessionCompleteNotice: (payload) => calls.push(['complete', payload])
+     }),
+-    'completed'
++    'idle'
+   );
+ 
+-  assert.equal(calls[0][1].source, 'headless-local');
+-  assert.equal(calls[1][1].source, 'headless-local');
++  assert.deepEqual(calls, []);
+ });
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:00Z)**_
+
+代码面已经把 headless-local 从“桌面线程刷新白名单”里拿掉了。接下来我跑一轮检索和定向测试，看有没有残留断言或状态名没改干净。
+
+_**Agent (gpt-5.5 2026-05-11 04:28:00Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "headless-local|hasDesktopThreadRuntime|external thread|external threads" client/src/session-live-refresh.test.mjs client/src/app-state.test.mjs client/src/app/useSessionLivePolling.js client/src/session-live-refresh.js client/src/app/useAppWebSocket.js client/src/app/session-utils.js client/src/app/turn-submission-utils.js client/src/*.test.mjs`</summary>
+```
+Chunk ID: e4cb1d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 587
+Output:
+client/src/app-state.test.mjs:136:    source: 'headless-local'
+client/src/app-state.test.mjs:154:    source: 'headless-local'
+client/src/app-state.test.mjs:197:    'headless-turn-1': { status: 'running', source: 'headless-local' },
+client/src/app-state.test.mjs:308:        'thread-1': { status: 'running', source: 'headless-local' }
+client/src/turn-submission-utils.test.mjs:157:    shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'headless-local' } }),
+client/src/app/useSessionLivePolling.js:69:      const hasDesktopThreadRuntime =
+client/src/app/useSessionLivePolling.js:72:      const hasExternalThreadRefresh = Boolean(hasDesktopThreadRuntime);
+client/src/session-live-refresh.test.mjs:51:      desktopBridge: { connected: true, mode: 'headless-local' },
+client/src/session-live-refresh.test.mjs:390:        source: 'headless-local',
+client/src/session-live-refresh.test.mjs:419:        source: 'headless-local',
+client/src/app-websocket-events.test.mjs:44:      source: 'headless-local',
+client/src/app-websocket-events.test.mjs:53:      source: 'headless-local',
+client/src/app-websocket-events.test.mjs:61:test('external thread terminal events refresh after completing local turn state', () => {
+client/src/app-websocket-events.test.mjs:81:      source: 'headless-local'
+client/src/app-websocket-events.test.mjs:116:      source: 'headless-local',
+client/src/app-websocket-events.test.mjs:124:      source: 'headless-local',
+client/src/app-state.test.mjs:136:    source: 'headless-local'
+client/src/app-state.test.mjs:154:    source: 'headless-local'
+client/src/app-state.test.mjs:197:    'headless-turn-1': { status: 'running', source: 'headless-local' },
+client/src/app-state.test.mjs:308:        'thread-1': { status: 'running', source: 'headless-local' }
+client/src/session-live-refresh.test.mjs:51:      desktopBridge: { connected: true, mode: 'headless-local' },
+client/src/session-live-refresh.test.mjs:390:        source: 'headless-local',
+client/src/session-live-refresh.test.mjs:419:        source: 'headless-local',
+client/src/send-state.test.mjs:99:      mode: 'headless-local',
+client/src/topbar-status.test.mjs:36:      selectedRuntime: { status: 'running', source: 'headless-local' }
+client/src/topbar-status.test.mjs:54:    bridgeConnectionLabel('connected', { connected: true, mode: 'headless-local' }).label,
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:00Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff -- client/src/app/useAppWebSocket.js client/src/app/session-utils.js client/src/session-live-refresh.js client/src/app/turn-submission-utils.js client/src/app/useSessionLivePolling.js client/src/app-websocket-events.test.mjs client/src/turn-submission-utils.test.mjs client/src/app-state.test.mjs client/src/session-live-refresh.test.mjs`</summary>
+```
+Chunk ID: e3f1a0
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2651
+Output:
+diff --git a/client/src/app-state.test.mjs b/client/src/app-state.test.mjs
+index e2fafea..a1de452 100644
+--- a/client/src/app-state.test.mjs
++++ b/client/src/app-state.test.mjs
+@@ -118,7 +118,7 @@ test('status sync preserves only active local submission polling', () => {
+   );
+ });
+ 
+-test('empty activeRuns status keeps desktop thread running activity', () => {
++test('empty activeRuns status keeps only desktop-owned running activity', () => {
+   assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
+     role: 'activity',
+     kind: 'desktop',
+@@ -134,7 +134,7 @@ test('empty activeRuns status keeps desktop thread running activity', () => {
+     kind: 'turn',
+     status: 'running',
+     source: 'headless-local'
+-  }), false);
++  }), true);
+   assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
+     role: 'activity',
+     kind: 'turn',
+@@ -152,7 +152,7 @@ test('empty activeRuns status keeps desktop thread running activity', () => {
+   assert.equal(shouldClearRuntimeWhenNoActiveRuns({
+     status: 'running',
+     source: 'headless-local'
+-  }), false);
++  }), true);
+   assert.equal(shouldClearRuntimeWhenNoActiveRuns({
+     status: 'running',
+     source: 'codexmobile'
+@@ -199,7 +199,7 @@ test('activeRuns status merge can preserve external desktop runtimes beside mobi
+     'completed-thread': { status: 'completed', source: 'desktop-thread' }
+   });
+ 
+-  assert.deepEqual(Object.keys(preserved), ['desktop-thread-1', 'desktop-ipc-turn-1', 'headless-turn-1']);
++  assert.deepEqual(Object.keys(preserved), ['desktop-thread-1', 'desktop-ipc-turn-1']);
+   assert.equal(preserved['desktop-thread-1'], desktopRuntime);
+ });
+ 
+diff --git a/client/src/app-websocket-events.test.mjs b/client/src/app-websocket-events.test.mjs
+index a627915..0153259 100644
+--- a/client/src/app-websocket-events.test.mjs
++++ b/client/src/app-websocket-events.test.mjs
+@@ -26,6 +26,9 @@ test('desktop IPC status updates drive runtime without rendering local activity
+     }),
+     false
+   );
++});
++
++test('headless fallback status updates render like local background work', () => {
+   assert.equal(
+     shouldRenderStatusMessageForPayload({
+       type: 'status-update',
+@@ -42,7 +45,7 @@ test('desktop IPC status updates drive runtime without rendering local activity
+       kind: 'turn',
+       status: 'running'
+     }),
+-    false
++    true
+   );
+   assert.equal(
+     shouldRenderStatusMessageForPayload({
+@@ -51,7 +54,7 @@ test('desktop IPC status updates drive runtime without rendering local activity
+       kind: 'reasoning',
+       status: 'running'
+     }),
+-    false
++    true
+   );
+ });
+ 
+@@ -77,7 +80,7 @@ test('external thread terminal events refresh after completing local turn state'
+       type: 'chat-complete',
+       source: 'headless-local'
+     }),
+-    true
++    false
+   );
+   assert.equal(
+     shouldCompleteLocalTurnBeforeRefresh({
+@@ -106,14 +109,14 @@ test('external thread terminal events refresh after completing local turn state'
+   );
+ });
+ 
+-test('headless fallback activity and assistant updates are read from the thread like IPC', () => {
++test('headless fallback activity and assistant updates render from the local live stream', () => {
+   assert.equal(
+     shouldRenderActivityMessageForPayload({
+       type: 'activity-update',
+       source: 'headless-local',
+       status: 'running'
+     }),
+-    false
++    true
+   );
+   assert.equal(
+     shouldRenderAssistantMessageForPayload({
+@@ -121,7 +124,7 @@ test('headless fallback activity and assistant updates are read from the thread
+       source: 'headless-local',
+       content: '完成'
+     }),
+-    false
++    true
+   );
+   assert.equal(
+     shouldRenderActivityMessageForPayload({
+diff --git a/client/src/app/session-utils.js b/client/src/app/session-utils.js
+index 6811434..ef2a097 100644
+--- a/client/src/app/session-utils.js
++++ b/client/src/app/session-utils.js
+@@ -362,7 +362,7 @@ export function sessionRunKeys(session) {
+ }
+ 
+ export function isExternalThreadRuntimeSource(value) {
+-  return ['desktop-thread', 'desktop-ipc', 'headless-local'].includes(String(value || ''));
++  return ['desktop-thread', 'desktop-ipc'].includes(String(value || ''));
+ }
+ 
+ export function isExternalThreadRuntime(runtime) {
+diff --git a/client/src/app/turn-submission-utils.js b/client/src/app/turn-submission-utils.js
+index b429237..9c937ce 100644
+--- a/client/src/app/turn-submission-utils.js
++++ b/client/src/app/turn-submission-utils.js
+@@ -127,7 +127,7 @@ export function restoredComposerText(current, nextText) {
+ }
+ 
+ export function shouldPollTurnEndpointAfterSend(result = {}) {
+-  return !['desktop-ipc', 'headless-local'].includes(result?.desktopBridge?.mode);
++  return result?.desktopBridge?.mode !== 'desktop-ipc';
+ }
+ 
+ export function localHandoffStatusPayload({ sessionId, previousSessionId = null, turnId, timestamp = new Date().toISOString() } = {}) {
+diff --git a/client/src/app/use
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:04Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '126,175p' client/src/session-live-refresh.js`</summary>
+```
+Chunk ID: 837212
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 470
+Output:
+function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
+  return Boolean(bridge?.connected && bridge?.mode === 'desktop-ipc');
+}
+
+export function desktopRunningActivityPayload(messages = [], sessionId = '', selectedRunRuntime = null) {
+  if (!Array.isArray(messages)) {
+    return null;
+  }
+  const targetSessionId = String(sessionId || '');
+  const runningActivity = messages
+    .filter((message) => {
+      if (message?.role !== 'activity' || String(message?.kind || '') !== 'desktop') {
+        return false;
+      }
+      if (!isRunningStatus(message?.status)) {
+        return false;
+      }
+      if (!targetSessionId) {
+        return true;
+      }
+      return messageRunKeys(message).includes(targetSessionId);
+    })
+    .at(-1);
+
+  if (!runningActivity) {
+    return null;
+  }
+
+  return {
+    source: selectedRunRuntime?.source || 'desktop-thread',
+    sessionId: runningActivity.sessionId || targetSessionId || null,
+    turnId: runningActivity.turnId || selectedRunRuntime?.turnId || runningActivity.sessionId || targetSessionId || null,
+    startedAt: runningActivity.startedAt || runningActivity.timestamp || null,
+    timestamp: runningActivity.timestamp || runningActivity.startedAt || new Date().toISOString(),
+    steerable: false
+  };
+}
+
+function desktopCompletedActivityPayload(messages = [], sessionId = '', selectedRunRuntime = null) {
+  if (!Array.isArray(messages) || selectedRunRuntime?.status !== 'running' || !isDesktopRuntimeSource(selectedRunRuntime?.source)) {
+    return null;
+  }
+  const targetSessionId = String(sessionId || '');
+  const targetTurnId = String(selectedRunRuntime?.turnId || '');
+  const completedActivity = messages
+    .filter((message) => {
+      if (message?.role !== 'activity' || String(message?.kind || '') !== 'desktop') {
+        return false;
+      }
+      if (String(message?.status || '') !== 'completed') {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:09Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/session-live-refresh.js`**
+
+```diff
+@@
+ export function desktopRunningActivityPayload(messages = [], sessionId = '', selectedRunRuntime = null) {
+-  if (!Array.isArray(messages)) {
++  if (!Array.isArray(messages) || (selectedRunRuntime?.source && !isDesktopRuntimeSource(selectedRunRuntime.source))) {
+     return null;
+   }
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:12Z)**_
+
+我又补了一刀关键保护：即使消息轮询里读到了 desktop kind 的 activity，只要当前 runtime 是 headless-local，也不会被桌面同步函数接管。这样 fallback 的完成/清理就只归本地后台链路处理。
+
+_**Agent (gpt-5.5 2026-05-11 04:28:13Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node --test client/src/app-websocket-events.test.mjs client/src/turn-submission-utils.test.mjs client/src/app-state.test.mjs client/src/session-live-refresh.test.mjs`</summary>
+```
+Chunk ID: 0ca61c
+Wall time: 0.0415 seconds
+Process exited with code 0
+Original token count: 3394
+Output:
+TAP version 13
+# Subtest: appReducer updates ui state with direct and functional values
+ok 1 - appReducer updates ui state with direct and functional values
+  ---
+  duration_ms: 1.819625
+  type: 'test'
+  ...
+# Subtest: createInitialUiState restores dark theme from storage
+ok 2 - createInitialUiState restores dark theme from storage
+  ---
+  duration_ms: 0.226542
+  type: 'test'
+  ...
+# Subtest: createInitialUiState restores system theme preference from storage
+ok 3 - createInitialUiState restores system theme preference from storage
+  ---
+  duration_ms: 0.055125
+  type: 'test'
+  ...
+# Subtest: applyPwaTheme syncs iOS PWA meta with dark theme
+ok 4 - applyPwaTheme syncs iOS PWA meta with dark theme
+  ---
+  duration_ms: 0.116875
+  type: 'test'
+  ...
+# Subtest: applyPwaTheme resolves system preference from media query
+ok 5 - applyPwaTheme resolves system preference from media query
+  ---
+  duration_ms: 0.271833
+  type: 'test'
+  ...
+# Subtest: status sync preserves only active local submission polling
+ok 6 - status sync preserves only active local submission polling
+  ---
+  duration_ms: 0.147125
+  type: 'test'
+  ...
+# Subtest: empty activeRuns status keeps only desktop-owned running activity
+ok 7 - empty activeRuns status keeps only desktop-owned running activity
+  ---
+  duration_ms: 0.4155
+  type: 'test'
+  ...
+# Subtest: activeRuns status drops stale mobile running activity from other turns
+ok 8 - activeRuns status drops stale mobile running activity from other turns
+  ---
+  duration_ms: 0.218792
+  type: 'test'
+  ...
+# Subtest: activeRuns status merge can preserve external desktop runtimes beside mobile runs
+ok 9 - activeRuns status merge can preserve external desktop runtimes beside mobile runs
+  ---
+  duration_ms: 1.073458
+  type: 'test'
+  ...
+# Subtest: selected desktop activity counts as running for composer controls
+ok 10 - selected desktop activity counts as running for composer controls
+  ---
+  duration_ms: 1.208584
+  type: 'test'
+  ...
+# Subtest: selected running activity marks the matching sidebar session as running
+ok 11 - selected running activity marks the matching sidebar session as running
+  ---
+  duration_ms: 0.566375
+  type: 'test'
+  ...
+# Subtest: desktop ipc active runs expose both app and client turn ids
+ok 12 - desktop ipc active runs expose both app and client turn ids
+  ---
+  duration_ms: 0.222083
+  type: 'test'
+  ...
+# Subtest: turn completion finishes matching running activity before thread refresh
+ok 13 - turn completion finishes matching running activity before thread refresh
+  ---
+  duration_ms: 3.661084
+  type: 'test'
+  ...
+# Subtest: new conversation project resolution prefers explicit drawer choice
+ok 14 - new conversation project resolution prefers explicit drawer choice
+  ---
+  duration_ms: 0.132625
+  type: 'test'
+  ...
+# Subtest: draft sessions preserve the chosen conversation scope
+ok 15 - draft sessions preserve the chosen conversation scope
+  ---
+  duration_ms: 0.371167
+  type: 'test'
+  ...
+# Subtest: titleFromFirstMessage uses the shared provisional title helper
+ok 16 - titleFromFirstMessage uses the shared provisional title helper
+  ---
+  duration_ms: 1.21225
+  type: 'test'
+  ...
+# Subtest: sessionRunBadgeState ignores session index runtime but honors live runtime
+ok 17 - sessionRunBadgeState ignores session index runtime but honors live runtime
+  ---
+  duration_ms: 0.297084
+  type: 'test'
+  ...
+# Subtest: sessionRunBadgeState reads active runs by session id
+ok 18 - sessionRunBadgeState reads active runs by session id
+  ---
+  duration_ms: 0.086875
+  type: 'test'
+  ...
+# Subtest: session runtime reconciliation keeps index hints out of the live running badge
+ok 19 - session runtime reconciliation keeps index hints out of the live running badge
+  ---
+  duration_ms: 0.301375
+  type: 'test'
+  ...
+# Subtest: session runtime reconciliation clears stale desktop runtime for loaded sessions
+ok 20 - session runtime reconciliation clears stale desktop runtime for loaded sessions
+  ---
+  duration_ms: 0.121042
+  type: 'test'
+  ...
+# Subtest: completed turn payload maps back to the selected sidebar session
+ok 21 - completed turn payload maps back to the selected sidebar session
+  ---
+  duration_ms: 0.207042
+  type: 'test'
+  ...
+# Subtest: viewportSizingMetrics exposes keyboard inset from visual viewport
+ok 22 - viewportSizingMetrics exposes keyboard inset from visual viewport
+  ---
+  duration_ms: 0.162958
+  type: 'test'
+  ...
+# Subtest: localFileApiPath can include token for direct browser navigation
+ok 23 - localFileApiPath can include token for direct browser navigation
+  ---
+  duration_ms: 0.08775
+  type: 'test'
+  ...
+# Subtest: localFilePreviewPath routes local files through the mobile preview page
+ok 24 - localFilePreviewPath routes local files through the mobile preview page
+  ---
+  duration_ms: 0.180042
+  type: 'test'
+  ...
+# Subtest: desktop IPC status updates drive runtime witho
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:25Z)**_
+
+定向测试过了，61 个相关用例全绿。为了确认“手机 fallback 跑完后桌面重开还能看见”的底层成立，我再快速核一遍 server 的 headless 执行是不是落在同一条 Codex session 上，而不是只在移动端内存里冒泡。
+
+_**Agent (gpt-5.5 2026-05-11 04:28:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "runCodexTurn|resume|sessionId|threadId|CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE|headless-local|backgroundFallbackBridge|codex exec|codex.*resume|activeRuns" server shared client/src -g '*.js' -g '*.mjs'`</summary>
+```
+Chunk ID: 6fad57
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 15217
+Output:
+Total output lines: 686
+
+client/src/app-websocket-events.test.mjs:44:      source: 'headless-local',
+client/src/app-websocket-events.test.mjs:53:      source: 'headless-local',
+client/src/app-websocket-events.test.mjs:81:      source: 'headless-local'
+client/src/app-websocket-events.test.mjs:116:      source: 'headless-local',
+client/src/app-websocket-events.test.mjs:124:      source: 'headless-local',
+server/chat-service.test.mjs:27:    runCodexTurn: async () => 'thread-1',
+server/chat-service.test.mjs:28:    steerCodexTurn: async () => ({ accepted: true, delivery: 'steered', sessionId: 'thread-1', turnId: 'active-turn' }),
+server/chat-service.test.mjs:55:      return { accepted: true, delivery: 'steered', sessionId: 'thread-1', turnId: 'active-turn' };
+server/chat-service.test.mjs:61:    sessionId: 'thread-1',
+server/chat-service.test.mjs:88:      sessionId: 'thread-1',
+server/chat-service.test.mjs:106:    sessionId: 'thread-1',
+server/chat-service.test.mjs:114:  assert.equal(service.getTurn('client-turn-1').sessionId, 'thread-1');
+server/chat-service.test.mjs:117:  assert.equal(broadcasts.at(-1).sessionId, 'thread-1');
+server/chat-service.test.mjs:165:    sessionId: 'thread-1',
+server/chat-service.test.mjs:170:  assert.equal(result.sessionId, 'thread-1');
+server/chat-service.test.mjs:192:    sessionId: 'thread-1',
+server/chat-service.test.mjs:204:    sessionId: 'thread-1',
+server/chat-service.test.mjs:236:    sessionId: 'thread-1',
+server/chat-service.test.mjs:242:    sessionId: 'thread-1',
+server/chat-service.test.mjs:276:    sessionId: 'thread-1',
+server/chat-service.test.mjs:282:    sessionId: 'thread-1',
+server/chat-service.test.mjs:310:      sessionId: 'thread-1',
+server/chat-service.test.mjs:314:      source: 'headless-local'
+server/chat-service.test.mjs:324:    sessionId: 'thread-1',
+server/chat-service.test.mjs:330:    sessionId: 'thread-1',
+server/chat-service.test.mjs:339:  assert.equal(broadcasts.at(-1).source, 'headless-local');
+server/chat-service.test.mjs:362:    sessionId: 'thread-1'
+server/chat-service.test.mjs:369:  assert.equal(broadcasts.at(-1).sessionId, 'thread-1');
+server/chat-service.test.mjs:400:    sessionId: 'thread-1',
+server/chat-service.test.mjs:452:    sessionId: 'thread-1',
+server/chat-service.test.mjs:481:      error.code = 'CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE';
+server/chat-service.test.mjs:484:    runCodexTurn: async (payload, emit) => {
+server/chat-service.test.mjs:486:      emit({ type: 'chat-complete', sessionId: payload.sessionId, turnId: payload.turnId });
+server/chat-service.test.mjs:487:      return payload.sessionId;
+server/chat-service.test.mjs:493:    sessionId: 'thread-1',
+server/chat-service.test.mjs:500:  assert.equal(result.desktopBridge.mode, 'headless-local');
+server/chat-service.test.mjs:501:  assert.equal(runPayload.sessionId, 'thread-1');
+server/chat-service.test.mjs:530:    runCodexTurn: async (payload, emit) => {
+server/chat-service.test.mjs:532:      emit({ type: 'chat-complete', sessionId: payload.sessionId, turnId: payload.turnId });
+server/chat-service.test.mjs:533:      return payload.sessionId;
+server/chat-service.test.mjs:539:    sessionId: 'thread-1',
+server/chat-service.test.mjs:547:  assert.equal(result.desktopBridge.mode, 'headless-local');
+server/chat-service.test.mjs:549:  assert.equal(runPayload.sessionId, 'thread-1');
+server/chat-service.test.mjs:584:    runCodexTurn: async (payload, emit) => {
+server/chat-service.test.mjs:586:      emit({ type: 'chat-complete', sessionId: payload.sessionId, turnId: payload.turnId });
+server/chat-service.test.mjs:587:      return payload.sessionId;
+server/chat-service.test.mjs:593:    sessionId: 'thread-1',
+server/chat-service.test.mjs:620:    runCodexTurn: async (payload, emit) => {
+server/chat-service.test.mjs:622:      emit({ type: 'thread-started', sessionId: 'background-thread-1', previousSessionId: payload.draftSessionId, turnId: payload.turnId });
+server/chat-service.test.mjs:623:      emit({ type: 'chat-complete', sessionId: 'background-thread-1', previousSessionId: payload.draftSessionId, turnId: payload.turnId });
+server/chat-service.test.mjs:637:  assert.equal(result.desktopBridge.mode, 'headless-local');
+server/chat-service.test.mjs:658:    runCodexTurn: async (payload, emit) => {
+server/chat-service.test.mjs:662:        sessionId: 'background-thread-1',
+server/chat-service.test.mjs:668:        sessionId: 'background-thread-1',
+server/chat-service.test.mjs:695:  assert.equal(first.desktopBridge.mode, 'headless-local');
+server/chat-service.test.mjs:697:  assert.equal(second.sessionId, 'background-thread-1');
+server/chat-service.test.mjs:726:    runCodexTurn: async (payload, emit) => {
+server/chat-service.test.mjs:730:        sessionId: 'projectless-thread-1',
+server/chat-service.test.mjs:737:        sessionId: 'projectless-thread-1',
+server/chat-service.test.mjs:743:    registerP
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' server/codex-runner.js`</summary>
+```
+Chunk ID: 2bd648
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2240
+Output:
+/**
+ * 启动与管理 Codex CLI 子进程，解析流式输出并驱动一轮对话回合。
+ *
+ * Keywords: codex-runner, subprocess, streaming, abort, steer
+ *
+ * Exports:
+ * - statusLabel / shouldCompleteTurnFromAppServerItem — 状态与回合完成判定辅助。
+ * - runCodexTurn — 主演示路径：跑一轮 Codex。
+ * - abortCodexTurn / getActiveRuns / steerCodexTurn — 控制运行中回合。
+ *
+ * Inward（本模块依赖/组装的关键符号）: Node child_process、服务层配置、runtime-debug。
+ *
+ * Outward（谁在用/调用场景）: chat-delivery、push、状态 API。
+ *
+ * 不负责: HTTP 请求解析。
+ */
+import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { normalizeServiceTier } from '../shared/service-tier.js';
+import { createCodexAppServerClient, defaultServerRequestResult } from './codex-app-server.js';
+import { buildCodexTurnInput, imageMarkdownFromCodexImageGeneration } from './codex-native-images.js';
+import { buildCodexLarkCliContext } from './lark-cli.js';
+import { detectFeishuSkillKeys } from './feishu-skills.js';
+
+const activeRuns = new Map();
+const NON_ASCII_PATH_PATTERN = /[^\u0000-\u007F]/;
+const DEFAULT_TURN_TIMEOUT_MS = 30 * 60 * 1000;
+const DEFAULT_TURN_INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
+const TURN_TIMEOUT_MS = parseTurnTimeoutMs(process.env.CODEXMOBILE_TURN_TIMEOUT_MS, DEFAULT_TURN_TIMEOUT_MS);
+const TURN_INACTIVITY_TIMEOUT_MS = parseTurnTimeoutMs(
+  process.env.CODEXMOBILE_TURN_INACTIVITY_TIMEOUT_MS,
+  DEFAULT_TURN_INACTIVITY_TIMEOUT_MS
+);
+
+function parseTurnTimeoutMs(value, fallbackMs = DEFAULT_TURN_TIMEOUT_MS) {
+  const timeoutMs = Number(value);
+  if (Number.isFinite(timeoutMs) && timeoutMs > 0) {
+    return Math.max(1000, Math.floor(timeoutMs));
+  }
+  return fallbackMs;
+}
+
+function formatTimeoutDuration(timeoutMs) {
+  if (timeoutMs >= 60_000) {
+    return `${Math.round(timeoutMs / 60_000)} 分钟`;
+  }
+  return `${Math.round(timeoutMs / 1000)} 秒`;
+}
+
+function turnTimeoutError() {
+  const error = new Error(`Codex turn timed out after ${formatTimeoutDuration(TURN_TIMEOUT_MS)}`);
+  error.code = 'CODEXMOBILE_TURN_TIMEOUT';
+  return error;
+}
+
+function turnInactivityTimeoutError() {
+  const error = new Error(`Codex turn had no activity for ${formatTimeoutDuration(TURN_INACTIVITY_TIMEOUT_MS)}`);
+  error.code = 'CODEXMOBILE_TURN_INACTIVITY_TIMEOUT';
+  return error;
+}
+
+function isTurnTimeoutError(error) {
+  return error?.code === 'CODEXMOBILE_TURN_TIMEOUT';
+}
+
+function isTurnInactivityTimeoutError(error) {
+  return error?.code === 'CODEXMOBILE_TURN_INACTIVITY_TIMEOUT';
+}
+
+async function ensureAsciiWorkingDirectory(projectPath) {
+  if (process.platform !== 'win32' || !NON_ASCII_PATH_PATTERN.test(projectPath)) {
+    return projectPath;
+  }
+
+  const resolved = path.resolve(projectPath);
+  const driveRoot = path.parse(resolved).root || 'C:\\';
+  const aliasRoot = path.join(driveRoot, 'codex_project_aliases');
+  const aliasName = crypto.createHash('sha1').update(resolved.toLowerCase()).digest('hex');
+  const aliasPath = path.join(aliasRoot, aliasName);
+
+  await fs.mkdir(aliasRoot, { recursive: true });
+  try {
+    const stats = await fs.lstat(aliasPath);
+    if (stats.isDirectory() || stats.isSymbolicLink()) {
+      return aliasPath;
+    }
+    await fs.rm(aliasPath, { recursive: true, force: true });
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  await fs.symlink(resolved, aliasPath, 'junction');
+  return aliasPath;
+}
+
+function mapPermissionMode(permissionMode) {
+  if (permissionMode === 'bypassPermissions') {
+    return { sandboxMode: 'danger-full-access', approvalPolicy: 'never' };
+  }
+  if (permissionMode === 'acceptEdits') {
+    return { sandboxMode: 'workspace-write', approvalPolicy: 'never' };
+  }
+  return { sandboxMode: 'workspace-write', approvalPolicy: 'never' };
+}
+
+function normalizeReasoningEffort(reasoningEffort) {
+  const value = String(reasoningEffort || '').trim();
+  return ['minimal', 'low', 'medium', 'high', 'xhigh'].includes(value) ? value : undefined;
+}
+
+function textFromContent(content) {
+  if (typeof content === 'string') {
+    return content;
+  }
+  if (!Array.isArray(content)) {
+    return '';
+  }
+  return content
+    .map((part) => {
+      if (typeof part === 'string') {
+        return part;
+      }
+      if (part?.type === 'output_text' || part?.type === 'input_text' || part?.type === 'text') {
+        return part.text || '';
+      }
+      return part?.text || '';
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+function contentFromItem(item) {
+  if (!item) {
+    return '';
+  }
+  const contentText = textFromContent(item.content);
+  if (contentText) {
+    return contentText;
+  }
+  if (typeof item.text === 'string') {
+    return item.text;
+  }
+  if (typeof item.aggregated_output === 'string') {
+    return item.aggregated_output;
+  }
+  if (typ
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,240p' server/chat-delivery.js`</summary>
+```
+Chunk ID: c64a4a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1843
+Output:
+/**
+ * 聊天投递层：桌面桥校验、Unix/socket IPC 送信与无桌面时的 headless 队列。
+ *
+ * Keywords: desktop-ipc, headless-codex, bridge, codex-turn-input
+ *
+ * Exports:
+ * - assertDesktopBridgeAvailable — 校验桌面桥是否可用。
+ * - desktopIpcCanUseBackgroundFallback — 是否允许后台 fallback。
+ * - backgroundFallbackBridge — 构造 fallback descriptors。
+ * - sendViaDesktopIpc — 经桌面转发用户回合。
+ * - runQueuedHeadlessChatJob — 排队执行后台 Codex。
+ *
+ * Inward（本模块依赖/组装的关键符号）: codex-native-images（buildCodexTurnInput）、desktop-ipc-client、codex-runner。
+ *
+ * Outward（谁在用/调用场景）: chat-service。
+ *
+ * 不负责: HTTP 层与路由注册。
+ */
+import { buildCodexTurnInput } from './codex-native-images.js';
+
+export async function assertDesktopBridgeAvailable(getDesktopBridgeStatus) {
+  const bridge = getDesktopBridgeStatus ? await getDesktopBridgeStatus({ force: true }) : null;
+  if (bridge && !bridge.connected) {
+    const error = new Error(bridge.reason || '桌面端 Codex 未连接，无法发送消息。');
+    error.statusCode = 503;
+    error.code = 'CODEXMOBILE_DESKTOP_BRIDGE_UNAVAILABLE';
+    throw error;
+  }
+  return bridge;
+}
+
+function desktopIpcUnavailableError(message = '桌面端 Codex 已连接，但当前线程没有可接管的桌面窗口。') {
+  const error = new Error(message);
+  error.statusCode = 409;
+  error.code = 'CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE';
+  return error;
+}
+
+function desktopCreateThreadUnavailableError() {
+  const error = new Error('当前桌面端 Codex 只开放了接管已有对话，不能从手机直接新建桌面端对话。请先在桌面端新建或打开一个对话，再从手机继续发送。');
+  error.statusCode = 409;
+  error.code = 'CODEXMOBILE_DESKTOP_CREATE_THREAD_UNAVAILABLE';
+  return error;
+}
+
+function isDesktopFollowerPreflightTimeout(error) {
+  if (error?.code !== 'CODEXMOBILE_DESKTOP_IPC_TIMEOUT') {
+    return false;
+  }
+  return /thread-follower-set-(?:model-and-reasoning|collaboration-mode)\b/.test(String(error.message || ''));
+}
+
+function isDesktopThreadOwnerUnavailable(error) {
+  return (
+    error?.message === 'no-client-found' ||
+    error?.statusCode === 409 ||
+    isDesktopFollowerPreflightTimeout(error)
+  );
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function retryDelays(value) {
+  return Array.isArray(value)
+    ? value.map((item) => Number(item)).filter((item) => Number.isFinite(item) && item >= 0)
+    : [];
+}
+
+export function desktopIpcCanUseBackgroundFallback(bridge) {
+  return Boolean(
+    bridge?.capabilities?.backgroundCodex ||
+    bridge?.capabilities?.headless ||
+    bridge?.capabilities?.createThreadViaBackground
+  );
+}
+
+export function backgroundFallbackBridge(bridge, reason = '桌面端当前没有接管这个线程，已改用后台 Codex 执行。') {
+  return {
+    ...(bridge || {}),
+    strict: false,
+    connected: true,
+    mode: 'headless-local',
+    reason,
+    capabilities: {
+      ...(bridge?.capabilities || {}),
+      read: true,
+      sendToOpenDesktopThread: false,
+      createThread: true,
+      headless: true,
+      backgroundCodex: true
+    }
+  };
+}
+
+function userMessageMetadataForSendMode(sendMode = 'start') {
+  return sendMode === 'steer'
+    ? {
+      guided: true,
+      guideLabel: '已引导对话',
+      kind: 'guided_user'
+    }
+    : {};
+}
+
+async function syncDesktopFollowerCollaborationMode({
+  selectedSessionId,
+  collaborationMode,
+  setDesktopFollowerCollaborationMode
+}) {
+  if (!setDesktopFollowerCollaborationMode) {
+    return;
+  }
+  await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode || null);
+}
+
+export async function sendViaDesktopIpc({
+  bridge,
+  project,
+  selectedSessionId,
+  draftSessionId,
+  turnId,
+  sendMode,
+  codexMessage,
+  visibleMessage,
+  attachments,
+  selectedSkills,
+  model,
+  reasoningEffort,
+  serviceTier,
+  permissionMode,
+  collaborationMode,
+  getSession,
+  rememberTurn,
+  broadcast,
+  setDesktopFollowerModelAndReasoning,
+  setDesktopFollowerCollaborationMode,
+  steerDesktopFollowerTurn,
+  startDesktopFollowerTurn,
+  interruptDesktopFollowerTurn,
+  desktopOwnerRetryDelays = [],
+  sleep = wait
+}) {
+  if (!selectedSessionId) {
+    throw desktopCreateThreadUnavailableError();
+  }
+
+  const input = buildCodexTurnInput({
+    message: codexMessage,
+    attachments,
+    selectedSkills
+  });
+  const now = new Date().toISOString();
+  const lastSession = getSession(selectedSessionId);
+  const baseTurnStartParams = {
+    input,
+    cwd: lastSession?.cwd || project.path || null,
+    approvalPolicy: 'never',
+    approvalsReviewer: 'user',
+    sandboxPolicy: permissionMode === 'bypassPermissions'
+      ? { type: 'dangerFullAccess' }
+      : { type: 'workspaceWrite', networkAccess: false },
+    mod
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,220p' server/chat-service.js`</summary>
+```
+Chunk ID: cdb41f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1712
+Output:
+/**
+ * 组装聊天业务：队列、桌面桥接/后台 fallback、图片与自动标题等子能力。
+ *
+ * Keywords: chat-service, desktop-bridge, codex-turn, queue, attachments
+ *
+ * Exports:
+ * - createChatService — 创建可注入依赖的聊天服务实例。
+ * - normalizeSelectedSkills — 再导出自 chat-request-prep。
+ *
+ * Inward（本模块依赖/组装的关键符号）: chat-queue、chat-delivery、chat-request-prep、chat-image-handler、desktop-turn-monitor、runtime-debug。
+ *
+ * Outward（谁在用/调用场景）: HTTP 聊天路由或上层服务装配。
+ *
+ * 不负责: Codex CLI 进程细节（由 codex-runner 等承担）。
+ */
+import {
+  registerProjectlessThread as registerProjectlessThreadInCodexState
+} from './codex-config.js';
+import { registerMobileSession as registerMobileSessionInIndex } from './mobile-session-index.js';
+import { createChatQueue } from './chat-queue.js';
+import {
+  assertDesktopBridgeAvailable,
+  backgroundFallbackBridge,
+  desktopIpcCanUseBackgroundFallback,
+  runQueuedHeadlessChatJob,
+  sendViaDesktopIpc
+} from './chat-delivery.js';
+import {
+  prepareChatRequest,
+  projectlessThreadWorkingDirectory
+} from './chat-request-prep.js';
+import { createChatImageHandler } from './chat-image-handler.js';
+import { createChatAutoNamer } from './chat-auto-title.js';
+import { createDesktopTurnMonitor } from './desktop-turn-monitor.js';
+import {
+  compactActiveRuns,
+  runtimeDebugLine
+} from './runtime-debug.js';
+
+export { normalizeSelectedSkills } from './chat-request-prep.js';
+
+export function createChatService({
+  imagePromptState,
+  defaultReasoningEffort = 'xhigh',
+  getProject,
+  getSession,
+  getCacheSnapshot,
+  getDesktopBridgeStatus,
+  listProjectSessions,
+  readSessionMessages = async () => ({ messages: [] }),
+  refreshCodexCache,
+  renameSession,
+  broadcast,
+  runCodexTurn,
+  steerCodexTurn,
+  startDesktopFollowerTurn,
+  steerDesktopFollowerTurn,
+  interruptDesktopFollowerTurn,
+  setDesktopFollowerModelAndReasoning,
+  setDesktopFollowerCollaborationMode,
+  abortCodexTurn,
+  getActiveRuns,
+  runImageTurn,
+  isImageRequest,
+  useLegacyImageGenerator,
+  maybeAutoNameSession,
+  registerProjectlessThread = registerProjectlessThreadInCodexState,
+  registerMobileSession = registerMobileSessionInIndex,
+  rememberLiveSession = () => null,
+  desktopOwnerRetryDelays = [250, 700, 1500]
+}) {
+  const chatQueue = createChatQueue();
+  const getConversationQueue = chatQueue.getConversationQueue;
+  const rememberConversationAlias = chatQueue.rememberConversationAlias;
+  const rememberTurn = chatQueue.rememberTurn;
+  const rememberTurnEvent = chatQueue.rememberTurnEvent;
+  const resolveConversationKey = chatQueue.resolveConversationKey;
+  const chatImage = createChatImageHandler({
+    imagePromptState,
+    runImageTurn,
+    isImageRequest,
+    listProjectSessions,
+    refreshCodexCache,
+    broadcast,
+    rememberTurn,
+    emitJobEvent: (job, payload) => emitJobEvent(job, payload)
+  });
+  const desktopTurnMonitor = createDesktopTurnMonitor({
+    readSessionMessages,
+    refreshCodexCache,
+    rememberTurn,
+    broadcast
+  });
+
+  function sessionHasActiveWork(sessionId) {
+    return (
+      chatQueue.sessionHasActiveWork(sessionId, [
+        ...getActiveRuns(),
+        ...chatImage.getActiveImageRuns(),
+        ...desktopTurnMonitor.getActiveRuns()
+      ]) ||
+      desktopTurnMonitor.hasActiveWork(sessionId)
+    );
+  }
+
+  function activeLocalRunForAbort({ turnId = '', sessionId = '', previousSessionId = '' } = {}) {
+    const ids = new Set([turnId, sessionId, previousSessionId].map((value) => String(value || '').trim()).filter(Boolean));
+    if (!ids.size) {
+      return null;
+    }
+    return getActiveRuns().find((run) => (
+      run?.status === 'running' &&
+      [run.turnId, run.sessionId, run.previousSessionId].some((value) => ids.has(String(value || '').trim()))
+    )) || null;
+  }
+
+  function emitJobEvent(job, payload) {
+    const enriched = { projectId: job.project.id, ...payload };
+    rememberTurnEvent(enriched);
+    broadcast(enriched);
+  }
+
+  const { scheduleAutoNameCompletedSession } = createChatAutoNamer({
+    getTurn: chatQueue.getTurn,
+    refreshCodexCache,
+    getSession,
+    maybeAutoNameSession,
+    renameSession,
+    broadcast
+  });
+
+  async function steerQueuedDraft(query = {}) {
+    const draft = chatQueue.removeQueuedDraft(query);
+    if (!draft) {
+      return null;
+    }
+    const sessionId = String(query.sessionId || draft.sessionId || '').trim();
+    if (!sessionId) {
+      const error = new Error('没有可发送到当前任务的线程。');
+      error.statusCode = 409;
+      throw error;
+    }
+    return sendChat({
+      projectId: query.projectId || draft.projectId,
+      sessionId,
+      message: draft.text,
+      attachments: draft.attachments,
+      selectedSkills: draft.selectedSkills,
+      fileMentions: draft.fileMentions,
+      
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "spawn\(|codex|resume|exec|sessionId|previousSessionId|runCodexTurn|thread-started|registerMobileSession" server/codex-runner.js server/chat-delivery.js server/chat-service.js server/mobile-session-index.js server/codex-config.js`</summary>
+```
+Chunk ID: 2da93f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 4778
+Output:
+server/codex-config.js:2: * 读写 ~/.codex 下 config.toml、技能列表、模型缓存与项目外线程注册。
+server/codex-config.js:4: * Keywords: codex-config, toml, skills, sqlite-path, projectless
+server/codex-config.js:13: * Outward（谁在用/调用场景）: codex-data、provider-api、全站配置读取。
+server/codex-config.js:22:export const CODEX_HOME = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
+server/codex-config.js:24:export const CODEX_GLOBAL_STATE_PATH = path.join(CODEX_HOME, '.codex-global-state.json');
+server/codex-config.js:29:let codexGlobalStateMutationQueue = Promise.resolve();
+server/codex-config.js:56:    .replace(/-codex.*$/i, '')
+server/codex-config.js:296:  const task = codexGlobalStateMutationQueue.then(run, run);
+server/codex-config.js:297:  codexGlobalStateMutationQueue = task.catch(() => {});
+server/codex-config.js:365:    provider: 'codex',
+server/mobile-session-index.js:8: * - deleteMobileSession / registerMobileSession / renameMobileSession。
+server/mobile-session-index.js:10: * Inward（本模块依赖/组装的关键符号）: .codexmobile/state/mobile-sessions.json、shared/session-title。
+server/mobile-session-index.js:12: * Outward（谁在用/调用场景）: codex-data 合并索引、image-generator 登记消息。
+server/mobile-session-index.js:23:const STATE_DIR = path.join(ROOT_DIR, '.codexmobile', 'state');
+server/mobile-session-index.js:74:export async function readMobileSessionMessages(sessionId) {
+server/mobile-session-index.js:76:  const session = sessions.find((item) => item.id === sessionId);
+server/mobile-session-index.js:80:export async function deleteMobileSession(sessionId) {
+server/mobile-session-index.js:81:  const id = String(sessionId || '').trim();
+server/mobile-session-index.js:94:export async function registerMobileSession({ id, projectPath, projectless = false, title, summary, titleLocked = false, updatedAt, messages, filePath }) {
+server/mobile-session-index.js:95:  if (!id || (!projectPath && !projectless) || String(id).startsWith('draft-') || String(id).startsWith('codex-')) {
+server/mobile-session-index.js:113:    source: existing?.source || 'codexmobile',
+server/mobile-session-index.js:145:  const sessionId = String(id || '').trim();
+server/mobile-session-index.js:146:  if (!sessionId || (!projectPath && !projectless) || sessionId.startsWith('draft-')) {
+server/mobile-session-index.js:151:  const existingIndex = sessions.findIndex((session) => session.id === sessionId);
+server/mobile-session-index.js:156:    id: sessionId,
+server/mobile-session-index.js:163:    source: existing?.source || 'codexmobile'
+server/chat-service.js:4: * Keywords: chat-service, desktop-bridge, codex-turn, queue, attachments
+server/chat-service.js:14: * 不负责: Codex CLI 进程细节（由 codex-runner 等承担）。
+server/chat-service.js:18:} from './codex-config.js';
+server/chat-service.js:19:import { registerMobileSession as registerMobileSessionInIndex } from './mobile-session-index.js';
+server/chat-service.js:54:  runCodexTurn,
+server/chat-service.js:68:  registerMobileSession = registerMobileSessionInIndex,
+server/chat-service.js:95:  function sessionHasActiveWork(sessionId) {
+server/chat-service.js:97:      chatQueue.sessionHasActiveWork(sessionId, [
+server/chat-service.js:102:      desktopTurnMonitor.hasActiveWork(sessionId)
+server/chat-service.js:106:  function activeLocalRunForAbort({ turnId = '', sessionId = '', previousSessionId = '' } = {}) {
+server/chat-service.js:107:    const ids = new Set([turnId, sessionId, previousSessionId].map((value) => String(value || '').trim()).filter(Boolean));
+server/chat-service.js:113:      [run.turnId, run.sessionId, run.previousSessionId].some((value) => ids.has(String(value || '').trim()))
+server/chat-service.js:137:    const sessionId = String(query.sessionId || draft.sessionId || '').trim();
+server/chat-service.js:138:    if (!sessionId) {
+server/chat-service.js:145:      sessionId,
+server/chat-service.js:159:      const sessionId = state.sessionId || job.selectedSessionId || job.draftSessionId;
+server/chat-service.js:163:        sessionId: sessionId || null
+server/chat-service.js:168:        sessionId,
+server/chat-service.js:196:    const sessionId = state.sessionId || job.selectedSessionId;
+server/chat-service.js:202:      sessionId,
+server/chat-service.js:203:      runCodexTurn,
+server/chat-service.js:205:      registerMobileSession,
+server/chat-service.js:220:      `[chat] send request remote=${remoteAddress} project=${body.projectId || ''} session=${body.sessionId || body.draftSessionId || ''} attachments=${attachmentCount}`
+server/chat-service.js:249:      codexMessage
+server/chat-service.js:264:    if (!selectedSessionId && draftSessionId && existingConversationState.sessionId) {
+server/chat-service.js:265:      selectedSessionId = existingConversationState.sessionId;
+serv
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '240,620p' server/codex-runner.js`</summary>
+```
+Chunk ID: ed4350
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3057
+Output:
+        ...change,
+        additions: Number(change?.additions) || stats.additions,
+        deletions: Number(change?.deletions) || stats.deletions,
+        unifiedDiff: diff,
+        movePath: change?.move_path || change?.movePath || null
+      };
+    });
+  }
+  if (!changes || typeof changes !== 'object') {
+    return [];
+  }
+  return Object.entries(changes).map(([filePath, change]) => {
+    const stats = diffStats(change?.unified_diff || change?.diff || '');
+    return {
+      path: filePath,
+      kind: change?.type || change?.kind || 'update',
+      additions: Number(change?.additions) || stats.additions,
+      deletions: Number(change?.deletions) || stats.deletions,
+      unifiedDiff: change?.unified_diff || change?.diff || '',
+      movePath: change?.move_path || null
+    };
+  });
+}
+
+function maybeIsoFromTimeValue(value) {
+  if (typeof value === 'string' && value.trim() && !/^\d+(\.\d+)?$/.test(value.trim())) {
+    const parsed = new Date(value).getTime();
+    return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
+  }
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return null;
+  }
+  const millis = seconds > 10_000_000_000 ? seconds : seconds * 1000;
+  return new Date(millis).toISOString();
+}
+
+function turnTimingPayload(turn, { fallbackStartedAt = null, fallbackCompletedAt = null } = {}) {
+  const startedAt = maybeIsoFromTimeValue(turn?.startedAt) || fallbackStartedAt || null;
+  const completedAt = maybeIsoFromTimeValue(turn?.completedAt) || fallbackCompletedAt || null;
+  let durationMs = positiveNumber(turn?.durationMs);
+  if (!durationMs && startedAt && completedAt) {
+    const startMs = new Date(startedAt).getTime();
+    const endMs = new Date(completedAt).getTime();
+    if (Number.isFinite(startMs) && Number.isFinite(endMs) && endMs > startMs) {
+      durationMs = endMs - startMs;
+    }
+  }
+  return { startedAt, completedAt, durationMs };
+}
+
+function emitStatus(emit, {
+  sessionId,
+  turnId,
+  kind,
+  status = 'running',
+  label,
+  detail = '',
+  startedAt = null,
+  completedAt = null,
+  durationMs = null,
+  timestamp = null
+}) {
+  emit({
+    type: 'status-update',
+    sessionId,
+    turnId,
+    kind,
+    status,
+    label: label || statusLabel(kind, status),
+    detail,
+    timestamp: timestamp || completedAt || startedAt || new Date().toISOString(),
+    startedAt,
+    completedAt,
+    durationMs
+  });
+}
+
+function positiveNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function emitContextStatus(emit, { sessionId, turnId, state, timestamp = new Date().toISOString() }) {
+  const contextWindow = state.contextWindow || null;
+  const inputTokens = state.inputTokens || null;
+  const percent =
+    inputTokens && contextWindow
+      ? Math.max(0, Math.min(100, Math.round((inputTokens / contextWindow) * 1000) / 10))
+      : null;
+  emit({
+    type: 'context-status-update',
+    sessionId,
+    turnId,
+    inputTokens,
+    totalTokens: state.totalTokens || null,
+    contextWindow,
+    percent,
+    lastTokenUsage: state.lastTokenUsage || null,
+    totalTokenUsage: state.totalTokenUsage || null,
+    updatedAt: timestamp,
+    autoCompact: {
+      detected: Boolean(state.autoCompactDetected),
+      status: state.autoCompactDetected ? 'detected' : 'watching',
+      lastCompactedAt: state.autoCompactLastAt || null,
+      reason: state.autoCompactReason || ''
+    }
+  });
+}
+
+function applyTokenCountToContextState(contextState, payload, timestamp) {
+  const info = payload?.info && typeof payload.info === 'object' ? payload.info : {};
+  const last = info.last_token_usage && typeof info.last_token_usage === 'object' ? info.last_token_usage : {};
+  const total = info.total_token_usage && typeof info.total_token_usage === 'object' ? info.total_token_usage : {};
+  const inputTokens = positiveNumber(last.input_tokens ?? total.input_tokens);
+  const totalTokens = positiveNumber(total.total_tokens ?? last.total_tokens);
+  const contextWindow = positiveNumber(info.model_context_window ?? payload?.model_context_window);
+  const previousInputTokens = contextState.inputTokens;
+
+  contextState.inputTokens = inputTokens || contextState.inputTokens || null;
+  contextState.totalTokens = totalTokens || contextState.totalTokens || null;
+  contextState.contextWindow = contextWindow || contextState.contextWindow || null;
+  contextState.lastTokenUsage = last;
+  contextState.totalTokenUsage = total;
+  contextState.updatedAt = timestamp;
+
+  if (
+    previousInputTokens &&
+    inputTokens &&
+    previousInputTokens > 20000 &&
+    inputTokens < previousInputTokens * 0.62
+  ) {
+    contextState.autoCompactDetected = true;
+    contextState.autoCompactLastAt = timestamp;
+    contextState.autoCompactReason = '上下文用量回落';
+  }
+}
+
+function isSpawnPermissionError(error) {
+  return error?.code === 'EPERM' && Stri
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '220,380p' server/chat-delivery.js`</summary>
+```
+Chunk ID: 604284
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1211
+Output:
+          throw error;
+        }
+        const delay = ownerRetryDelays[attempt] || 0;
+        if (delay > 0) {
+          await sleep(delay);
+        }
+      }
+    }
+  } catch (error) {
+    if (isDesktopThreadOwnerUnavailable(error)) {
+      throw desktopIpcUnavailableError(error?.message || undefined);
+    }
+    throw error;
+  }
+
+  const appTurnId = result?.result?.turn?.id || result?.turn?.id || turnId;
+  rememberTurn(turnId, {
+    projectId: project.id,
+    projectPath: project.path,
+    sessionId: selectedSessionId,
+    previousSessionId: selectedSessionId,
+    draftSessionId,
+    status: 'running',
+    label: sendMode === 'steer' ? '已发送到当前任务' : '已交给桌面端处理',
+    startedAt: now
+  });
+  broadcast({
+    type: 'user-message',
+    sessionId: selectedSessionId,
+    projectId: project.id,
+    message: {
+      id: `local-${Date.now()}`,
+      role: 'user',
+      content: visibleMessage,
+      ...userMessageMetadataForSendMode(sendMode),
+      timestamp: now
+    }
+  });
+  broadcast({
+    type: 'status-update',
+    source: bridge?.mode || 'desktop-ipc',
+    projectId: project.id,
+    sessionId: selectedSessionId,
+    turnId,
+    kind: 'turn',
+    status: 'running',
+    label: sendMode === 'steer' ? '已发送到当前任务' : '已交给桌面端处理',
+    detail: '',
+    timestamp: new Date().toISOString()
+  });
+  return {
+    accepted: true,
+    queued: false,
+    sessionId: selectedSessionId,
+    draftSessionId,
+    turnId: appTurnId,
+    clientTurnId: turnId,
+    delivery: sendMode === 'steer' ? 'steered' : (sendMode === 'interrupt' ? 'interrupted-started' : 'started'),
+    desktopBridge: bridge
+  };
+}
+
+export function runQueuedHeadlessChatJob({
+  job,
+  queueKey,
+  state,
+  sessionId,
+  runCodexTurn,
+  registerProjectlessThread,
+  registerMobileSession,
+  refreshCodexCache,
+  broadcast,
+  rememberConversationAlias,
+  rememberTurn,
+  rememberLiveSession,
+  emitJobEvent,
+  scheduleAutoNameCompletedSession,
+  onQueueDrained
+}) {
+  const metadataUpdates = [];
+
+  function rememberStartedBackgroundThread(payload) {
+    if (!payload?.sessionId || !job.draftSessionId) {
+      return;
+    }
+    const updatedAt = payload.startedAt || new Date().toISOString();
+    const visibleContent = job.visibleMessage || job.displayMessage;
+    const sessionRecord = {
+      id: payload.sessionId,
+      projectId: job.project.id,
+      projectPath: job.executionProjectPath || job.project.path,
+      projectless: Boolean(job.project?.projectless),
+      title: job.displayMessage,
+      summary: job.displayMessage,
+      updatedAt,
+      filePath: payload.filePath || payload.path || null,
+      messages: [
+        {
+          id: `${payload.sessionId}-user-${job.turnId}`,
+          role: 'user',
+          content: visibleContent,
+          timestamp: updatedAt
+        }
+      ]
+    };
+    rememberLiveSession?.(sessionRecord);
+    metadataUpdates.push(
+      Promise.all([
+        job.project?.projectless
+          ? registerProjectlessThread(payload.sessionId, job.project.path)
+          : Promise.resolve(null),
+        registerMobileSession(sessionRecord)
+      ]).catch((error) => {
+        console.warn('[sessions] Failed to register background thread:', error.message);
+      })
+    );
+  }
+
+  runCodexTurn(
+    {
+      sessionId,
+      draftSessionId: job.draftSessionId,
+      projectPath: job.executionProjectPath || job.project.path,
+      message: job.codexMessage,
+      attachments: job.attachments,
+      selectedSkills: job.selectedSkills,
+      model: job.model,
+      reasoningEffort: job.reasoningEffort,
+      serviceTier: job.serviceTier,
+      permissionMode: job.permissionMode,
+      collaborationMode: job.collaborationMode,
+      turnId: job.turnId
+    },
+    (payload) => {
+      const eventPayload = {
+        ...payload,
+        source: payload?.source || 'headless-local'
+      };
+      if (eventPayload.sessionId) {
+        state.sessionId = eventPayload.sessionId;
+        rememberConversationAlias(queueKey, eventPayload.sessionId);
+      }
+      if (eventPayload.previousSessionId) {
+        rememberConversationAlias(queueKey, eventPayload.previousSessionId);
+      }
+      if (eventPayload.type === 'thread-started') {
+        rememberStartedBackgroundThread(eventPayload);
+      } else if (eventPayload.type === 'chat-started') {
+        rememberStartedBackgroundThread(eventPayload);
+      }
+      emitJobEvent(job, eventPayload);
+    }
+  ).then(async (finalSessionId) => {
+    if (finalSessionId) {
+      state.sessionId = finalSessionId;
+      rememberConversationAlias(queueKey, finalSessionId);
+    }
+    rememberTurn(job.turnId, {
+      projectId: job.project.id,
+      sessionId: finalSessionId || sessionId || job.selectedSessionId || job.draftSessionId || null,
+      previousSessionId: job.draftSessionId || job.selectedSessionId || null
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '220,430p' server/chat-service.js`</summary>
+```
+Chunk ID: 6a1e25
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1845
+Output:
+      `[chat] send request remote=${remoteAddress} project=${body.projectId || ''} session=${body.sessionId || body.draftSessionId || ''} attachments=${attachmentCount}`
+    );
+    const project = getProject(body.projectId);
+    if (!project) {
+      console.warn(`[chat] rejected project not found: ${body.projectId || ''}`);
+      const error = new Error('Project not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    const config = getCacheSnapshot().config || {};
+    const prepared = prepareChatRequest(body, {
+      getSession,
+      config,
+      defaultReasoningEffort
+    });
+    const {
+      attachments,
+      fileMentions,
+      requestedSessionId,
+      draftSessionId,
+      turnId,
+      sendMode,
+      selectedSkills,
+      modelForTurn,
+      reasoningEffortForTurn,
+      serviceTierForTurn,
+      collaborationMode,
+      displayMessage,
+      visibleMessage,
+      codexMessage
+    } = prepared;
+    let selectedSessionId = prepared.selectedSessionId;
+    let conversationSessionId = prepared.conversationSessionId;
+    let bridge = await assertDesktopBridgeAvailable(getDesktopBridgeStatus);
+
+    const imagePrompt = chatImage.resolveImagePrompt({
+      enabled: useLegacyImageGenerator(),
+      projectId: project.id,
+      displayMessage,
+      attachments
+    });
+    const queueKey = resolveConversationKey(selectedSessionId, draftSessionId, requestedSessionId);
+    const existingConversationState = getConversationQueue(queueKey);
+    let selectedSessionResolvedFromBackgroundAlias = false;
+    if (!selectedSessionId && draftSessionId && existingConversationState.sessionId) {
+      selectedSessionId = existingConversationState.sessionId;
+      conversationSessionId = selectedSessionId;
+      selectedSessionResolvedFromBackgroundAlias = true;
+    }
+    const shouldHoldInLocalQueue =
+      sendMode === 'queue' &&
+      conversationSessionId &&
+      sessionHasActiveWork(conversationSessionId);
+
+    runtimeDebugLine('sendChat.enter', {
+      remoteAddress,
+      sendMode,
+      imagePrompt: Boolean(imagePrompt),
+      bridgeMode: bridge?.mode,
+      bridgeConnected: bridge?.connected,
+      selectedSessionId,
+      draftSessionId,
+      conversationSessionId,
+      turnId,
+      queueKey,
+      shouldHoldInLocalQueue,
+      selectedSessionResolvedFromBackgroundAlias,
+      headlessRuns: compactActiveRuns(getActiveRuns()),
+      desktopTurnRuns: compactActiveRuns(desktopTurnMonitor.getActiveRuns()),
+      imageRuns: compactActiveRuns(chatImage.getActiveImageRuns())
+    });
+
+    if (shouldHoldInLocalQueue) {
+      const queued = enqueueChatJob({
+        queueKey,
+        project,
+        selectedSessionId,
+        draftSessionId,
+        executionProjectPath: project.path,
+        turnId,
+        codexMessage,
+        displayMessage,
+        visibleMessage,
+        attachments,
+        selectedSkills,
+        fileMentions,
+        model: modelForTurn,
+        reasoningEffort: reasoningEffortForTurn,
+        serviceTier: serviceTierForTurn,
+        permissionMode: body.permissionMode || 'bypassPermissions',
+        collaborationMode
+      }, { forceQueued: true, autoStart: false });
+      runtimeDebugLine('sendChat.exit', { branch: 'hold-local-queue', delivery: 'queued', turnId });
+      return {
+        accepted: true,
+        queued,
+        sessionId: selectedSessionId,
+        draftSessionId,
+        turnId,
+        delivery: 'queued',
+        desktopBridge: bridge
+      };
+    }
+
+    if (bridge?.mode === 'desktop-ipc' && !imagePrompt) {
+      runtimeDebugLine('sendChat.branch', { branch: 'try-desktop-ipc', bridgeMode: bridge?.mode });
+      if (!selectedSessionId && desktopIpcCanUseBackgroundFallback(bridge)) {
+        bridge = backgroundFallbackBridge(bridge, '桌面端还不能从手机新建真实桌面线程，已改用后台 Codex 新建。');
+        runtimeDebugLine('sendChat.bridge', {
+          reason: 'no-session-background-fallback',
+          bridgeModeAfter: bridge?.mode
+        });
+      } else {
+        try {
+          const result = await sendViaDesktopIpc({
+            bridge,
+            project,
+            selectedSessionId,
+            draftSessionId,
+            turnId,
+            sendMode,
+            codexMessage,
+            visibleMessage,
+            attachments,
+            selectedSkills,
+            model: modelForTurn,
+            reasoningEffort: reasoningEffortForTurn,
+            serviceTier: serviceTierForTurn,
+            permissionMode: body.permissionMode || 'bypassPermissions',
+            collaborationMode,
+            getSession,
+            rememberTurn,
+            broadcast,
+            setDesktopFollowerModelAndReasoning,
+            setDesktopFollowerCollaborationMode,
+            steerDesktopFollowerTurn,
+            startDesktopFollowerTurn,
+            interruptDesktopFollowerTurn,
+            desktopOwnerRetryDelays
+          });
+   
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:36Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '780,970p' server/codex-runner.js`</summary>
+```
+Chunk ID: 21cf97
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1902
+Output:
+
+function abortError() {
+  const error = new Error('aborted');
+  error.name = 'AbortError';
+  return error;
+}
+
+export async function runCodexTurn({ sessionId, draftSessionId, projectPath, message, attachments = [], selectedSkills = [], model, reasoningEffort, serviceTier, permissionMode, collaborationMode = null, turnId: providedTurnId }, emit) {
+  const workingDirectory = await ensureAsciiWorkingDirectory(projectPath);
+  const { sandboxMode, approvalPolicy } = mapPermissionMode(permissionMode);
+  const feishuSkillKeys = detectFeishuSkillKeys(message);
+  const normalizedReasoningEffort = normalizeReasoningEffort(reasoningEffort);
+  const normalizedServiceTier = normalizeServiceTier(serviceTier);
+  const modelReasoningEffort =
+    feishuSkillKeys.length && normalizedReasoningEffort === 'xhigh' ? 'low' : normalizedReasoningEffort;
+  const larkCliContext = await buildCodexLarkCliContext(message).catch((error) => {
+    console.warn('[lark-cli] Codex context disabled:', error.message);
+    return { enabled: false, env: { ...process.env }, instruction: '' };
+  });
+  const abortController = new AbortController();
+  const turnId = providedTurnId || crypto.randomUUID();
+  const state = {
+    hadAssistantText: false,
+    failed: false,
+    usage: null,
+    context: {},
+    agentMessages: new Map(),
+    commandOutputs: new Map(),
+    items: new Map(),
+    fallbackCompletionTimer: null,
+    turnCompletionResolved: false,
+    scheduleFallbackTurnCompletion: null
+  };
+  const run = {
+    thread: null,
+    client: null,
+    appTurnId: null,
+    abortController,
+    turnId,
+    sessionId: sessionId || draftSessionId || null,
+    previousSessionId: draftSessionId || sessionId || null,
+    startedAt: new Date().toISOString(),
+    status: 'running'
+  };
+  activeRuns.set(turnId, run);
+
+  let currentSessionId = sessionId || null;
+  let previousSessionId = draftSessionId || sessionId || null;
+  let client = null;
+  let completionResolve = null;
+  let completionReject = null;
+  const completionPromise = new Promise((resolve, reject) => {
+    completionResolve = resolve;
+    completionReject = reject;
+  });
+  function resolveTurnCompletion(turn = {}) {
+    if (state.turnCompletionResolved) {
+      return;
+    }
+    state.turnCompletionResolved = true;
+    completionResolve(turn);
+  }
+  state.scheduleFallbackTurnCompletion = (turn = {}) => {
+    if (state.turnCompletionResolved || state.fallbackCompletionTimer) {
+      return;
+    }
+    state.fallbackCompletionTimer = setTimeout(() => resolveTurnCompletion(turn), 750);
+    if (typeof state.fallbackCompletionTimer.unref === 'function') {
+      state.fallbackCompletionTimer.unref();
+    }
+  };
+  const abortPromise = new Promise((_, reject) => {
+    abortController.signal.addEventListener('abort', () => reject(abortError()), { once: true });
+  });
+  let turnTimeoutTimer = null;
+  let turnInactivityTimeoutTimer = null;
+  let resetTurnInactivityTimeout = () => {};
+
+  try {
+    if (larkCliContext.enabled && larkCliContext.env) {
+      larkCliContext.env.CODEXMOBILE_TURN_ID = turnId;
+      larkCliContext.env.CODEXMOBILE_SESSION_ID = sessionId || draftSessionId || '';
+    }
+
+    client = await createCodexAppServerClient({
+      env: larkCliContext.env || { ...process.env },
+      cwd: workingDirectory,
+      clientInfo: { name: 'CodexMobile', title: null, version: '0.1.0' },
+      allowHeadlessLocal: true,
+      onServerRequest: async (appMessage) => {
+        resetTurnInactivityTimeout();
+        if (appMessage?.method === 'item/plan/requestImplementation') {
+          emitPlanImplementationRequest(appMessage, currentSessionId || sessionId || draftSessionId, turnId, emit);
+        }
+        return defaultServerRequestResult(appMessage);
+      },
+      onNotification: (appMessage) => {
+        resetTurnInactivityTimeout();
+        const params = appMessage.params || {};
+        if (appMessage.method === 'thread/started' && params.thread?.id) {
+          const fromSessionId = previousSessionId || currentSessionId || draftSessionId || params.thread.id;
+          currentSessionId = params.thread.id;
+          run.sessionId = currentSessionId;
+          run.previousSessionId = fromSessionId;
+          emit({
+            type: 'thread-started',
+            sessionId: currentSessionId,
+            previousSessionId: fromSessionId,
+            turnId,
+            projectPath,
+            cwd: params.thread.cwd || workingDirectory,
+            filePath: params.thread.path || params.thread.filePath || null,
+            startedAt: new Date().toISOString()
+          });
+          return;
+        }
+        if (appMessage.method === 'turn/started' && params.turn?.id) {
+          run.appTurnId = params.turn.id;
+        }
+        if (params.threadId && currentSessionId && params.threadId !== currentSessionId) {
+          return;
+        }
+        emitAppServerNotification(appMessage, currentSessionId 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '970,1085p' server/codex-runner.js && sed -n '380,560p' server/chat-delivery.js`</summary>
+```
+Chunk ID: 4f5faa
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1182
+Output:
+      collaborationMode: collaborationMode || null
+    };
+    if (normalizedServiceTier) {
+      turnStartParams.serviceTier = normalizedServiceTier;
+    }
+    const turnResponse = await client.request('turn/start', turnStartParams, { timeoutMs: 30_000 });
+    if (turnResponse?.turn?.id) {
+      run.appTurnId = turnResponse.turn.id;
+    }
+    const turnTimeoutPromise = new Promise((_, reject) => {
+      turnTimeoutTimer = setTimeout(() => reject(turnTimeoutError()), TURN_TIMEOUT_MS);
+      if (typeof turnTimeoutTimer.unref === 'function') {
+        turnTimeoutTimer.unref();
+      }
+    });
+    const turnInactivityTimeoutPromise = new Promise((_, reject) => {
+      resetTurnInactivityTimeout = () => {
+        if (turnInactivityTimeoutTimer) {
+          clearTimeout(turnInactivityTimeoutTimer);
+        }
+        turnInactivityTimeoutTimer = setTimeout(
+          () => reject(turnInactivityTimeoutError()),
+          TURN_INACTIVITY_TIMEOUT_MS
+        );
+        if (typeof turnInactivityTimeoutTimer.unref === 'function') {
+          turnInactivityTimeoutTimer.unref();
+        }
+      };
+      resetTurnInactivityTimeout();
+    });
+
+    await Promise.race([
+      completionPromise,
+      abortPromise,
+      turnTimeoutPromise,
+      turnInactivityTimeoutPromise,
+      client.closed.then(({ error }) => {
+        if (error && run.status !== 'aborted') {
+          throw error;
+        }
+        if (run.status !== 'aborted') {
+          throw new Error('Codex app-server closed before the turn completed');
+        }
+      })
+    ]);
+
+    if (!state.failed) {
+      const timing = turnTimingPayload(state.usage, {
+        fallbackStartedAt: run.startedAt,
+        fallbackCompletedAt: new Date().toISOString()
+      });
+      emit({
+        type: 'chat-complete',
+        sessionId: currentSessionId,
+        previousSessionId,
+        turnId,
+        usage: state.usage,
+        context: state.context,
+        hadAssistantText: state.hadAssistantText,
+        ...timing
+      });
+    }
+  } catch (error) {
+    const timedOut = isTurnTimeoutError(error);
+    const inactiveTimedOut = isTurnInactivityTimeoutError(error);
+    if (timedOut || inactiveTimedOut) {
+      run.status = 'timeout';
+      if (client && currentSessionId && run.appTurnId) {
+        await client.request('turn/interrupt', {
+          threadId: currentSessionId,
+          turnId: run.appTurnId
+        }, { timeoutMs: 5_000 }).catch((interruptError) => {
+          console.warn('[codex] Failed to interrupt timed out turn:', interruptError.message);
+        });
+      }
+    }
+    const wasAborted =
+      error?.name === 'AbortError' ||
+      String(error?.message || '').toLowerCase().includes('aborted') ||
+      activeRuns.get(turnId)?.status === 'aborted';
+    const userError = timedOut
+      ? `任务超过 ${formatTimeoutDuration(TURN_TIMEOUT_MS)} 没有完成，已自动中止。可以重新发送一次。`
+      : inactiveTimedOut
+        ? `任务超过 ${formatTimeoutDuration(TURN_INACTIVITY_TIMEOUT_MS)} 没有任何进度，已自动中止。可以重新发送一次。`
+      : userFacingCodexError(error);
+
+    emit({
+      type: wasAborted ? 'chat-aborted' : 'chat-error',
+      sessionId: currentSessionId,
+      turnId,
+      error: wasAborted ? null : userError
+    });
+    if (!wasAborted) {
+      console.error('[codex] Chat error:', codexErrorDiagnostics(error));
+      emitStatus(emit, {
+        sessionId: currentSessionId,
+        turnId,
+        kind: 'turn',
+        status: 'failed',
+        label: '任务失败',
+        detail: userError
+      });
+    }
+  } finally {
+    if (turnTimeoutTimer) {
+      clearTimeout(turnTimeoutTimer);
+    }
+    if (turnInactivityTimeoutTimer) {
+      clearTimeout(turnInactivityTimeoutTimer);
+    }
+    if (state.fallbackCompletionTimer) {
+      clearTimeout(state.fallbackCompletionTimer);
+    }
+    if (client) {
+      client.close();
+    }
+      previousSessionId: job.draftSessionId || job.selectedSessionId || null
+    });
+    if (job.draftSessionId) {
+      scheduleAutoNameCompletedSession({
+        sessionId: finalSessionId || sessionId || job.selectedSessionId || null,
+        turnId: job.turnId,
+        userMessage: job.displayMessage
+      });
+    }
+  }).finally(async () => {
+    try {
+      if (metadataUpdates.length) {
+        await Promise.allSettled(metadataUpdates);
+      }
+      const snapshot = await refreshCodexCache();
+      broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
+    } catch (error) {
+      console.warn('[sync] Failed to refresh after chat:', error.message);
+    } finally {
+      state.running = false;
+      if (state.jobs.length) {
+        onQueueDrained?.();
+      }
+    }
+  });
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:43Z)**_
+
+server 这边也符合目标：fallback 不是“假消息”，它会通过 Codex app-server `thread/resume` 或 `thread/start` 跑真实 Codex 线程；跑完后刷新 Codex cache，所以桌面端以后打开同一线程能读到。现在我跑更宽一点的相关测试和 build。
+
+_**Agent (gpt-5.5 2026-05-11 04:28:46Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node --test client/src/app-websocket-events.test.mjs client/src/turn-submission-utils.test.mjs client/src/app-state.test.mjs client/src/session-live-refresh.test.mjs client/src/send-state.test.mjs client/src/topbar-status.test.mjs server/chat-service.test.mjs server/codex-app-server.test.mjs server/session-message-reader.test.mjs server/desktop-turn-monitor.test.mjs`</summary>
+```
+Chunk ID: 696855
+Wall time: 0.1407 seconds
+Process exited with code 0
+Original token count: 7144
+Output:
+TAP version 13
+# Subtest: appReducer updates ui state with direct and functional values
+ok 1 - appReducer updates ui state with direct and functional values
+  ---
+  duration_ms: 1.6625
+  type: 'test'
+  ...
+# Subtest: createInitialUiState restores dark theme from storage
+ok 2 - createInitialUiState restores dark theme from storage
+  ---
+  duration_ms: 0.1265
+  type: 'test'
+  ...
+# Subtest: createInitialUiState restores system theme preference from storage
+ok 3 - createInitialUiState restores system theme preference from storage
+  ---
+  duration_ms: 0.083125
+  type: 'test'
+  ...
+# Subtest: applyPwaTheme syncs iOS PWA meta with dark theme
+ok 4 - applyPwaTheme syncs iOS PWA meta with dark theme
+  ---
+  duration_ms: 0.179125
+  type: 'test'
+  ...
+# Subtest: applyPwaTheme resolves system preference from media query
+ok 5 - applyPwaTheme resolves system preference from media query
+  ---
+  duration_ms: 0.219917
+  type: 'test'
+  ...
+# Subtest: status sync preserves only active local submission polling
+ok 6 - status sync preserves only active local submission polling
+  ---
+  duration_ms: 0.206667
+  type: 'test'
+  ...
+# Subtest: empty activeRuns status keeps only desktop-owned running activity
+ok 7 - empty activeRuns status keeps only desktop-owned running activity
+  ---
+  duration_ms: 1.897791
+  type: 'test'
+  ...
+# Subtest: activeRuns status drops stale mobile running activity from other turns
+ok 8 - activeRuns status drops stale mobile running activity from other turns
+  ---
+  duration_ms: 0.397208
+  type: 'test'
+  ...
+# Subtest: activeRuns status merge can preserve external desktop runtimes beside mobile runs
+ok 9 - activeRuns status merge can preserve external desktop runtimes beside mobile runs
+  ---
+  duration_ms: 0.653542
+  type: 'test'
+  ...
+# Subtest: selected desktop activity counts as running for composer controls
+ok 10 - selected desktop activity counts as running for composer controls
+  ---
+  duration_ms: 0.749625
+  type: 'test'
+  ...
+# Subtest: selected running activity marks the matching sidebar session as running
+ok 11 - selected running activity marks the matching sidebar session as running
+  ---
+  duration_ms: 0.196375
+  type: 'test'
+  ...
+# Subtest: desktop ipc active runs expose both app and client turn ids
+ok 12 - desktop ipc active runs expose both app and client turn ids
+  ---
+  duration_ms: 0.081208
+  type: 'test'
+  ...
+# Subtest: turn completion finishes matching running activity before thread refresh
+ok 13 - turn completion finishes matching running activity before thread refresh
+  ---
+  duration_ms: 6.005292
+  type: 'test'
+  ...
+# Subtest: new conversation project resolution prefers explicit drawer choice
+ok 14 - new conversation project resolution prefers explicit drawer choice
+  ---
+  duration_ms: 0.119667
+  type: 'test'
+  ...
+# Subtest: draft sessions preserve the chosen conversation scope
+ok 15 - draft sessions preserve the chosen conversation scope
+  ---
+  duration_ms: 0.333417
+  type: 'test'
+  ...
+# Subtest: titleFromFirstMessage uses the shared provisional title helper
+ok 16 - titleFromFirstMessage uses the shared provisional title helper
+  ---
+  duration_ms: 1.514041
+  type: 'test'
+  ...
+# Subtest: sessionRunBadgeState ignores session index runtime but honors live runtime
+ok 17 - sessionRunBadgeState ignores session index runtime but honors live runtime
+  ---
+  duration_ms: 0.249375
+  type: 'test'
+  ...
+# Subtest: sessionRunBadgeState reads active runs by session id
+ok 18 - sessionRunBadgeState reads active runs by session id
+  ---
+  duration_ms: 0.066208
+  type: 'test'
+  ...
+# Subtest: session runtime reconciliation keeps index hints out of the live running badge
+ok 19 - session runtime reconciliation keeps index hints out of the live running badge
+  ---
+  duration_ms: 0.194958
+  type: 'test'
+  ...
+# Subtest: session runtime reconciliation clears stale desktop runtime for loaded sessions
+ok 20 - session runtime reconciliation clears stale desktop runtime for loaded sessions
+  ---
+  duration_ms: 0.101084
+  type: 'test'
+  ...
+# Subtest: completed turn payload maps back to the selected sidebar session
+ok 21 - completed turn payload maps back to the selected sidebar session
+  ---
+  duration_ms: 0.29025
+  type: 'test'
+  ...
+# Subtest: viewportSizingMetrics exposes keyboard inset from visual viewport
+ok 22 - viewportSizingMetrics exposes keyboard inset from visual viewport
+  ---
+  duration_ms: 0.193584
+  type: 'test'
+  ...
+# Subtest: localFileApiPath can include token for direct browser navigation
+ok 23 - localFileApiPath can include token for direct browser navigation
+  ---
+  duration_ms: 0.470542
+  type: 'test'
+  ...
+# Subtest: localFilePreviewPath routes local files through the mobile preview page
+ok 24 - localFilePreviewPath routes local files through the mobile preview page
+  ---
+  duration_ms: 0.169125
+  type: 'test'
+  ...
+# Subtest: desktop IPC status updates drive runtime withou
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node -e "const p=require('./package.json'); console.log(JSON.stringify(p.scripts,null,2))"`</summary>
+```
+Chunk ID: f6dd84
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 147
+Output:
+{
+  "dev:server": "node server/index.js",
+  "dev:client": "vite --host 0.0.0.0 --config client/vite.config.js",
+  "build": "vite build --config client/vite.config.js",
+  "start": "node server/index.js",
+  "start:env": "node --env-file=.env server/index.js",
+  "start:bg": "node scripts/start-server.mjs",
+  "mac:autostart": "node scripts/install-macos-autostart.mjs",
+  "mac:autostart:remove": "node scripts/install-macos-autostart.mjs --uninstall",
+  "asr:start": "node scripts/start-asr.mjs",
+  "postinstall": "node scripts/patch-codex-sdk.mjs",
+  "smoke": "node scripts/smoke.mjs"
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short`</summary>
+```
+Chunk ID: 3f9d06
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 116
+Output:
+ M .specstory/history/2026-05-11_04-17-47Z-https-github-com-emanuele.md
+ M .specstory/statistics.json
+ M client/src/app-state.test.mjs
+ M client/src/app-websocket-events.test.mjs
+ M client/src/app/session-utils.js
+ M client/src/app/turn-submission-utils.js
+ M client/src/app/useAppWebSocket.js
+ M client/src/app/useSessionLivePolling.js
+ M client/src/session-live-refresh.js
+ M client/src/session-live-refresh.test.mjs
+ M client/src/turn-submission-utils.test.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:28:55Z)**_
+
+宽测试也过了，114 个相关用例全绿。工作区里有 SpecStory 自动记录文件变动，我不会碰它们；现在只跑前端 build 做最后确认。
+
+_**Agent (gpt-5.5 2026-05-11 04:28:55Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run build`</summary>
+```
+Chunk ID: 81e152
+Wall time: 2.9762 seconds
+Process exited with code 0
+Original token count: 227
+Output:
+
+> codexmobile@1.2.0 build
+> vite build --config client/vite.config.js
+
+vite v7.3.2 building client environment for production...
+transforming...
+✓ 1962 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/assets/manifest-DkwGc9r2.webmanifest      0.66 kB
+dist/index.html                                2.01 kB │ gzip:   0.88 kB
+dist/assets/pdf.worker-B1D2UnXD.mjs        2,161.15 kB
+dist/assets/index-CVVVp3D-.css               106.18 kB │ gzip:  18.72 kB
+dist/assets/index-KyvUYw5c.js                930.08 kB │ gzip: 285.93 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.59s
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:29:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/app/useAppWebSocket.js | sed -n '20,70p'`</summary>
+```
+Chunk ID: 291265
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 485
+Output:
+    20	  upsertActivityMessage,
+    21	  upsertAssistantMessage,
+    22	  upsertStatusMessage
+    23	} from '../chat/activity-model.js';
+    24	import { sameUserMessageContent } from '../chat/message-identity.js';
+    25	import { mergeContextStatus, normalizeContextStatus } from './context-status.js';
+    26	
+    27	const EXTERNAL_THREAD_SOURCES = new Set(['desktop-ipc', 'desktop-thread']);
+    28	
+    29	export function isExternalThreadPayload(payload = {}) {
+    30	  return EXTERNAL_THREAD_SOURCES.has(payload?.source);
+    31	}
+    32	
+    33	export function isDesktopThreadStatusPayload(payload = {}) {
+    34	  return isExternalThreadPayload(payload);
+    35	}
+    36	
+    37	export function shouldRenderStatusMessageForPayload(payload = {}) {
+    38	  if (isExternalThreadPayload(payload)) {
+    39	    return false;
+    40	  }
+    41	  return true;
+    42	}
+    43	
+    44	export function shouldRenderActivityMessageForPayload(payload = {}) {
+    45	  return !isExternalThreadPayload(payload);
+    46	}
+    47	
+    48	export function shouldRenderAssistantMessageForPayload(payload = {}) {
+    49	  return !isExternalThreadPayload(payload);
+    50	}
+    51	
+    52	export function shouldRefreshDesktopThreadForPayload(payload = {}) {
+    53	  if (!isExternalThreadPayload(payload)) {
+    54	    return false;
+    55	  }
+    56	  if (payload.type === 'chat-complete') {
+    57	    return true;
+    58	  }
+    59	  return payload.type === 'status-update' && payload.kind === 'turn' && ['completed', 'failed'].includes(payload.status);
+    60	}
+    61	
+    62	export function shouldCompleteLocalTurnBeforeRefresh(payload = {}) {
+    63	  if (!shouldRefreshDesktopThreadForPayload(payload)) {
+    64	    return false;
+    65	  }
+    66	  if (payload.type === 'chat-complete') {
+    67	    return true;
+    68	  }
+    69	  return payload.type === 'status-update' && payload.kind === 'turn' && payload.status === 'completed';
+    70	}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:29:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/app/turn-submission-utils.js | sed -n '120,135p'`</summary>
+```
+Chunk ID: 681a2d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 130
+Output:
+   120	  if (!base) {
+   121	    return value;
+   122	  }
+   123	  if (base.includes(value)) {
+   124	    return current;
+   125	  }
+   126	  return `${base}\n${value}`;
+   127	}
+   128	
+   129	export function shouldPollTurnEndpointAfterSend(result = {}) {
+   130	  return result?.desktopBridge?.mode !== 'desktop-ipc';
+   131	}
+   132	
+   133	export function localHandoffStatusPayload({ sessionId, previousSessionId = null, turnId, timestamp = new Date().toISOString() } = {}) {
+   134	  return {
+   135	    sessionId,
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:29:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/app/session-utils.js | sed -n '356,370p'`</summary>
+```
+Chunk ID: 411d2b
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 155
+Output:
+   356	export function hasRunningKey(runningById, keys) {
+   357	  return keys.some((key) => Boolean(runningById[key]));
+   358	}
+   359	
+   360	export function sessionRunKeys(session) {
+   361	  return [session?.id, session?.turnId, session?.previousSessionId].filter(Boolean);
+   362	}
+   363	
+   364	export function isExternalThreadRuntimeSource(value) {
+   365	  return ['desktop-thread', 'desktop-ipc'].includes(String(value || ''));
+   366	}
+   367	
+   368	export function isExternalThreadRuntime(runtime) {
+   369	  return runtime?.status === 'running' && isExternalThreadRuntimeSource(runtime?.source);
+   370	}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:29:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/session-live-refresh.js | sed -n '50,135p'`</summary>
+```
+Chunk ID: 1c84a8
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 995
+Output:
+    50	  return loaded.some((item) => item?.role === 'assistant' && messageMatchesRunKeys(item, keys) && normalizeText(item.content));
+    51	}
+    52	
+    53	function isDesktopRuntimeSource(value) {
+    54	  return value === 'desktop-thread' || value === 'desktop-ipc';
+    55	}
+    56	
+    57	function messageMatchesRunKeys(message, keys) {
+    58	  if (!keys.size) {
+    59	    return false;
+    60	  }
+    61	  return messageRunKeys(message).some((key) => keys.has(key));
+    62	}
+    63	
+    64	function completeLocalActivityMessage(message, loaded = []) {
+    65	  const keys = new Set(messageRunKeys(message));
+    66	  const assistant = loaded.find((item) => item?.role === 'assistant' && messageMatchesRunKeys(item, keys) && normalizeText(item.content));
+    67	  if (!assistant && !['running', 'queued'].includes(String(message?.status || ''))) {
+    68	    return message;
+    69	  }
+    70	  return {
+    71	    ...message,
+    72	    status: message.status === 'failed' ? 'failed' : 'completed',
+    73	    label: message.status === 'failed' ? message.label : '过程已同步',
+    74	    content: message.status === 'failed' ? message.content : '过程已同步',
+    75	    completedAt: message.completedAt || assistant?.timestamp || new Date().toISOString(),
+    76	    activities: Array.isArray(message.activities)
+    77	      ? message.activities.map((activity) =>
+    78	        ['running', 'queued'].includes(String(activity?.status || ''))
+    79	          ? { ...activity, status: 'completed' }
+    80	          : activity
+    81	      )
+    82	      : message.activities
+    83	  };
+    84	}
+    85	
+    86	function activityInsertIndex(loaded, activity) {
+    87	  const keys = new Set(messageRunKeys(activity));
+    88	  const index = loaded.findIndex((message) => message?.role === 'assistant' && messageMatchesRunKeys(message, keys));
+    89	  return index >= 0 ? index : loaded.length;
+    90	}
+    91	
+    92	function preserveLocalActivityMessages(current = [], loaded = []) {
+    93	  const loadedIds = new Set(loaded.map((message) => String(message?.id || '')).filter(Boolean));
+    94	  const preserved = current
+    95	    .filter((message) => message?.role === 'activity' && !loadedIds.has(String(message?.id || '')))
+    96	    .filter((message) => {
+    97	      const keys = new Set(messageRunKeys(message));
+    98	      if (!keys.size) {
+    99	        return false;
+   100	      }
+   101	      if (loaded.some((item) => item?.role === 'activity' && messageMatchesRunKeys(item, keys))) {
+   102	        return false;
+   103	      }
+   104	      if (isTransientActivityMessage(message) && loadedHasAssistantForActivity(loaded, message)) {
+   105	        return false;
+   106	      }
+   107	      return loaded.some((item) => messageMatchesRunKeys(item, keys)) || ['running', 'queued'].includes(String(message?.status || ''));
+   108	    })
+   109	    .map((message) =>
+   110	      isTransientActivityMessage(message)
+   111	        ? message
+   112	        : completeLocalActivityMessage(message, loaded)
+   113	    );
+   114	
+   115	  if (!preserved.length) {
+   116	    return loaded;
+   117	  }
+   118	
+   119	  const result = [...loaded];
+   120	  for (const activity of preserved.sort((a, b) => activityInsertIndex(result, a) - activityInsertIndex(result, b))) {
+   121	    result.splice(activityInsertIndex(result, activity), 0, activity);
+   122	  }
+   123	  return result;
+   124	}
+   125	
+   126	function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
+   127	  return Boolean(bridge?.connected && bridge?.mode === 'desktop-ipc');
+   128	}
+   129	
+   130	export function desktopRunningActivityPayload(messages = [], sessionId = '', selectedRunRuntime = null) {
+   131	  if (!Array.isArray(messages) || (selectedRunRuntime?.source && !isDesktopRuntimeSource(selectedRunRuntime.source))) {
+   132	    return null;
+   133	  }
+   134	  const targetSessionId = String(sessionId || '');
+   135	  const runningActivity = messages
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:29:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/app/useSessionLivePolling.js | sed -n '64,78p'`</summary>
+```
+Chunk ID: 1db946
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 189
+Output:
+    64	        selectedRunKeys(selectedSessionRef.current || selectedSession)
+    65	      );
+    66	      const selectedRunRuntime = selectedRunKeys(selectedSessionRef.current || selectedSession)
+    67	        .map((key) => threadRuntimeById?.[key])
+    68	        .find(isLiveThreadRuntime) || null;
+    69	      const hasDesktopThreadRuntime =
+    70	        selectedRunRuntime?.source === 'desktop-thread' ||
+    71	        selectedRunRuntime?.source === 'desktop-ipc';
+    72	      const hasExternalThreadRefresh = Boolean(hasDesktopThreadRuntime);
+    73	      if (!shouldPollSelectedSessionMessages({
+    74	        hasSelectedRunning,
+    75	        desktopBridge,
+    76	        hasExternalThreadRefresh
+    77	      })) {
+    78	        return;
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:29:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff --stat`</summary>
+```
+Chunk ID: 901e43
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 192
+Output:
+ ...26-05-11_04-17-47Z-https-github-com-emanuele.md | 12942 ++++++++++++++++++-
+ .specstory/statistics.json                         |    10 +-
+ client/src/app-state.test.mjs                      |     8 +-
+ client/src/app-websocket-events.test.mjs           |    15 +-
+ client/src/app/session-utils.js                    |     2 +-
+ client/src/app/turn-submission-utils.js            |     2 +-
+ client/src/app/useAppWebSocket.js                  |     2 +-
+ client/src/app/useSessionLivePolling.js            |     3 +-
+ client/src/session-live-refresh.js                 |     6 +-
+ client/src/session-live-refresh.test.mjs           |    17 +-
+ client/src/turn-submission-utils.test.mjs          |     4 +-
+ 11 files changed, 12974 insertions(+), 37 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:29:20Z)**_
+
+<tool-use data-tool-type="task" data-tool-name="update_plan"><details>
+<summary>Tool use: **update_plan**</summary>
+**Agent task list:**
+- [X] Trace current fallback state flow
+- [X] Patch headless-local runtime semantics
+- [X] Update focused tests for new routing model
+- [X] Run targeted tests and build
+
+```
+Plan updated
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:29:44Z)**_
+
+能实现，而且我已经把核心问题修掉了。
+
+我参考了 Remodex 的思路：手机只是远程控制入口，Codex runtime 留在 Mac，本地 bridge 负责实时流和持久化；它的 README 也明确是“手机实时看 Mac 上 Codex 跑、线程历史落在本机磁盘，Codex.app 后续能读”。但我们这里按你的要求没有照搬 Remodex：桌面在线时仍走现有 `desktop-ipc` 做 live mirror；桌面不在线或当前线程没人接管时，走 `headless-local` 后台 Codex，且状态流不再假装成桌面 IPC。
+
+主要改动：
+
+- [client/src/app/useAppWebSocket.js](/Users/xiayanghui/编程项目/CodexMobile/client/src/app/useAppWebSocket.js:27)：`headless-local` 不再算外部桌面线程源，所以 fallback 的 status / activity / assistant 会直接在手机端实时显示。
+- [client/src/app/turn-submission-utils.js](/Users/xiayanghui/编程项目/CodexMobile/client/src/app/turn-submission-utils.js:129)：只有 `desktop-ipc` 跳过 turn endpoint polling；`headless-local` 会继续轮询自己的后台 turn，避免运行状态卡死。
+- [client/src/app/session-utils.js](/Users/xiayanghui/编程项目/CodexMobile/client/src/app/session-utils.js:364)：只有 `desktop-thread` / `desktop-ipc` 被当成外部线程 runtime，headless stale 状态会正常清理。
+- [client/src/session-live-refresh.js](/Users/xiayanghui/编程项目/CodexMobile/client/src/session-live-refresh.js:53)：live mirror 刷新只服务桌面 IPC；headless fallback 不再被桌面消息轮询接管。
+- [client/src/app/useSessionLivePolling.js](/Users/xiayanghui/编程项目/CodexMobile/client/src/app/useSessionLivePolling.js:69)：选中会话的“外部线程刷新”也只认桌面 runtime。
+
+server 这边我核过了，不需要重写：`headless-local` 本来就是通过 Codex app-server 的 `thread/resume` / `thread/start` 跑真实 Codex 线程，结束后会 refresh Codex cache，所以桌面端重新打开后能从同一套 Codex 线程历史里读回来。也就是说这次主要是把前端运行状态的归属修正了。
+
+验证已过：
+
+```bash
+node --test client/src/app-websocket-events.test.mjs client/src/turn-submission-utils.test.mjs client/src/app-state.test.mjs client/src/session-live-refresh.test.mjs client/src/send-state.test.mjs client/src/topbar-status.test.mjs server/chat-service.test.mjs server/codex-app-server.test.mjs server/session-message-reader.test.mjs server/desktop-turn-monitor.test.mjs
+# 114 pass
+
+npm run build
+# pass，只有 Vite 原有 chunk size warning
+```
+
+参考源：Remodex README 架构说明和特性列表：[Emanuele-web04/remodex](https://github.com/Emanuele-web04/remodex)。
+
+
+
+---
+
+_**User (2026-05-11 04:30:17Z)**_
+
+你重新构建部署，我来测试一下
+
+
+---
+
+_**Agent (gpt-5.5 2026-05-11 04:30:31Z)**_
+
+好，我来重新 build 并把本地服务拉起来给你测。先看一下当前服务状态，避免端口上有旧进程占着导致你测到旧包。
+
+_**Agent (gpt-5.5 2026-05-11 04:30:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run build`</summary>
+```
+Chunk ID: 6ccf58
+Wall time: 3.0304 seconds
+Process exited with code 0
+Original token count: 227
+Output:
+
+> codexmobile@1.2.0 build
+> vite build --config client/vite.config.js
+
+vite v7.3.2 building client environment for production...
+transforming...
+✓ 1962 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/assets/manifest-DkwGc9r2.webmanifest      0.66 kB
+dist/index.html                                2.01 kB │ gzip:   0.88 kB
+dist/assets/pdf.worker-B1D2UnXD.mjs        2,161.15 kB
+dist/assets/index-CVVVp3D-.css               106.18 kB │ gzip:  18.72 kB
+dist/assets/index-KyvUYw5c.js                930.08 kB │ gzip: 285.93 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.67s
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:30:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `lsof -nP -iTCP -sTCP:LISTEN | rg "(:5173|:3000|:8787|:8080|CodexMobile|node)"`</summary>
+```
+Chunk ID: 8d6b11
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 44
+Output:
+node      44010 xiayanghui   13u  IPv4 0x39e60515813d2a41      0t0  TCP *:3331 (LISTEN)
+node      87904 xiayanghui   13u  IPv4 0x54de3d3ec94042ce      0t0  TCP *:3321 (LISTEN)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:30:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,220p' scripts/start-server.mjs`</summary>
+```
+Chunk ID: 67466a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1520
+Output:
+/**
+ * 开发/本机启动器：加载 .env、应用系统代理，前台或后台 spawn Node 跑 server/index.js 并写日志。
+ *
+ * Keywords: dev-server, dotenv, spawn, logging, system-proxy
+ *
+ * Exports:
+ * - 无 default，CLI 自执行。
+ *
+ * Inward（本模块依赖/组装的关键符号）: system-proxy-env.mjs；.codexmobile 日志目录。
+ *
+ * Outward（谁在用/调用场景）: package.json start:bg；本地手动 node scripts/start-server.mjs。
+ */
+
+import { spawn, spawnSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import { applyMacSystemProxyEnv } from './system-proxy-env.mjs';
+
+const root = path.resolve(import.meta.dirname, '..');
+const logDir = path.join(root, '.codexmobile');
+const port = Number(process.env.PORT || 3321);
+const launchdLabel = 'com.codexmobile.bridge';
+fs.mkdirSync(logDir, { recursive: true });
+
+const outPath = path.join(logDir, 'server.out.log');
+const errPath = path.join(logDir, 'server.err.log');
+
+function loadDotEnv() {
+  const envPath = path.join(root, '.env');
+  if (!fs.existsSync(envPath)) {
+    return;
+  }
+  const lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) {
+      continue;
+    }
+    const match = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+    if (!match || process.env[match[1]] !== undefined) {
+      continue;
+    }
+    let value = match[2].trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    process.env[match[1]] = value;
+  }
+}
+
+function dedupePath(value) {
+  const seen = new Set();
+  return String(value || '')
+    .split(path.delimiter)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .filter((item) => {
+      const key = process.platform === 'win32' ? item.toLowerCase() : item;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    })
+    .join(path.delimiter);
+}
+
+function childEnv() {
+  if (process.platform !== 'win32') {
+    return process.env;
+  }
+
+  const env = {};
+  const seen = new Set();
+  for (const [key, value] of Object.entries(process.env)) {
+    const normalized = key.toLowerCase();
+    if (normalized === 'path' || seen.has(normalized)) {
+      continue;
+    }
+    seen.add(normalized);
+    env[key] = value;
+  }
+
+  env.Path = dedupePath([
+    process.env.Path,
+    process.env.PATH
+  ].filter(Boolean).join(path.delimiter));
+  return env;
+}
+
+loadDotEnv();
+const proxyEnv = applyMacSystemProxyEnv();
+if (proxyEnv.applied) {
+  console.log(`Using macOS system proxy for background Codex requests: ${proxyEnv.proxyUrl}`);
+}
+
+function launchdDomain() {
+  const uid = process.getuid?.();
+  return Number.isInteger(uid) ? `gui/${uid}` : 'gui';
+}
+
+function restartLaunchAgentIfInstalled() {
+  if (process.platform !== 'darwin') {
+    return false;
+  }
+  const domain = launchdDomain();
+  const serviceName = `${domain}/${launchdLabel}`;
+  const printResult = spawnSync('launchctl', ['print', serviceName], {
+    encoding: 'utf8'
+  });
+  if (printResult.status !== 0) {
+    return false;
+  }
+  const output = `${printResult.stdout || ''}\n${printResult.stderr || ''}`;
+  if (!output.includes(root) || !output.includes('scripts/run-server.mjs')) {
+    return false;
+  }
+  const result = spawnSync('launchctl', ['kickstart', '-k', serviceName], {
+    encoding: 'utf8'
+  });
+  if (result.status !== 0) {
+    const detail = [result.stdout, result.stderr].filter(Boolean).join('\n').trim();
+    throw new Error(`launchctl kickstart failed${detail ? `:\n${detail}` : ''}`);
+  }
+  console.log(`CodexMobile is managed by launchd; restarted ${launchdLabel}.`);
+  console.log(`Logs: ${path.join(logDir, 'launchd.out.log')}`);
+  return true;
+}
+
+function listenerPidsForPort(value) {
+  if (process.platform === 'win32') {
+    return [];
+  }
+  const result = spawnSync('lsof', [`-tiTCP:${value}`, '-sTCP:LISTEN'], {
+    encoding: 'utf8'
+  });
+  if (result.status !== 0 && !result.stdout) {
+    return [];
+  }
+  return String(result.stdout || '')
+    .split(/\s+/)
+    .map((item) => Number(item))
+    .filter((pid) => Number.isInteger(pid) && pid > 0 && pid !== process.pid);
+}
+
+function commandForPid(pid) {
+  const result = spawnSync('ps', ['-p', String(pid), '-o', 'command='], {
+    encoding: 'utf8'
+  });
+  return result.status === 0 ? String(result.stdout || '').trim() : '';
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function pidIsAlive(pid) {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function stopExistingServer() {
+  const pids = listenerPidsForPort(port).filter((pid) => {
+    const command = commandForPid(pid);
+    return command.includes('server/index.js')
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:30:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "PORT|HOST|listen\(|start:bg|server/index|dist" server scripts README.md package.json .env*`</summary>
+```
+Chunk ID: 5db431
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1466
+Output:
+package.json:8:    "dev:server": "node server/index.js",
+package.json:11:    "start": "node server/index.js",
+package.json:12:    "start:env": "node --env-file=.env server/index.js",
+package.json:13:    "start:bg": "node scripts/start-server.mjs",
+package.json:25:    "pdfjs-dist": "^5.7.284",
+.env.example:5:HOST=0.0.0.0
+.env.example:6:PORT=3321
+.env.example:7:HTTPS_PORT=3443
+.env.example:65:# CODEXMOBILE_ASR_PORT=8000
+README.md:86:- 支持 `@文件` 项目内搜索，自动忽略 `.git`、`node_modules`、`dist`、`.codexmobile` 等目录。
+README.md:243:- `HOST`：服务监听地址，默认 `0.0.0.0`
+README.md:244:- `PORT`：HTTP 端口，默认 `3321`
+README.md:245:- `HTTPS_PORT`：HTTPS 端口，默认 `3443`
+README.md:262:- `npm run build`：构建 PWA 到 `client/dist`
+README.md:265:- `npm run start:bg`：后台启动服务，日志写入 `.codexmobile`
+README.md:300:主要路由从 `server/index.js` 挂载，具体实现已拆到 `server/*-routes.js`、`server/*-service.js` 等模块：
+scripts/start-all.ps1:53:npm run start:bg
+scripts/install-macos-autostart.mjs:25:const port = Number(process.env.PORT || 3321);
+scripts/install-macos-autostart.mjs:87:      return command.includes('/server/index.js') ||
+scripts/install-macos-autostart.mjs:88:        command.includes('server/index.js') ||
+server/chat-service.test.mjs:961:    fileMentions: [{ name: 'server.js', path: '/repo/server/index.js' }],
+scripts/run-server.mjs:7: * - 无 default，动态 import server/index.js。
+scripts/run-server.mjs:52:await import('../server/index.js');
+scripts/patch-codex-sdk.mjs:17:const sdkPath = path.resolve('node_modules', '@openai', 'codex-sdk', 'dist', 'index.js');
+scripts/start-server.mjs:2: * 开发/本机启动器：加载 .env、应用系统代理，前台或后台 spawn Node 跑 server/index.js 并写日志。
+scripts/start-server.mjs:11: * Outward（谁在用/调用场景）: package.json start:bg；本地手动 node scripts/start-server.mjs。
+scripts/start-server.mjs:21:const port = Number(process.env.PORT || 3321);
+scripts/start-server.mjs:172:    return command.includes('server/index.js') || command.includes('scripts/run-server.mjs');
+scripts/start-server.mjs:208:  const child = spawn(process.execPath, ['server/index.js'], {
+scripts/start-asr.mjs:24:const port = process.env.CODEXMOBILE_ASR_PORT || '8000';
+server/codex-data.js:14: * Outward（谁在用/调用场景）: server/index、各 API handler 注入。
+server/feishu-routes.js:11: * Outward（谁在用/调用场景）: server/index 注册 feishu 相关路径。
+server/file-search.test.mjs:22:  await fs.mkdir(path.join(root, 'dist'), { recursive: true });
+server/file-search.test.mjs:27:  await fs.writeFile(path.join(root, 'dist', 'App.jsx'), '');
+server/file-search.test.mjs:37:  assert.equal(fileSearchInternals.isIgnoredRelativePath('dist/app.js'), true);
+server/static-service.js:14: * Outward（谁在用/调用场景）: server/index 静态与 /api/local-* 路径。
+server/git-routes.js:11: * Outward（谁在用/调用场景）: server/index。
+server/chat-routes.js:11: * Outward（谁在用/调用场景）: server/index 装配路由。
+server/session-routes.js:11: * Outward（谁在用/调用场景）: server/index。
+server/notification-routes.js:11: * Outward（谁在用/调用场景）: server/index。
+server/codex-quota.js:12: * Outward（谁在用/调用场景）: server/index 状态接口、客户端状态栏。
+server/codex-quota.test.mjs:14:test('quota error messages distinguish common network and auth failures', () => {
+server/static-service.test.mjs:38:  const clientDist = path.join(root, 'dist');
+server/file-search.js:23:const IGNORE_DIRS = new Set(['.git', 'node_modules', 'dist', '.codexmobile', 'client/dist']);
+server/index.js:83:const CLIENT_DIST = path.join(ROOT_DIR, 'client', 'dist');
+server/index.js:88:const PORT = Number(process.env.PORT || 3321);
+server/index.js:89:const HOST = process.env.HOST || '0.0.0.0';
+server/index.js:90:const HTTPS_PORT = Number(process.env.HTTPS_PORT || 3443);
+server/index.js:150:  const host = req.headers['x-forwarded-host'] || req.headers.host || `127.0.0.1:${PORT}`;
+server/index.js:301:    port: PORT,
+server/index.js:417:  const url = new URL(req.url || '/', `http://${req.headers.host || `127.0.0.1:${PORT}`}`);
+server/index.js:440:    const url = new URL(req.url || '/', `http://${req.headers.host || `127.0.0.1:${PORT}`}`);
+server/index.js:470:  server.listen(PORT, HOST, () => {
+server/index.js:471:    console.log(`CodexMobile listening on http://${HOST}:${PORT}`);
+server/index.js:484:    httpsServer.listen(HTTPS_PORT, HOST, () => {
+server/index.js:485:      console.log(`CodexMobile HTTPS listening on https://${HOST}:${HTTPS_PORT}`);
+server/index.js:489:        console.log(`Use Tailscale HTTPS: https://<your-device>.<your-tailnet>.ts.net:${HTTPS_PORT}/`);
+server/chat-request-prep.test.mjs:32:      { name
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:30:41Z)**_
+
+构建已经完成。当前机器上 `3321` 有一个 Node 服务在监听，启动器会优雅重启这个 CodexMobile 服务；我现在执行后台重启，并检查健康状态。
+
+_**Agent (gpt-5.5 2026-05-11 04:30:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `ps -p 87904,44010 -o pid,ppid,command=`</summary>
+```
+Chunk ID: 2ee28f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 33
+Output:
+  PID  PPID 
+44010 43988 node server/index.js
+87904     1 /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node server/index.js
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:30:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,120p' client/vite.config.js`</summary>
+```
+Chunk ID: 7463d3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 96
+Output:
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  root: 'client',
+  plugins: [react()],
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true
+  },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': 'http://127.0.0.1:3321',
+      '/ws': {
+        target: 'ws://127.0.0.1:3321',
+        ws: true
+      }
+    }
+  }
+});
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:30:44Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run start:bg`</summary>
+```
+Chunk ID: 1b7261
+Wall time: 14.9612 seconds
+Process exited with code 0
+Original token count: 72
+Output:
+
+> codexmobile@1.2.0 start:bg
+> node scripts/start-server.mjs
+
+Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+CodexMobile is managed by launchd; restarted com.codexmobile.bridge.
+Logs: /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.out.log
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:08Z)**_
+
+服务是 launchd 管的，已经 kickstart 重启了。现在我看日志和 `/api/status`，确认你打开手机时拿到的是新构建后的服务。
+
+_**Agent (gpt-5.5 2026-05-11 04:31:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `tail -n 80 .codexmobile/launchd.out.log`</summary>
+```
+Chunk ID: 470e3f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2370
+Output:
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `tail -n 80 .codexmobile/launchd.err.log`</summary>
+```
+Chunk ID: 3cf597
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 622
+Output:
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3321
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3321
+}
+
+Node.js v22.22.0
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3321
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3321
+}
+
+Node.js v22.22.0
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3321
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3321
+}
+
+Node.js v22.22.0
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3321
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3321
+}
+
+Node.js v22.22.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `lsof -nP -iTCP:3321 -sTCP:LISTEN && curl -sS http://127.0.0.1:3321/api/status | head -c 2000`</summary>
+```
+Chunk ID: 5f6e7a
+Wall time: 0.0010 seconds
+Process exited with code 0
+Original token count: 541
+Output:
+COMMAND   PID       USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    87904 xiayanghui   13u  IPv4 0x54de3d3ec94042ce      0t0  TCP *:3321 (LISTEN)
+{"connected":true,"desktopBridge":{"strict":true,"connected":true,"mode":"desktop-ipc","reason":null,"socketPath":"/var/folders/bx/grk73b6n1js274nxq2f5shsh0000gn/T/codex-ipc/ipc-501.sock","checkedAt":"2026-05-11T04:31:08.267Z","capabilities":{"read":true,"sendToOpenDesktopThread":true,"createThread":false,"createThreadReason":"当前 Codex Desktop IPC 只暴露已有线程接管入口，还没有开放外部新建桌面线程入口。","createThreadViaBackground":true,"backgroundCodex":true}},"hostName":"Mac-mini-home.local","port":3321,"provider":"codex","model":"gpt-5.5","modelShort":"5.5 中","models":[{"value":"gpt-5.5","label":"GPT-5.5"},{"value":"gpt-5.4","label":"gpt-5.4"},{"value":"gpt-5.4-mini","label":"GPT-5.4-Mini"},{"value":"gpt-5.3-codex","label":"gpt-5.3-codex"},{"value":"gpt-5.2","label":"gpt-5.2"}],"skills":[{"name":"30x-image","label":"30x-image","description":"|","path":"/Users/xiayanghui/.codex/skills/30x-image/SKILL.md"},{"name":"agent-browser","label":"agent-browser","description":"Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages.","path":"/Users/xiayanghui/.codex/skills/agent-browser/SKILL.md"},{"name":"agent-group-discussion","label":"agent-group-discussion","description":"This skill should be used when the user asks to \"发起群讨论\", \"让大臣们讨论\", \"组织agent讨论\", \"群聊讨论\", \"多人讨论\", or needs to coordinate multiple agents for collaborative discussion on a topic. Provides complete discussion orchestration workflows and paradigms.","path":"/Users/xiayanghui/.codex/skills/agent-group-discussion/SKILL.md"},{"name":"agent-reach","label":"agent-reach","description":">","path":"/Users/xiayanghui/.codex/skills/agent-reach/SKILL.md"},{"name":"aishort-prompts","label":"aishort-prompts","description":"Retrieve
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `find client/dist -maxdepth 2 -type f | sort | sed -n '1,40p'`</summary>
+```
+Chunk ID: c1d45c
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 84
+Output:
+client/dist/assets/index-CVVVp3D-.css
+client/dist/assets/index-KyvUYw5c.js
+client/dist/assets/manifest-DkwGc9r2.webmanifest
+client/dist/assets/pdf.worker-B1D2UnXD.mjs
+client/dist/codex-icon-180.png
+client/dist/codex-icon-192.png
+client/dist/codex-icon-512.png
+client/dist/codexmobile-sw.js
+client/dist/icon.svg
+client/dist/index.html
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:18Z)**_
+
+我发现一个部署细节：launchd 重启时旧的 `3321` 进程还占着端口，所以日志里有 `EADDRINUSE`。接口现在还能访问，但为了确保不是旧进程，我会把这个旧 CodexMobile 监听进程停掉，让 launchd 重新拉起一份干净的新服务。
+
+_**Agent (gpt-5.5 2026-05-11 04:31:18Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `ps -p 87904 -ww -o pid,ppid,lstart,command=`</summary>
+```
+Chunk ID: 654533
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 39
+Output:
+  PID  PPID STARTED                      
+87904     1 Sat May  9 13:47:35 2026     /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node server/index.js
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:18Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `launchctl print gui/$(id -u)/com.codexmobile.bridge | sed -n '1,160p'`</summary>
+```
+Chunk ID: 642bf2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 774
+Output:
+gui/501/com.codexmobile.bridge = {
+	active count = 0
+	path = /Users/xiayanghui/Library/LaunchAgents/com.codexmobile.bridge.plist
+	type = LaunchAgent
+	state = spawn scheduled
+
+	program = /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+	arguments = {
+		/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+		/Users/xiayanghui/编程项目/CodexMobile/scripts/run-server.mjs
+	}
+
+	working directory = /Users/xiayanghui/编程项目/CodexMobile
+
+	stdout path = /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.out.log
+	stderr path = /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.err.log
+	inherited environment = {
+		SSH_AUTH_SOCK => /var/run/com.apple.launchd.JfZgry2FhK/Listeners
+	}
+
+	default environment = {
+		PATH => /usr/bin:/bin:/usr/sbin:/sbin
+	}
+
+	environment = {
+		OSLogRateLimit => 64
+		PATH => /Users/xiayanghui/编程项目/CodexMobile/node_modules/.bin:/Users/xiayanghui/编程项目/node_modules/.bin:/Users/xiayanghui/node_modules/.bin:/Users/node_modules/.bin:/node_modules/.bin:/Users/xiayanghui/.nvm/versions/node/v22.22.0/lib/node_modules/npm/node_modules/@npmcli/run-script/lib/node-gyp-bin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Users/xiayanghui/.codex/tmp/arg0/codex-arg0NlQuli:/Users/xiayanghui/.antigravity/antigravity/bin:/Users/xiayanghui/.antigravity/antigravity/bin:/opt/homebrew/opt/node@20/bin:/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin:/Users/xiayanghui/.codeium/windsurf/bin:/Users/xiayanghui/.rbenv/shims:/Users/xiayanghui/.rbenv/bin:/usr/local/opt/ruby/bin:/Users/xiayanghui/.local/bin:/opt/anaconda3/bin:/opt/anaconda3/condabin:/Users/xiayanghui/.rbenv/shims:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pkg/env/active/bin:/opt/pmk/env/global/bin://Applications/Topaz Gigapixel.app/Contents/Resources/bin:/Library/Apple/usr/bin:/Library/TeX/texbin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Applications/Obsidian.app/Contents/MacOS:/Applications/Codex.app/Contents/Resources
+		HOME => /Users/xiayanghui
+		XPC_SERVICE_NAME => com.codexmobile.bridge
+	}
+
+	domain = gui/501 [100004]
+	asid = 100004
+	minimum runtime = 10
+	exit timeout = 5
+	runs = 16199
+	last exit code = 1
+
+	resource coalition = {
+		ID = 65106
+		type = resource
+		state = active
+		active count = 1
+		name = com.codexmobile.bridge
+	}
+
+	jetsam coalition = {
+		ID = 65107
+		type = jetsam
+		state = active
+		active count = 1
+		name = com.codexmobile.bridge
+	}
+
+	spawn type = daemon (3)
+	jetsam priority = 40
+	jetsam memory limit (active) = (unlimited)
+	jetsam memory limit (inactive) = (unlimited)
+	jetsamproperties category = daemon
+	jetsam thread limit = 32
+	cpumon = default
+
+	properties = keepalive | runatload | inferred program
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `kill 87904 && sleep 2 && lsof -nP -iTCP:3321 -sTCP:LISTEN && curl -sS http://127.0.0.1:3321/api/status | head -c 1200`</summary>
+```
+Chunk ID: b33ae5
+Wall time: 3.5723 seconds
+Process exited with code 0
+Original token count: 341
+Output:
+COMMAND   PID       USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    70609 xiayanghui   13u  IPv4 0x6c8fcb1b3e6c58f0      0t0  TCP *:3321 (LISTEN)
+{"connected":true,"desktopBridge":{"strict":true,"connected":true,"mode":"desktop-ipc","reason":null,"socketPath":"/var/folders/bx/grk73b6n1js274nxq2f5shsh0000gn/T/codex-ipc/ipc-501.sock","checkedAt":"2026-05-11T04:31:25.965Z","capabilities":{"read":true,"sendToOpenDesktopThread":true,"createThread":false,"createThreadReason":"当前 Codex Desktop IPC 只暴露已有线程接管入口，还没有开放外部新建桌面线程入口。","createThreadViaBackground":true,"backgroundCodex":true}},"hostName":"Mac-mini-home.local","port":3321,"provider":"codex","model":"gpt-5.5","modelShort":"5.5 中","models":[{"value":"gpt-5.5","label":"GPT-5.5"},{"value":"gpt-5.4","label":"gpt-5.4"},{"value":"gpt-5.4-mini","label":"GPT-5.4-Mini"},{"value":"gpt-5.3-codex","label":"gpt-5.3-codex"},{"value":"gpt-5.2","label":"gpt-5.2"}],"skills":[{"name":"30x-image","label":"30x-image","description":"|","path":"/Users/xiayanghui/.codex/skills/30x-image/SKILL.md"},{"name":"agent-browser","label":"agent-browser","description":"Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, tak
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:34Z)**_
+
+干净重启成功了，`3321` 现在是新 PID `70609`。我再确认一下页面入口引用的是刚构建出来的新 hash 包，避免手机端缓存看旧 JS。
+
+_**Agent (gpt-5.5 2026-05-11 04:31:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `curl -sS http://127.0.0.1:3321/ | rg "index-[A-Za-z0-9_-]+\.(js|css)|manifest"`</summary>
+```
+Chunk ID: 4ffd6a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 57
+Output:
+    <link rel="manifest" href="/assets/manifest-DkwGc9r2.webmanifest" />
+    <script type="module" crossorigin src="/assets/index-KyvUYw5c.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CVVVp3D-.css">
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `tail -n 30 .codexmobile/launchd.err.log`</summary>
+```
+Chunk ID: 804e32
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 214
+Output:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3321
+}
+
+Node.js v22.22.0
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3321
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3321
+}
+
+Node.js v22.22.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `ps -p 70609 -ww -o pid,ppid,lstart,command=`</summary>
+```
+Chunk ID: c08fec
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 51
+Output:
+  PID  PPID STARTED                      
+70609     1 Mon May 11 12:31:20 2026     /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node /Users/xiayanghui/编程项目/CodexMobile/scripts/run-server.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `curl -I -sS http://127.0.0.1:3321/assets/index-KyvUYw5c.js | sed -n '1,12p'`</summary>
+```
+Chunk ID: 70d1f0
+Wall time: 0.0791 seconds
+Process exited with code 0
+Original token count: 65
+Output:
+HTTP/1.1 200 OK
+content-type: text/javascript; charset=utf-8
+cache-control: public, max-age=31536000, immutable
+x-content-type-options: nosniff
+content-length: 930079
+Date: Mon, 11 May 2026 04:31:35 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:44Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `launchctl print gui/$(id -u)/com.codexmobile.bridge | sed -n '1,80p' && lsof -nP -iTCP:3321 -sTCP:LISTEN`</summary>
+```
+Chunk ID: fdc6e3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 878
+Output:
+gui/501/com.codexmobile.bridge = {
+	active count = 1
+	path = /Users/xiayanghui/Library/LaunchAgents/com.codexmobile.bridge.plist
+	type = LaunchAgent
+	state = running
+
+	program = /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+	arguments = {
+		/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+		/Users/xiayanghui/编程项目/CodexMobile/scripts/run-server.mjs
+	}
+
+	working directory = /Users/xiayanghui/编程项目/CodexMobile
+
+	stdout path = /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.out.log
+	stderr path = /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.err.log
+	inherited environment = {
+		SSH_AUTH_SOCK => /var/run/com.apple.launchd.JfZgry2FhK/Listeners
+	}
+
+	default environment = {
+		PATH => /usr/bin:/bin:/usr/sbin:/sbin
+	}
+
+	environment = {
+		OSLogRateLimit => 64
+		PATH => /Users/xiayanghui/编程项目/CodexMobile/node_modules/.bin:/Users/xiayanghui/编程项目/node_modules/.bin:/Users/xiayanghui/node_modules/.bin:/Users/node_modules/.bin:/node_modules/.bin:/Users/xiayanghui/.nvm/versions/node/v22.22.0/lib/node_modules/npm/node_modules/@npmcli/run-script/lib/node-gyp-bin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Users/xiayanghui/.codex/tmp/arg0/codex-arg0NlQuli:/Users/xiayanghui/.antigravity/antigravity/bin:/Users/xiayanghui/.antigravity/antigravity/bin:/opt/homebrew/opt/node@20/bin:/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin:/Users/xiayanghui/.codeium/windsurf/bin:/Users/xiayanghui/.rbenv/shims:/Users/xiayanghui/.rbenv/bin:/usr/local/opt/ruby/bin:/Users/xiayanghui/.local/bin:/opt/anaconda3/bin:/opt/anaconda3/condabin:/Users/xiayanghui/.rbenv/shims:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pkg/env/active/bin:/opt/pmk/env/global/bin://Applications/Topaz Gigapixel.app/Contents/Resources/bin:/Library/Apple/usr/bin:/Library/TeX/texbin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Applications/Obsidian.app/Contents/MacOS:/Applications/Codex.app/Contents/Resources
+		HOME => /Users/xiayanghui
+		XPC_SERVICE_NAME => com.codexmobile.bridge
+	}
+
+	domain = gui/501 [100004]
+	asid = 100004
+	minimum runtime = 10
+	exit timeout = 5
+	runs = 16200
+	pid = 70609
+	immediate reason = inefficient
+	forks = 88
+	execs = 1
+	initialized = 1
+	trampolined = 1
+	started suspended = 0
+	proxy started suspended = 0
+	checked allocations = 0 (queried = 1)
+	checked allocations reason = no host
+	checked allocations flags = 0x0
+	last exit code = 1
+
+	resource coalition = {
+		ID = 65106
+		type = resource
+		state = active
+		active count = 1
+		name = com.codexmobile.bridge
+	}
+
+	jetsam coalition = {
+		ID = 65107
+		type = jetsam
+		state = active
+		active count = 1
+		name = com.codexmobile.bridge
+	}
+
+	spawn type = daemon (3)
+	jetsam priority = 40
+	jetsam memory limit (active) = (unlimited)
+	jetsam memory limit (inactive) = (unlimited)
+	jetsamproperties category = daemon
+	jetsam thread limit = 32
+	cpumon = default
+
+	properties = keepalive | runatload | inferred program
+}
+COMMAND   PID       USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    70609 xiayanghui   13u  IPv4 0x6c8fcb1b3e6c58f0      0t0  TCP *:3321 (LISTEN)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:31:49Z)**_
+
+好了，已经重新构建并部署起来了。
+
+当前状态：
+- `npm run build` 成功，新包是 `/assets/index-KyvUYw5c.js`
+- launchd 服务已重启并处于 `running`
+- 当前监听进程：`pid=70609`
+- 服务地址：`http://Mac-mini-home.local:3321/`
+- `/api/status` 正常返回，当前识别到桌面端是 `desktop-ipc` 在线
+
+刚才有个旧进程占着 `3321`，我已经停掉旧进程，让 launchd 拉起了新的。你手机端现在可以直接打开测；如果 PWA 还看到旧界面，先把页面下拉刷新或关掉重新进一次，service worker 有时会咬着旧缓存不放。
+
+---
+
+_**User (2026-05-11 04:35:05Z)**_
+
+
+# In app browser:
+- The user has the in-app browser open.
+- Current URL: http://mac-mini-home.local:3321/
+
+## My request for Codex:
+remodex是可以实现移动端运行 桌面端也实时显示的吗
+
+
+---
+
+_**Agent (gpt-5.5 2026-05-11 04:35:18Z)**_
+
+不是完全可以。准确说：
+
+Remodex 可以实现 **移动端发起/控制 Codex 在 Mac 上运行，并且手机实时看到输出**。它的 README 写得很清楚：Codex runtime 留在 Mac，iPhone 通过 bridge 连接；功能里有 “Live streaming on your phone while Codex runs on your Mac” 和 “Shared thread history with Codex on your Mac”。
+
+但 **Codex Desktop 实时同步显示** 不是它的默认强能力。它 README 架构里写的是：`Codex.app` 可以从 `~/.codex/sessions` 读同一份线程历史，**但不是 true live mirror**，除非启用可选的 refresh workaround。
+
+所以结论是：
+
+- 手机端实时看：可以。
+- 手机端运行的记录，桌面端之后能读到：可以。
+- 桌面端打开时也像同屏直播一样实时刷新：Remodex 默认不是，它主要靠磁盘历史 + 可选刷新 workaround。
+
+我们现在这套设计反而更贴近你要的目标：桌面端在线时走 `desktop-ipc` 做真正 live mirror；桌面端不在线时走后台 Codex，等桌面端再打开时读回同一套历史。来源：[Remodex README](https://github.com/Emanuele-web04/remodex)。
+
+---
+
+_**User (2026-05-11 04:36:06Z)**_
+
+
+# In app browser:
+- The user has the in-app browser open.
+- Current URL: http://mac-mini-home.local:3321/
+
+## My request for Codex:
+我们现在新建的线程，桌面端codex 还不能立刻刷新出来，我想实现热重载可以吗
+
+
+---
+
+_**Agent (gpt-5.5 2026-05-11 04:36:18Z)**_
+
+可以做，不过要先分清“刷新桌面端线程列表”和“桌面端打开某个线程后实时镜像”是两件事。我先沿着现有 desktop IPC / thread title / cache refresh 链路看一下，找一个最小但靠谱的热刷新入口。
+
+_**Agent (gpt-5.5 2026-05-11 04:36:18Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,220p' /Users/xiayanghui/.codex/memories/MEMORY.md`</summary>
+```
+Chunk ID: 47e25e
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 6653
+Output:
+# Task Group: CodexMobile / composer 控件、线程同步、架构拆分与私网访问
+
+scope: `CodexMobile` 手机端 composer 控件、`/plan` 协作模式、repo-local skill 发现、自动标题、普通对话/发送链路排障、desktop IPC fallback、draft/new-thread send、abort 状态卡片、后端保守拆分、移动端 Git 面板、macOS 自启动与 Tailscale/LAN 访问；适用于这个 repo 的 live 前后端联调、app-server 行为核验、私网访问解释和公开仓库卫生，不适用于泛化移动端产品设计。
+applies_to: cwd=/Users/xiayanghui/编程项目/CodexMobile; reuse_rule=适合复用到这个 `CodexMobile` 仓库里与 composer、`/plan`、`/api/status`、`thread/*` app-server 能力、本地 Node 服务、README 功能口径、Git HTTP API、launchd、Tailscale/LAN origin 行为有关的任务；具体端口、running process、模型列表和代码结构都要按当前 checkout/live server 重验
+
+## Task 1: 给 mobile composer 加 skill 选择，并修复“按钮无法点击”的运行态错配
+
+### rollout_summary_files
+
+- rollout_summaries/2026-05-05T00-12-41-rXsC-codexmobile_skill_picker_and_remove_voice_controls.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T08-12-41-019df57a-d854-73d1-8bec-a9d15f8453c2.jsonl, updated_at=2026-05-05T00:25:11+00:00, thread_id=019df57a-d854-73d1-8bec-a9d15f8453c2, added skill discovery and mobile picker, then proved the first disabled state came from an older live backend on port 3321)
+
+### keywords
+
+- CodexMobile, skill picker, composer, /api/status, localStorage, buildCodexTurnInput, type: skill, lsof, port 3321, port 3331, readCodexSkills
+
+## Task 2: 按用户要求移除 app 内 `对话` / `语音输入` 按钮和相关功能
+
+### rollout_summary_files
+
+- rollout_summaries/2026-05-05T00-12-41-rXsC-codexmobile_skill_picker_and_remove_voice_controls.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T08-12-41-019df57a-d854-73d1-8bec-a9d15f8453c2.jsonl, updated_at=2026-05-05T00:25:11+00:00, thread_id=019df57a-d854-73d1-8bec-a9d15f8453c2, removed the in-app voice/dialog entry points and updated docs to match the native-keyboard voice preference)
+
+### keywords
+
+- CodexMobile, voice-dialog, microphone button, dialog button, VoiceDialogPanel, native keyboard voice path, README.md, npm run build, restart 3321
+
+## Task 3: 追 Codex 真实命名链路，并给 draft 线程接入 `gpt-5.4-mini` 自动标题
+
+### rollout_summary_files
+
+- rollout_summaries/2026-05-05T11-35-49-5GrC-codexmobile_auto_thread_title_hook_gpt_5_4_mini.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T19-35-49-019df7ec-42b4-7602-94d6-e06d2430e6c0.jsonl, updated_at=2026-05-05T12:01:30+00:00, thread_id=019df7ec-42b4-7602-94d6-e06d2430e6c0, traced `name`/`preview` fallback and added async auto-title writeback for new draft sessions)
+
+### keywords
+
+- thread naming, preview fallback, thread/name/set, gpt-5.4-mini, auto title, session-title, draft session, sanitizeGeneratedTitle, node --test, EADDRINUSE
+
+## Task 4: 清理普通对话旧线程、解释 mobile/desktop 归档现状，并修复发送一直“处理中”
+
+### rollout_summary_files
+
+- rollout_summaries/2026-05-05T19-24-27-hq5w-codexmobile_mobile_thread_sync_and_hanging_turn_debug.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/06/rollout-2026-05-06T03-24-27-019df999-4f02-70f1-9d0f-895fb3098ee6.jsonl, updated_at=2026-05-07T05:33:58+00:00, thread_id=019df999-4f02-70f1-9d0f-895fb3098ee6, cleaned ordinary-thread history bleed-through, clarified hide-vs-archive behavior, cleared `/Users/xiayanghui/Documents/Codex/`, and fixed normal-chat turn hangs caused by leaked lark-cli env)
+
+### keywords
+
+- ordinary conversations, hidden-sessions.json, mobile-sessions.json, refreshCodexCache, Documents/Codex, activeRuns, /api/chat/abort, runCodexTurn, lark-cli, NO_PROXY, thread/archive, app-server timeout, turn/completed
+
+## Task 5: 先做重启后快速配对 skill，后改成 macOS LaunchAgent 自动启动
+
+### rollout_summary_files
+
+- rollout_summaries/2026-05-05T19-18-01-iLno-codexmobile_macos_autostart_launchagent.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/06/rollout-2026-05-06T03-18-01-019df993-6bb9-7ff2-99b2-c34ddc737c76.jsonl, updated_at=2026-05-06T12:17:56+00:00, thread_id=019df993-6bb9-7ff2-99b2-c34ddc737c76, started with a reboot-pairing skill, then replaced it with a user-level LaunchAgent that keeps port 3321 alive after reboot and crash)
+
+### keywords
+
+- CodexMobile, LaunchAgent, launchctl, macOS autostart, run-server.mjs, start-server.mjs, /api/sta
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:18Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,220p' '/Users/xiayanghui/.codex/plugins/cache/openai-curated/superpowers/63976030/skills/systematic-debugging/SKILL.md'`</summary>
+```
+Chunk ID: d7007b
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1593
+Output:
+---
+name: systematic-debugging
+description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+---
+
+# Systematic Debugging
+
+## Overview
+
+Random fixes waste time and create new bugs. Quick patches mask underlying issues.
+
+**Core principle:** ALWAYS find root cause before attempting fixes. Symptom fixes are failure.
+
+**Violating the letter of this process is violating the spirit of debugging.**
+
+## The Iron Law
+
+```
+NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
+```
+
+If you haven't completed Phase 1, you cannot propose fixes.
+
+## When to Use
+
+Use for ANY technical issue:
+- Test failures
+- Bugs in production
+- Unexpected behavior
+- Performance problems
+- Build failures
+- Integration issues
+
+**Use this ESPECIALLY when:**
+- Under time pressure (emergencies make guessing tempting)
+- "Just one quick fix" seems obvious
+- You've already tried multiple fixes
+- Previous fix didn't work
+- You don't fully understand the issue
+
+**Don't skip when:**
+- Issue seems simple (simple bugs have root causes too)
+- You're in a hurry (rushing guarantees rework)
+- Manager wants it fixed NOW (systematic is faster than thrashing)
+
+## The Four Phases
+
+You MUST complete each phase before proceeding to the next.
+
+### Phase 1: Root Cause Investigation
+
+**BEFORE attempting ANY fix:**
+
+1. **Read Error Messages Carefully**
+   - Don't skip past errors or warnings
+   - They often contain the exact solution
+   - Read stack traces completely
+   - Note line numbers, file paths, error codes
+
+2. **Reproduce Consistently**
+   - Can you trigger it reliably?
+   - What are the exact steps?
+   - Does it happen every time?
+   - If not reproducible → gather more data, don't guess
+
+3. **Check Recent Changes**
+   - What changed that could cause this?
+   - Git diff, recent commits
+   - New dependencies, config changes
+   - Environmental differences
+
+4. **Gather Evidence in Multi-Component Systems**
+
+   **WHEN system has multiple components (CI → build → signing, API → service → database):**
+
+   **BEFORE proposing fixes, add diagnostic instrumentation:**
+   ```
+   For EACH component boundary:
+     - Log what data enters component
+     - Log what data exits component
+     - Verify environment/config propagation
+     - Check state at each layer
+
+   Run once to gather evidence showing WHERE it breaks
+   THEN analyze evidence to identify failing component
+   THEN investigate that specific component
+   ```
+
+   **Example (multi-layer system):**
+   ```bash
+   # Layer 1: Workflow
+   echo "=== Secrets available in workflow: ==="
+   echo "IDENTITY: ${IDENTITY:+SET}${IDENTITY:-UNSET}"
+
+   # Layer 2: Build script
+   echo "=== Env vars in build script: ==="
+   env | grep IDENTITY || echo "IDENTITY not in environment"
+
+   # Layer 3: Signing script
+   echo "=== Keychain state: ==="
+   security list-keychains
+   security find-identity -v
+
+   # Layer 4: Actual signing
+   codesign --sign "$IDENTITY" --verbose=4 "$APP"
+   ```
+
+   **This reveals:** Which layer fails (secrets → workflow ✓, workflow → build ✗)
+
+5. **Trace Data Flow**
+
+   **WHEN error is deep in call stack:**
+
+   See `root-cause-tracing.md` in this directory for the complete backward tracing technique.
+
+   **Quick version:**
+   - Where does bad value originate?
+   - What called this with bad value?
+   - Keep tracing up until you find the source
+   - Fix at source, not at symptom
+
+### Phase 2: Pattern Analysis
+
+**Find the pattern before fixing:**
+
+1. **Find Working Examples**
+   - Locate similar working code in same codebase
+   - What works that's similar to what's broken?
+
+2. **Compare Against References**
+   - If implementing pattern, read reference implementation COMPLETELY
+   - Don't skim - read every line
+   - Understand the pattern fully before applying
+
+3. **Identify Differences**
+   - What's different between working and broken?
+   - List every difference, however small
+   - Don't assume "that can't matter"
+
+4. **Understand Dependencies**
+   - What other components does this need?
+   - What settings, config, environment?
+   - What assumptions does it make?
+
+### Phase 3: Hypothesis and Testing
+
+**Scientific method:**
+
+1. **Form Single Hypothesis**
+   - State clearly: "I think X is the root cause because Y"
+   - Write it down
+   - Be specific, not vague
+
+2. **Test Minimally**
+   - Make the SMALLEST possible change to test hypothesis
+   - One variable at a time
+   - Don't fix multiple things at once
+
+3. **Verify Before Continuing**
+   - Did it work? Yes → Phase 4
+   - Didn't work? Form NEW hypothesis
+   - DON'T add more fixes on top
+
+4. **When You Don't Know**
+   - Say "I don't understand X"
+   - Don't pretend to know
+   - Ask for help
+   - Research more
+
+### Phase 4: Implementation
+
+**Fix the root cause, not the symptom:**
+
+1. **Create Failing Test Case**
+   - Simplest possible reproduction
+   - Automated test if possible
+   - One-off test script
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:18Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "refresh|reload|broadcastDesktop|desktop.*refresh|thread.*updated|thread-started|sync-complete|desktop-ipc|AppleScript|route|navigate|openDesktop|readDesktopThread|broadcastDesktopThread" server client shared scripts -g '*.js' -g '*.mjs' -g '*.jsx'`</summary>
+```
+Chunk ID: 66720a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 8390
+Output:
+client/src/session-live-refresh.js:4: * Keywords: session, live-refresh, polling, merge-messages, desktop-runtime
+client/src/session-live-refresh.js:54:  return value === 'desktop-thread' || value === 'desktop-ipc';
+client/src/session-live-refresh.js:127:  return Boolean(bridge?.connected && bridge?.mode === 'desktop-ipc');
+server/route-handlers.test.mjs:2: * 测试多类 HTTP route handler：chat/feishu/file/notification/session/voice。
+server/route-handlers.test.mjs:4: * Keywords: route-handlers, test, http
+server/route-handlers.test.mjs:8: * Inward: chat-routes.js, feishu-routes.js, file-routes.js, notification-routes.js, session-routes.js, voice-routes.js
+server/route-handlers.test.mjs:16:import { createChatRouteHandler } from './chat-routes.js';
+server/route-handlers.test.mjs:17:import { createFeishuIntegration } from './feishu-routes.js';
+server/route-handlers.test.mjs:18:import { createFileRouteHandler } from './file-routes.js';
+server/route-handlers.test.mjs:19:import { createNotificationRouteHandler } from './notification-routes.js';
+server/route-handlers.test.mjs:20:import { createSessionRouteHandler } from './session-routes.js';
+server/route-handlers.test.mjs:21:import { createVoiceRouteHandler } from './voice-routes.js';
+server/route-handlers.test.mjs:59:test('notification route handler keeps public key and subscribe response shapes', async () => {
+server/route-handlers.test.mjs:90:test('chat route handler routes send and abort through chat service', async () => {
+server/route-handlers.test.mjs:119:test('file route handler searches project files and preserves project not found response', async () => {
+server/route-handlers.test.mjs:149:test('file route handler accepts local file URLs with source filename path segment', async () => {
+server/route-handlers.test.mjs:181:test('session route handler renames sessions and broadcasts refresh events', async () => {
+server/route-handlers.test.mjs:191:    refreshCodexCache: async () => ({ syncedAt: 'sync-1', projects: [] }),
+server/route-handlers.test.mjs:201:  assert.deepEqual(broadcasts.map((payload) => payload.type), ['session-renamed', 'sync-complete']);
+server/route-handlers.test.mjs:204:test('voice route handler redacts API keys from speech failures', async () => {
+server/route-handlers.test.mjs:223:test('feishu integration reports CLI auth status through its route handler', async () => {
+server/route-handlers.test.mjs:224:  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-feishu-routes-'));
+server/chat-service.test.mjs:24:    refreshCodexCache: async () => ({ syncedAt: 'now', projects: [] }),
+server/chat-service.test.mjs:50:test('sendChat routes running input through desktop turn/steer', async () => {
+server/chat-service.test.mjs:120:test('sendChat rejects desktop-ipc draft sends with a create-thread specific error', async () => {
+server/chat-service.test.mjs:125:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:147:test('sendChat sends existing desktop-ipc threads through the desktop follower bridge', async () => {
+server/chat-service.test.mjs:153:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:182:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:199:  assert.equal(service.getTurn('client-turn-1').source, 'desktop-ipc');
+server/chat-service.test.mjs:202:    source: 'desktop-ipc',
+server/chat-service.test.mjs:212:  assert.equal(broadcasts.some((payload) => payload.type === 'status-update' && payload.source === 'desktop-ipc'), true);
+server/chat-service.test.mjs:221:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:252:  assert.equal(broadcasts.filter((payload) => payload.type === 'chat-aborted' && payload.source === 'desktop-ipc').length, 1);
+server/chat-service.test.mjs:261:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:299:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:349:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:372:test('sendChat sends desktop-ipc plan requests with desktop collaboration mode', async () => {
+server/chat-service.test.mjs:380:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:436:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:464:test('sendChat falls back to headless local when an existing desktop-ipc thread has no owner', async () => {
+server/chat-service.test.mjs:470:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:513:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:554:test('sendChat waits for a desktop-ipc owner before falling back to headless local', async () => {
+server/chat-service.test.mjs:563:      mode: 'desktop-ipc',
+server/chat-service.test.mjs:598:  assert.equal(result.desktopBridge.mode, 'desktop-ipc');
+server/chat-service.test.mjs:605:test('sendChat can create a background thread when desktop-ipc cannot create desktop threads', async () => {
+server/chat-service.test.mjs:611:      mode: 'desktop-ipc',
+server/c
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:27Z)**_
+
+我已经找到一个关键事实：我们现在只有 `thread-title-updated` / `thread-archived` 这类桌面广播，缺少“新线程已出现/请重新扫列表”的广播。所以移动端后台新建线程后，Codex Desktop 只能等它自己重新读磁盘，不能立刻刷新出来。接下来我看 IPC 客户端协议能不能加一个通用 refresh / created 广播。
+
+_**Agent (gpt-5.5 2026-05-11 04:36:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,430p' server/desktop-ipc-client.js`</summary>
+```
+Chunk ID: 978952
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2880
+Output:
+/**
+ * 与 Codex 桌面端 Unix domain socket 的 IPC 帧协议客户端与便捷方法。
+ *
+ * Keywords: desktop-ipc, unix-socket, net-socket, follower-turn
+ *
+ * Exports:
+ * - desktopIpcMethodVersion / desktopIpcSocketPath / getDesktopIpcSocketStatus。
+ * - DesktopIpcClient — 连接与请求封装。
+ * - probeDesktopIpc / startDesktopFollowerTurn / steerDesktopFollowerTurn / interruptDesktopFollowerTurn 等。
+ *
+ * Inward（本模块依赖/组装的关键符号）: node:net、平台相关 socket 路径约定。
+ *
+ * Outward（谁在用/调用场景）: chat-delivery、codex-app-server、测试。
+ *
+ * 不负责: HTTP 层。
+ */
+import crypto from 'node:crypto';
+import fsSync from 'node:fs';
+import net from 'node:net';
+import os from 'node:os';
+import path from 'node:path';
+
+const MAX_FRAME_BYTES = 256 * 1024 * 1024;
+const DEFAULT_TIMEOUT_MS = 15_000;
+const DESKTOP_IPC_METHOD_VERSIONS = new Map([
+  ['thread-archived', 2],
+  ['thread-unarchived', 1],
+  ['thread-follower-start-turn', 1],
+  ['thread-follower-compact-thread', 1],
+  ['thread-follower-steer-turn', 1],
+  ['thread-follower-interrupt-turn', 1],
+  ['thread-follower-set-model-and-reasoning', 1],
+  ['thread-follower-set-collaboration-mode', 1],
+  ['thread-follower-edit-last-user-turn', 1],
+  ['thread-follower-command-approval-decision', 1],
+  ['thread-follower-file-approval-decision', 1],
+  ['thread-follower-permissions-request-approval-response', 1],
+  ['thread-follower-submit-user-input', 1],
+  ['thread-follower-submit-mcp-server-elicitation-response', 1],
+  ['thread-follower-set-queued-follow-ups-state', 1]
+]);
+
+export function desktopIpcMethodVersion(method) {
+  return DESKTOP_IPC_METHOD_VERSIONS.get(method) || 0;
+}
+
+export function desktopIpcSocketPath() {
+  if (process.platform === 'win32') {
+    return String.raw`\\.\pipe\codex-ipc`;
+  }
+  const uid = process.getuid?.();
+  return path.join(os.tmpdir(), 'codex-ipc', uid ? `ipc-${uid}.sock` : 'ipc.sock');
+}
+
+function frameFor(payload) {
+  const json = JSON.stringify(payload);
+  const size = Buffer.byteLength(json, 'utf8');
+  const frame = Buffer.alloc(4 + size);
+  frame.writeUInt32LE(size, 0);
+  frame.write(json, 4, 'utf8');
+  return frame;
+}
+
+function ipcError(message, code = 'CODEXMOBILE_DESKTOP_IPC_ERROR') {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
+
+export function getDesktopIpcSocketStatus(sockPath = desktopIpcSocketPath()) {
+  if (process.platform === 'win32') {
+    return { ok: true, socketPath: sockPath, reason: null };
+  }
+  try {
+    const stat = fsSync.statSync(sockPath);
+    if (!stat.isSocket()) {
+      return { ok: false, socketPath: sockPath, reason: `桌面端 IPC 路径不是 socket: ${sockPath}` };
+    }
+    return { ok: true, socketPath: sockPath, reason: null };
+  } catch (error) {
+    return {
+      ok: false,
+      socketPath: sockPath,
+      reason: error.code === 'ENOENT'
+        ? `桌面端 IPC socket 不存在: ${sockPath}`
+        : `无法访问桌面端 IPC socket: ${error.message}`
+    };
+  }
+}
+
+export class DesktopIpcClient {
+  constructor({ clientType = 'codexmobile', socketPath = desktopIpcSocketPath() } = {}) {
+    this.clientType = clientType;
+    this.socketPath = socketPath;
+    this.clientId = 'initializing-client';
+    this.socket = null;
+    this.buffer = Buffer.alloc(0);
+    this.nextFrameSize = null;
+    this.pending = new Map();
+  }
+
+  async connect({ timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+    if (this.socket?.writable) {
+      return this;
+    }
+    const status = getDesktopIpcSocketStatus(this.socketPath);
+    if (!status.ok) {
+      throw ipcError(status.reason || '桌面端 Codex IPC 未连接', 'CODEXMOBILE_DESKTOP_IPC_UNAVAILABLE');
+    }
+    await new Promise((resolve, reject) => {
+      const socket = net.createConnection(this.socketPath);
+      const timeout = setTimeout(() => {
+        socket.destroy();
+        reject(ipcError('连接桌面端 Codex IPC 超时', 'CODEXMOBILE_DESKTOP_IPC_TIMEOUT'));
+      }, timeoutMs);
+      socket.once('connect', () => {
+        clearTimeout(timeout);
+        this.socket = socket;
+        socket.on('data', (chunk) => this.handleData(chunk));
+        socket.on('close', () => this.rejectAll(ipcError('桌面端 Codex IPC 已断开', 'CODEXMOBILE_DESKTOP_IPC_CLOSED')));
+        socket.on('error', (error) => this.rejectAll(error));
+        resolve();
+      });
+      socket.once('error', (error) => {
+        clearTimeout(timeout);
+        reject(error);
+      });
+    });
+
+    const initialized = await this.request('initialize', { clientType: this.clientType }, { timeoutMs });
+    if (initialized?.resultType !== 'success' || initialized?.method !== 'initialize') {
+      throw ipcError(initialized?.error || '桌面端 Codex IPC 初始化失败');
+    }
+    this.clientId = initialized.result?.clientId || this.clientId;
+    return this;
+  }
+
+  async request(method, params =
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,180p' server/desktop-ipc-client.test.mjs`</summary>
+```
+Chunk ID: 2f3e46
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1148
+Output:
+/**
+ * 测试 server/desktop-ipc-client.js：IPC socket、方法版本与探测行为。
+ *
+ * Keywords: desktop-ipc, test, unix-socket
+ *
+ * Exports: 无导出，内含用例
+ *
+ * Inward: desktop-ipc-client.js
+ */
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import net from 'node:net';
+import os from 'node:os';
+import path from 'node:path';
+import test from 'node:test';
+import * as desktopIpc from './desktop-ipc-client.js';
+
+const { DesktopIpcClient, desktopIpcMethodVersion } = desktopIpc;
+
+test('desktop follower IPC methods use the current desktop protocol version', () => {
+  assert.equal(desktopIpcMethodVersion('initialize'), 0);
+  assert.equal(desktopIpcMethodVersion('thread-archived'), 2);
+  assert.equal(desktopIpcMethodVersion('thread-follower-start-turn'), 1);
+  assert.equal(desktopIpcMethodVersion('thread-follower-steer-turn'), 1);
+  assert.equal(desktopIpcMethodVersion('thread-follower-interrupt-turn'), 1);
+});
+
+function frameFor(payload) {
+  const json = JSON.stringify(payload);
+  const frame = Buffer.alloc(4 + Buffer.byteLength(json));
+  frame.writeUInt32LE(Buffer.byteLength(json), 0);
+  frame.write(json, 4);
+  return frame;
+}
+
+function readFrame(socket) {
+  return new Promise((resolve, reject) => {
+    let buffer = Buffer.alloc(0);
+    let expected = null;
+    const onData = (chunk) => {
+      buffer = Buffer.concat([buffer, chunk]);
+      if (expected == null && buffer.length >= 4) {
+        expected = buffer.readUInt32LE(0);
+        buffer = buffer.subarray(4);
+      }
+      if (expected != null && buffer.length >= expected) {
+        socket.off('data', onData);
+        resolve(JSON.parse(buffer.subarray(0, expected).toString('utf8')));
+      }
+    };
+    socket.on('data', onData);
+    socket.once('error', reject);
+  });
+}
+
+test('sendBroadcast writes desktop IPC broadcast frames', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-ipc-test-'));
+  const socketPath = path.join(dir, 'ipc.sock');
+  const server = net.createServer();
+  await new Promise((resolve) => server.listen(socketPath, resolve));
+
+  const accepted = new Promise((resolve) => server.once('connection', resolve));
+  const client = new DesktopIpcClient({ clientType: 'codexmobile-test', socketPath });
+  const connected = client.connect({ timeoutMs: 1000 });
+  const socket = await accepted;
+  const init = await readFrame(socket);
+  socket.write(frameFor({
+    type: 'response',
+    requestId: init.requestId,
+    resultType: 'success',
+    method: 'initialize',
+    result: { clientId: 'client-1' }
+  }));
+  await connected;
+
+  client.sendBroadcast('thread-archived', {
+    hostId: 'local',
+    conversationId: 'thread-1',
+    cwd: null
+  });
+  const broadcast = await readFrame(socket);
+
+  assert.equal(broadcast.type, 'broadcast');
+  assert.equal(broadcast.method, 'thread-archived');
+  assert.equal(broadcast.sourceClientId, 'client-1');
+  assert.equal(broadcast.version, 2);
+  assert.deepEqual(broadcast.params, {
+    hostId: 'local',
+    conversationId: 'thread-1',
+    cwd: null
+  });
+
+  client.close();
+  server.close();
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+test('broadcastDesktopThreadTitleUpdated writes desktop title update broadcast frames', async () => {
+  assert.equal(typeof desktopIpc.broadcastDesktopThreadTitleUpdated, 'function');
+
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-ipc-test-'));
+  const socketPath = path.join(dir, 'ipc.sock');
+  const server = net.createServer();
+  await new Promise((resolve) => server.listen(socketPath, resolve));
+
+  const accepted = new Promise((resolve) => server.once('connection', resolve));
+  const sent = desktopIpc.broadcastDesktopThreadTitleUpdated('thread-1', 'Renamed thread', {
+    hostId: 'local',
+    socketPath,
+    timeoutMs: 1000
+  });
+  const socket = await accepted;
+  const init = await readFrame(socket);
+  socket.write(frameFor({
+    type: 'response',
+    requestId: init.requestId,
+    resultType: 'success',
+    method: 'initialize',
+    result: { clientId: 'client-1' }
+  }));
+  const broadcast = await readFrame(socket);
+  const result = await sent;
+
+  assert.deepEqual(result, { sent: true });
+  assert.equal(broadcast.type, 'broadcast');
+  assert.equal(broadcast.method, 'thread-title-updated');
+  assert.equal(broadcast.sourceClientId, 'client-1');
+  assert.equal(broadcast.version, 0);
+  assert.deepEqual(broadcast.params, {
+    hostId: 'local',
+    conversationId: 'thread-1',
+    title: 'Renamed thread'
+  });
+
+  server.close();
+  await fs.rm(dir, { recursive: true, force: true });
+});
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,560p' server/codex-app-server.js`</summary>
+```
+Chunk ID: 0fbcb8
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 4102
+Output:
+/**
+ * 与本机 Codex.app / headless codex 子进程通信，查询桌面桥状态与 thread 列表。
+ *
+ * Keywords: codex-app-server, child-process, desktop-bridge, thread-api
+ *
+ * Exports:
+ * - resolveAppServerTransport / defaultServerRequestResult — 传输层与默认响应。
+ * - CodexAppServerClient / createCodexAppServerClient — 客户端构造。
+ * - getDesktopBridgeStatus — 当前桥接健康与能力摘要。
+ * - listDesktopThreads / readDesktopThread / setDesktopThreadName / archiveDesktopThread — Thread CRUD 辅助。
+ *
+ * Inward（本模块依赖/组装的关键符号）: desktop-ipc-client（广播/probe）、child_process.spawn。
+ *
+ * Outward（谁在用/调用场景）: codex-data、chat-delivery、session 读取。
+ *
+ * 不负责: 移动端 HTTP 路由。
+ */
+import { spawn } from 'node:child_process';
+import fsSync from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import readline from 'node:readline';
+import {
+  broadcastDesktopThreadArchived,
+  broadcastDesktopThreadTitleUpdated,
+  probeDesktopIpc
+} from './desktop-ipc-client.js';
+
+const DEFAULT_CODEX_APP_BINARY = '/Applications/Codex.app/Contents/Resources/codex';
+const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
+const DEFAULT_CONTROL_SOCKET = path.join(os.homedir(), '.codex', 'app-server-control', 'app-server-control.sock');
+const BRIDGE_STATUS_CACHE_MS = 2500;
+
+let bridgeStatusCache = null;
+
+function resolveCodexBinary() {
+  const candidates = [
+    process.env.CODEXMOBILE_CODEX_BINARY,
+    process.env.CODEX_BINARY,
+    DEFAULT_CODEX_APP_BINARY,
+    'codex'
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    if (candidate === 'codex' || fsSync.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return 'codex';
+}
+
+function responseError(message, method = '') {
+  const error = new Error(message || `Codex app-server request failed${method ? `: ${method}` : ''}`);
+  error.method = method;
+  return error;
+}
+
+function isEnabled(value) {
+  return /^(1|true|yes|on)$/i.test(String(value || '').trim());
+}
+
+function socketStatus(sockPath) {
+  if (!sockPath) {
+    return { ok: false, reason: '未找到桌面端 Codex app-server control socket' };
+  }
+  try {
+    const stat = fsSync.statSync(sockPath);
+    if (!stat.isSocket()) {
+      return { ok: false, reason: `桌面端 control socket 路径不是 socket: ${sockPath}` };
+    }
+    return { ok: true, sockPath };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error.code === 'ENOENT'
+        ? `桌面端 control socket 不存在: ${sockPath}`
+        : `无法访问桌面端 control socket: ${error.message}`
+    };
+  }
+}
+
+export function resolveAppServerTransport(env = process.env, { allowHeadlessLocal = false } = {}) {
+  const allowIsolated = isEnabled(env.CODEXMOBILE_ALLOW_ISOLATED_CODEX);
+  const disableHeadless = isEnabled(env.CODEXMOBILE_DISABLE_HEADLESS_CODEX);
+  const explicitSocket = String(env.CODEXMOBILE_CODEX_APP_SERVER_SOCK || '').trim();
+  const candidateSocket = explicitSocket || DEFAULT_CONTROL_SOCKET;
+  const candidate = socketStatus(candidateSocket);
+  if (candidate.ok) {
+    return {
+      mode: 'desktop-proxy',
+      strict: true,
+      sockPath: candidate.sockPath,
+      connected: true,
+      reason: null
+    };
+  }
+  if (allowIsolated) {
+    return {
+      mode: 'isolated-dev',
+      strict: false,
+      sockPath: null,
+      connected: true,
+      reason: 'CODEXMOBILE_ALLOW_ISOLATED_CODEX=1，正在使用独立开发 app-server'
+    };
+  }
+  if (allowHeadlessLocal && !disableHeadless) {
+    return {
+      mode: 'headless-local',
+      strict: false,
+      sockPath: null,
+      connected: true,
+      reason: '桌面端 Codex 未连接，正在使用后台 Codex 执行'
+    };
+  }
+  return {
+    mode: 'unavailable',
+    strict: true,
+    sockPath: candidateSocket,
+    connected: false,
+    reason: candidate.reason
+  };
+}
+
+function unavailableBridgeError(transport) {
+  const error = responseError(
+    `桌面端 Codex 未连接：${transport?.reason || '未找到可用 app-server control socket'}`,
+    'desktop-bridge'
+  );
+  error.statusCode = 503;
+  error.code = 'CODEXMOBILE_DESKTOP_BRIDGE_UNAVAILABLE';
+  error.transport = transport;
+  return error;
+}
+
+export function defaultServerRequestResult(message) {
+  switch (message?.method) {
+    case 'item/commandExecution/requestApproval':
+      return { decision: 'decline' };
+    case 'item/fileChange/requestApproval':
+      return { decision: 'decline' };
+    case 'item/permissions/requestApproval':
+      return { permissions: {}, scope: 'turn' };
+    case 'applyPatchApproval':
+    case 'execCommandApproval':
+      return { decision: 'denied' };
+    case 'item/tool/requestUserInput':
+      return { answers: {} };
+    case 'item/plan/requestImplementation':
+      return {};
+    case 'mcpServer/elicitation/request':
+      return { action: 'decline', content:
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '605,850p' server/chat-service.test.mjs`</summary>
+```
+Chunk ID: 560d63
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2134
+Output:
+test('sendChat can create a background thread when desktop-ipc cannot create desktop threads', async () => {
+  let runPayload = null;
+  const { service } = makeChatService({
+    getDesktopBridgeStatus: async () => ({
+      strict: true,
+      connected: true,
+      mode: 'desktop-ipc',
+      reason: null,
+      capabilities: {
+        sendToOpenDesktopThread: true,
+        createThread: false,
+        createThreadViaBackground: true,
+        backgroundCodex: true
+      }
+    }),
+    runCodexTurn: async (payload, emit) => {
+      runPayload = payload;
+      emit({ type: 'thread-started', sessionId: 'background-thread-1', previousSessionId: payload.draftSessionId, turnId: payload.turnId });
+      emit({ type: 'chat-complete', sessionId: 'background-thread-1', previousSessionId: payload.draftSessionId, turnId: payload.turnId });
+      return 'background-thread-1';
+    }
+  });
+
+  const result = await service.sendChat({
+    projectId: 'project-1',
+    draftSessionId: 'draft-project-1-1',
+    clientTurnId: 'client-turn',
+    message: '从手机后台新建'
+  });
+
+  assert.equal(result.accepted, true);
+  assert.equal(result.delivery, 'started');
+  assert.equal(result.desktopBridge.mode, 'headless-local');
+  assert.equal(runPayload.draftSessionId, 'draft-project-1-1');
+  assert.match(runPayload.message, /从手机后台新建/);
+});
+
+test('sendChat reuses a background-created thread alias for later desktop-ipc sends', async () => {
+  const runPayloads = [];
+  let desktopStarted = null;
+  const { service } = makeChatService({
+    getDesktopBridgeStatus: async () => ({
+      strict: true,
+      connected: true,
+      mode: 'desktop-ipc',
+      reason: null,
+      capabilities: {
+        sendToOpenDesktopThread: true,
+        createThread: false,
+        createThreadViaBackground: true,
+        backgroundCodex: true
+      }
+    }),
+    runCodexTurn: async (payload, emit) => {
+      runPayloads.push(payload);
+      emit({
+        type: 'thread-started',
+        sessionId: 'background-thread-1',
+        previousSessionId: payload.draftSessionId,
+        turnId: payload.turnId
+      });
+      emit({
+        type: 'chat-complete',
+        sessionId: 'background-thread-1',
+        previousSessionId: payload.draftSessionId,
+        turnId: payload.turnId
+      });
+      return 'background-thread-1';
+    },
+    startDesktopFollowerTurn: async (conversationId, params) => {
+      desktopStarted = { conversationId, params };
+      return { result: { turn: { id: 'desktop-turn-1' } } };
+    }
+  });
+
+  const first = await service.sendChat({
+    projectId: 'project-1',
+    draftSessionId: 'draft-project-1-1',
+    clientTurnId: 'client-turn-1',
+    message: '从手机后台新建'
+  });
+  await flushQueuedWork();
+
+  const second = await service.sendChat({
+    projectId: 'project-1',
+    draftSessionId: 'draft-project-1-1',
+    clientTurnId: 'client-turn-2',
+    message: '继续这条线程'
+  });
+
+  assert.equal(first.desktopBridge.mode, 'headless-local');
+  assert.equal(second.desktopBridge.mode, 'desktop-ipc');
+  assert.equal(second.sessionId, 'background-thread-1');
+  assert.equal(desktopStarted.conversationId, 'background-thread-1');
+  assert.match(desktopStarted.params.input.at(-1).text, /继续这条线程/);
+  assert.equal(runPayloads.length, 1);
+});
+
+test('sendChat registers new projectless background threads for mobile and desktop lists', async () => {
+  let runPayload = null;
+  let desktopRegistration = null;
+  let mobileRegistration = null;
+  const { service } = makeChatService({
+    getProject: () => ({
+      id: '__codexmobile_projectless__',
+      name: '普通对话',
+      path: '/tmp/codex-projectless',
+      projectless: true
+    }),
+    getDesktopBridgeStatus: async () => ({
+      strict: true,
+      connected: true,
+      mode: 'desktop-ipc',
+      reason: null,
+      capabilities: {
+        sendToOpenDesktopThread: true,
+        createThread: false,
+        createThreadViaBackground: true,
+        backgroundCodex: true
+      }
+    }),
+    runCodexTurn: async (payload, emit) => {
+      runPayload = payload;
+      emit({
+        type: 'thread-started',
+        sessionId: 'projectless-thread-1',
+        previousSessionId: payload.draftSessionId,
+        turnId: payload.turnId,
+        startedAt: '2026-05-07T08:00:00.000Z'
+      });
+      emit({
+        type: 'chat-complete',
+        sessionId: 'projectless-thread-1',
+        previousSessionId: payload.draftSessionId,
+        turnId: payload.turnId
+      });
+      return 'projectless-thread-1';
+    },
+    registerProjectlessThread: async (threadId, workspaceRoot) => {
+      desktopRegistration = { threadId, workspaceRoot };
+    },
+    registerMobileSession: async (session) => {
+      mobileRegistration = session;
+    }
+  });
+
+  const result = await service.sendChat({
+    projectId: '__codexmobile_projectless__',
+    draftSessionId: 'draft-projectless-1',
+    cli
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "thread-title-updated|thread-archived|thread-unarchived|thread-follower|client-discovery|inactive_thread|notLoaded|reload|refresh|thread.*created|conversationId" /Applications/Codex.app/Contents -g '*.{js,mjs,cjs,ts,tsx,json}'`</summary>
+```
+Chunk ID: 0d9198
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 84407
+Output:
+Total output lines: 8
+
+/Applications/Codex.app/Contents/Resources/plugins/openai-bundled/plugins/chrome/scripts/browser-client.mjs:40:Error:`,o)}}var Fc=null;function um(t){let e="error";Yr(e,t),Zr(e,cE)}function cE(){Fc=U.onerror,U.onerror=function(t,e,r,n,o){return Jr("error",{column:n,error:o,line:r,msg:t,url:e}),Fc?Fc.apply(this,arguments):!1},U.onerror.__SENTRY_INSTRUMENTED__=!0}var Oc=null;function cm(t){let e="unhandledrejection";Yr(e,t),Zr(e,lE)}function lE(){Oc=U.onunhandledrejection,U.onunhandledrejection=function(t){return Jr("unhandledrejection",t),Oc?Oc.apply(this,arguments):!0},U.onunhandledrejection.__SENTRY_INSTRUMENTED__=!0}var lm=Object.prototype.toString;function ze(t){switch(lm.call(t)){case"[object Error]":case"[object Exception]":case"[object DOMException]":case"[object WebAssembly.Exception]":return!0;default:return Ge(t,Error)}}function es(t,e){return lm.call(t)===`[object ${e}]`}function Bc(t){return es(t,"ErrorEvent")}function Mt(t){return es(t,"String")}function Xr(t){return typeof t=="object"&&t!==null&&"__sentry_template_string__"in t&&"__sentry_template_values__"in t}function sr(t){return t===null||Xr(t)||typeof t!="object"&&typeof t!="function"}function mt(t){return es(t,"Object")}function Uc(t){return typeof Event<"u"&&Ge(t,Event)}function jc(t){return typeof Element<"u"&&Ge(t,Element)}function qc(t){return es(t,"RegExp")}function He(t){return!!(t?.then&&typeof t.then=="function")}function $c(t){return mt(t)&&"nativeEvent"in t&&"preventDefault"in t&&"stopPropagation"in t}function Ge(t,e){try{return t instanceof e}catch{return!1}}function vo(t){return!!(typeof t=="object"&&t!==null&&(t.__isVue||t._isVue||t.__v_isVNode))}var dE=U,pE=80;function dm(t,e={}){if(!t)return"<unknown>";try{let r=t,n=5,o=[],i=0,s=0,a=" > ",u=a.length,c,d=Array.isArray(e)?e:e.keyAttrs,p=!Array.isArray(e)&&e.maxStringLength||pE;for(;r&&i++<n&&(c=fE(r,d),!(c==="html"||i>1&&s+o.length*u+c.length>=p));)o.push(c),s+=c.length,r=r.parentNode;return o.reverse().join(a)}catch{return"<unknown>"}}function fE(t,e){let r=t,n=[];if(!r?.tagName)return"";if(dE.HTMLElement&&r instanceof HTMLElement&&r.dataset){if(r.dataset.sentryComponent)return r.dataset.sentryComponent;if(r.dataset.sentryElement)return r.dataset.sentryElement}n.push(r.tagName.toLowerCase());let o=e?.length?e.filter(i=>r.getAttribute(i)).map(i=>[i,r.getAttribute(i)]):null;if(o?.length)o.forEach(i=>{n.push(`[${i[0]}="${i[1]}"]`)});else{r.id&&n.push(`#${r.id}`);let i=r.className;if(i&&Mt(i)){let s=i.split(/\s+/);for(let a of s)n.push(`.${a}`)}}for(let i of["aria-label","type","name","title","alt"]){let s=r.getAttribute(i);s&&n.push(`[${i}="${s}"]`)}return n.join("")}function mm(t,e,r){if(!(e in t))return;let n=t[e];if(typeof n!="function")return;let o=r(n);typeof o=="function"&&mE(o,n);try{t[e]=o}catch{I&&y.log(`Failed to replace method "${e}" in object`,t)}}function So(t,e,r){try{Object.defineProperty(t,e,{value:r,writable:!0,configurable:!0})}catch{I&&y.log(`Failed to add non-enumerable property "${e}" to object`,t)}}function mE(t,e){try{let r=e.prototype||{};t.prototype=e.prototype=r,So(t,"__sentry_original__",e)}catch{}}function hm(t){return t.__sentry_original__}function zc(t){if(ze(t))return{message:t.message,name:t.name,stack:t.stack,...fm(t)};if(Uc(t)){let e={type:t.type,target:pm(t.target),currentTarget:pm(t.currentTarget),...fm(t)};return typeof CustomEvent<"u"&&Ge(t,CustomEvent)&&(e.detail=t.detail),e}else return t}function pm(t){try{return jc(t)?dm(t):Object.prototype.toString.call(t)}catch{return"<unknown>"}}function fm(t){return typeof t=="object"&&t!==null?Object.fromEntries(Object.entries(t)):{}}function gm(t){let e=Object.keys(zc(t));return e.sort(),e[0]?e.join(", "):"[object has no keys]"}var Qr;function en(t){if(Qr!==void 0)return Qr?Qr(t):t();let e=Symbol.for("__SENTRY_SAFE_RANDOM_ID_WRAPPER__"),r=U;return e in r&&typeof r[e]=="function"?(Qr=r[e],Qr(t)):(Qr=null,t())}function pe(){return en(()=>Math.random())}function tn(){return en(()=>Date.now())}function rn(t,e=0){return typeof t!="string"||e===0||t.length<=e?t:`${t.slice(0,e)}...`}function Hc(t,e){let r=t,n=r.length;if(n<=150)return r;e>n&&(e=n);let o=Math.max(e-60,0);o<5&&(o=0);let i=Math.min(o+140,n);return i>n-5&&(i=n),i===n&&(o=Math.max(i-140,0)),r=r.slice(o,i),o>0&&(r=`'{snip} ${r}`),i<n&&(r+=" {snip}"),r}function Gc(t,e){if(!Array.isArray(t))return"";let r=[];for(let n=0;n<t.length;n++){let o=t[n];try{vo(o)?r.push(Xi(o)):r.push(String(o))}catch{r.push("[value cannot be serialized]")}}return r.join(e)}function ht(t,e,r=!1){return Mt(t)?qc(e)?e.test(t):Mt(e)?r?t===e:t.includes(e):typeof e=="function"?e(t):!1:!1}function Lt(t,e=[],r=!1){return e.some(n=>ht(t,n,r))}function hE(){let t=U;return t.crypto||t.msCrypto}var Vc;function gE(){return pe()*16}function X(t=hE()){try{if(t?.randomUUID)return en(()=>t.randomUUID()).replace(/-/g,"")}catch{}return Vc||(Vc="10000000100040008
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `find /Applications/Codex.app/Contents -maxdepth 4 -type f \( -name '*.js' -o -name '*.mjs' -o -name '*.json' \) | sed -n '1,120p'`</summary>
+```
+Chunk ID: 6f3906
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `find /Applications/Codex.app/Contents/Resources -maxdepth 3 -type f | sed -n '1,200p'`</summary>
+```
+Chunk ID: 03007b
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 263
+Output:
+/Applications/Codex.app/Contents/Resources/electron.icns
+/Applications/Codex.app/Contents/Resources/app.asar
+/Applications/Codex.app/Contents/Resources/native/sparkle.node
+/Applications/Codex.app/Contents/Resources/native/browser-use-peer-authorization.node
+/Applications/Codex.app/Contents/Resources/native/bare-modifier-monitor
+/Applications/Codex.app/Contents/Resources/native/remote-control-device-key.node
+/Applications/Codex.app/Contents/Resources/native/launch-services-helper
+/Applications/Codex.app/Contents/Resources/codex
+/Applications/Codex.app/Contents/Resources/node_repl
+/Applications/Codex.app/Contents/Resources/rg
+/Applications/Codex.app/Contents/Resources/Assets.car
+/Applications/Codex.app/Contents/Resources/THIRD_PARTY_NOTICES.txt
+/Applications/Codex.app/Contents/Resources/codexTemplate@2x.png
+/Applications/Codex.app/Contents/Resources/node
+/Applications/Codex.app/Contents/Resources/codex-notification.wav
+/Applications/Codex.app/Contents/Resources/codexTemplate.png
+/Applications/Codex.app/Contents/Resources/codex_chronicle
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:45Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node -e "try{console.log(require.resolve('@electron/asar'))}catch(e){console.error('no asar')}"`</summary>
+```
+Chunk ID: 469423
+Wall time: 0.0816 seconds
+Process exited with code 0
+Original token count: 2
+Output:
+no asar
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:45Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `strings /Applications/Codex.app/Contents/Resources/app.asar | rg -n "thread-title-updated|thread-archived|thread-unarchived|thread-follower|thread-created|thread.*reload|refresh|reload|client-discovery"`</summary>
+```
+Chunk ID: d6975d
+Wall time: 0.7862 seconds
+Process exited with code 0
+Original token count: 2262356
+Output:
+Total output lines: 2969
+
+1:{"files":{".vite":{"files":{"build":{"files":{"app-session-tZw_L1R0.js":{"size":4433277,"offset":"0","integrity":{"algorithm":"SHA256","hash":"0939571ec52b9af080753e37fee9726ecb8c4b4ca80d3417f1eaec0ee13fbeb6","blockSize":4194304,"blocks":["9f5b37ef9fd3a18b371fdb3f37b35494d9bcefee9e25f52ffcbcd5fbd7378ae9","442a22c89e2424689918d60716d53fc2f4eb7df0ccadbf732aee3e2c8cb0ad5b"]}},"bootstrap.js":{"size":3754,"offset":"4433277","integrity":{"algorithm":"SHA256","hash":"2a05917f1820c606c7dc862ff5c71a4d451629a177fa1bb99ac40dd26a85f83a","blockSize":4194304,"blocks":["2a05917f1820c606c7dc862ff5c71a4d451629a177fa1bb99ac40dd26a85f83a"]}},"comment-preload.js":{"size":35642178,"offset":"4437031","integrity":{"algorithm":"SHA256","hash":"802f8be4d53fa441086b70f408480c8912cf87b18435dc73a1f3c05dbbff14ea","blockSize":4194304,"blocks":["4cc8702c4f67659b50d5a3fd1a6bf52b705552b2e29dd88b8dd0a3c903ebe6dd","7f4bc1c29f72275590756120b683c3f6ef8f5a7fef0078eb482145e95e086ded","16c9c56a407a2c9bd60f8bf393ccf84146bc70451b9797b95b4621c01688e351","2a9d9d900b73b1323d5d3fc400693fe65c1d276b5dee16b8e08a88737dd8db53","b4ca79dc38f7f575994c0c92f28b7734d7cfca9b3fe30900d913a6690c1594d6","1e9b0ff192d33ea2fc70626589209c13d71abcc5e7eb824ec45f66ac624bde9a","f1f8ae67933a4d1c15e5c5a2ca3b1723ee502d2b8e54d6a8624047f3c36bc11b","8b5e1b734a7696a64af2e989715ab88f9091863d679219c7d037750135e4ba18","a431f0c2863b34d2ecdf9758a1306ea354e6cae669f80beb7bc98f5b069e1978"]}},"main-DnQgBHvi.js":{"size":1173347,"offset":"40079209","integrity":{"algorithm":"SHA256","hash":"974c537bbc1e20219e667fd7d1c53164de64a3c33f81792d35d50cdfa64bc2cd","blockSize":4194304,"blocks":["974c537bbc1e20219e667fd7d1c53164de64a3c33f81792d35d50cdfa64bc2cd"]}},"preload.js":{"size":2374,"offset":"41252556","integrity":{"algorithm":"SHA256","hash":"f5fce8d08b6d92fa9514397814932cceb09a1de56ba873364275b75a5a2ae179","blockSize":4194304,"blocks":["f5fce8d08b6d92fa9514397814932cceb09a1de56ba873364275b75a5a2ae179"]}},"sandbox-preload.js":{"size":1978,"offset":"41254930","integrity":{"algorithm":"SHA256","hash":"3458600f713ff170864db47c01c727ed4bc5d74202c0b43e76f94c8217be3ece","blockSize":4194304,"blocks":["3458600f713ff170864db47c01c727ed4bc5d74202c0b43e76f94c8217be3ece"]}},"trace-recording-sentry-upload-CHIY5YpW.js":{"size":3415,"offset":"41256908","integrity":{"algorithm":"SHA256","hash":"fb2e0469019346237bb1c461e4ab71abeb3f28148ef0f906a0735daac8c3243d","blockSize":4194304,"blocks":["fb2e0469019346237bb1c461e4ab71abeb3f28148ef0f906a0735daac8c3243d"]}},"worker.js":{"size":1268866,"offset":"41260323","integrity":{"algorithm":"SHA256","hash":"e0a451f6762322bf664b7a288f1dd9b145bae207b6ee3aad35b6c0349ff157c4","blockSize":4194304,"blocks":["e0a451f6762322bf664b7a288f1dd9b145bae207b6ee3aad35b6c0349ff157c4"]}},"workspace-root-drop-handler-CVOJlSpQ.js":{"size":856756,"offset":"42529189","integrity":{"algorithm":"SHA256","hash":"aeaa56c5518bdc8e8ae9c7a9ce8c41261e1c5501c5dc117f48216886f279ff87","blockSize":4194304,"blocks":["aeaa56c5518bdc8e8ae9c7a9ce8c41261e1c5501c5dc117f48216886f279ff87"]}}}}}},"native-menu-locales":{"files":{"am.json":{"size":3270,"offset":"43385945","integrity":{"algorithm":"SHA256","hash":"f5fcb09ce305f0156e0151a647077c9608ee9bccd9d180352827db4f3e28c62f","blockSize":4194304,"blocks":["f5fcb09ce305f0156e0151a647077c9608ee9bccd9d180352827db4f3e28c62f"]}},"ar.json":{"size":2894,"offset":"43389215","integrity":{"algorithm":"SHA256","hash":"79af54dab0930a5ce9ff2d93355ad66f6d3b75fc8ba84547f964c6c100285d5c","blockSize":4194304,"blocks":["79af54dab0930a5ce9ff2d93355ad66f6d3b75fc8ba84547f964c6c100285d5c"]}},"bg-BG.json":{"size":3393,"offset":"43392109","integrity":{"algorithm":"SHA256","hash":"33e24d9e5c92c956078a13536e23d67d61c4864fa8e9aa0c38b7978fdb644d01","blockSize":4194304,"blocks":["33e24d9e5c92c956078a13536e23d67d61c4864fa8e9aa0c38b7978fdb644d01"]}},"bn-BD.json":{"size":4356,"offset":"43395502","integrity":{"algorithm":"SHA256","hash":"1a4fe430a1761cb1cb6512c111bd7a3e367b671dd9d6d047fe1dc2e2ce05ab0f","blockSize":4194304,"blocks":["1a4fe430a1761cb1cb6512c111bd7a3e367b671dd9d6d047fe1dc2e2ce05ab0f"]}},"bs-BA.json":{"size":2345,"offset":"43399858","integrity":{"algorithm":"SHA256","hash":"c7fe52939f88688107e7bb8ba8b1a0b7e5964eaaad69a3b1a97f9978704c208c","blockSize":4194304,"blocks":["c7fe52939f88688107e7bb8ba8b1a0b7e5964eaaad69a3b1a97f9978704c208c"]}},"ca-ES.json":{"size":2590,"offset":"43402203","integrity":{"algorithm":"SHA256","hash":"991000ed59ee14dd5a15836539413fcd9a8e16fe953c59cf1c8260b9436b7b3c","blockSize":4194304,"blocks":["991000ed59ee14dd5a15836539413fcd9a8e16fe953c59cf1c8260b9436b7b3c"]}},"cs-CZ.json":{"size":2448,"offset":"43404793","integrity":{"algorithm":"SHA256","hash":"0b9f12077ddc22db20e246de910fcab0ecd32951823e787f8d3ba6921bd4d29a","blockSize":4194304,"blocks":["0b9f12077ddc22db20e246de910fcab0ecd32951823e787f8d3ba6921bd4d29a"]}},"da-DK.json":{"size
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:36:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `xxd -l 32 /Applications/Codex.app/Contents/Resources/app.asar`</summary>
+```
+Chunk ID: ee6293
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 34
+Output:
+00000000: 0400 0000 f4ac 0500 f0ac 0500 ecac 0500  ................
+00000010: 7b22 6669 6c65 7322 3a7b 222e 7669 7465  {"files":{".vite
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:37:00Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command**</summary>
+```bash
+node - <<'NODE'
+const fs=require('fs'); const asar='/Applications/Codex.app/Contents/Resources/app.asar'; const b=fs.readFileSync(asar); const headerSize=b.readUInt32LE(8); const header=JSON.parse(b.subarray(16,16+headerSize).toString()); function find(node,p=''){ if(node.files){ for(const [k,v] of Object.entries(node.files)) find(v,p?`${p}/${k}`:k)} else console.log(p,node.size,node.offset); } find(header);
+NODE
+```
+```
+Chunk ID: 31b725
+Wall time: 0.0000 seconds
+Process exited with code 1
+Original token count: 16389
+Output:
+Total output lines: 3
+
+<anonymous_script>:1
+{"files":{".vite":{"files":{"build":{"files":{"app-session-tZw_L1R0.js":{"size":4433277,"offset":"0","integrity":{"algorithm":"SHA256","hash":"0939571ec52b9af080753e37fee9726ecb8c4b4ca80d3417f1eaec0ee13fbeb6","blockSize":4194304,"blocks":["9f5b37ef9fd3a18b371fdb3f37b35494d9bcefee9e25f52ffcbcd5fbd7378ae9","442a22c89e2424689918d60716d53fc2f4eb7df0ccadbf732aee3e2c8cb0ad5b"]}},"bootstrap.js":{"size":3754,"offset":"4433277","integrity":{"algorithm":"SHA256","hash":"2a05917f1820c606c7dc862ff5c71a4d451629a177fa1bb99ac40dd26a85f83a","blockSize":4194304,"blocks":["2a05917f1820c606c7dc862ff5c71a4d451629a177fa1bb99ac40dd26a85f83a"]}},"comment-preload.js":{"size":35642178,"offset":"4437031","integrity":{"algorithm":"SHA256","hash":"802f8be4d53fa441086b70f408480c8912cf87b18435dc73a1f3c05dbbff14ea","blockSize":4194304,"blocks":["4cc8702c4f67659b50d5a3fd1a6bf52b705552b2e29dd88b8dd0a3c903ebe6dd","7f4bc1c29f72275590756120b683c3f6ef8f5a7fef0078eb482145e95e086ded","16c9c56a407a2c9bd60f8bf393ccf84146bc70451b9797b95b4621c01688e351","2a9d9d900b73b1323d5d3fc400693fe65c1d276b5dee16b8e08a88737dd8db53","b4ca79dc38f7f575994c0c92f28b7734d7cfca9b3fe30900d913a6690c1594d6","1e9b0ff192d33ea2fc70626589209c13d71abcc5e7eb824ec45f66ac624bde9a","f1f8ae67933a4d1c15e5c5a2ca3b1723ee502d2b8e54d6a8624047f3c36bc11b","8b5e1b734a7696a64af2e989715ab88f9091863d679219c7d037750135e4ba18","a431f0c2863b34d2ecdf9758a1306ea354e6cae669f80beb7bc98f5b069e1978"]}},"main-DnQgBHvi.js":{"size":1173347,"offset":"40079209","integrity":{"algorithm":"SHA256","hash":"974c537bbc1e20219e667fd7d1c53164de64a3c33f81792d35d50cdfa64bc2cd","blockSize":4194304,"blocks":["974c537bbc1e20219e667fd7d1c53164de64a3c33f81792d35d50cdfa64bc2cd"]}},"preload.js":{"size":2374,"offset":"41252556","integrity":{"algorithm":"SHA256","hash":"f5fce8d08b6d92fa9514397814932cceb09a1de56ba873364275b75a5a2ae179","blockSize":4194304,"blocks":["f5fce8d08b6d92fa9514397814932cceb09a1de56ba873364275b75a5a2ae179"]}},"sandbox-preload.js":{"size":1978,"offset":"41254930","integrity":{"algorithm":"SHA256","hash":"3458600f713ff170864db47c01c727ed4bc5d74202c0b43e76f94c8217be3ece","blockSize":4194304,"blocks":["3458600f713ff170864db47c01c727ed4bc5d74202c0b43e76f94c8217be3ece"]}},"trace-recording-sentry-upload-CHIY5YpW.js":{"size":3415,"offset":"41256908","integrity":{"algorithm":"SHA256","hash":"fb2e0469019346237bb1c461e4ab71abeb3f28148ef0f906a0735daac8c3243d","blockSize":4194304,"blocks":["fb2e0469019346237bb1c461e4ab71abeb3f28148ef0f906a0735daac8c3243d"]}},"worker.js":{"size":1268866,"offset":"41260323","integrity":{"algorithm":"SHA256","hash":"e0a451f6762322bf664b7a288f1dd9b145bae207b6ee3aad35b6c0349ff157c4","blockSize":4194304,"blocks":["e0a451f6762322bf664b7a288f1dd9b145bae207b6ee3aad35b6c0349ff157c4"]}},"workspace-root-drop-handler-CVOJlSpQ.js":{"size":856756,"offset":"42529189","integrity":{"algorithm":"SHA256","hash":"aeaa56c5518bdc8e8ae9c7a9ce8c41261e1c5501c5dc117f48216886f279ff87","blockSize":4194304,"blocks":["aeaa56c5518bdc8e8ae9c7a9ce8c41261e1c5501c5dc117f48216886f279ff87"]}}}}}},"native-menu-locales":{"files":{"am.json":{"size":3270,"offset":"43385945","integrity":{"algorithm":"SHA256","hash":"f5fcb09ce305f0156e0151a647077c9608ee9bccd9d180352827db4f3e28c62f","blockSize":4194304,"blocks":["f5fcb09ce305f0156e0151a647077c9608ee9bccd9d180352827db4f3e28c62f"]}},"ar.json":{"size":2894,"offset":"43389215","integrity":{"algorithm":"SHA256","hash":"79af54dab0930a5ce9ff2d93355ad66f6d3b75fc8ba84547f964c6c100285d5c","blockSize":4194304,"blocks":["79af54dab0930a5ce9ff2d93355ad66f6d3b75fc8ba84547f964c6c100285d5c"]}},"bg-BG.json":{"size":3393,"offset":"43392109","integrity":{"algorithm":"SHA256","hash":"33e24d9e5c92c956078a13536e23d67d61c4864fa8e9aa0c38b7978fdb644d01","blockSize":4194304,"blocks":["33e24d9e5c92c956078a13536e23d67d61c4864fa8e9aa0c38b7978fdb644d01"]}},"bn-BD.json":{"size":4356,"offset":"43395502","integrity":{"algorithm":"SHA256","hash":"1a4fe430a1761cb1cb6512c111bd7a3e367b671dd9d6d047fe1dc2e2ce05ab0f","blockSize":4194304,"blocks":["1a4fe430a1761cb1cb6512c111bd7a3e367b671dd9d6d047fe1dc2e2ce05ab0f"]}},"bs-BA.json":{"size":2345,"offset":"43399858","integrity":{"algorithm":"SHA256","hash":"c7fe52939f88688107e7bb8ba8b1a0b7e5964eaaad69a3b1a97f9978704c208c","blockSize":4194304,"blocks":["c7fe52939f88688107e7bb8ba8b1a0b7e5964eaaad69a3b1a97f9978704c208c"]}},"ca-ES.json":{"size":2590,"offset":"43402203","integrity":{"algorithm":"SHA256","hash":"991000ed59ee14dd5a15836539413fcd9a8e16fe953c59cf1c8260b9436b7b3c","blockSize":4194304,"blocks":["991000ed59ee14dd5a15836539413fcd9a8e16fe953c59cf1c8260b9436b7b3c"]}},"cs-CZ.json":{"size":2448,"offset":"43404793","integrity":{"algorithm":"SHA256","hash":"0b9f12077ddc22db20e246de910fcab0ecd32951823e787f8d3ba6921bd4d29a","blockSize":4194304,"blocks":["0b9f12077ddc22db20e246de910fcab0ecd32951823e787f8d3ba6921bd4d29a"]}},"da-D
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:37:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command**</summary>
+```bash
+node - <<'NODE'
+const fs=require('fs'); const b=fs.readFileSync('/Applications/Codex.app/Contents/Resources/app.asar'); for (const off of [4,8,12]) {const len=b.readUInt32LE(off); console.log(off,len,b.subarray(16,16+len).at(-1)); try{ const h=JSON.parse(b.subarray(16,16+len).toString()); console.log('parsed', off, Object.keys(h.files).slice(0,5));}catch(e){console.log('fail', off, e.message)}}
+NODE
+```
+```
+Chunk ID: 04a9f1
+Wall time: 0.1844 seconds
+Process exited with code 0
+Original token count: 82
+Output:
+4 371956 98
+fail 4 Unexpected non-whitespace character after JSON at position 371948 (line 1 column 371949)
+8 371952 32
+fail 8 Unexpected non-whitespace character after JSON at position 371948 (line 1 column 371949)
+12 371948 125
+parsed 12 [
+  '.vite',
+  'native-menu-locales',
+  'node_modules',
+  'package.json',
+  'skills'
+]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:37:17Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command**</summary>
+```bash
+node - <<'NODE'
+const fs=require('fs'); const path='/Applications/Codex.app/Contents/Resources/app.asar'; const b=fs.readFileSync(path); const headerSize=b.readUInt32LE(12); const header=JSON.parse(b.subarray(16,16+headerSize).toString()); const base=16+b.readUInt32LE(8); function nodeFor(p){let n=header; for(const part of p.split('/')) n=n.files[part]; return n;} for(const p of ['.vite/build/app-session-tZw_L1R0.js','.vite/build/main-DnQgBHvi.js','.vite/build/worker.js']){ const n=nodeFor(p); const text=b.subarray(base+Number(n.offset),base+Number(n.offset)+n.size).toString(); console.log('\nFILE',p,'size',n.size); for(const needle of ['thread-title-updated','thread-archived','thread-unarchived','thread-follower-start-turn','thread-created','thread/loaded/list','use-navigate-to-local-conversation','navigate-to-local','openLocalConversation','route']){ const idx=text.indexOf(needle); if(idx>=0) console.log('needle',needle,'idx',idx,'snippet',text.slice(Math.max(0,idx-240),idx+500).replace(/\n/g,' ')); }
+}
+NODE
+```
+```
+Chunk ID: 2a353d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1797
+Output:
+
+FILE .vite/build/app-session-tZw_L1R0.js size 4433277
+needle thread-archived idx 238824 snippet l}}var dh={CHANGED:`inbox-items-changed`},fh={DIFF:`diff`,BROWSER:`browser`,PDF:`pdf`};function ph(e,t){return{...e,origin:t}}var mh={NEW_TAB_PAGE:`new-tab-page`,WEB:`web`},hh={"thread-stream-state-changed":6,"thread-read-state-changed":1,"thread-archived":2,"thread-unarchived":1,"thread-follower-start-turn":1,"thread-follower-compact-thread":1,"thread-follower-steer-turn":1,"thread-follower-interrupt-turn":1,"thread-follower-set-model-and-reasoning":1,"thread-follower-set-collaboration-mode":1,"thread-follower-edit-last-user-turn":1,"thread-follower-command-approval-decision":1,"thread-follower-file-approval-decision":1,"thread-follower-permissions-request-approval-response":1,"thread-follower-submit-user-input":1,"thread-followe
+needle thread-unarchived idx 238844 snippet inbox-items-changed`},fh={DIFF:`diff`,BROWSER:`browser`,PDF:`pdf`};function ph(e,t){return{...e,origin:t}}var mh={NEW_TAB_PAGE:`new-tab-page`,WEB:`web`},hh={"thread-stream-state-changed":6,"thread-read-state-changed":1,"thread-archived":2,"thread-unarchived":1,"thread-follower-start-turn":1,"thread-follower-compact-thread":1,"thread-follower-steer-turn":1,"thread-follower-interrupt-turn":1,"thread-follower-set-model-and-reasoning":1,"thread-follower-set-collaboration-mode":1,"thread-follower-edit-last-user-turn":1,"thread-follower-command-approval-decision":1,"thread-follower-file-approval-decision":1,"thread-follower-permissions-request-approval-response":1,"thread-follower-submit-user-input":1,"thread-follower-submit-mcp-server-
+needle thread-follower-start-turn idx 238866 snippet fh={DIFF:`diff`,BROWSER:`browser`,PDF:`pdf`};function ph(e,t){return{...e,origin:t}}var mh={NEW_TAB_PAGE:`new-tab-page`,WEB:`web`},hh={"thread-stream-state-changed":6,"thread-read-state-changed":1,"thread-archived":2,"thread-unarchived":1,"thread-follower-start-turn":1,"thread-follower-compact-thread":1,"thread-follower-steer-turn":1,"thread-follower-interrupt-turn":1,"thread-follower-set-model-and-reasoning":1,"thread-follower-set-collaboration-mode":1,"thread-follower-edit-last-user-turn":1,"thread-follower-command-approval-decision":1,"thread-follower-file-approval-decision":1,"thread-follower-permissions-request-approval-response":1,"thread-follower-submit-user-input":1,"thread-follower-submit-mcp-server-elicitation-response":
+needle route idx 247449 snippet a":!0,"item/reasoning/summaryPartAdded":!0,"item/reasoning/textDelta":!0,"thread/compacted":!1,deprecationNotice:!0,configWarning:!0,"windows/worldWritableWarning":!1,"windowsSandbox/setupCompleted":!0,"account/login/completed":!0,"model/rerouted":!0,"model/verification":!0,authStatusChange:!1,loginChatGptComplete:!1,sessionConfigured:!0,"codex/event/session_configured":!0,"codex/event/task_started":!1,"codex/event/agent_reasoning":!1,"codex/event/agent_message":!1,"codex/event/task_complete":!1,"codex/event/mcp_tool_call_begin":!1,"codex/event/mcp_tool_call_end":!1,"codex/event/exec_command_begin":!1,"codex/event/exec_command_end":!1,"codex/event/exec_command_output_delta":!1,"codex/event/exec_approval_request":!1,"codex/event/ap
+
+FILE .vite/build/main-DnQgBHvi.js size 1173347
+needle thread-archived idx 718774 snippet ktree:i.cleanupWorktree,replacementOwnerThreadId:i.replacementOwnerThreadId,replacementOwnerCwd:i.replacementOwnerCwd});break;case`unarchive-thread`:this.getAppServerConnection(i.hostId).registerUnarchiveThread(i.conversationId);break;case`thread-archived`:{let e=this.getIpcClientForWebContents(r);e&&await e.sendBroadcast(`thread-archived`,{hostId:i.hostId,conversationId:i.conversationId,cwd:i.cwd});break}case`thread-unarchived`:{let e=this.getIpcClientForWebContents(r);e&&await e.sendBroadcast(`thread-unarchived`,{hostId:i.hostId,conversationId:i.conversationId});break}case`thread-queued-followups-changed`:{let e=this.getIpcClientForWebContents(r);e&&await e.sendBroadcast(`thread-queued-followups-changed`,{conversationId:i.conver
+needle thread-unarchived idx 718948 snippet on(i.hostId).registerUnarchiveThread(i.conversationId);break;case`thread-archived`:{let e=this.getIpcClientForWebContents(r);e&&await e.sendBroadcast(`thread-archived`,{hostId:i.hostId,conversationId:i.conversationId,cwd:i.cwd});break}case`thread-unarchived`:{let e=this.getIpcClientForWebContents(r);e&&await e.sendBroadcast(`thread-unarchived`,{hostId:i.hostId,conversationId:i.conversationId});break}case`thread-queued-followups-changed`:{let e=this.getIpcClientForWebContents(r);e&&await e.sendBroadcast(`thread-queued-followups-changed`,{conversationId:i.conversationId,messages:i.messages});break}case`thread-stream-state-changed`:{let e=this.getIpcClientForWebContents(r);e&&await e.sendBroadcast(`thread-stream-state-changed`,i);bre
+needle thread-follower-start-turn idx 709835 snippet curity?Privacy_ScreenCapture`,WL=`x-
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:37:26Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command**</summary>
+```bash
+node - <<'NODE'
+const fs=require('fs'); const b=fs.readFileSync('/Applications/Codex.app/Contents/Resources/app.asar'); const headerSize=b.readUInt32LE(12); const base=16+b.readUInt32LE(8); const header=JSON.parse(b.subarray(16,16+headerSize).toString()); function n(p){let x=header; for(const part of p.split('/')) x=x.files[part]; return x;} const files=['.vite/build/app-session-tZw_L1R0.js','.vite/build/main-DnQgBHvi.js']; for(const p of files){const meta=n(p); const text=b.subarray(base+Number(meta.offset),base+Number(meta.offset)+meta.size).toString(); console.log('\nFILE',p); for(const needle of ['thread-stream-state-changed','thread-read-state-changed','thread-queued-followups-changed','thread-title-updated','sendBroadcast(`thread-stream-state-changed','case`thread-stream-state-changed`','registerArchiveThread','registerUnarchiveThread','registerThread','refreshThreads','thread/list']){ let start=0, count=0; while(true){const idx=text.indexOf(needle,start); if(idx<0) break; count++; if(count<=6) console.log('\nneedle',needle,'idx',idx,'snippet:',text.slice(Math.max(0,idx-500),idx+900).replace(/\n/g,' ')); start=idx+needle.length; } if(count>6) console.log('... total',count); }
+}
+NODE
+```
+```
+Chunk ID: aff63d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 6203
+Output:
+
+FILE .vite/build/app-session-tZw_L1R0.js
+
+needle thread-stream-state-changed idx 238762 snippet: SER_COMMENT_POPUP:`browserCommentPopup`};function uh(e){if(!e.startsWith(ch))return null;let t=e.slice(22),n=t.indexOf(`:`);if(n<0)return null;let r=t.slice(0,n),i=t.slice(n+1);if(r!==lh.BROWSER_COMMENT_POPUP)return null;try{let e=decodeURIComponent(i);return e.length>0?{windowId:r,conversationId:e}:null}catch{return null}}var dh={CHANGED:`inbox-items-changed`},fh={DIFF:`diff`,BROWSER:`browser`,PDF:`pdf`};function ph(e,t){return{...e,origin:t}}var mh={NEW_TAB_PAGE:`new-tab-page`,WEB:`web`},hh={"thread-stream-state-changed":6,"thread-read-state-changed":1,"thread-archived":2,"thread-unarchived":1,"thread-follower-start-turn":1,"thread-follower-compact-thread":1,"thread-follower-steer-turn":1,"thread-follower-interrupt-turn":1,"thread-follower-set-model-and-reasoning":1,"thread-follower-set-collaboration-mode":1,"thread-follower-edit-last-user-turn":1,"thread-follower-command-approval-decision":1,"thread-follower-file-approval-decision":1,"thread-follower-permissions-request-approval-response":1,"thread-follower-submit-user-input":1,"thread-follower-submit-mcp-server-elicitation-response":1,"thread-follower-set-queued-follow-ups-state":1,"thread-queued-followups-changed":1};function gh(e){let t=hh[e];return t===void 0?0:t}function _h(e){let t=hh[e];return t===void 0?0:t}function vh(e){return e}function yh(e){return e}function bh(e){let t=e.anchor.title.trim();if(t.length>0)return
+
+needle thread-read-state-changed idx 238794 snippet: tPopup`};function uh(e){if(!e.startsWith(ch))return null;let t=e.slice(22),n=t.indexOf(`:`);if(n<0)return null;let r=t.slice(0,n),i=t.slice(n+1);if(r!==lh.BROWSER_COMMENT_POPUP)return null;try{let e=decodeURIComponent(i);return e.length>0?{windowId:r,conversationId:e}:null}catch{return null}}var dh={CHANGED:`inbox-items-changed`},fh={DIFF:`diff`,BROWSER:`browser`,PDF:`pdf`};function ph(e,t){return{...e,origin:t}}var mh={NEW_TAB_PAGE:`new-tab-page`,WEB:`web`},hh={"thread-stream-state-changed":6,"thread-read-state-changed":1,"thread-archived":2,"thread-unarchived":1,"thread-follower-start-turn":1,"thread-follower-compact-thread":1,"thread-follower-steer-turn":1,"thread-follower-interrupt-turn":1,"thread-follower-set-model-and-reasoning":1,"thread-follower-set-collaboration-mode":1,"thread-follower-edit-last-user-turn":1,"thread-follower-command-approval-decision":1,"thread-follower-file-approval-decision":1,"thread-follower-permissions-request-approval-response":1,"thread-follower-submit-user-input":1,"thread-follower-submit-mcp-server-elicitation-response":1,"thread-follower-set-queued-follow-ups-state":1,"thread-queued-followups-changed":1};function gh(e){let t=hh[e];return t===void 0?0:t}function _h(e){let t=hh[e];return t===void 0?0:t}function vh(e){return e}function yh(e){return e}function bh(e){let t=e.anchor.title.trim();if(t.length>0)return`browser:${t}`;try{let t=new URL
+
+needle thread-queued-followups-changed idx 239417 snippet: act-thread":1,"thread-follower-steer-turn":1,"thread-follower-interrupt-turn":1,"thread-follower-set-model-and-reasoning":1,"thread-follower-set-collaboration-mode":1,"thread-follower-edit-last-user-turn":1,"thread-follower-command-approval-decision":1,"thread-follower-file-approval-decision":1,"thread-follower-permissions-request-approval-response":1,"thread-follower-submit-user-input":1,"thread-follower-submit-mcp-server-elicitation-response":1,"thread-follower-set-queued-follow-ups-state":1,"thread-queued-followups-changed":1};function gh(e){let t=hh[e];return t===void 0?0:t}function _h(e){let t=hh[e];return t===void 0?0:t}function vh(e){return e}function yh(e){return e}function bh(e){let t=e.anchor.title.trim();if(t.length>0)return`browser:${t}`;try{let t=new URL(e.anchor.pageUrl);return`browser:${`${t.hostname}${t.pathname===`/`?``:t.pathname}`}`}catch{return`browser:${e.anchor.pageUrl}`}}function xh(e,t){return Sh({anchor:e.anchor,attachedImages:e.attachedImages,body:e.body,line:t,markerViewportPoint:e.markerViewportPoint,screenshot:e.screenshot,screenshotCommentId:e.id,viewportSize:e.viewportSize})}function Sh({anchor:e,attachedImages:t,body:n,line:r,markerViewportPoint:i,screenshot:a,screenshotCommentId:o,viewportSize:s}){return ph({type:`comment`,content:[{content_type:`text`,text:n}],position:{side:`right`,path:bh({anchor:e}),line:r},localBrowserContext:{pageUrl:e.pag
+
+FILE .vite/build/main-DnQgBHvi.js
+
+needle thread-stream-state-changed idx 719316 snippet: orWebContents(r);e&&await e.sendBroadcast(`thread-archived`,{hostId:i.hostId,conversationId:i.conversationId,cwd:i.cwd});break}case`thread-unarchived`:{let e=this.getIpcClientForWebContents(r);e&&await e.sendBroadcast(`thread-unarchived`,{hostId:i.hostId,conversationId:i.conversationId});break}case`thread-queued-followups-changed`:{let e=this.getIpcClientForWebContents(r);e&&await e.sen
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:37:37Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command**</summary>
+```bash
+node - <<'NODE'
+const fs=require('fs'); const b=fs.readFileSync('/Applications/Codex.app/Contents/Resources/app.asar'); const hs=b.readUInt32LE(12); const base=16+b.readUInt32LE(8); const h=JSON.parse(b.subarray(16,16+hs).toString()); function meta(p){let n=h; for(const part of p.split('/')) n=n.files[part]; return n;} const p='.vite/build/app-session-tZw_L1R0.js'; const m=meta(p); const text=b.subarray(base+Number(m.offset),base+Number(m.offset)+m.size).toString(); for(const needle of ['query-cache-invalidate','thread/list','threads/list','thread-list','conversation-list','conversations','loaded/list','allConversations','conversationId','inbox-items-changed']){ let start=0,count=0; while(true){ const idx=text.indexOf(needle,start); if(idx<0) break; count++; if(count<=15) console.log('\nneedle',needle,'idx',idx,'snippet:', text.slice(Math.max(0,idx-420),idx+700).replace(/\n/g,' ')); start=idx+needle.length; } console.log('TOTAL', needle, count); }
+NODE
+```
+```
+Chunk ID: d4bbc9
+Wall time: 0.0208 seconds
+Process exited with code 0
+Original token count: 643
+Output:
+TOTAL query-cache-invalidate 0
+TOTAL thread/list 0
+TOTAL threads/list 0
+TOTAL thread-list 0
+TOTAL conversation-list 0
+TOTAL conversations 0
+TOTAL loaded/list 0
+TOTAL allConversations 0
+
+needle conversationId idx 238545 snippet: e.viewportSize==null?{}:{viewportSize:e.viewportSize}}}var sh={defaultLocale:`en-US`,locale:`en-US`},ch=`codex-renderer-window:`,lh={BROWSER_COMMENT_POPUP:`browserCommentPopup`};function uh(e){if(!e.startsWith(ch))return null;let t=e.slice(22),n=t.indexOf(`:`);if(n<0)return null;let r=t.slice(0,n),i=t.slice(n+1);if(r!==lh.BROWSER_COMMENT_POPUP)return null;try{let e=decodeURIComponent(i);return e.length>0?{windowId:r,conversationId:e}:null}catch{return null}}var dh={CHANGED:`inbox-items-changed`},fh={DIFF:`diff`,BROWSER:`browser`,PDF:`pdf`};function ph(e,t){return{...e,origin:t}}var mh={NEW_TAB_PAGE:`new-tab-page`,WEB:`web`},hh={"thread-stream-state-changed":6,"thread-read-state-changed":1,"thread-archived":2,"thread-unarchived":1,"thread-follower-start-turn":1,"thread-follower-compact-thread":1,"thread-follower-steer-turn":1,"thread-follower-interrupt-turn":1,"thread-follower-set-model-and-reasoning":1,"thread-follower-set-collaboration-mode":1,"thread-follower-edit-last-user-turn":1,"thread-follower-command-approval-decision":1,"thread-follower-file-approval-decision":1,"thread-follower-permissions-req
+TOTAL conversationId 1
+
+needle inbox-items-changed idx 238604 snippet: sh={defaultLocale:`en-US`,locale:`en-US`},ch=`codex-renderer-window:`,lh={BROWSER_COMMENT_POPUP:`browserCommentPopup`};function uh(e){if(!e.startsWith(ch))return null;let t=e.slice(22),n=t.indexOf(`:`);if(n<0)return null;let r=t.slice(0,n),i=t.slice(n+1);if(r!==lh.BROWSER_COMMENT_POPUP)return null;try{let e=decodeURIComponent(i);return e.length>0?{windowId:r,conversationId:e}:null}catch{return null}}var dh={CHANGED:`inbox-items-changed`},fh={DIFF:`diff`,BROWSER:`browser`,PDF:`pdf`};function ph(e,t){return{...e,origin:t}}var mh={NEW_TAB_PAGE:`new-tab-page`,WEB:`web`},hh={"thread-stream-state-changed":6,"thread-read-state-changed":1,"thread-archived":2,"thread-unarchived":1,"thread-follower-start-turn":1,"thread-follower-compact-thread":1,"thread-follower-steer-turn":1,"thread-follower-interrupt-turn":1,"thread-follower-set-model-and-reasoning":1,"thread-follower-set-collaboration-mode":1,"thread-follower-edit-last-user-turn":1,"thread-follower-command-approval-decision":1,"thread-follower-file-approval-decision":1,"thread-follower-permissions-request-approval-response":1,"thread-follower-submit-user-inpu
+TOTAL inbox-items-changed 1
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:37:45Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command**</summary>
+```bash
+node - <<'NODE'
+const fs=require('fs'); const b=fs.readFileSync('/Applications/Codex.app/Contents/Resources/app.asar'); const hs=b.readUInt32LE(12); const base=16+b.readUInt32LE(8); const h=JSON.parse(b.subarray(16,16+hs).toString()); const needles=['query-cache-invalidate','thread-stream-state-changed','thread-read-state-changed','thread-title-updated','thread-archived','thread/list','thread/loaded/list']; function walk(n,p=''){ if(n.files){ for(const [k,v] of Object.entries(n.files)) walk(v,p?`${p}/${k}`:k); return;} if(!/\.(js|mjs|cjs|html|json)$/.test(p) || !n.size || n.unpacked) return; const text=b.subarray(base+Number(n.offset),base+Number(n.offset)+n.size).toString(); const hits=needles.filter(x=>text.includes(x)); if(hits.length) console.log(p, hits.join(','), 'size', n.size); } walk(h);
+NODE
+```
+```
+Chunk ID: 475b2f
+Wall time: 0.2800 seconds
+Process exited with code 0
+Original token count: 279
+Output:
+.vite/build/app-session-tZw_L1R0.js thread-stream-state-changed,thread-read-state-changed,thread-archived size 4433277
+.vite/build/main-DnQgBHvi.js query-cache-invalidate,thread-stream-state-changed,thread-read-state-changed,thread-archived size 1173347
+.vite/build/workspace-root-drop-handler-CVOJlSpQ.js thread-title-updated,thread/list size 856756
+webview/assets/app-main-Bucm979x.js query-cache-invalidate,thread-title-updated,thread-archived size 723359
+webview/assets/app-server-manager-signals-C1h8B-R-.js thread-stream-state-changed,thread-read-state-changed,thread-archived,thread/list size 460019
+webview/assets/apps-Cel-9d-y.js query-cache-invalidate size 580089
+webview/assets/global-settings-BacBXO5j.js query-cache-invalidate size 866
+webview/assets/hooks-settings-queries-DfLtnGMu.js query-cache-invalidate size 1910
+webview/assets/invalidate-queries-and-broadcast-B6TJTQ88.js query-cache-invalidate size 456
+webview/assets/src-CVmnixyG.js thread-stream-state-changed,thread-read-state-changed,thread-archived size 58063
+webview/assets/use-configuration-C6s74gHM.js query-cache-invalidate size 1013
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:37:56Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command**</summary>
+```bash
+node - <<'NODE'
+const fs=require('fs'); const b=fs.readFileSync('/Applications/Codex.app/Contents/Resources/app.asar'); const hs=b.readUInt32LE(12); const base=16+b.readUInt32LE(8); const h=JSON.parse(b.subarray(16,16+hs).toString()); function meta(p){let n=h; for(const part of p.split('/')) n=n.files[part]; return n;} for(const p of ['webview/assets/app-main-Bucm979x.js','webview/assets/app-server-manager-signals-C1h8B-R-.js','webview/assets/invalidate-queries-and-broadcast-B6TJTQ88.js','webview/assets/src-CVmnixyG.js','webview/assets/global-settings-BacBXO5j.js']){ const m=meta(p); const text=b.subarray(base+Number(m.offset),base+Number(m.offset)+m.size).toString(); console.log('\nFILE',p); for(const needle of ['query-cache-invalidate','thread-title-updated','thread-archived','thread-stream-state-changed','thread-read-state-changed','thread/list','thread/loaded/list','sortKey','updated_at','conversation','conversations','queryKey']){ let start=0,count=0; while(true){const idx=text.indexOf(needle,start); if(idx<0) break; count++; if(count<=10) console.log('\nneedle',needle,'idx',idx,'snippet:', text.slice(Math.max(0,idx-500),idx+900).replace(/\n/g,' ')); start=idx+needle.length;} if(count>10) console.log('TOTAL',needle,count); }
+}
+NODE
+```
+```
+Chunk ID: a3f280
+Wall time: 0.0001 seconds
+Process exited with code 0
+Original token count: 42329
+Output:
+Total output lines: 259
+
+
+FILE webview/assets/app-main-Bucm979x.js
+
+needle query-cache-invalidate idx 644873 snippet: e.rrule}}function NM(e){switch(e){case`invalid_id`:return`Automation id was invalid.`;case`store_unavailable`:return`Automation storage is unavailable.`;case`state_cleanup_failed`:return`Automation scheduling state could not be updated.`;case`remove_failed`:return`Automation still exists after the app tried to delete it.`;case`deleted`:case`not_found`:return`Automation was not deleted.`}}async function PM(e){let t=oo(`list-automations`);await e.invalidateQueries({queryKey:t}),G.dispatchMessage(`query-cache-invalidate`,{queryKey:[...t]})}function FM(e,t){e.setQueryData(oo(`list-automations`),e=>e==null?e:e.items.findIndex(e=>e.id===t.id)===-1?{items:[t,...e.items]}:{items:e.items.map(e=>e.id===t.id?t:e)})}function IM(e,t){e.setQueryData(oo(`list-automations`),e=>e==null?e:{items:e.items.filter(e=>e.id!==t)})}function LM({hostId:e,queryClient:t}){t.invalidateQueries({queryKey:[`command-menu-thread-search`,e]})}function RM({claimAppConnectOAuthCallback:e,isCompactWindow:t,message:n,navigate:r,queryClient:i}){if(n.method===`app-connect-oauth-callback-received`){e(n.params.fullRedirectUrl)&&r(`/connector/oauth_callback`,{state:{fullRedirectUrl:n.params.fullRedirectUrl}});return}if(n.method===`query-cache-invalidate`){i.invalidateQueries({queryKey:n.params.queryKey});return}!t&&(n.method===`thread-archived`||n.method===`thread-unarchived`)&&i.invalidateQueries({queryKey:[`tasks`]})}f
+
+needle query-cache-invalidate idx 645580 snippet: t:e)})}function IM(e,t){e.setQueryData(oo(`list-automations`),e=>e==null?e:{items:e.items.filter(e=>e.id!==t)})}function LM({hostId:e,queryClient:t}){t.invalidateQueries({queryKey:[`command-menu-thread-search`,e]})}function RM({claimAppConnectOAuthCallback:e,isCompactWindow:t,message:n,navigate:r,queryClient:i}){if(n.method===`app-connect-oauth-callback-received`){e(n.params.fullRedirectUrl)&&r(`/connector/oauth_callback`,{state:{fullRedirectUrl:n.params.fullRedirectUrl}});return}if(n.method===`query-cache-invalidate`){i.invalidateQueries({queryKey:n.params.queryKey});return}!t&&(n.method===`thread-archived`||n.method===`thread-unarchived`)&&i.invalidateQueries({queryKey:[`tasks`]})}function zM({children:e}){let t=U(K),n=Ls(),r=Ur(),i=Vs(),a=Ia(),o=yi(),{claimAppConnectOAuthCallback:s}=lm();return(0,Q.useEffect)(()=>{let e=async e=>{switch(e.type){case`worker-response`:case`worker-event`:break;case`fetch-response`:break;case`fetch-stream-event`:case`fetch-stream-error`:case`fetch-stream-complete`:break;case`shared-object-updated`:break;case`close-terminal-session`:break;case`primary-runtime-install-progress`:break;case`chat-font-settings`:{let t=document.documentElement;typeof e.chatFontSize==`number`?t.style.setProperty(`--vscode-chat-font-size`,`${e.chatFontSize}px`):t.style.removeProperty(`--vscode-chat-font-size`),typeof e.chatCodeFontSize==`number`?t.style.setProperty(`--v
+
+needle thread-title-updated idx 648361 snippet: Overrides:e.featureOverrides,hostId:e.hostId,listExperimentalFeatures:t=>Kn(`list-experimental-features`,{...t,hostId:e.hostId}),threadStartConfig:e.threadStartConfig})}catch(e){J.error(`Failed to build dynamic tools for thread start`,{safe:{},sensitive:{error:e}})}try{await Kn(`handle-dynamic-tools-for-thread-start-response-for-host`,{hostId:e.hostId,requestId:e.requestId,dynamicTools:t})}catch(e){J.error(`Failed to send dynamic tools for thread start`,{safe:{},sensitive:{error:e}})}break}case`thread-title-updated`:await Kn(`apply-thread-title-update-for-host`,{hostId:e.hostId,conversationId:e.conversationId,title:e.title});break;case`hotkey-window-transition`:break;case m.CHANGED:o||(a.invalidateQueries({queryKey:oo(`inbox-items`,{limit:200})}),a.invalidateQueries({queryKey:oo(`list-automations`)}));break;case`mcp-response`:e.message.result?await Kn(`handle-mcp-result-for-host`,{hostId:e.hostId,requestId:ie(e.message.id),result:e.message.result}):e.message.error?await Kn(`handle-mcp-error-for-host`,{hostId:e.hostId,requestId:ie(e.message.id),error:e.message.error}):J.error(`Invalid MCP message: missing result/error`,{safe:{},sensitive:{id:e.message.id}});break;case`codex-app-server-fatal-error`:on(t,{error:M(e.errorMessage),hostId:e.hostId,source:`fatal_error_message`,state:`error`}),t.set(rO,e);break;case`mcp-notification`:if(df(t,{hostId:e.hostId,method:e.method,params:e.pa
+
+needle thread-archived idx 645679 snippet: >e.id!==t)})}function LM({hostId:e,queryClient:t}){t.invalidateQueries({queryKey:[`command-menu-thread-search`,e]})}function RM({claimAppConnectOAuthCallback:e,isCompactWindow:t,message:n,navigate:r,queryClient:i}){if(n.method===`app-connect-oauth-callback-received`){e(n.params.fullRedirectUrl)&&r(`/connector/oauth_callback`,{state:{fullRedirectUrl:n.params.fullRedirectUrl}});return}if(n.method===`query-cache-invalidate`){i.i
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:38:14Z)**_
+
+证据基本够了：Codex Desktop 自己的前端已经支持 `query-cache-invalidate` 广播，收到后会 invalidate 指定 query；线程侧栏用的是 `tasks` query。也就是说不用改桌面端，可以从我们这个 bridge 发一个“桌面端请刷新 tasks 列表”的 IPC 广播。现在我会把它接到后台新线程 `thread-started` 和完成后的同步点上。
+
+_**Agent (gpt-5.5 2026-05-11 04:38:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,80p' server/chat-service.test.mjs`</summary>
+```
+Chunk ID: 6ab60e
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 780
+Output:
+/**
+ * 测试 server/chat-service.js：发送消息、队列与依赖注入路径。
+ *
+ * Keywords: chat-service, test, integration
+ *
+ * Exports: 无导出，内含用例
+ *
+ * Inward: chat-service.js
+ */
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { createChatService } from './chat-service.js';
+
+function makeChatService(overrides = {}) {
+  const broadcasts = [];
+  const service = createChatService({
+    imagePromptState: '/tmp/codexmobile-chat-service-test.json',
+    getProject: () => ({ id: 'project-1', name: 'Project', path: '/tmp/project', projectless: false }),
+    getSession: () => ({ id: 'thread-1', projectId: 'project-1' }),
+    getCacheSnapshot: () => ({ config: { skills: [], model: 'gpt-5.5' } }),
+    getDesktopBridgeStatus: async () => ({ strict: true, connected: true, mode: 'desktop-proxy', reason: null }),
+    listProjectSessions: () => [],
+    readSessionMessages: async () => ({ messages: [] }),
+    refreshCodexCache: async () => ({ syncedAt: 'now', projects: [] }),
+    renameSession: async () => null,
+    broadcast: (payload) => broadcasts.push(payload),
+    runCodexTurn: async () => 'thread-1',
+    steerCodexTurn: async () => ({ accepted: true, delivery: 'steered', sessionId: 'thread-1', turnId: 'active-turn' }),
+    setDesktopFollowerCollaborationMode: async () => ({ ok: true }),
+    abortCodexTurn: () => true,
+    getActiveRuns: () => [],
+    runImageTurn: async () => 'thread-1',
+    isImageRequest: () => false,
+    useLegacyImageGenerator: () => false,
+    maybeAutoNameSession: async () => false,
+    registerProjectlessThread: async () => null,
+    registerMobileSession: async () => null,
+    rememberLiveSession: () => null,
+    desktopOwnerRetryDelays: [],
+    ...overrides
+  });
+  return { service, broadcasts };
+}
+
+async function flushQueuedWork() {
+  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setImmediate(resolve));
+}
+
+test('sendChat routes running input through desktop turn/steer', async () => {
+  let steerPayload = null;
+  const { service, broadcasts } = makeChatService({
+    steerCodexTurn: async (identifier, payload) => {
+      steerPayload = { identifier, payload };
+      return { accepted: true, delivery: 'steered', sessionId: 'thread-1', turnId: 'active-turn' };
+    }
+  });
+
+  const result = await service.sendChat({
+    projectId: 'project-1',
+    sessionId: 'thread-1',
+    clientTurnId: 'client-turn',
+    message: '补充这个方向',
+    sendMode: 'steer'
+  });
+
+  assert.equal(result.delivery, 'steered');
+  assert.equal(result.clientTurnId, 'client-turn');
+  assert.equal(result.turnId, 'active-turn');
+  assert.equal(steerPayload.identifier, 'thread-1');
+  assert.match(steerPayload.payload.message, /补充这个方向/);
+  assert.equal(broadcasts.some((payload) => payload.type === 'user-message'), true);
+});
+
+test('sendChat rejects when strict desktop bridge is unavailable', async () => {
+  const { service, broadcasts } = makeChatService({
+    getDesktopBridgeStatus: async () => ({
+      strict: true,
+      connected: false,
+      mode: 'unavailable',
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:38:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '280,420p' server/chat-delivery.js`</summary>
+```
+Chunk ID: 303ac5
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 984
+Output:
+}
+
+export function runQueuedHeadlessChatJob({
+  job,
+  queueKey,
+  state,
+  sessionId,
+  runCodexTurn,
+  registerProjectlessThread,
+  registerMobileSession,
+  refreshCodexCache,
+  broadcast,
+  rememberConversationAlias,
+  rememberTurn,
+  rememberLiveSession,
+  emitJobEvent,
+  scheduleAutoNameCompletedSession,
+  onQueueDrained
+}) {
+  const metadataUpdates = [];
+
+  function rememberStartedBackgroundThread(payload) {
+    if (!payload?.sessionId || !job.draftSessionId) {
+      return;
+    }
+    const updatedAt = payload.startedAt || new Date().toISOString();
+    const visibleContent = job.visibleMessage || job.displayMessage;
+    const sessionRecord = {
+      id: payload.sessionId,
+      projectId: job.project.id,
+      projectPath: job.executionProjectPath || job.project.path,
+      projectless: Boolean(job.project?.projectless),
+      title: job.displayMessage,
+      summary: job.displayMessage,
+      updatedAt,
+      filePath: payload.filePath || payload.path || null,
+      messages: [
+        {
+          id: `${payload.sessionId}-user-${job.turnId}`,
+          role: 'user',
+          content: visibleContent,
+          timestamp: updatedAt
+        }
+      ]
+    };
+    rememberLiveSession?.(sessionRecord);
+    metadataUpdates.push(
+      Promise.all([
+        job.project?.projectless
+          ? registerProjectlessThread(payload.sessionId, job.project.path)
+          : Promise.resolve(null),
+        registerMobileSession(sessionRecord)
+      ]).catch((error) => {
+        console.warn('[sessions] Failed to register background thread:', error.message);
+      })
+    );
+  }
+
+  runCodexTurn(
+    {
+      sessionId,
+      draftSessionId: job.draftSessionId,
+      projectPath: job.executionProjectPath || job.project.path,
+      message: job.codexMessage,
+      attachments: job.attachments,
+      selectedSkills: job.selectedSkills,
+      model: job.model,
+      reasoningEffort: job.reasoningEffort,
+      serviceTier: job.serviceTier,
+      permissionMode: job.permissionMode,
+      collaborationMode: job.collaborationMode,
+      turnId: job.turnId
+    },
+    (payload) => {
+      const eventPayload = {
+        ...payload,
+        source: payload?.source || 'headless-local'
+      };
+      if (eventPayload.sessionId) {
+        state.sessionId = eventPayload.sessionId;
+        rememberConversationAlias(queueKey, eventPayload.sessionId);
+      }
+      if (eventPayload.previousSessionId) {
+        rememberConversationAlias(queueKey, eventPayload.previousSessionId);
+      }
+      if (eventPayload.type === 'thread-started') {
+        rememberStartedBackgroundThread(eventPayload);
+      } else if (eventPayload.type === 'chat-started') {
+        rememberStartedBackgroundThread(eventPayload);
+      }
+      emitJobEvent(job, eventPayload);
+    }
+  ).then(async (finalSessionId) => {
+    if (finalSessionId) {
+      state.sessionId = finalSessionId;
+      rememberConversationAlias(queueKey, finalSessionId);
+    }
+    rememberTurn(job.turnId, {
+      projectId: job.project.id,
+      sessionId: finalSessionId || sessionId || job.selectedSessionId || job.draftSessionId || null,
+      previousSessionId: job.draftSessionId || job.selectedSessionId || null
+    });
+    if (job.draftSessionId) {
+      scheduleAutoNameCompletedSession({
+        sessionId: finalSessionId || sessionId || job.selectedSessionId || null,
+        turnId: job.turnId,
+        userMessage: job.displayMessage
+      });
+    }
+  }).finally(async () => {
+    try {
+      if (metadataUpdates.length) {
+        await Promise.allSettled(metadataUpdates);
+      }
+      const snapshot = await refreshCodexCache();
+      broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
+    } catch (error) {
+      console.warn('[sync] Failed to refresh after chat:', error.message);
+    } finally {
+      state.running = false;
+      if (state.jobs.length) {
+        onQueueDrained?.();
+      }
+    }
+  });
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:38:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,80p' server/codex-app-server.js && sed -n '470,540p' server/codex-app-server.js`</summary>
+```
+Chunk ID: ebdf3a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1124
+Output:
+/**
+ * 与本机 Codex.app / headless codex 子进程通信，查询桌面桥状态与 thread 列表。
+ *
+ * Keywords: codex-app-server, child-process, desktop-bridge, thread-api
+ *
+ * Exports:
+ * - resolveAppServerTransport / defaultServerRequestResult — 传输层与默认响应。
+ * - CodexAppServerClient / createCodexAppServerClient — 客户端构造。
+ * - getDesktopBridgeStatus — 当前桥接健康与能力摘要。
+ * - listDesktopThreads / readDesktopThread / setDesktopThreadName / archiveDesktopThread — Thread CRUD 辅助。
+ *
+ * Inward（本模块依赖/组装的关键符号）: desktop-ipc-client（广播/probe）、child_process.spawn。
+ *
+ * Outward（谁在用/调用场景）: codex-data、chat-delivery、session 读取。
+ *
+ * 不负责: 移动端 HTTP 路由。
+ */
+import { spawn } from 'node:child_process';
+import fsSync from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import readline from 'node:readline';
+import {
+  broadcastDesktopThreadArchived,
+  broadcastDesktopThreadTitleUpdated,
+  probeDesktopIpc
+} from './desktop-ipc-client.js';
+
+const DEFAULT_CODEX_APP_BINARY = '/Applications/Codex.app/Contents/Resources/codex';
+const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
+const DEFAULT_CONTROL_SOCKET = path.join(os.homedir(), '.codex', 'app-server-control', 'app-server-control.sock');
+const BRIDGE_STATUS_CACHE_MS = 2500;
+
+let bridgeStatusCache = null;
+
+function resolveCodexBinary() {
+  const candidates = [
+    process.env.CODEXMOBILE_CODEX_BINARY,
+    process.env.CODEX_BINARY,
+    DEFAULT_CODEX_APP_BINARY,
+    'codex'
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    if (candidate === 'codex' || fsSync.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return 'codex';
+}
+
+function responseError(message, method = '') {
+  const error = new Error(message || `Codex app-server request failed${method ? `: ${method}` : ''}`);
+  error.method = method;
+  return error;
+}
+
+function isEnabled(value) {
+  return /^(1|true|yes|on)$/i.test(String(value || '').trim());
+}
+
+function socketStatus(sockPath) {
+  if (!sockPath) {
+    return { ok: false, reason: '未找到桌面端 Codex app-server control socket' };
+  }
+  try {
+    const stat = fsSync.statSync(sockPath);
+    if (!stat.isSocket()) {
+      return { ok: false, reason: `桌面端 control socket 路径不是 socket: ${sockPath}` };
+    }
+    return { ok: true, sockPath };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error.code === 'ENOENT'
+        ? `桌面端 control socket 不存在: ${sockPath}`
+        : `无法访问桌面端 control socket: ${error.message}`
+    };
+  }
+}
+      threads.push(...data);
+      cursor = response?.nextCursor || null;
+      if (!cursor || !rawData.length) {
+        break;
+      }
+    }
+    return threads;
+  } finally {
+    client.close();
+  }
+}
+
+export async function readDesktopThread(threadId, { includeTurns = true } = {}) {
+  const client = await createCodexAppServerClient({
+    clientInfo: { name: 'CodexMobileRead', title: null, version: '0.1.0' },
+    allowReadOnlyIsolated: true
+  });
+  try {
+    return await client.request('thread/read', {
+      threadId,
+      includeTurns
+    }, { timeoutMs: 20_000 });
+  } finally {
+    client.close();
+  }
+}
+
+export async function setDesktopThreadName(threadId, name) {
+  const client = await createCodexAppServerClient({
+    clientInfo: { name: 'CodexMobileRename', title: null, version: '0.1.0' },
+    allowHeadlessLocal: true
+  });
+  try {
+    const result = await client.request('thread/name/set', {
+      threadId,
+      name
+    }, { timeoutMs: 20_000 });
+    const broadcast = await broadcastDesktopThreadTitleUpdated(threadId, name);
+    if (!broadcast.sent) {
+      console.warn(`[desktop-ipc] title broadcast skipped thread=${threadId}: ${broadcast.reason}`);
+    }
+    return result;
+  } finally {
+    client.close();
+  }
+}
+
+export async function archiveDesktopThread(threadId) {
+  const client = await createCodexAppServerClient({
+    clientInfo: { name: 'CodexMobileArchive', title: null, version: '0.1.0' },
+    allowHeadlessLocal: true
+  });
+  try {
+    const result = await client.request('thread/archive', {
+      threadId
+    }, { timeoutMs: 20_000 });
+    const broadcast = await broadcastDesktopThreadArchived(threadId);
+    if (!broadcast.sent) {
+      console.warn(`[desktop-ipc] archive broadcast skipped thread=${threadId}: ${broadcast.reason}`);
+    }
+    return result;
+  } finally {
+    client.close();
+  }
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:38:46Z)**_
+
+我会按最小改动做：新增一个 desktop IPC 广播 helper，发 `query-cache-invalidate` 给 Codex Desktop 的 `tasks` query；后台新线程创建后立刻触发一次，完成后再触发一次保证排序/标题/状态跟上。这个不依赖改 Codex.app 本体，风险比较可控。
+
+_**Agent (gpt-5.5 2026-05-11 04:39:14Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/desktop-ipc-client.js`**
+
+```diff
+@@
+  * Exports:
+  * - desktopIpcMethodVersion / desktopIpcSocketPath / getDesktopIpcSocketStatus。
+  * - DesktopIpcClient — 连接与请求封装。
+  * - probeDesktopIpc / startDesktopFollowerTurn / steerDesktopFollowerTurn / interruptDesktopFollowerTurn 等。
++ * - broadcastDesktopThreadListRefresh — 通知 Codex Desktop 刷新线程列表相关查询。
+@@
+   ['thread-follower-submit-user-input', 1],
+   ['thread-follower-submit-mcp-server-elicitation-response', 1],
+-  ['thread-follower-set-queued-follow-ups-state', 1]
++  ['thread-follower-set-queued-follow-ups-state', 1],
++  ['thread-queued-followups-changed', 1],
++  ['thread-read-state-changed', 1],
++  ['thread-stream-state-changed', 6]
+ ]);
+@@
+ export async function broadcastDesktopThreadTitleUpdated(
+   conversationId,
+   title,
+@@
+     client.close();
+   }
+ }
++
++export async function broadcastDesktopQueryCacheInvalidate(
++  queryKey,
++  { clientType = 'codexmobile-query-cache-sync', socketPath = null, timeoutMs = 1500 } = {}
++) {
++  const key = Array.isArray(queryKey) ? queryKey : [queryKey].filter(Boolean);
++  if (!key.length) {
++    return { sent: false, reason: 'queryKey is required' };
++  }
++  const client = new DesktopIpcClient({
++    clientType,
++    ...(socketPath ? { socketPath } : {})
++  });
++  try {
++    await client.connect({ timeoutMs });
++    client.sendBroadcast('query-cache-invalidate', { queryKey: key });
++    return { sent: true, queryKey: key };
++  } catch (error) {
++    return {
++      sent: false,
++      reason: error.message || '桌面端 Codex IPC 广播失败',
++      queryKey: key
++    };
++  } finally {
++    client.close();
++  }
++}
++
++export async function broadcastDesktopThreadListRefresh({
++  hostId = 'local',
++  conversationId = null,
++  cwd = null,
++  reason = 'thread-list-refresh',
++  socketPath = null,
++  timeoutMs = 1500
++} = {}) {
++  const client = new DesktopIpcClient({
++    clientType: 'codexmobile-thread-list-sync',
++    ...(socketPath ? { socketPath } : {})
++  });
++  try {
++    await client.connect({ timeoutMs });
++    client.sendBroadcast('query-cache-invalidate', { queryKey: ['tasks'] });
++    client.sendBroadcast('query-cache-invalidate', { queryKey: ['command-menu-thread-search', hostId] });
++    return {
++      sent: true,
++      conversationId,
++      cwd,
++      hostId,
++      reason,
++      queryKeys: [
++        ['tasks'],
++        ['command-menu-thread-search', hostId]
++      ]
++    };
++  } catch (error) {
++    return {
++      sent: false,
++      reason: error.message || '桌面端 Codex IPC 广播失败',
++      conversationId,
++      cwd,
++      hostId
++    };
++  } finally {
++    client.close();
++  }
++}
+```
+
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/codex-app-server.js`**
+
+```diff
+@@
+  * - getDesktopBridgeStatus — 当前桥接健康与能力摘要。
+  * - listDesktopThreads / readDesktopThread / setDesktopThreadName / archiveDesktopThread — Thread CRUD 辅助。
++ * - notifyDesktopThreadListChanged — 通过桌面 IPC 请求 Codex Desktop 热刷新线程列表。
+@@
+ import {
+   broadcastDesktopThreadArchived,
++  broadcastDesktopThreadListRefresh,
+   broadcastDesktopThreadTitleUpdated,
+   probeDesktopIpc
+ } from './desktop-ipc-client.js';
+@@
+ export async function archiveDesktopThread(threadId) {
+@@
+     client.close();
+   }
+ }
++
++export async function notifyDesktopThreadListChanged({
++  threadId = '',
++  cwd = null,
++  hostId = 'local',
++  reason = 'thread-list-refresh'
++} = {}) {
++  const broadcast = await broadcastDesktopThreadListRefresh({
++    hostId,
++    conversationId: threadId || null,
++    cwd,
++    reason
++  });
++  if (!broadcast.sent) {
++    console.warn(`[desktop-ipc] thread list refresh skipped thread=${threadId || ''}: ${broadcast.reason}`);
++  }
++  return broadcast;
++}
+```
+
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/chat-delivery.js`**
+
+```diff
+@@
+   rememberTurn,
+   rememberLiveSession,
++  notifyDesktopThreadListChanged,
+   emitJobEvent,
+   scheduleAutoNameCompletedSession,
+   onQueueDrained
+ }) {
+   const metadataUpdates = [];
++  let lastBackgroundThread = null;
+@@
+     const sessionRecord = {
+@@
+       ]
+     };
++    lastBackgroundThread = {
++      threadId: payload.sessionId,
++      cwd: payload.cwd || job.executionProjectPath || job.project.path || null
++    };
+     rememberLiveSession?.(sessionRecord);
+     metadataUpdates.push(
+       Promise.all([
+@@
+         registerMobileSession(sessionRecord)
++      ]).then(() =>
++        notifyDesktopThreadListChanged?.({
++          ...lastBackgroundThread,
++          reason: 'background-thread-started'
++        })
+       ]).catch((error) => {
+         console.warn('[sessions] Failed to register background thread:', error.message);
+       })
+@@
+       const snapshot = await refreshCodexCache();
+       broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
++      if (lastBackgroundThread) {
++        await notifyDesktopThreadListChanged?.({
++          ...lastBackgroundThread,
++          reason: 'background-thread-completed'
++        });
++      }
+     } catch (error) {
+       console.warn('[sync] Failed to refresh after chat:', error.message);
+```
+
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/chat-service.js`**
+
+```diff
+@@
+ import {
+   registerProjectlessThread as registerProjectlessThreadInCodexState
+ } from './codex-config.js';
++import {
++  notifyDesktopThreadListChanged as notifyDesktopThreadListChangedInCodexApp
++} from './codex-app-server.js';
+@@
+   maybeAutoNameSession,
+   registerProjectlessThread = registerProjectlessThreadInCodexState,
+   registerMobileSession = registerMobileSessionInIndex,
+   rememberLiveSession = () => null,
++  notifyDesktopThreadListChanged = notifyDesktopThreadListChangedInCodexApp,
+   desktopOwnerRetryDelays = [250, 700, 1500]
+ }) {
+@@
+       rememberTurn,
+       rememberLiveSession,
++      notifyDesktopThreadListChanged,
+       emitJobEvent,
+       scheduleAutoNameCompletedSession,
+       onQueueDrained: () => setTimeout(() => runNextQueuedChat(queueKey), 0)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:39:18Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '300,350p' server/chat-delivery.js`</summary>
+```
+Chunk ID: 7c5eee
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 407
+Output:
+  const metadataUpdates = [];
+  let lastBackgroundThread = null;
+
+  function rememberStartedBackgroundThread(payload) {
+    if (!payload?.sessionId || !job.draftSessionId) {
+      return;
+    }
+    const updatedAt = payload.startedAt || new Date().toISOString();
+    const visibleContent = job.visibleMessage || job.displayMessage;
+    const sessionRecord = {
+      id: payload.sessionId,
+      projectId: job.project.id,
+      projectPath: job.executionProjectPath || job.project.path,
+      projectless: Boolean(job.project?.projectless),
+      title: job.displayMessage,
+      summary: job.displayMessage,
+      updatedAt,
+      filePath: payload.filePath || payload.path || null,
+      messages: [
+        {
+          id: `${payload.sessionId}-user-${job.turnId}`,
+          role: 'user',
+          content: visibleContent,
+          timestamp: updatedAt
+        }
+      ]
+    };
+    lastBackgroundThread = {
+      threadId: payload.sessionId,
+      cwd: payload.cwd || job.executionProjectPath || job.project.path || null
+    };
+    rememberLiveSession?.(sessionRecord);
+    metadataUpdates.push(
+      Promise.all([
+        job.project?.projectless
+          ? registerProjectlessThread(payload.sessionId, job.project.path)
+          : Promise.resolve(null),
+        registerMobileSession(sessionRecord)
+      ]).then(() =>
+        notifyDesktopThreadListChanged?.({
+          ...lastBackgroundThread,
+          reason: 'background-thread-started'
+        })
+      ]).catch((error) => {
+        console.warn('[sessions] Failed to register background thread:', error.message);
+      })
+    );
+  }
+
+  runCodexTurn(
+    {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:39:24Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/chat-delivery.js`**
+
+```diff
+@@
+-    lastBackgroundThread = {
++    const backgroundThread = {
+       threadId: payload.sessionId,
+       cwd: payload.cwd || job.executionProjectPath || job.project.path || null
+     };
++    lastBackgroundThread = backgroundThread;
+@@
+       ]).then(() =>
+         notifyDesktopThreadListChanged?.({
+-          ...lastBackgroundThread,
++          ...backgroundThread,
+           reason: 'background-thread-started'
+         })
+-      ]).catch((error) => {
++      ).catch((error) => {
+         console.warn('[sessions] Failed to register background thread:', error.message);
+       })
+     );
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:39:28Z)**_
+
+刚才这一块我顺手发现一个括号位置问题，已经修正了。接下来补两类测试：一类确认 IPC 发出的帧就是 Codex Desktop 能识别的 `query-cache-invalidate`，另一类确认后台新线程会触发桌面列表刷新。
+
+_**Agent (gpt-5.5 2026-05-11 04:39:47Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/desktop-ipc-client.test.mjs`**
+
+```diff
+@@
+ test('broadcastDesktopThreadTitleUpdated writes desktop title update broadcast frames', async () => {
+@@
+   server.close();
+   await fs.rm(dir, { recursive: true, force: true });
+ });
++
++test('broadcastDesktopThreadListRefresh invalidates desktop task and command search queries', async () => {
++  assert.equal(typeof desktopIpc.broadcastDesktopThreadListRefresh, 'function');
++
++  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-ipc-test-'));
++  const socketPath = path.join(dir, 'ipc.sock');
++  const server = net.createServer();
++  await new Promise((resolve) => server.listen(socketPath, resolve));
++
++  const accepted = new Promise((resolve) => server.once('connection', resolve));
++  const sent = desktopIpc.broadcastDesktopThreadListRefresh({
++    hostId: 'local',
++    conversationId: 'thread-1',
++    cwd: '/repo',
++    reason: 'background-thread-started',
++    socketPath,
++    timeoutMs: 1000
++  });
++  const socket = await accepted;
++  const init = await readFrame(socket);
++  socket.write(frameFor({
++    type: 'response',
++    requestId: init.requestId,
++    resultType: 'success',
++    method: 'initialize',
++    result: { clientId: 'client-1' }
++  }));
++  const taskBroadcast = await readFrame(socket);
++  const searchBroadcast = await readFrame(socket);
++  const result = await sent;
++
++  assert.equal(result.sent, true);
++  assert.equal(taskBroadcast.type, 'broadcast');
++  assert.equal(taskBroadcast.method, 'query-cache-invalidate');
++  assert.equal(taskBroadcast.sourceClientId, 'client-1');
++  assert.equal(taskBroadcast.version, 0);
++  assert.deepEqual(taskBroadcast.params, { queryKey: ['tasks'] });
++  assert.equal(searchBroadcast.method, 'query-cache-invalidate');
++  assert.deepEqual(searchBroadcast.params, { queryKey: ['command-menu-thread-search', 'local'] });
++
++  server.close();
++  await fs.rm(dir, { recursive: true, force: true });
++});
+```
+
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/chat-service.test.mjs`**
+
+```diff
+@@
+ test('sendChat can create a background thread when desktop-ipc cannot create desktop threads', async () => {
+@@
+   assert.equal(runPayload.draftSessionId, 'draft-project-1-1');
+   assert.match(runPayload.message, /从手机后台新建/);
+ });
++
++test('sendChat asks desktop to hot-refresh after a background thread is created', async () => {
++  const desktopRefreshes = [];
++  const { service } = makeChatService({
++    getDesktopBridgeStatus: async () => ({
++      strict: true,
++      connected: true,
++      mode: 'desktop-ipc',
++      reason: null,
++      capabilities: {
++        sendToOpenDesktopThread: true,
++        createThread: false,
++        createThreadViaBackground: true,
++        backgroundCodex: true
++      }
++    }),
++    runCodexTurn: async (payload, emit) => {
++      emit({
++        type: 'thread-started',
++        sessionId: 'background-thread-1',
++        previousSessionId: payload.draftSessionId,
++        turnId: payload.turnId,
++        cwd: '/tmp/project'
++      });
++      emit({
++        type: 'chat-complete',
++        sessionId: 'background-thread-1',
++        previousSessionId: payload.draftSessionId,
++        turnId: payload.turnId
++      });
++      return 'background-thread-1';
++    },
++    notifyDesktopThreadListChanged: async (payload) => {
++      desktopRefreshes.push(payload);
++      return { sent: true };
++    }
++  });
++
++  await service.sendChat({
++    projectId: 'project-1',
++    draftSessionId: 'draft-project-1-1',
++    clientTurnId: 'client-turn',
++    message: '从手机后台新建'
++  });
++  await flushQueuedWork();
++
++  assert.deepEqual(desktopRefreshes, [
++    {
++      threadId: 'background-thread-1',
++      cwd: '/tmp/project',
++      reason: 'background-thread-started'
++    },
++    {
++      threadId: 'background-thread-1',
++      cwd: '/tmp/project',
++      reason: 'background-thread-completed'
++    }
++  ]);
++});
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:39:51Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node --test server/desktop-ipc-client.test.mjs server/chat-service.test.mjs`</summary>
+```
+Chunk ID: 368711
+Wall time: 30.0025 seconds
+Process running with session ID 3593
+Original token count: 2209
+Output:
+TAP version 13
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=client-turn-1 session=thread-1
+# [chat] send request remote= project=project-1 session=draft-project-1-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=client-turn-1 session=thread-1
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=stale-mobile-turn-id session=thread-1
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=headless-turn-1 session=thread-1
+# [chat] abort request remote=127.0.0.1 turn= session=thread-1
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] accepted codex turn=client-turn session=thread-1 project=Project
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] accepted codex turn=client-turn session=thread-1 project=Project
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=draft-project-1-1 attachments=0
+# [chat] accepted codex turn=client-turn session=draft-project-1-1 project=Project
+# [chat] send request remote= project=project-1 session=draft-project-1-1 attachments=0
+# [chat] accepted codex turn=client-turn session=draft-project-1-1 project=Project
+# Subtest: sendChat routes running input through desktop turn/steer
+ok 1 - sendChat routes running input through desktop turn/steer
+  ---
+  duration_ms: 14.1015
+  type: 'test'
+  ...
+# Subtest: sendChat rejects when strict desktop bridge is unavailable
+ok 2 - sendChat rejects when strict desktop bridge is unavailable
+  ---
+  duration_ms: 1.129917
+  type: 'test'
+  ...
+# Subtest: abortChat records and broadcasts an aborted turn even after the backend run is gone
+ok 3 - abortChat records and broadcasts an aborted turn even after the backend run is gone
+  ---
+  duration_ms: 0.445042
+  type: 'test'
+  ...
+# Subtest: sendChat rejects desktop-ipc draft sends with a create-thread specific error
+ok 4 - sendChat rejects desktop-ipc draft sends with a create-thread specific error
+  ---
+  duration_ms: 0.488917
+  type: 'test'
+  ...
+# Subtest: sendChat sends existing desktop-ipc threads through the desktop follower bridge
+ok 5 - sendChat sends existing desktop-ipc threads through the desktop follower bridge
+  ---
+  duration_ms: 0.916416
+  type: 'test'
+  ...
+# Subtest: sendChat starts server-side desktop IPC monitoring after desktop handoff
+ok 6 - sendChat starts server-side desktop IPC monitoring after desktop handoff
+  ---
+  duration_ms: 0.893417
+  type: 'test'
+  ...
+# Subtest: abortChat can abort a server-side desktop IPC monitor run
+ok 7 - abortChat can abort a server-side desktop IPC monitor run
+  ---
+  duration_ms: 0.648292
+  type: 'test'
+  ...
+# Subtest: abortChat falls back to session id when desktop IPC turn id does not match
+ok 8 - abortChat falls back to session id when desktop IPC turn id does not match
+  ---
+  duration_ms: 1.201333
+  type: 'test'
+  ...
+# Subtest: abortChat aborts an active headless run before a desktop IPC monitor on the same session
+ok 9 - abortChat aborts an active headless run before a desktop IPC monitor on the same session
+  ---
+  duration_ms: 1.774583
+  type: 'test'
+  ...
+# Subtest: abortChat interrupts a desktop-origin running session by session id
+ok 10 - abortChat interrupts a desktop-origin running session by session id
+  ---
+  duration_ms: 0.724708
+  type: 'test'
+  ...
+# Subtest: sendChat sends desktop-ipc plan requests with desktop collaboration mode
+ok 11 - sendChat sends desktop-ipc plan requests with desktop collaboration mode
+  ---
+  duration_ms: 0.962542
+  type: 'test'
+  ...
+# Subtest: sendChat clears desktop collaboration mode for normal follow-up turns
+ok 12 - sendChat clears desktop collaboration mode for normal follow-up turns
+  ---
+  duration_ms: 0.570334
+  type: 'test'
+  ...
+# Subtest: sendChat falls back to headless local when an existing desktop-ipc thread has no owner
+ok 13 - sendChat falls back to headless local when an existing desktop-ipc thread has no owner
+  ---
+  duration_ms: 0.9695
+  type: 'test'
+  ...
+# Subtest: sendChat falls back to headless local when settings sync times out before start
+ok 14 - sendChat falls back to headless local when settings sync times out bef
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:40:26Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: c9a87f
+Wall time: 30.0014 seconds
+Process running with session ID 3593
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:41:00Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 99df68
+Wall time: 10.0017 seconds
+Process running with session ID 3593
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:41:13Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+write_stdin failed: stdin is closed for this session; rerun exec_command with tty=true to keep stdin open
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:41:17Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `ps -axo pid,ppid,command | rg "node --test server/desktop-ipc-client.test|desktop-ipc-client.test|chat-service.test"`</summary>
+```
+Chunk ID: 23ab40
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 229
+Output:
+18891     1 node --test server/desktop-ipc-client.test.mjs
+18892 18891 /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node server/desktop-ipc-client.test.mjs
+32996     1 node --test server/desktop-ipc-client.test.mjs
+32997 32996 /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node server/desktop-ipc-client.test.mjs
+34454     1 node --test server/desktop-ipc-client.test.mjs
+34455 34454 /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node server/desktop-ipc-client.test.mjs
+52682 64613 node --test server/desktop-ipc-client.test.mjs server/chat-service.test.mjs
+52684 52682 /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node server/desktop-ipc-client.test.mjs
+78428 64613 /bin/zsh -c ps -axo pid,ppid,command | rg "node --test server/desktop-ipc-client.test|desktop-ipc-client.test|chat-service.test"
+78430 78428 rg node --test server/desktop-ipc-client.test|desktop-ipc-client.test|chat-service.test
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:41:21Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `kill 18891 18892 32996 32997 34454 34455 52682 52684 || true`</summary>
+```
+Chunk ID: 356f4f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:41:33Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/desktop-ipc-client.test.mjs`**
+
+```diff
+@@
+ function readFrame(socket) {
+@@
+   });
+ }
++
++function readFrames(socket, count) {
++  return new Promise((resolve, reject) => {
++    let buffer = Buffer.alloc(0);
++    let expected = null;
++    const frames = [];
++    const onData = (chunk) => {
++      buffer = Buffer.concat([buffer, chunk]);
++      for (;;) {
++        if (expected == null) {
++          if (buffer.length < 4) {
++            return;
++          }
++          expected = buffer.readUInt32LE(0);
++          buffer = buffer.subarray(4);
++        }
++        if (buffer.length < expected) {
++          return;
++        }
++        frames.push(JSON.parse(buffer.subarray(0, expected).toString('utf8')));
++        buffer = buffer.subarray(expected);
++        expected = null;
++        if (frames.length >= count) {
++          socket.off('data', onData);
++          resolve(frames);
++          return;
++        }
++      }
++    };
++    socket.on('data', onData);
++    socket.once('error', reject);
++  });
++}
+@@
+-  const taskBroadcast = await readFrame(socket);
+-  const searchBroadcast = await readFrame(socket);
++  const [taskBroadcast, searchBroadcast] = await readFrames(socket, 2);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:41:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node --test server/desktop-ipc-client.test.mjs`</summary>
+```
+Chunk ID: c23f75
+Wall time: 0.1113 seconds
+Process exited with code 0
+Original token count: 241
+Output:
+TAP version 13
+# Subtest: desktop follower IPC methods use the current desktop protocol version
+ok 1 - desktop follower IPC methods use the current desktop protocol version
+  ---
+  duration_ms: 0.860167
+  type: 'test'
+  ...
+# Subtest: sendBroadcast writes desktop IPC broadcast frames
+ok 2 - sendBroadcast writes desktop IPC broadcast frames
+  ---
+  duration_ms: 6.239209
+  type: 'test'
+  ...
+# Subtest: broadcastDesktopThreadTitleUpdated writes desktop title update broadcast frames
+ok 3 - broadcastDesktopThreadTitleUpdated writes desktop title update broadcast frames
+  ---
+  duration_ms: 1.578
+  type: 'test'
+  ...
+# Subtest: broadcastDesktopThreadListRefresh invalidates desktop task and command search queries
+ok 4 - broadcastDesktopThreadListRefresh invalidates desktop task and command search queries
+  ---
+  duration_ms: 1.682667
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 64.87475
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:41:42Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node --test server/chat-service.test.mjs`</summary>
+```
+Chunk ID: c4fc0c
+Wall time: 0.0199 seconds
+Process exited with code 0
+Original token count: 2235
+Output:
+TAP version 13
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=client-turn-1 session=thread-1
+# [chat] send request remote= project=project-1 session=draft-project-1-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=client-turn-1 session=thread-1
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=stale-mobile-turn-id session=thread-1
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=headless-turn-1 session=thread-1
+# [chat] abort request remote=127.0.0.1 turn= session=thread-1
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] accepted codex turn=client-turn session=thread-1 project=Project
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] accepted codex turn=client-turn session=thread-1 project=Project
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=draft-project-1-1 attachments=0
+# [chat] accepted codex turn=client-turn session=draft-project-1-1 project=Project
+# [chat] send request remote= project=project-1 session=draft-project-1-1 attachments=0
+# [chat] accepted codex turn=client-turn session=draft-project-1-1 project=Project
+# Subtest: sendChat routes running input through desktop turn/steer
+ok 1 - sendChat routes running input through desktop turn/steer
+  ---
+  duration_ms: 8.468667
+  type: 'test'
+  ...
+# Subtest: sendChat rejects when strict desktop bridge is unavailable
+ok 2 - sendChat rejects when strict desktop bridge is unavailable
+  ---
+  duration_ms: 0.505917
+  type: 'test'
+  ...
+# Subtest: abortChat records and broadcasts an aborted turn even after the backend run is gone
+ok 3 - abortChat records and broadcasts an aborted turn even after the backend run is gone
+  ---
+  duration_ms: 0.258083
+  type: 'test'
+  ...
+# Subtest: sendChat rejects desktop-ipc draft sends with a create-thread specific error
+ok 4 - sendChat rejects desktop-ipc draft sends with a create-thread specific error
+  ---
+  duration_ms: 0.260416
+  type: 'test'
+  ...
+# Subtest: sendChat sends existing desktop-ipc threads through the desktop follower bridge
+ok 5 - sendChat sends existing desktop-ipc threads through the desktop follower bridge
+  ---
+  duration_ms: 0.465459
+  type: 'test'
+  ...
+# Subtest: sendChat starts server-side desktop IPC monitoring after desktop handoff
+ok 6 - sendChat starts server-side desktop IPC monitoring after desktop handoff
+  ---
+  duration_ms: 0.754416
+  type: 'test'
+  ...
+# Subtest: abortChat can abort a server-side desktop IPC monitor run
+ok 7 - abortChat can abort a server-side desktop IPC monitor run
+  ---
+  duration_ms: 0.383833
+  type: 'test'
+  ...
+# Subtest: abortChat falls back to session id when desktop IPC turn id does not match
+ok 8 - abortChat falls back to session id when desktop IPC turn id does not match
+  ---
+  duration_ms: 0.437916
+  type: 'test'
+  ...
+# Subtest: abortChat aborts an active headless run before a desktop IPC monitor on the same session
+ok 9 - abortChat aborts an active headless run before a desktop IPC monitor on the same session
+  ---
+  duration_ms: 1.332917
+  type: 'test'
+  ...
+# Subtest: abortChat interrupts a desktop-origin running session by session id
+ok 10 - abortChat interrupts a desktop-origin running session by session id
+  ---
+  duration_ms: 0.49575
+  type: 'test'
+  ...
+# Subtest: sendChat sends desktop-ipc plan requests with desktop collaboration mode
+ok 11 - sendChat sends desktop-ipc plan requests with desktop collaboration mode
+  ---
+  duration_ms: 0.407833
+  type: 'test'
+  ...
+# Subtest: sendChat clears desktop collaboration mode for normal follow-up turns
+ok 12 - sendChat clears desktop collaboration mode for normal follow-up turns
+  ---
+  duration_ms: 0.192416
+  type: 'test'
+  ...
+# Subtest: sendChat falls back to headless local when an existing desktop-ipc thread has no owner
+ok 13 - sendChat falls back to headless local when an existing desktop-ipc thread has no owner
+  ---
+  duration_ms: 0.640625
+  type: 'test'
+  ...
+# Subtest: sendChat falls back to headless local when settings sync times out before start
+ok 14 - sendChat falls back to headless local when settings sync times out before start
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:41:48Z)**_
+
+新增的两组测试已经过了。现在我再跑一遍相关服务测试和 build；如果都过，我就重启 3321，让你直接在桌面端看新线程是否热刷新。
+
+_**Agent (gpt-5.5 2026-05-11 04:41:50Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node --test server/desktop-ipc-client.test.mjs server/chat-service.test.mjs server/codex-app-server.test.mjs server/session-message-reader.test.mjs server/desktop-turn-monitor.test.mjs`</summary>
+```
+Chunk ID: c82cae
+Wall time: 0.0883 seconds
+Process exited with code 0
+Original token count: 3449
+Output:
+TAP version 13
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=client-turn-1 session=thread-1
+# [chat] send request remote= project=project-1 session=draft-project-1-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=client-turn-1 session=thread-1
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=stale-mobile-turn-id session=thread-1
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] abort request remote=127.0.0.1 turn=headless-turn-1 session=thread-1
+# [chat] abort request remote=127.0.0.1 turn= session=thread-1
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] accepted codex turn=client-turn session=thread-1 project=Project
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] accepted codex turn=client-turn session=thread-1 project=Project
+# [chat] send request remote= project=project-1 session=thread-1 attachments=0
+# [chat] send request remote= project=project-1 session=draft-project-1-1 attachments=0
+# [chat] accepted codex turn=client-turn session=draft-project-1-1 project=Project
+# [chat] send request remote= project=project-1 session=draft-project-1-1 attachments=0
+# [chat] accepted codex turn=client-turn session=draft-project-1-1 project=Project
+# Subtest: sendChat routes running input through desktop turn/steer
+ok 1 - sendChat routes running input through desktop turn/steer
+  ---
+  duration_ms: 5.060916
+  type: 'test'
+  ...
+# Subtest: sendChat rejects when strict desktop bridge is unavailable
+ok 2 - sendChat rejects when strict desktop bridge is unavailable
+  ---
+  duration_ms: 0.983625
+  type: 'test'
+  ...
+# Subtest: abortChat records and broadcasts an aborted turn even after the backend run is gone
+ok 3 - abortChat records and broadcasts an aborted turn even after the backend run is gone
+  ---
+  duration_ms: 0.74275
+  type: 'test'
+  ...
+# Subtest: sendChat rejects desktop-ipc draft sends with a create-thread specific error
+ok 4 - sendChat rejects desktop-ipc draft sends with a create-thread specific error
+  ---
+  duration_ms: 0.999958
+  type: 'test'
+  ...
+# Subtest: sendChat sends existing desktop-ipc threads through the desktop follower bridge
+ok 5 - sendChat sends existing desktop-ipc threads through the desktop follower bridge
+  ---
+  duration_ms: 1.077583
+  type: 'test'
+  ...
+# Subtest: sendChat starts server-side desktop IPC monitoring after desktop handoff
+ok 6 - sendChat starts server-side desktop IPC monitoring after desktop handoff
+  ---
+  duration_ms: 0.969542
+  type: 'test'
+  ...
+# Subtest: abortChat can abort a server-side desktop IPC monitor run
+ok 7 - abortChat can abort a server-side desktop IPC monitor run
+  ---
+  duration_ms: 0.695708
+  type: 'test'
+  ...
+# Subtest: abortChat falls back to session id when desktop IPC turn id does not match
+ok 8 - abortChat falls back to session id when desktop IPC turn id does not match
+  ---
+  duration_ms: 0.782
+  type: 'test'
+  ...
+# Subtest: abortChat aborts an active headless run before a desktop IPC monitor on the same session
+ok 9 - abortChat aborts an active headless run before a desktop IPC monitor on the same session
+  ---
+  duration_ms: 1.092875
+  type: 'test'
+  ...
+# Subtest: abortChat interrupts a desktop-origin running session by session id
+ok 10 - abortChat interrupts a desktop-origin running session by session id
+  ---
+  duration_ms: 0.893458
+  type: 'test'
+  ...
+# Subtest: sendChat sends desktop-ipc plan requests with desktop collaboration mode
+ok 11 - sendChat sends desktop-ipc plan requests with desktop collaboration mode
+  ---
+  duration_ms: 0.532042
+  type: 'test'
+  ...
+# Subtest: sendChat clears desktop collaboration mode for normal follow-up turns
+ok 12 - sendChat clears desktop collaboration mode for normal follow-up turns
+  ---
+  duration_ms: 0.390625
+  type: 'test'
+  ...
+# Subtest: sendChat falls back to headless local when an existing desktop-ipc thread has no owner
+ok 13 - sendChat falls back to headless local when an existing desktop-ipc thread has no owner
+  ---
+  duration_ms: 0.807292
+  type: 'test'
+  ...
+# Subtest: sendChat falls back to headless local when settings sync times out before start
+ok 14 - sendChat falls back to headless local when settings sync times out before start
+  
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:41:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run build`</summary>
+```
+Chunk ID: 10c9fb
+Wall time: 3.7761 seconds
+Process exited with code 0
+Original token count: 227
+Output:
+
+> codexmobile@1.2.0 build
+> vite build --config client/vite.config.js
+
+vite v7.3.2 building client environment for production...
+transforming...
+✓ 1962 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/assets/manifest-DkwGc9r2.webmanifest      0.66 kB
+dist/index.html                                2.01 kB │ gzip:   0.88 kB
+dist/assets/pdf.worker-B1D2UnXD.mjs        2,161.15 kB
+dist/assets/index-CVVVp3D-.css               106.18 kB │ gzip:  18.72 kB
+dist/assets/index-KyvUYw5c.js                930.08 kB │ gzip: 285.93 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 3.01s
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:42:04Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command**</summary>
+```bash
+node --input-type=module - <<'NODE'
+import { notifyDesktopThreadListChanged } from './server/codex-app-server.js';
+const result = await notifyDesktopThreadListChanged({ threadId: 'manual-refresh-probe', cwd: process.cwd(), reason: 'manual-probe' });
+console.log(JSON.stringify(result));
+NODE
+```
+```
+Chunk ID: 572937
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 53
+Output:
+{"sent":true,"conversationId":"manual-refresh-probe","cwd":"/Users/xiayanghui/编程项目/CodexMobile","hostId":"local","reason":"manual-probe","queryKeys":[["tasks"],["command-menu-thread-search","local"]]}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:42:04Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff --stat && git diff -- server/desktop-ipc-client.js server/codex-app-server.js server/chat-delivery.js server/chat-service.js server/desktop-ipc-client.test.mjs server/chat-service.test.mjs`</summary>
+```
+Chunk ID: 5bf801
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3613
+Output:
+ ...26-05-11_04-17-47Z-https-github-com-emanuele.md | 16823 ++++++++++++++++++-
+ .specstory/statistics.json                         |    10 +-
+ client/src/app-state.test.mjs                      |     8 +-
+ client/src/app-websocket-events.test.mjs           |    15 +-
+ client/src/app/session-utils.js                    |     2 +-
+ client/src/app/turn-submission-utils.js            |     2 +-
+ client/src/app/useAppWebSocket.js                  |     2 +-
+ client/src/app/useSessionLivePolling.js            |     3 +-
+ client/src/session-live-refresh.js                 |     6 +-
+ client/src/session-live-refresh.test.mjs           |    17 +-
+ client/src/turn-submission-utils.test.mjs          |     4 +-
+ server/chat-delivery.js                            |    20 +-
+ server/chat-service.js                             |     5 +
+ server/chat-service.test.mjs                       |    59 +
+ server/codex-app-server.js                         |    20 +
+ server/desktop-ipc-client.js                       |    73 +-
+ server/desktop-ipc-client.test.mjs                 |    75 +
+ 17 files changed, 17105 insertions(+), 39 deletions(-)
+diff --git a/server/chat-delivery.js b/server/chat-delivery.js
+index 9b85bdd..2ae59e7 100644
+--- a/server/chat-delivery.js
++++ b/server/chat-delivery.js
+@@ -292,11 +292,13 @@ export function runQueuedHeadlessChatJob({
+   rememberConversationAlias,
+   rememberTurn,
+   rememberLiveSession,
++  notifyDesktopThreadListChanged,
+   emitJobEvent,
+   scheduleAutoNameCompletedSession,
+   onQueueDrained
+ }) {
+   const metadataUpdates = [];
++  let lastBackgroundThread = null;
+ 
+   function rememberStartedBackgroundThread(payload) {
+     if (!payload?.sessionId || !job.draftSessionId) {
+@@ -322,6 +324,11 @@ export function runQueuedHeadlessChatJob({
+         }
+       ]
+     };
++    const backgroundThread = {
++      threadId: payload.sessionId,
++      cwd: payload.cwd || job.executionProjectPath || job.project.path || null
++    };
++    lastBackgroundThread = backgroundThread;
+     rememberLiveSession?.(sessionRecord);
+     metadataUpdates.push(
+       Promise.all([
+@@ -329,7 +336,12 @@ export function runQueuedHeadlessChatJob({
+           ? registerProjectlessThread(payload.sessionId, job.project.path)
+           : Promise.resolve(null),
+         registerMobileSession(sessionRecord)
+-      ]).catch((error) => {
++      ]).then(() =>
++        notifyDesktopThreadListChanged?.({
++          ...backgroundThread,
++          reason: 'background-thread-started'
++        })
++      ).catch((error) => {
+         console.warn('[sessions] Failed to register background thread:', error.message);
+       })
+     );
+@@ -393,6 +405,12 @@ export function runQueuedHeadlessChatJob({
+       }
+       const snapshot = await refreshCodexCache();
+       broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
++      if (lastBackgroundThread) {
++        await notifyDesktopThreadListChanged?.({
++          ...lastBackgroundThread,
++          reason: 'background-thread-completed'
++        });
++      }
+     } catch (error) {
+       console.warn('[sync] Failed to refresh after chat:', error.message);
+     } finally {
+diff --git a/server/chat-service.js b/server/chat-service.js
+index c2271eb..a71ef30 100644
+--- a/server/chat-service.js
++++ b/server/chat-service.js
+@@ -16,6 +16,9 @@
+ import {
+   registerProjectlessThread as registerProjectlessThreadInCodexState
+ } from './codex-config.js';
++import {
++  notifyDesktopThreadListChanged as notifyDesktopThreadListChangedInCodexApp
++} from './codex-app-server.js';
+ import { registerMobileSession as registerMobileSessionInIndex } from './mobile-session-index.js';
+ import { createChatQueue } from './chat-queue.js';
+ import {
+@@ -67,6 +70,7 @@ export function createChatService({
+   registerProjectlessThread = registerProjectlessThreadInCodexState,
+   registerMobileSession = registerMobileSessionInIndex,
+   rememberLiveSession = () => null,
++  notifyDesktopThreadListChanged = notifyDesktopThreadListChangedInCodexApp,
+   desktopOwnerRetryDelays = [250, 700, 1500]
+ }) {
+   const chatQueue = createChatQueue();
+@@ -208,6 +212,7 @@ export function createChatService({
+       rememberConversationAlias,
+       rememberTurn,
+       rememberLiveSession,
++      notifyDesktopThreadListChanged,
+       emitJobEvent,
+       scheduleAutoNameCompletedSession,
+       onQueueDrained: () => setTimeout(() => runNextQueuedChat(queueKey), 0)
+diff --git a/server/chat-service.test.mjs b/server/chat-service.test.mjs
+index 6967567..59e013a 100644
+--- a/server/chat-service.test.mjs
++++ b/server/chat-service.test.mjs
+@@ -639,6 +639,65 @@ test('sendChat can create a background thread when desktop-ipc cannot create des
+   assert.match(runPayload.message, /从手机后台新建/);
+ });
+ 
++test('sendChat asks desktop to hot-refresh after a background thread is created', async () => {
++  co
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:07Z)**_
+
+我已经把“手机端新建后台线程后，桌面端列表热刷新”的链路补上了，现在做最后一轮本地验证和重启部署。重点是确认 3321 上跑的是新代码，不然你在手机上测会看到旧行为。
+
+_**Agent (gpt-5.5 2026-05-11 04:43:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short`</summary>
+```
+Chunk ID: 6951df
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 163
+Output:
+ M .specstory/history/2026-05-11_04-17-47Z-https-github-com-emanuele.md
+ M .specstory/statistics.json
+ M client/src/app-state.test.mjs
+ M client/src/app-websocket-events.test.mjs
+ M client/src/app/session-utils.js
+ M client/src/app/turn-submission-utils.js
+ M client/src/app/useAppWebSocket.js
+ M client/src/app/useSessionLivePolling.js
+ M client/src/session-live-refresh.js
+ M client/src/session-live-refresh.test.mjs
+ M client/src/turn-submission-utils.test.mjs
+ M server/chat-delivery.js
+ M server/chat-service.js
+ M server/chat-service.test.mjs
+ M server/codex-app-server.js
+ M server/desktop-ipc-client.js
+ M server/desktop-ipc-client.test.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `lsof -nP -iTCP:3321 -sTCP:LISTEN || true`</summary>
+```
+Chunk ID: e3e9a3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 41
+Output:
+COMMAND   PID       USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    70609 xiayanghui   13u  IPv4 0x6c8fcb1b3e6c58f0      0t0  TCP *:3321 (LISTEN)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `pgrep -fl "node --test|node .*server/index|run-server.mjs|vite" || true`</summary>
+```
+Chunk ID: 6173e1
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 39
+Output:
+44010 node server/index.js
+70609 /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node /Users/xiayanghui/编程项目/CodexMobile/scripts/run-server.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba /Users/xiayanghui/.codex/memories/MEMORY.md | sed -n '1,120p'`</summary>
+```
+Chunk ID: 693036
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2897
+Output:
+     1	# Task Group: CodexMobile / composer 控件、线程同步、架构拆分与私网访问
+     2	
+     3	scope: `CodexMobile` 手机端 composer 控件、`/plan` 协作模式、repo-local skill 发现、自动标题、普通对话/发送链路排障、desktop IPC fallback、draft/new-thread send、abort 状态卡片、后端保守拆分、移动端 Git 面板、macOS 自启动与 Tailscale/LAN 访问；适用于这个 repo 的 live 前后端联调、app-server 行为核验、私网访问解释和公开仓库卫生，不适用于泛化移动端产品设计。
+     4	applies_to: cwd=/Users/xiayanghui/编程项目/CodexMobile; reuse_rule=适合复用到这个 `CodexMobile` 仓库里与 composer、`/plan`、`/api/status`、`thread/*` app-server 能力、本地 Node 服务、README 功能口径、Git HTTP API、launchd、Tailscale/LAN origin 行为有关的任务；具体端口、running process、模型列表和代码结构都要按当前 checkout/live server 重验
+     5	
+     6	## Task 1: 给 mobile composer 加 skill 选择，并修复“按钮无法点击”的运行态错配
+     7	
+     8	### rollout_summary_files
+     9	
+    10	- rollout_summaries/2026-05-05T00-12-41-rXsC-codexmobile_skill_picker_and_remove_voice_controls.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T08-12-41-019df57a-d854-73d1-8bec-a9d15f8453c2.jsonl, updated_at=2026-05-05T00:25:11+00:00, thread_id=019df57a-d854-73d1-8bec-a9d15f8453c2, added skill discovery and mobile picker, then proved the first disabled state came from an older live backend on port 3321)
+    11	
+    12	### keywords
+    13	
+    14	- CodexMobile, skill picker, composer, /api/status, localStorage, buildCodexTurnInput, type: skill, lsof, port 3321, port 3331, readCodexSkills
+    15	
+    16	## Task 2: 按用户要求移除 app 内 `对话` / `语音输入` 按钮和相关功能
+    17	
+    18	### rollout_summary_files
+    19	
+    20	- rollout_summaries/2026-05-05T00-12-41-rXsC-codexmobile_skill_picker_and_remove_voice_controls.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T08-12-41-019df57a-d854-73d1-8bec-a9d15f8453c2.jsonl, updated_at=2026-05-05T00:25:11+00:00, thread_id=019df57a-d854-73d1-8bec-a9d15f8453c2, removed the in-app voice/dialog entry points and updated docs to match the native-keyboard voice preference)
+    21	
+    22	### keywords
+    23	
+    24	- CodexMobile, voice-dialog, microphone button, dialog button, VoiceDialogPanel, native keyboard voice path, README.md, npm run build, restart 3321
+    25	
+    26	## Task 3: 追 Codex 真实命名链路，并给 draft 线程接入 `gpt-5.4-mini` 自动标题
+    27	
+    28	### rollout_summary_files
+    29	
+    30	- rollout_summaries/2026-05-05T11-35-49-5GrC-codexmobile_auto_thread_title_hook_gpt_5_4_mini.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T19-35-49-019df7ec-42b4-7602-94d6-e06d2430e6c0.jsonl, updated_at=2026-05-05T12:01:30+00:00, thread_id=019df7ec-42b4-7602-94d6-e06d2430e6c0, traced `name`/`preview` fallback and added async auto-title writeback for new draft sessions)
+    31	
+    32	### keywords
+    33	
+    34	- thread naming, preview fallback, thread/name/set, gpt-5.4-mini, auto title, session-title, draft session, sanitizeGeneratedTitle, node --test, EADDRINUSE
+    35	
+    36	## Task 4: 清理普通对话旧线程、解释 mobile/desktop 归档现状，并修复发送一直“处理中”
+    37	
+    38	### rollout_summary_files
+    39	
+    40	- rollout_summaries/2026-05-05T19-24-27-hq5w-codexmobile_mobile_thread_sync_and_hanging_turn_debug.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/06/rollout-2026-05-06T03-24-27-019df999-4f02-70f1-9d0f-895fb3098ee6.jsonl, updated_at=2026-05-07T05:33:58+00:00, thread_id=019df999-4f02-70f1-9d0f-895fb3098ee6, cleaned ordinary-thread history bleed-through, clarified hide-vs-archive behavior, cleared `/Users/xiayanghui/Documents/Codex/`, and fixed normal-chat turn hangs caused by leaked lark-cli env)
+    41	
+    42	### keywords
+    43	
+    44	- ordinary conversations, hidden-sessions.json, mobile-sessions.json, refreshCodexCache, Documents/Codex, activeRuns, /api/chat/abort, runCodexTurn, lark-cli, NO_PROXY, thread/archive, app-server timeout, turn/completed
+    45	
+    46	## Task 5: 先做重启后快速配对 skill，后改成 macOS LaunchAgent 自动启动
+    47	
+    48	### rollout_summary_files
+    49	
+    50	- rollout_summaries/2026-05-05T19-18-01-iLno-codexmobile_macos_autostart_launchagent.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/06/rollout-2026-05-06T03-18-01-019df993-6bb9-7ff2-99b2-c34d
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:15Z)**_
+
+状态看起来干净：测试进程没有残留，3321 当前是 launchd 托管的 `run-server.mjs`。我再看一下另一个 `node server/index.js` 是不是旧的手动服务，避免重启时端口或旧代码混进来。
+
+_**Agent (gpt-5.5 2026-05-11 04:43:15Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `ps -p 44010,70609 -ww -o pid,ppid,lstart,command=`</summary>
+```
+Chunk ID: c0c325
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 67
+Output:
+  PID  PPID STARTED                      
+44010 43988 Mon May 11 12:09:28 2026     node server/index.js
+70609     1 Mon May 11 12:31:20 2026     /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node /Users/xiayanghui/编程项目/CodexMobile/scripts/run-server.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:15Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `pwdx 44010 2>/dev/null || lsof -p 44010 -Fn 2>/dev/null | sed -n '1,20p' || true`</summary>
+```
+Chunk ID: fe1c20
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 69
+Output:
+p44010
+fcwd
+n/Users/xiayanghui/编程项目/CodexMobile
+ftxt
+n/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+ftxt
+n/usr/lib/dyld
+f0
+n/dev/null
+f1
+n->0xdc1dc1b8c64834fc
+f2
+n->0xb4f98cf41b1562a
+f3
+ncount=0, state=0x8
+f4
+n->0xd29dd487bea793f1
+f5
+n->0x9c4444a8a2b71043
+f6
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:15Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `curl -sS http://127.0.0.1:3321/api/status | head -c 1600`</summary>
+```
+Chunk ID: 13baf6
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 400
+Output:
+{"connected":true,"desktopBridge":{"strict":true,"connected":true,"mode":"desktop-ipc","reason":null,"socketPath":"/var/folders/bx/grk73b6n1js274nxq2f5shsh0000gn/T/codex-ipc/ipc-501.sock","checkedAt":"2026-05-11T04:43:15.843Z","capabilities":{"read":true,"sendToOpenDesktopThread":true,"createThread":false,"createThreadReason":"当前 Codex Desktop IPC 只暴露已有线程接管入口，还没有开放外部新建桌面线程入口。","createThreadViaBackground":true,"backgroundCodex":true}},"hostName":"Mac-mini-home.local","port":3321,"provider":"codex","model":"gpt-5.5","modelShort":"5.5 中","models":[{"value":"gpt-5.5","label":"GPT-5.5"},{"value":"gpt-5.4","label":"gpt-5.4"},{"value":"gpt-5.4-mini","label":"GPT-5.4-Mini"},{"value":"gpt-5.3-codex","label":"gpt-5.3-codex"},{"value":"gpt-5.2","label":"gpt-5.2"}],"skills":[{"name":"30x-image","label":"30x-image","description":"|","path":"/Users/xiayanghui/.codex/skills/30x-image/SKILL.md"},{"name":"agent-browser","label":"agent-browser","description":"Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages.","path":"/Users/xiayanghui/.codex/skills/agent-browser/SKILL.md"},{"name":"agent-group-discussion","label":"agent-group-discussion","description":"This skill should be used when the user asks to \"发起群讨论\", \"让大臣们讨论\", \"组织agent讨论\", \"群聊讨论\", \"多人讨论\", or needs to coordinate m
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `ps -p 43988 -ww -o pid,ppid,lstart,command=`</summary>
+```
+Chunk ID: 4c1db3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 25
+Output:
+  PID  PPID STARTED                      
+43988 43982 Mon May 11 12:09:28 2026     npm run start
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `lsof -Pan -p 44010 -iTCP -sTCP:LISTEN || true`</summary>
+```
+Chunk ID: db3808
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 41
+Output:
+COMMAND   PID       USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    44010 xiayanghui   13u  IPv4 0x39e60515813d2a41      0t0  TCP *:3331 (LISTEN)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `launchctl print gui/$(id -u)/com.codexmobile.bridge | sed -n '1,100p'`</summary>
+```
+Chunk ID: 9c53d0
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 839
+Output:
+gui/501/com.codexmobile.bridge = {
+	active count = 1
+	path = /Users/xiayanghui/Library/LaunchAgents/com.codexmobile.bridge.plist
+	type = LaunchAgent
+	state = running
+
+	program = /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+	arguments = {
+		/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+		/Users/xiayanghui/编程项目/CodexMobile/scripts/run-server.mjs
+	}
+
+	working directory = /Users/xiayanghui/编程项目/CodexMobile
+
+	stdout path = /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.out.log
+	stderr path = /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.err.log
+	inherited environment = {
+		SSH_AUTH_SOCK => /var/run/com.apple.launchd.JfZgry2FhK/Listeners
+	}
+
+	default environment = {
+		PATH => /usr/bin:/bin:/usr/sbin:/sbin
+	}
+
+	environment = {
+		OSLogRateLimit => 64
+		PATH => /Users/xiayanghui/编程项目/CodexMobile/node_modules/.bin:/Users/xiayanghui/编程项目/node_modules/.bin:/Users/xiayanghui/node_modules/.bin:/Users/node_modules/.bin:/node_modules/.bin:/Users/xiayanghui/.nvm/versions/node/v22.22.0/lib/node_modules/npm/node_modules/@npmcli/run-script/lib/node-gyp-bin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Users/xiayanghui/.codex/tmp/arg0/codex-arg0NlQuli:/Users/xiayanghui/.antigravity/antigravity/bin:/Users/xiayanghui/.antigravity/antigravity/bin:/opt/homebrew/opt/node@20/bin:/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin:/Users/xiayanghui/.codeium/windsurf/bin:/Users/xiayanghui/.rbenv/shims:/Users/xiayanghui/.rbenv/bin:/usr/local/opt/ruby/bin:/Users/xiayanghui/.local/bin:/opt/anaconda3/bin:/opt/anaconda3/condabin:/Users/xiayanghui/.rbenv/shims:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pkg/env/active/bin:/opt/pmk/env/global/bin://Applications/Topaz Gigapixel.app/Contents/Resources/bin:/Library/Apple/usr/bin:/Library/TeX/texbin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Applications/Obsidian.app/Contents/MacOS:/Applications/Codex.app/Contents/Resources
+		HOME => /Users/xiayanghui
+		XPC_SERVICE_NAME => com.codexmobile.bridge
+	}
+
+	domain = gui/501 [100004]
+	asid = 100004
+	minimum runtime = 10
+	exit timeout = 5
+	runs = 16200
+	pid = 70609
+	immediate reason = inefficient
+	forks = 1849
+	execs = 1
+	initialized = 1
+	trampolined = 1
+	started suspended = 0
+	proxy started suspended = 0
+	checked allocations = 0 (queried = 1)
+	checked allocations reason = no host
+	checked allocations flags = 0x0
+	last exit code = 1
+
+	resource coalition = {
+		ID = 65106
+		type = resource
+		state = active
+		active count = 1
+		name = com.codexmobile.bridge
+	}
+
+	jetsam coalition = {
+		ID = 65107
+		type = jetsam
+		state = active
+		active count = 1
+		name = com.codexmobile.bridge
+	}
+
+	spawn type = daemon (3)
+	jetsam priority = 40
+	jetsam memory limit (active) = (unlimited)
+	jetsam memory limit (inactive) = (unlimited)
+	jetsamproperties category = daemon
+	jetsam thread limit = 32
+	cpumon = default
+
+	properties = keepalive | runatload | inferred program
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:25Z)**_
+
+还有一个 3331 的手动 `npm run start`，它不占 3321，我不会动它。现在重启 launchd 托管的 3321 服务，让刚才的热刷新 IPC 改动真正进入你手机正在访问的入口。
+
+_**Agent (gpt-5.5 2026-05-11 04:43:26Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run start:bg`</summary>
+```
+Chunk ID: 06ab0d
+Wall time: 0.1079 seconds
+Process exited with code 0
+Original token count: 72
+Output:
+
+> codexmobile@1.2.0 start:bg
+> node scripts/start-server.mjs
+
+Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+CodexMobile is managed by launchd; restarted com.codexmobile.bridge.
+Logs: /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.out.log
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `lsof -nP -iTCP:3321 -sTCP:LISTEN || true`</summary>
+```
+Chunk ID: 489c74
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 41
+Output:
+COMMAND   PID       USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    32984 xiayanghui   13u  IPv4 0x61c7b7ac8e6798fe      0t0  TCP *:3321 (LISTEN)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `launchctl print gui/$(id -u)/com.codexmobile.bridge | sed -n '1,90p'`</summary>
+```
+Chunk ID: f93e97
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 844
+Output:
+gui/501/com.codexmobile.bridge = {
+	active count = 1
+	path = /Users/xiayanghui/Library/LaunchAgents/com.codexmobile.bridge.plist
+	type = LaunchAgent
+	state = running
+
+	program = /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+	arguments = {
+		/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+		/Users/xiayanghui/编程项目/CodexMobile/scripts/run-server.mjs
+	}
+
+	working directory = /Users/xiayanghui/编程项目/CodexMobile
+
+	stdout path = /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.out.log
+	stderr path = /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.err.log
+	inherited environment = {
+		SSH_AUTH_SOCK => /var/run/com.apple.launchd.JfZgry2FhK/Listeners
+	}
+
+	default environment = {
+		PATH => /usr/bin:/bin:/usr/sbin:/sbin
+	}
+
+	environment = {
+		OSLogRateLimit => 64
+		PATH => /Users/xiayanghui/编程项目/CodexMobile/node_modules/.bin:/Users/xiayanghui/编程项目/node_modules/.bin:/Users/xiayanghui/node_modules/.bin:/Users/node_modules/.bin:/node_modules/.bin:/Users/xiayanghui/.nvm/versions/node/v22.22.0/lib/node_modules/npm/node_modules/@npmcli/run-script/lib/node-gyp-bin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Users/xiayanghui/.codex/tmp/arg0/codex-arg0NlQuli:/Users/xiayanghui/.antigravity/antigravity/bin:/Users/xiayanghui/.antigravity/antigravity/bin:/opt/homebrew/opt/node@20/bin:/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin:/Users/xiayanghui/.codeium/windsurf/bin:/Users/xiayanghui/.rbenv/shims:/Users/xiayanghui/.rbenv/bin:/usr/local/opt/ruby/bin:/Users/xiayanghui/.local/bin:/opt/anaconda3/bin:/opt/anaconda3/condabin:/Users/xiayanghui/.rbenv/shims:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pkg/env/active/bin:/opt/pmk/env/global/bin://Applications/Topaz Gigapixel.app/Contents/Resources/bin:/Library/Apple/usr/bin:/Library/TeX/texbin:/Users/xiayanghui/.gem/bin:/Users/xiayanghui/development/flutter/bin:/Applications/Obsidian.app/Contents/MacOS:/Applications/Codex.app/Contents/Resources
+		HOME => /Users/xiayanghui
+		XPC_SERVICE_NAME => com.codexmobile.bridge
+	}
+
+	domain = gui/501 [100004]
+	asid = 100004
+	minimum runtime = 10
+	exit timeout = 5
+	runs = 16201
+	pid = 32984
+	immediate reason = inefficient
+	forks = 50
+	execs = 1
+	initialized = 1
+	trampolined = 1
+	started suspended = 0
+	proxy started suspended = 0
+	checked allocations = 0 (queried = 1)
+	checked allocations reason = no host
+	checked allocations flags = 0x0
+	last terminating signal = Terminated: 15
+
+	resource coalition = {
+		ID = 65106
+		type = resource
+		state = active
+		active count = 1
+		name = com.codexmobile.bridge
+	}
+
+	jetsam coalition = {
+		ID = 65107
+		type = jetsam
+		state = active
+		active count = 1
+		name = com.codexmobile.bridge
+	}
+
+	spawn type = daemon (3)
+	jetsam priority = 40
+	jetsam memory limit (active) = (unlimited)
+	jetsam memory limit (inactive) = (unlimited)
+	jetsamproperties category = daemon
+	jetsam thread limit = 32
+	cpumon = default
+
+	properties = keepalive | runatload | inferred program
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `curl -sS http://127.0.0.1:3321/api/status | head -c 1600`</summary>
+```
+Chunk ID: a04855
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 400
+Output:
+{"connected":true,"desktopBridge":{"strict":true,"connected":true,"mode":"desktop-ipc","reason":null,"socketPath":"/var/folders/bx/grk73b6n1js274nxq2f5shsh0000gn/T/codex-ipc/ipc-501.sock","checkedAt":"2026-05-11T04:43:34.738Z","capabilities":{"read":true,"sendToOpenDesktopThread":true,"createThread":false,"createThreadReason":"当前 Codex Desktop IPC 只暴露已有线程接管入口，还没有开放外部新建桌面线程入口。","createThreadViaBackground":true,"backgroundCodex":true}},"hostName":"Mac-mini-home.local","port":3321,"provider":"codex","model":"gpt-5.5","modelShort":"5.5 中","models":[{"value":"gpt-5.5","label":"GPT-5.5"},{"value":"gpt-5.4","label":"gpt-5.4"},{"value":"gpt-5.4-mini","label":"GPT-5.4-Mini"},{"value":"gpt-5.3-codex","label":"gpt-5.3-codex"},{"value":"gpt-5.2","label":"gpt-5.2"}],"skills":[{"name":"30x-image","label":"30x-image","description":"|","path":"/Users/xiayanghui/.codex/skills/30x-image/SKILL.md"},{"name":"agent-browser","label":"agent-browser","description":"Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages.","path":"/Users/xiayanghui/.codex/skills/agent-browser/SKILL.md"},{"name":"agent-group-discussion","label":"agent-group-discussion","description":"This skill should be used when the user asks to \"发起群讨论\", \"让大臣们讨论\", \"组织agent讨论\", \"群聊讨论\", \"多人讨论\", or needs to coordinate m
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `tail -n 40 .codexmobile/launchd.err.log`</summary>
+```
+Chunk ID: 5144bc
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 369
+Output:
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3321
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3321
+}
+
+Node.js v22.22.0
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3321
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3321
+}
+
+Node.js v22.22.0
+[sync] Background refresh failed: Codex app-server request timed out: thread/list
+[sync] Background refresh failed: Codex app-server request timed out: thread/list
+[sync] Background refresh failed: Codex app-server request timed out: thread/list
+[title] model title generation failed: fetch failed
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:45Z)**_
+
+3321 已经重启到新 PID，接口也能连上。日志里有之前端口占用留下的旧报错，我再用页面本身和一次 IPC 探针确认当前新代码的热刷新广播能打到桌面端。
+
+_**Agent (gpt-5.5 2026-05-11 04:43:45Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command**</summary>
+```bash
+node --input-type=module - <<'NODE'
+import { notifyDesktopThreadListChanged } from './server/codex-app-server.js';
+const result = await notifyDesktopThreadListChanged({ threadId: 'post-restart-hot-refresh-probe', cwd: process.cwd(), reason: 'post-restart-probe' });
+console.log(JSON.stringify(result));
+NODE
+```
+```
+Chunk ID: 6149c1
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 57
+Output:
+{"sent":true,"conversationId":"post-restart-hot-refresh-probe","cwd":"/Users/xiayanghui/编程项目/CodexMobile","hostId":"local","reason":"post-restart-probe","queryKeys":[["tasks"],["command-menu-thread-search","local"]]}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:45Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `tail -n 30 .codexmobile/launchd.out.log`</summary>
+```
+Chunk ID: 3a0ee6
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1096
+Output:
+[runtime-debug] {"t":"2026-05-11T04:33:27.127Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:33:40.477Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:33:43.510Z","event":"status.activeRuns","count":0,"runs":[]}
+[chat] send request remote=127.0.0.1 project=__codexmobile_projectless__ session=019e154e-c75f-7ec1-8aee-ff5a75bf8ff4 attachments=0
+[runtime-debug] {"t":"2026-05-11T04:33:56.018Z","event":"sendChat.enter","remoteAddress":"127.0.0.1","sendMode":"start","imagePrompt":false,"bridgeMode":"desktop-ipc","bridgeConnected":true,"selectedSessionId":"019e154e-c75f-7ec1-8aee-ff5a75bf8ff4","draftSessionId":null,"conversationSessionId":"019e154e-c75f-7ec1-8aee-ff5a75bf8ff4","turnId":"turn-1778474035938-5e469c02a14fd8","queueKey":"draft-__codexmobile_projectless__-1778473933080","shouldHoldInLocalQueue":false,"selectedSessionResolvedFromBackgroundAlias":false,"headlessRuns":[],"desktopTurnRuns":[],"imageRuns":[]}
+[runtime-debug] {"t":"2026-05-11T04:33:56.099Z","event":"sendChat.branch","branch":"try-desktop-ipc","bridgeMode":"desktop-ipc"}
+[runtime-debug] {"t":"2026-05-11T04:33:59.492Z","event":"sendChat.bridge","reason":"desktop-ipc-error-fallback","code":"CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE","bridgeModeAfter":"headless-local"}
+[runtime-debug] {"t":"2026-05-11T04:33:59.519Z","event":"sendChat.branch","branch":"headless","bridgeMode":"headless-local","sendMode":"start","interrupt":false}
+[chat] accepted codex turn=turn-1778474035938-5e469c02a14fd8 session=019e154e-c75f-7ec1-8aee-ff5a75bf8ff4 project=普通对话
+[runtime-debug] {"t":"2026-05-11T04:33:59.536Z","event":"sendChat.exit","branch":"headless","delivery":"started","sessionId":"019e154e-c75f-7ec1-8aee-ff5a75bf8ff4","turnId":"turn-1778474035938-5e469c02a14fd8","queued":false}
+[runtime-debug] {"t":"2026-05-11T04:34:13.893Z","event":"status.activeRuns","count":1,"runs":[{"sessionId":"019e154e-c75f-7ec1-8aee-ff5a75bf8ff4","turnId":"turn-1778474035938-5e469c02a14fd8","previousSessionId":"019e154e-c75f-7ec1-8aee-ff5a75bf8ff4","source":"headless-local","status":"running","steerable":true}]}
+[runtime-debug] {"t":"2026-05-11T04:34:17.358Z","event":"status.activeRuns","count":1,"runs":[{"sessionId":"019e154e-c75f-7ec1-8aee-ff5a75bf8ff4","turnId":"turn-1778474035938-5e469c02a14fd8","previousSessionId":"019e154e-c75f-7ec1-8aee-ff5a75bf8ff4","source":"headless-local","status":"running","steerable":true}]}
+[runtime-debug] {"t":"2026-05-11T04:34:29.387Z","event":"status.activeRuns","count":1,"runs":[{"sessionId":"019e154e-c75f-7ec1-8aee-ff5a75bf8ff4","turnId":"turn-1778474035938-5e469c02a14fd8","previousSessionId":"019e154e-c75f-7ec1-8aee-ff5a75bf8ff4","source":"headless-local","status":"running","steerable":true}]}
+[runtime-debug] {"t":"2026-05-11T04:34:45.384Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:34:49.382Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:36:38.159Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:36:41.690Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:36:55.330Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:36:59.094Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:37:03.531Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:40:09.292Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:43:15.845Z","event":"status.activeRuns","count":0,"runs":[]}
+[launchd] Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+[launchd] CodexMobile run-server starting cwd=/Users/xiayanghui/编程项目/CodexMobile node=/Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node
+CodexMobile listening on http://0.0.0.0:3321
+Pairing code: 651726 (81 trusted device(s), fixed)
+Use Tailscale and open http://<this-pc-tailscale-ip>:3321 on iPhone.
+CodexMobile HTTPS disabled: certificate not found at /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/tls/server.pfx
+[runtime-debug] {"t":"2026-05-11T04:43:31.048Z","event":"status.activeRuns","count":0,"runs":[]}
+[runtime-debug] {"t":"2026-05-11T04:43:34.739Z","event":"status.activeRuns","count":0,"runs":[]}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:45Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `ps -p 32984 -ww -o pid,ppid,lstart,command=`</summary>
+```
+Chunk ID: b2f24e
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 51
+Output:
+  PID  PPID STARTED                      
+32984     1 Mon May 11 12:43:26 2026     /Users/xiayanghui/.nvm/versions/node/v22.22.0/bin/node /Users/xiayanghui/编程项目/CodexMobile/scripts/run-server.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:43:47Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_navigate"><details>
+<summary>Tool use: **browser_navigate**</summary>
+```
+Wall time: 41.0816 seconds
+Output:
+[{"type":"text","text":"### Error\nError: browserBackend.callTool: net::ERR_NAME_NOT_RESOLVED at http://mac-mini-home.local:3321/\nCall log:\n  - navigating to \"http://mac-mini-home.local:3321/\", waiting until \"domcontentloaded\"\n"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:44:31Z)**_
+
+浏览器自动化这边解析不了 `mac-mini-home.local` 这个 Bonjour 名字，但服务本机地址正常。我用 `127.0.0.1:3321` 直接打开页面确认前端也能起来。
+
+_**Agent (gpt-5.5 2026-05-11 04:44:32Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_navigate"><details>
+<summary>Tool use: **browser_navigate**</summary>
+```
+Wall time: 0.5434 seconds
+Output:
+[{"type":"text","text":"### Ran Playwright code\n```js\nawait page.goto('http://127.0.0.1:3321/');\n```\n### Page\n- Page URL: http://127.0.0.1:3321/\n- Page Title: CodexMobile\n### Snapshot\n- [Snapshot](.playwright-mcp/page-2026-05-11T04-44-32-909Z.yml)"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:44:36Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_snapshot"><details>
+<summary>Tool use: **browser_snapshot**</summary>
+```
+Wall time: 0.0167 seconds
+Output:
+[{"type":"text","text":"### Page\n- Page URL: http://127.0.0.1:3321/\n- Page Title: CodexMobile\n### Snapshot\n```yaml\n- generic [ref=e3]:\n  - banner [ref=e4]:\n    - button \"打开菜单\" [ref=e5]\n    - generic [ref=e7]\n    - button \"更多操作\" [ref=e16]\n  - complementary [ref=e21]:\n    - generic [ref=e22]\n    - generic [ref=e30]\n    - generic [ref=e35]\n    - generic [ref=e41]\n  - generic [ref=e64]:\n    - generic [ref=e216]\n    - button \"已处理 2m 22s\" [ref=e237] [cursor=pointer]\n    - generic [ref=e242]\n    - button \"已处理 1m 31s\" [ref=e265] [cursor=pointer]\n    - generic [ref=e270]\n    - button \"已处理 39s\" [ref=e295] [cursor=pointer]\n    - generic [ref=e300]\n    - button \"已处理 20s\" [ref=e318] [cursor=pointer]\n    - generic [ref=e323]\n    - generic [ref=e352]\n    - button \"已处理 6s\" [ref=e373] [cursor=pointer]\n    - button \"已处理\" [ref=e379] [cursor=pointer]\n    - generic [ref=e384]\n    - generic [ref=e410]\n    - button \"已处理 29s\" [ref=e428] [cursor=pointer]\n    - button \"已处理\" [ref=e434] [cursor=pointer]\n    - generic [ref=e439]\n    - generic [ref=e487]\n    - button \"已处理 2m 8s\" [ref=e508] [cursor=pointer]\n    - generic [ref=e513]\n  - generic [ref=e76]:\n    - textbox \"给 Codex 发送消息\" [ref=e77]\n    - generic [ref=e78]\n```\n### Events\n- New console entries: .playwright-mcp/console-2026-05-11T04-44-32-395Z.log#L1-L2"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:44:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff --stat -- server/desktop-ipc-client.js server/codex-app-server.js server/chat-service.js server/chat-delivery.js server/desktop-ipc-client.test.mjs server/chat-service.test.mjs`</summary>
+```
+Chunk ID: d3e7e2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 108
+Output:
+ server/chat-delivery.js            | 20 +++++++++-
+ server/chat-service.js             |  5 +++
+ server/chat-service.test.mjs       | 59 ++++++++++++++++++++++++++++++
+ server/codex-app-server.js         | 20 ++++++++++
+ server/desktop-ipc-client.js       | 73 ++++++++++++++++++++++++++++++++++++-
+ server/desktop-ipc-client.test.mjs | 75 ++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 250 insertions(+), 2 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:44:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff -- server/desktop-ipc-client.js server/codex-app-server.js server/chat-service.js server/chat-delivery.js server/desktop-ipc-client.test.mjs server/chat-service.test.mjs | sed -n '1,260p'`</summary>
+```
+Chunk ID: 0b9821
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2304
+Output:
+diff --git a/server/chat-delivery.js b/server/chat-delivery.js
+index 9b85bdd..2ae59e7 100644
+--- a/server/chat-delivery.js
++++ b/server/chat-delivery.js
+@@ -292,11 +292,13 @@ export function runQueuedHeadlessChatJob({
+   rememberConversationAlias,
+   rememberTurn,
+   rememberLiveSession,
++  notifyDesktopThreadListChanged,
+   emitJobEvent,
+   scheduleAutoNameCompletedSession,
+   onQueueDrained
+ }) {
+   const metadataUpdates = [];
++  let lastBackgroundThread = null;
+ 
+   function rememberStartedBackgroundThread(payload) {
+     if (!payload?.sessionId || !job.draftSessionId) {
+@@ -322,6 +324,11 @@ export function runQueuedHeadlessChatJob({
+         }
+       ]
+     };
++    const backgroundThread = {
++      threadId: payload.sessionId,
++      cwd: payload.cwd || job.executionProjectPath || job.project.path || null
++    };
++    lastBackgroundThread = backgroundThread;
+     rememberLiveSession?.(sessionRecord);
+     metadataUpdates.push(
+       Promise.all([
+@@ -329,7 +336,12 @@ export function runQueuedHeadlessChatJob({
+           ? registerProjectlessThread(payload.sessionId, job.project.path)
+           : Promise.resolve(null),
+         registerMobileSession(sessionRecord)
+-      ]).catch((error) => {
++      ]).then(() =>
++        notifyDesktopThreadListChanged?.({
++          ...backgroundThread,
++          reason: 'background-thread-started'
++        })
++      ).catch((error) => {
+         console.warn('[sessions] Failed to register background thread:', error.message);
+       })
+     );
+@@ -393,6 +405,12 @@ export function runQueuedHeadlessChatJob({
+       }
+       const snapshot = await refreshCodexCache();
+       broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
++      if (lastBackgroundThread) {
++        await notifyDesktopThreadListChanged?.({
++          ...lastBackgroundThread,
++          reason: 'background-thread-completed'
++        });
++      }
+     } catch (error) {
+       console.warn('[sync] Failed to refresh after chat:', error.message);
+     } finally {
+diff --git a/server/chat-service.js b/server/chat-service.js
+index c2271eb..a71ef30 100644
+--- a/server/chat-service.js
++++ b/server/chat-service.js
+@@ -16,6 +16,9 @@
+ import {
+   registerProjectlessThread as registerProjectlessThreadInCodexState
+ } from './codex-config.js';
++import {
++  notifyDesktopThreadListChanged as notifyDesktopThreadListChangedInCodexApp
++} from './codex-app-server.js';
+ import { registerMobileSession as registerMobileSessionInIndex } from './mobile-session-index.js';
+ import { createChatQueue } from './chat-queue.js';
+ import {
+@@ -67,6 +70,7 @@ export function createChatService({
+   registerProjectlessThread = registerProjectlessThreadInCodexState,
+   registerMobileSession = registerMobileSessionInIndex,
+   rememberLiveSession = () => null,
++  notifyDesktopThreadListChanged = notifyDesktopThreadListChangedInCodexApp,
+   desktopOwnerRetryDelays = [250, 700, 1500]
+ }) {
+   const chatQueue = createChatQueue();
+@@ -208,6 +212,7 @@ export function createChatService({
+       rememberConversationAlias,
+       rememberTurn,
+       rememberLiveSession,
++      notifyDesktopThreadListChanged,
+       emitJobEvent,
+       scheduleAutoNameCompletedSession,
+       onQueueDrained: () => setTimeout(() => runNextQueuedChat(queueKey), 0)
+diff --git a/server/chat-service.test.mjs b/server/chat-service.test.mjs
+index 6967567..59e013a 100644
+--- a/server/chat-service.test.mjs
++++ b/server/chat-service.test.mjs
+@@ -639,6 +639,65 @@ test('sendChat can create a background thread when desktop-ipc cannot create des
+   assert.match(runPayload.message, /从手机后台新建/);
+ });
+ 
++test('sendChat asks desktop to hot-refresh after a background thread is created', async () => {
++  const desktopRefreshes = [];
++  const { service } = makeChatService({
++    getDesktopBridgeStatus: async () => ({
++      strict: true,
++      connected: true,
++      mode: 'desktop-ipc',
++      reason: null,
++      capabilities: {
++        sendToOpenDesktopThread: true,
++        createThread: false,
++        createThreadViaBackground: true,
++        backgroundCodex: true
++      }
++    }),
++    runCodexTurn: async (payload, emit) => {
++      emit({
++        type: 'thread-started',
++        sessionId: 'background-thread-1',
++        previousSessionId: payload.draftSessionId,
++        turnId: payload.turnId,
++        cwd: '/tmp/project'
++      });
++      emit({
++        type: 'chat-complete',
++        sessionId: 'background-thread-1',
++        previousSessionId: payload.draftSessionId,
++        turnId: payload.turnId
++      });
++      return 'background-thread-1';
++    },
++    notifyDesktopThreadListChanged: async (payload) => {
++      desktopRefreshes.push(payload);
++      return { sent: true };
++    }
++  });
++
++  await service.sendChat({
++    projectId: 'project-1',
++    draftSessionId: 'draft-project-1-1',
++    clientTurnId:
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:44:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff --check -- server/desktop-ipc-client.js server/codex-app-server.js server/chat-service.js server/chat-delivery.js server/desktop-ipc-client.test.mjs server/chat-service.test.mjs`</summary>
+```
+Chunk ID: ae379e
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:45:01Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "broadcastDesktopThreadListRefresh|notifyDesktopThreadListChanged|background-thread-started|background-thread-completed" server/desktop-ipc-client.js server/codex-app-server.js server/chat-delivery.js server/chat-service.js`</summary>
+```
+Chunk ID: 2700d7
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 308
+Output:
+server/desktop-ipc-client.js:10: * - broadcastDesktopThreadListRefresh — 通知 Codex Desktop 刷新线程列表相关查询。
+server/desktop-ipc-client.js:396:export async function broadcastDesktopThreadListRefresh({
+server/chat-delivery.js:295:  notifyDesktopThreadListChanged,
+server/chat-delivery.js:340:        notifyDesktopThreadListChanged?.({
+server/chat-delivery.js:342:          reason: 'background-thread-started'
+server/chat-delivery.js:409:        await notifyDesktopThreadListChanged?.({
+server/chat-delivery.js:411:          reason: 'background-thread-completed'
+server/chat-service.js:20:  notifyDesktopThreadListChanged as notifyDesktopThreadListChangedInCodexApp
+server/chat-service.js:73:  notifyDesktopThreadListChanged = notifyDesktopThreadListChangedInCodexApp,
+server/chat-service.js:215:      notifyDesktopThreadListChanged,
+server/codex-app-server.js:11: * - notifyDesktopThreadListChanged — 通过桌面 IPC 请求 Codex Desktop 热刷新线程列表。
+server/codex-app-server.js:26:  broadcastDesktopThreadListRefresh,
+server/codex-app-server.js:538:export async function notifyDesktopThreadListChanged({
+server/codex-app-server.js:544:  const broadcast = await broadcastDesktopThreadListRefresh({
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:45:01Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "hot-refresh|broadcastDesktopThreadListRefresh invalidates" server/chat-service.test.mjs server/desktop-ipc-client.test.mjs`</summary>
+```
+Chunk ID: d13cc7
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 69
+Output:
+server/desktop-ipc-client.test.mjs:172:test('broadcastDesktopThreadListRefresh invalidates desktop task and command search queries', async () => {
+server/chat-service.test.mjs:642:test('sendChat asks desktop to hot-refresh after a background thread is created', async () => {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-11 04:45:22Z)**_
+
+可以，已经实现并重新部署到你现在测的 `3321` 了。
+
+我这次加的是“桌面端热刷新线程列表”链路：手机端走 fallback 后台新建线程时，服务端会在后台线程创建成功和执行完成后，各给 Codex Desktop 发一次 IPC 广播，让桌面端 invalidate `tasks` 和线程搜索缓存。也就是说桌面端 Codex 在线时，新线程不需要你手动刷新，应该会更快出现在桌面端列表里。
+
+改动核心在：
+
+- [server/desktop-ipc-client.js](/Users/xiayanghui/编程项目/CodexMobile/server/desktop-ipc-client.js:396)：新增桌面端 query cache invalidate 广播。
+- [server/codex-app-server.js](/Users/xiayanghui/编程项目/CodexMobile/server/codex-app-server.js:538)：封装 `notifyDesktopThreadListChanged`。
+- [server/chat-delivery.js](/Users/xiayanghui/编程项目/CodexMobile/server/chat-delivery.js:340)：后台线程 started / completed 后触发桌面热刷新。
+- [server/chat-service.test.mjs](/Users/xiayanghui/编程项目/CodexMobile/server/chat-service.test.mjs:642)：补了手机后台新线程触发桌面热刷的测试。
+
+已验证：
+
+- `node --test server/desktop-ipc-client.test.mjs` 通过
+- `node --test server/chat-service.test.mjs` 通过
+- 扩展后端相关测试共 `46/46` 通过
+- `npm run build` 通过
+- 已执行 `npm run start:bg`，当前 `3321` 是新进程 `PID 32984`
+- 手动 IPC 探针返回 `sent:true`，确认能向当前 Codex Desktop IPC socket 发出热刷新广播
+- 页面 `http://127.0.0.1:3321/` 已能正常打开；你手机上的 [http://mac-mini-home.local:3321/](http://mac-mini-home.local:3321/) 仍然走同一个服务
+
+你现在可以直接在手机端新建一条线程测：桌面端 Codex 在线的话，线程列表应该会自动刷新出来。这个不是强制把桌面端切到那条线程，而是让桌面端立刻重新拉取线程列表。

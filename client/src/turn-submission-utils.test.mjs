@@ -148,14 +148,14 @@ test('completeLocalAbortMessages finishes the optimistic running activity', () =
   assert.equal(next[0].completedAt, '2026-05-08T02:00:05.000Z');
 });
 
-test('external thread handoff uses thread refresh instead of client turn polling', () => {
+test('only desktop IPC handoff skips client turn polling', () => {
   assert.equal(
     shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'desktop-ipc' } }),
     false
   );
   assert.equal(
     shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'headless-local' } }),
-    false
+    true
   );
   assert.equal(
     shouldPollTurnEndpointAfterSend({}),

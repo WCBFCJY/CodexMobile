@@ -531,11 +531,7 @@ export function shouldRenderActivityMessageInChat(message) {
   if (message?.role !== 'activity') {
     return true;
   }
-  if (
-    message?.transient &&
-    message?.source === 'local-handoff' &&
-    String(message?.status || '') !== 'failed'
-  ) {
+  if (message?.transient && String(message?.status || '') !== 'failed') {
     return false;
   }
   return !isPlaceholderActivityMessage(message);

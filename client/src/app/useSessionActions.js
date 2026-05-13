@@ -174,15 +174,16 @@ export function useSessionActions({
     });
   }
 
-  async function handleRenameSession(project, session) {
+  async function handleRenameSession(project, session, requestedTitle = null) {
     if (!project?.id || !session?.id) {
-      return;
+      return false;
     }
 
     const currentTitle = session.title || '对话';
-    const nextTitle = window.prompt('重命名线程', currentTitle)?.trim().slice(0, 52);
+    const rawTitle = requestedTitle ?? (typeof window.prompt === 'function' ? window.prompt('重命名线程', currentTitle) : '');
+    const nextTitle = String(rawTitle || '').trim().slice(0, 52);
     if (!nextTitle || nextTitle === currentTitle) {
-      return;
+      return false;
     }
 
     const applyLocalTitle = () => {
@@ -199,7 +200,7 @@ export function useSessionActions({
 
     if (isDraftSession(session)) {
       applyLocalTitle();
-      return;
+      return true;
     }
 
     try {
@@ -209,8 +210,10 @@ export function useSessionActions({
       });
       applyLocalTitle();
       await refreshProjectSessions(project);
+      return true;
     } catch (error) {
       window.alert(`重命名失败：${error.message}`);
+      return false;
     }
   }
 

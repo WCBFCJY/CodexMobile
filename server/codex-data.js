@@ -16,12 +16,14 @@
  * 不负责: HTTP 细节。
  */
 import { execFile } from 'node:child_process';
+import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
-import { archiveDesktopThread, listDesktopThreads, readDesktopThread, setDesktopThreadName } from './codex-app-server.js';
-import { CODEX_STATE_DB, readCodexConfig, readCodexWorkspaceState } from './codex-config.js';
+import { archiveDesktopThread, listDesktopThreads, readDesktopThread } from './codex-app-server.js';
+import { CODEX_SESSION_INDEX, CODEX_SESSIONS_DIR, CODEX_STATE_DB, readCodexConfig, readCodexWorkspaceState } from './codex-config.js';
+import { broadcastDesktopThreadTitleUpdated } from './desktop-ipc-client.js';
 import {
   readMobileSessionIndex,
   renameMobileSession
@@ -46,7 +48,12 @@ export { messagesFromDesktopThread } from './desktop-thread-projector.js';
 export { normalizeComparablePath } from './session-index-builder.js';
 
 const INCLUDE_MISSING_SUBAGENT_THREADS = process.env.CODEXMOBILE_INCLUDE_MISSING_SUBAGENT_THREADS === '1';
+const USE_APP_SERVER_THREAD_LIST = /^(1|true|yes|on)$/i.test(String(process.env.CODEXMOBILE_USE_APP_SERVER_THREAD_LIST || '').trim());
 const execFileAsync = promisify(execFile);
+const LOCAL_THREAD_SCAN_LIMIT = 1000;
+const LOCAL_THREAD_HEAD_BYTES = 512 * 1024;
+const THREAD_LIST_FALLBACK_MS = Math.max(1000, Number(process.env.CODEXMOBILE_THREAD_LIST_FALLBACK_MS) || 2500);
+const SESSION_CACHE_PATH = path.join(process.cwd(), '.codexmobile', 'state', 'session-cache.json');
 
 let cache = {
   syncedAt: null,
@@ -56,6 +63,54 @@ let cache = {
   sessionsByProject: new Map(),
   sessionById: new Map()
 };
+
+function hydrateCacheFromDisk() {
+  try {
+    const parsed = JSON.parse(fsSync.readFileSync(SESSION_CACHE_PATH, 'utf8'));
+    const projects = Array.isArray(parsed.projects) ? parsed.projects : [];
+    const sessions = Array.isArray(parsed.sessions) ? parsed.sessions : [];
+    const projectById = new Map(projects.map((project) => [project.id, project]));
+    const sessionsByProject = new Map();
+    const sessionById = new Map();
+    for (const session of sessions) {
+      if (!session?.id || !session.projectId) {
+        continue;
+      }
+      if (!sessionsByProject.has(session.projectId)) {
+        sessionsByProject.set(session.projectId, []);
+      }
+      sessionsByProject.get(session.projectId).push(session);
+      sessionById.set(session.id, session);
+    }
+    cache = {
+      syncedAt: parsed.syncedAt || null,
+      config: parsed.config || null,
+      projects,
+      projectById,
+      sessionsByProject,
+      sessionById
+    };
+  } catch {
+    // Empty cache is acceptable on first run.
+  }
+}
+
+async function persistCacheToDisk(snapshot) {
+  const sessions = [...snapshot.sessionById.values()];
+  const payload = {
+    version: 1,
+    syncedAt: snapshot.syncedAt,
+    config: snapshot.config,
+    projects: snapshot.projects,
+    sessions
+  };
+  await fs.mkdir(path.dirname(SESSION_CACHE_PATH), { recursive: true });
+  const tmpPath = `${SESSION_CACHE_PATH}.${process.pid}.${Date.now()}.tmp`;
+  await fs.writeFile(tmpPath, JSON.stringify(payload), 'utf8');
+  await fs.rename(tmpPath, SESSION_CACHE_PATH);
+}
+
+hydrateCacheFromDisk();
 
 async function resolveSessionThread(sessionId) {
   const cached = cache.sessionById.get(sessionId);
@@ -118,13 +173,315 @@ async function readThreadSpawnEdges() {
   }
 }
 
+async function collectJsonlFiles(dir, files = []) {
+  let entries = [];
+  try {
+    entries = await fs.readdir(dir, { withFileTypes: true });
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.warn('[sessions] Failed to scan local sessions:', error.message);
+    }
+    return files;
+  }
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      await collectJsonlFiles(fullPath, files);
+    } else if (entry.isFile() && entry.name.endsWith('.jsonl')) {
+      files.push(fullPath);
+    }
+  }
+  return files;
+}
+
+function eventUserPreviewFromPayload(payload = {}) {
+  if (payload.type === 'event_msg' && payload.payload?.type === 'user_message') {
+    return String(payload.payload.message || '').trim();
+  }
+  return '';
+}
+
+function fallbackUserPreviewFromPayload(payload = {}) {
+  if (payload.type === 'response_item' && payload.payload?.role === 'user') {
+    const content = Array.isArray(payload.payload.content) ? payload.payload.content : [];
+    return content
+      .map((item) => item?.text || item?.input_text?.text || '')
+      .join('\n')
+      .trim();
+  }
+  return '';
+}
+
+function localThreadFromJsonl(raw, filePath, stat, threadNameIndex = new Map(), threadSqliteIndex = new Map()) {
+  let meta = null;
+  let preview = '';
+  let fallbackPreview = '';
+  const lines = raw.split(/\r?\n/);
+  for (const line of lines) {
+    if (!line.trim()) {
+      continue;
+    }
+    let item = null;
+    try {
+      item = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    if (!meta && item.type === 'session_meta') {
+      meta = item.payload || {};
+    }
+    if (!preview) {
+      preview = eventUserPreviewFromPayload(item);
+    }
+    if (!fallbackPreview) {
+      fallbackPreview = fallbackUserPreviewFromPayload(item);
+    }
+    if (meta && preview) {
+      break;
+    }
+  }
+  const id = meta?.id || path.basename(filePath).match(/([0-9a-f]{8}-[0-9a-f-]{27,})\.jsonl$/i)?.[1] || '';
+  if (!id) {
+    return null;
+  }
+  const sqliteThread = threadSqliteIndex.get(id) || {};
+  const updatedAtMs = Number(stat?.mtimeMs || Date.now());
+  const sqliteSource = sqliteThread.agentNickname || sqliteThread.agentRole
+    ? {
+      subAgent: {
+        thread_spawn: {
+          agent_nickname: sqliteThread.agentNickname || null,
+          agent_role: sqliteThread.agentRole || null
+        }
+      }
+    }
+    : (sqliteThread.threadSource || sqliteThread.source || meta?.source || 'vscode');
+  return {
+    id,
+    cwd: sqliteThread.cwd || meta?.cwd || '',
+    path: filePath,
+    preview: sqliteThread.firstUserMessage || preview || fallbackPreview,
+    name: threadNameIndex.get(id) || sqliteThread.title || meta?.title || null,
+    source: sqliteSource,
+    modelProvider: sqliteThread.modelProvider || meta?.model_provider || null,
+    updatedAt: sqliteThread.updatedAt || Math.floor(updatedAtMs / 1000),
+    archived: Boolean(sqliteThread.archived),
+    archivedAt: sqliteThread.archivedAt || null,
+    agentNickname: sqliteThread.agentNickname || null,
+    agentRole: sqliteThread.agentRole || null,
+    status: 'completed',
+    skipContextState: true
+  };
+}
+
+async function readThreadSqliteIndex() {
+  try {
+    await fs.access(CODEX_STATE_DB);
+    const query = `
+      select
+        id,
+        title,
+        cwd,
+        source,
+        thread_source as threadSource,
+        model_provider as modelProvider,
+        updated_at as updatedAt,
+        archived,
+        archived_at as archivedAt,
+        first_user_message as firstUserMessage,
+        agent_nickname as agentNickname,
+        agent_role as agentRole
+      from threads
+    `;
+    const { stdout } = await execFileAsync('sqlite3', ['-json', CODEX_STATE_DB, query], {
+      maxBuffer: 16 * 1024 * 1024
+    });
+    const parsed = JSON.parse(stdout || '[]');
+    return new Map(
+      (Array.isArray(parsed) ? parsed : [])
+        .filter((thread) => thread?.id)
+        .map((thread) => [thread.id, thread])
+    );
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.warn('[sessions] Failed to read sqlite thread index:', error.message);
+    }
+    return new Map();
+  }
+}
+
+async function readThreadNameIndex() {
+  const names = new Map();
+  let raw = '';
+  try {
+    raw = await fs.readFile(CODEX_SESSION_INDEX, 'utf8');
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.warn('[sessions] Failed to read session title index:', error.message);
+    }
+    return names;
+  }
+  for (const line of raw.split(/\r?\n/)) {
+    if (!line.trim()) {
+      continue;
+    }
+    try {
+      const item = JSON.parse(line);
+      const id = String(item.id || '').trim();
+      const title = String(item.thread_name || '').trim();
+      if (id && title) {
+        names.set(id, title);
+      }
+    } catch {
+      // Ignore corrupt index rows; the rollout file still gives us a fallback title.
+    }
+  }
+  return names;
+}
+
+function sqlString(value) {
+  return `'${String(value || '').replace(/'/g, "''")}'`;
+}
+
+async function updateThreadTitleInSqlite(sessionId, title) {
+  try {
+    await fs.access(CODEX_STATE_DB);
+    const nowMs = Date.now();
+    const nowSeconds = Math.floor(nowMs / 1000);
+    await execFileAsync('sqlite3', [
+      CODEX_STATE_DB,
+      `update threads set title=${sqlString(title)}, updated_at=${nowSeconds}, updated_at_ms=${nowMs} where id=${sqlString(sessionId)}`
+    ]);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.warn('[sessions] Failed to update sqlite thread title:', error.message);
+    }
+  }
+}
+
+async function updateThreadNameIndex(sessionId, title) {
+  const id = String(sessionId || '').trim();
+  const threadName = String(title || '').trim();
+  if (!id || !threadName) {
+    return false;
+  }
+  let raw = '';
+  try {
+    raw = await fs.readFile(CODEX_SESSION_INDEX, 'utf8');
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+  const updatedAt = new Date().toISOString();
+  let found = false;
+  const lines = [];
+  for (const line of raw.split(/\r?\n/)) {
+    if (!line.trim()) {
+      continue;
+    }
+    try {
+      const item = JSON.parse(line);
+      if (String(item.id || '') === id) {
+        found = true;
+        lines.push(JSON.stringify({ ...item, thread_name: threadName, updated_at: updatedAt }));
+      } else {
+        lines.push(line);
+      }
+    } catch {
+      lines.push(line);
+    }
+  }
+  if (!found) {
+    lines.push(JSON.stringify({ id, thread_name: threadName, updated_at: updatedAt }));
+  }
+  await fs.mkdir(path.dirname(CODEX_SESSION_INDEX), { recursive: true });
+  const tmpPath = `${CODEX_SESSION_INDEX}.${process.pid}.${Date.now()}.tmp`;
+  await fs.writeFile(tmpPath, `${lines.join('\n')}\n`, 'utf8');
+  await fs.rename(tmpPath, CODEX_SESSION_INDEX);
+  return true;
+}
+
+async function readLocalThreadHead(filePath) {
+  const handle = await fs.open(filePath, 'r');
+  try {
+    const buffer = Buffer.alloc(LOCAL_THREAD_HEAD_BYTES);
+    const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0);
+    return buffer.subarray(0, bytesRead).toString('utf8');
+  } finally {
+    await handle.close();
+  }
+}
+
+async function listLocalDesktopThreadsFromJsonl({ limit = LOCAL_THREAD_SCAN_LIMIT } = {}) {
+  const threadNameIndex = await readThreadNameIndex();
+  const threadSqliteIndex = await readThreadSqliteIndex();
+  const files = await collectJsonlFiles(CODEX_SESSIONS_DIR);
+  const withStats = await Promise.all(files.map(async (filePath) => {
+    try {
+      return { filePath, stat: await fs.stat(filePath) };
+    } catch {
+      return null;
+    }
+  }));
+  const sorted = withStats
+    .filter(Boolean)
+    .sort((a, b) => Number(b.stat.mtimeMs || 0) - Number(a.stat.mtimeMs || 0))
+    .slice(0, limit);
+  const threads = [];
+  for (const item of sorted) {
+    try {
+      const raw = await readLocalThreadHead(item.filePath);
+      const thread = localThreadFromJsonl(raw, item.filePath, item.stat, threadNameIndex, threadSqliteIndex);
+      if (thread) {
+        threads.push(thread);
+      }
+    } catch (error) {
+      console.warn(`[sessions] Failed to read local session ${item.filePath}:`, error.message);
+    }
+  }
+  return threads;
+}
+
+async function listDesktopThreadsForCache() {
+  if (!USE_APP_SERVER_THREAD_LIST) {
+    return listLocalDesktopThreadsFromJsonl({ limit: LOCAL_THREAD_SCAN_LIMIT });
+  }
+  const remote = listDesktopThreads({ limit: 1000 })
+    .then((threads) => ({ source: 'desktop', threads }))
+    .catch((error) => ({ source: 'error', error }));
+  const fallback = new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      resolve({ source: 'fallback-timeout' });
+    }, THREAD_LIST_FALLBACK_MS);
+    if (typeof timer.unref === 'function') {
+      timer.unref();
+    }
+  });
+  const result = await Promise.race([remote, fallback]);
+  if (result.source === 'desktop') {
+    return result.threads;
+  }
+  if (result.source === 'error') {
+    console.warn('[sessions] Desktop thread/list failed, using local session files:', result.error.message);
+  } else {
+    console.warn(`[sessions] Desktop thread/list did not respond within ${THREAD_LIST_FALLBACK_MS}ms, using local session files.`);
+    remote.then((late) => {
+      if (late.source === 'error') {
+        console.warn('[sessions] Late desktop thread/list failed:', late.error.message);
+      }
+    });
+  }
+  return listLocalDesktopThreadsFromJsonl({ limit: LOCAL_THREAD_SCAN_LIMIT });
+}
+
 export async function refreshCodexCache() {
   const config = await readCodexConfig();
   const workspaceState = await readCodexWorkspaceState();
   const mobileSessionIndex = await readMobileSessionIndex();
   const hiddenSessionIds = await readHiddenSessionIds();
-  const spawnEdges = INCLUDE_MISSING_SUBAGENT_THREADS ? await readThreadSpawnEdges() : [];
-  const desktopThreads = await listDesktopThreads({ limit: 1000 });
+  const spawnEdges = await readThreadSpawnEdges();
+  const desktopThreads = await listDesktopThreadsForCache();
   const sessionIndex = await buildSessionIndex({
     config,
     workspaceState,
@@ -142,6 +499,9 @@ export async function refreshCodexCache() {
     config,
     ...sessionIndex
   };
+  persistCacheToDisk(cache).catch((error) => {
+    console.warn('[sessions] Failed to persist session cache:', error.message);
+  });
 
   return getCacheSnapshot();
 }
@@ -168,6 +528,8 @@ export function listProjectSessions(projectId) {
     projectId: session.projectId,
     cwd: session.cwd,
     title: session.title,
+    titleLocked: Boolean(session.titleLocked),
+    titleAutoGenerated: session.titleAutoGenerated || null,
     summary: session.summary,
     model: session.model,
     provider: session.provider,
@@ -208,6 +570,7 @@ export function rememberLiveSession(session = {}) {
     projectId,
     title,
     titleLocked: Boolean(existing.titleLocked || session.titleLocked),
+    titleAutoGenerated: existing.titleAutoGenerated || session.titleAutoGenerated || (session.titleLocked ? null : 'provisional'),
     summary,
     messageCount: Array.isArray(session.messages) ? session.messages.length : existing.messageCount || 0,
     updatedAt,
@@ -224,6 +587,65 @@ export function rememberLiveSession(session = {}) {
     const filtered = current.filter((item) => item.id !== id);
     cache.sessionsByProject.set(projectId, [next, ...filtered]);
   }
+  return next;
+}
+
+export async function applySessionTitleUpdate(sessionId, title, { projectId = null, auto = false } = {}) {
+  const id = String(sessionId || '').trim();
+  const nextTitle = String(title || '').trim().slice(0, 52);
+  if (!id || !nextTitle) {
+    return null;
+  }
+
+  await updateThreadNameIndex(id, nextTitle);
+  updateThreadTitleInSqlite(id, nextTitle).catch(() => {});
+
+  const existing = cache.sessionById.get(id) || null;
+  const updatedAt = new Date().toISOString();
+  const next = existing
+    ? {
+      ...existing,
+      title: nextTitle,
+      titleLocked: !auto,
+      titleAutoGenerated: auto ? 'model' : null,
+      updatedAt
+    }
+    : {
+      id,
+      projectId,
+      title: nextTitle,
+      titleLocked: !auto,
+      titleAutoGenerated: auto ? 'model' : null,
+      updatedAt
+    };
+
+  if (existing) {
+    cache.sessionById.set(id, next);
+    const targetProjectId = existing.projectId || projectId;
+    if (targetProjectId && cache.sessionsByProject.has(targetProjectId)) {
+      cache.sessionsByProject.set(
+        targetProjectId,
+        (cache.sessionsByProject.get(targetProjectId) || []).map((session) =>
+          session.id === id ? next : session
+        )
+      );
+    }
+    await renameMobileSession({
+      id,
+      projectPath: existing.cwd,
+      projectless: existing.projectless,
+      title: nextTitle,
+      titleLocked: !auto,
+      titleAutoGenerated: auto ? 'model' : null,
+      updatedAt
+    }).catch((error) => {
+      console.warn('[sessions] Failed to update mobile title index:', error.message);
+    });
+  }
+
+  persistCacheToDisk(cache).catch((error) => {
+    console.warn('[sessions] Failed to persist renamed session cache:', error.message);
+  });
   return next;
 }
 
@@ -247,19 +669,14 @@ export async function renameSession(sessionId, projectId, title, { auto = false 
     throw error;
   }
 
+  const renamed = await applySessionTitleUpdate(session.id, nextTitle, { projectId: session.projectId, auto });
   if (!session.mobileOnly) {
-    await setDesktopThreadName(session.id, nextTitle);
+    broadcastDesktopThreadTitleUpdated(session.id, nextTitle).catch((error) => {
+      console.warn(`[desktop-ipc] title broadcast failed thread=${session.id}: ${error.message}`);
+    });
   }
-  await renameMobileSession({
-    id: session.id,
-    projectPath: session.cwd,
-    projectless: session.projectless,
-    title: nextTitle,
-    titleLocked: !auto,
-    updatedAt: session.updatedAt
-  });
 
-  return { ...session, title: nextTitle, titleLocked: !auto };
+  return renamed || { ...session, title: nextTitle, titleLocked: !auto, titleAutoGenerated: auto ? 'model' : null };
 }
 
 export async function deleteSession(sessionId, projectId) {

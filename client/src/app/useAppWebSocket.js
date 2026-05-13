@@ -1,10 +1,10 @@
 /**
- * WebSocket 入站处理：按桌面线程等来源过滤/合并状态与消息，并暴露 `useAppWebSocket` 建立连接与分发副作用。
+ * WebSocket 入站处理：直接合并服务端 live events，并暴露 `useAppWebSocket` 建立连接与分发副作用。
  *
- * Keywords: websocket, desktop-thread, activity-sync, session-rename
+ * Keywords: websocket, live-events, activity-sync, session-rename
  *
  * Exports:
- * - 若干 `is*` / `should*` 纯函数 — 判定外部线程 payload、是否插入状态/活动/助手消息、重连后是否刷新等。
+ * - 若干 `is*` / `should*` 纯函数 — 兼容旧调用，当前所有 live payload 都直接渲染。
  * - `useAppWebSocket` — 订阅 WS、应用 payload 到会话与 context 的 hook。
  *
  * Inward: `api`（REST 与 `websocketUrl`）、`session-live-refresh`、`activity-model`、`context-status`。
@@ -14,20 +14,22 @@
 
 import { apiFetch, getToken, websocketUrl } from '../api.js';
 import {
-  applySessionRenameToProjectSessions
+  applySessionRenameToProjectSessions,
+  mergeLiveSelectedThreadMessages
 } from '../session-live-refresh.js';
 import {
+  messageStreamSignature,
   upsertActivityMessage,
   upsertAssistantMessage,
   upsertStatusMessage
 } from '../chat/activity-model.js';
 import { sameUserMessageContent } from '../chat/message-identity.js';
 import { mergeContextStatus, normalizeContextStatus } from './context-status.js';
-
-const EXTERNAL_THREAD_SOURCES = new Set(['desktop-ipc', 'desktop-thread', 'headless-local']);
+import { sessionMessagesApiPath } from './session-utils.js';
 
 export function isExternalThreadPayload(payload = {}) {
-  return EXTERNAL_THREAD_SOURCES.has(payload?.source);
+  void payload;
+  return false;
 }
 
 export function isDesktopThreadStatusPayload(payload = {}) {
@@ -35,6 +37,13 @@ export function isDesktopThreadStatusPayload(payload = {}) {
 }
 
 export function shouldRenderStatusMessageForPayload(payload = {}) {
+  if (
+    payload?.source === 'desktop-ipc' &&
+    payload?.kind === 'turn' &&
+    ['running', 'queued'].includes(String(payload?.status || ''))
+  ) {
+    return false;
+  }
   if (isExternalThreadPayload(payload)) {
     return false;
   }
@@ -50,13 +59,8 @@ export function shouldRenderAssistantMessageForPayload(payload = {}) {
 }
 
 export function shouldRefreshDesktopThreadForPayload(payload = {}) {
-  if (!isExternalThreadPayload(payload)) {
-    return false;
-  }
-  if (payload.type === 'chat-complete') {
-    return true;
-  }
-  return payload.type === 'status-update' && payload.kind === 'turn' && ['completed', 'failed'].includes(payload.status);
+  void payload;
+  return false;
 }
 
 export function shouldCompleteLocalTurnBeforeRefresh(payload = {}) {
@@ -125,6 +129,22 @@ export function useAppWebSocket({
         preferredSessionId: session.id,
         preserveSelection: true,
         silent: true
+      });
+    }
+
+    async function refreshSelectedSessionMessages({ forceDropStaleRunning = false } = {}) {
+      const session = selectedSessionRef.current;
+      if (!session?.id) {
+        return;
+      }
+      const data = await apiFetch(sessionMessagesApiPath(session.id)).catch(() => null);
+      if (!data || selectedSessionRef.current?.id !== session.id || !Array.isArray(data.messages)) {
+        return;
+      }
+      setContextStatus((current) => mergeContextStatus(current, data.context || defaultStatus.context, defaultStatus.context));
+      setMessages((current) => {
+        const merged = mergeLiveSelectedThreadMessages(current, data.messages, { forceDropStaleRunning });
+        return messageStreamSignature(current) === messageStreamSignature(merged) ? current : merged;
       });
     }
 
@@ -229,6 +249,17 @@ export function useAppWebSocket({
               updatedAt: payload.updatedAt || payload.session?.updatedAt || current.updatedAt
             };
           });
+          return;
+        }
+        if (payload.type === 'desktop-thread-updated') {
+          if (!payloadMatchesCurrentConversation(payload)) {
+            return;
+          }
+          if (payload.status && payload.status !== 'running') {
+            markSessionCompleteNotice(payload);
+            clearRun(payload);
+          }
+          refreshSelectedSessionMessages({ forceDropStaleRunning: true }).catch(() => null);
           return;
         }
         if (payload.type === 'user-message') {

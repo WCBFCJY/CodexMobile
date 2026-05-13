@@ -1,5 +1,5 @@
 /**
- * Markdown 消息正文：GFM、安全链接、本地文件/图片、代码块与记忆引用展示。
+ * Markdown 消息正文：GFM、安全链接、本地文件/图片、Mermaid、代码块与记忆引用展示。
  *
  * Keywords: react-markdown, message content, citation, image preview
  *
@@ -12,8 +12,8 @@
  * Outward: ChatMessage.jsx、PlanMessage、ActivityTimeline 等。
  */
 
-import { BookOpen, Check, Copy } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { BookOpen, Check, Copy, RotateCcw } from 'lucide-react';
+import { useEffect, useId, useRef, useState } from 'react';
 import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
@@ -70,7 +70,11 @@ export function MarkdownContent({ text, onPreviewImage, className = 'message-con
                 </code>
               );
             }
-            return <CodeBlock language={language || 'text'} code={String(children).replace(/\n$/, '')} />;
+            const code = String(children).replace(/\n$/, '');
+            if (language.toLowerCase() === 'mermaid') {
+              return <MermaidBlock code={code} />;
+            }
+            return <CodeBlock language={language || 'text'} code={code} />;
           }
         }}
       >
@@ -125,6 +129,170 @@ function MemoryCitationBlock({ citation }) {
         ) : null}
       </div>
     </details>
+  );
+}
+
+const mermaidRenderCache = new Map();
+
+function stableHash(value) {
+  let hash = 2166136261;
+  const text = String(value || '');
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+function resolvedMermaidTheme() {
+  if (typeof document === 'undefined') {
+    return 'light';
+  }
+  return document.documentElement?.dataset?.theme === 'dark' ? 'dark' : 'light';
+}
+
+function mermaidThemeVariables(theme) {
+  if (theme === 'dark') {
+    return {
+      darkMode: true,
+      background: '#101012',
+      mainBkg: '#18181b',
+      primaryColor: '#18181b',
+      primaryTextColor: '#f4f4f5',
+      primaryBorderColor: '#3f3f46',
+      secondaryColor: '#27272a',
+      tertiaryColor: '#111113',
+      lineColor: '#a1a1aa',
+      textColor: '#f4f4f5',
+      edgeLabelBackground: '#18181b',
+      clusterBkg: '#111113',
+      clusterBorder: '#3f3f46',
+      fontFamily: 'ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    };
+  }
+  return {
+    darkMode: false,
+    background: '#ffffff',
+    mainBkg: '#f8fafc',
+    primaryColor: '#f8fafc',
+    primaryTextColor: '#1f2937',
+    primaryBorderColor: '#cfd5dd',
+    secondaryColor: '#eef2f7',
+    tertiaryColor: '#ffffff',
+    lineColor: '#64748b',
+    textColor: '#1f2937',
+    edgeLabelBackground: '#ffffff',
+    clusterBkg: '#ffffff',
+    clusterBorder: '#cfd5dd',
+    fontFamily: 'ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+  };
+}
+
+function useMermaidTheme() {
+  const [theme, setTheme] = useState(() => resolvedMermaidTheme());
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return undefined;
+    }
+    const update = () => setTheme(resolvedMermaidTheme());
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
+    media?.addEventListener?.('change', update);
+    return () => {
+      observer.disconnect();
+      media?.removeEventListener?.('change', update);
+    };
+  }, []);
+
+  return theme;
+}
+
+function MermaidBlock({ code }) {
+  const rawId = useId();
+  const theme = useMermaidTheme();
+  const instanceIdRef = useRef(`mermaid-${rawId.replace(/[^a-zA-Z0-9_-]/g, '') || stableHash(code)}`);
+  const cacheKey = `${theme}:${stableHash(code)}:${code}`;
+  const [rendered, setRendered] = useState(() => mermaidRenderCache.get(cacheKey) || { svg: '', error: '' });
+  const [copied, setCopied] = useState(false);
+  const copiedTimerRef = useRef(null);
+
+  useEffect(() => {
+    const cached = mermaidRenderCache.get(cacheKey);
+    if (cached) {
+      setRendered(cached);
+      return undefined;
+    }
+    let cancelled = false;
+    setRendered((current) => current.svg ? current : { svg: '', error: '' });
+    const diagramId = `${instanceIdRef.current}-${theme}-${stableHash(code)}`;
+    import('mermaid')
+      .then(({ default: mermaid }) => {
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: 'strict',
+          theme: 'base',
+          themeVariables: mermaidThemeVariables(theme)
+        });
+        return mermaid.render(diagramId, code);
+      })
+      .then(({ svg }) => {
+        const next = { svg, error: '' };
+        mermaidRenderCache.set(cacheKey, next);
+        if (!cancelled) {
+          setRendered(next);
+        }
+      })
+      .catch((error) => {
+        const next = { svg: '', error: error?.message || 'Mermaid 渲染失败' };
+        mermaidRenderCache.set(cacheKey, next);
+        if (!cancelled) {
+          setRendered(next);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [cacheKey, code, theme]);
+
+  useEffect(() => () => {
+    if (copiedTimerRef.current) {
+      window.clearTimeout(copiedTimerRef.current);
+    }
+  }, []);
+
+  async function handleCopy() {
+    const ok = await copyTextToClipboard(code);
+    if (!ok) {
+      return;
+    }
+    setCopied(true);
+    if (copiedTimerRef.current) {
+      window.clearTimeout(copiedTimerRef.current);
+    }
+    copiedTimerRef.current = window.setTimeout(() => setCopied(false), 1200);
+  }
+
+  return (
+    <div className={`markdown-mermaid-block ${rendered.error ? 'is-error' : ''}`}>
+      <div className="markdown-code-head">
+        <span>mermaid</span>
+        <button type="button" onClick={handleCopy} aria-label="复制 Mermaid 源码">
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+        </button>
+      </div>
+      {rendered.svg ? (
+        <div className="markdown-mermaid-canvas" dangerouslySetInnerHTML={{ __html: rendered.svg }} />
+      ) : rendered.error ? (
+        <div className="markdown-mermaid-error">
+          <RotateCcw size={14} />
+          <span>{rendered.error}</span>
+        </div>
+      ) : (
+        <div className="markdown-mermaid-loading">正在渲染图表</div>
+      )}
+    </div>
   );
 }
 

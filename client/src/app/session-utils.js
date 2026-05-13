@@ -362,7 +362,7 @@ export function sessionRunKeys(session) {
 }
 
 export function isExternalThreadRuntimeSource(value) {
-  return ['desktop-thread', 'desktop-ipc', 'headless-local'].includes(String(value || ''));
+  return String(value || '') === 'desktop-ipc';
 }
 
 export function isExternalThreadRuntime(runtime) {
@@ -378,11 +378,12 @@ export function isLiveThreadRuntime(runtime) {
 }
 
 export function isPersistentDesktopThreadRuntime(runtime) {
-  return runtime?.status === 'running' && String(runtime?.source || '') === 'desktop-thread' && !isSessionIndexRuntime(runtime);
+  void runtime;
+  return false;
 }
 
 export function shouldClearRuntimeWhenNoActiveRuns(runtime) {
-  return runtime?.status === 'running' && !isExternalThreadRuntime(runtime);
+  return runtime?.status === 'running';
 }
 
 export function externalThreadRuntimeById(threadRuntimeById = {}) {
@@ -402,19 +403,8 @@ function allProjectSessions(sessionsByProject = {}) {
 }
 
 function runtimeFromSession(session) {
-  if (!session?.id || session.runtime?.status !== 'running') {
-    return null;
-  }
-  return {
-    ...session.runtime,
-    status: 'running',
-    fromSessionIndex: true,
-    source: session.runtime.source || 'desktop-thread',
-    sessionId: session.runtime.sessionId || session.id,
-    turnId: session.runtime.turnId || session.turnId || null,
-    updatedAt: session.runtime.updatedAt || session.updatedAt || null,
-    steerable: session.runtime.steerable === true
-  };
+  void session;
+  return null;
 }
 
 export function reconcileThreadRuntimeWithSessions(threadRuntimeById = {}, sessionsByProject = {}) {

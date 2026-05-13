@@ -118,7 +118,7 @@ test('status sync preserves only active local submission polling', () => {
   );
 });
 
-test('empty activeRuns status keeps desktop thread running activity', () => {
+test('empty activeRuns status clears stale running runtime locks', () => {
   assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
     role: 'activity',
     kind: 'desktop',
@@ -134,7 +134,7 @@ test('empty activeRuns status keeps desktop thread running activity', () => {
     kind: 'turn',
     status: 'running',
     source: 'headless-local'
-  }), false);
+  }), true);
   assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
     role: 'activity',
     kind: 'turn',
@@ -144,15 +144,15 @@ test('empty activeRuns status keeps desktop thread running activity', () => {
   assert.equal(shouldClearRuntimeWhenNoActiveRuns({
     status: 'running',
     source: 'desktop-thread'
-  }), false);
+  }), true);
   assert.equal(shouldClearRuntimeWhenNoActiveRuns({
     status: 'running',
     source: 'desktop-ipc'
-  }), false);
+  }), true);
   assert.equal(shouldClearRuntimeWhenNoActiveRuns({
     status: 'running',
     source: 'headless-local'
-  }), false);
+  }), true);
   assert.equal(shouldClearRuntimeWhenNoActiveRuns({
     status: 'running',
     source: 'codexmobile'
@@ -184,23 +184,18 @@ test('activeRuns status drops stale mobile running activity from other turns', (
   }, activeRunKeys), false);
 });
 
-test('activeRuns status merge can preserve external desktop runtimes beside mobile runs', () => {
-  const desktopRuntime = {
-    status: 'running',
-    source: 'desktop-thread',
-    sessionId: 'desktop-thread-1',
-    turnId: 'desktop-turn-1'
-  };
+test('activeRuns status merge preserves only IPC desktop runtimes beside mobile runs', () => {
+  const ipcRuntime = { status: 'running', source: 'desktop-ipc' };
   const preserved = externalThreadRuntimeById({
-    'desktop-thread-1': desktopRuntime,
-    'desktop-ipc-turn-1': { status: 'running', source: 'desktop-ipc' },
+    'desktop-thread-1': { status: 'running', source: 'desktop-thread' },
+    'desktop-ipc-turn-1': ipcRuntime,
     'headless-turn-1': { status: 'running', source: 'headless-local' },
     'mobile-turn-1': { status: 'running', source: 'codexmobile' },
     'completed-thread': { status: 'completed', source: 'desktop-thread' }
   });
 
-  assert.deepEqual(Object.keys(preserved), ['desktop-thread-1', 'desktop-ipc-turn-1', 'headless-turn-1']);
-  assert.equal(preserved['desktop-thread-1'], desktopRuntime);
+  assert.deepEqual(Object.keys(preserved), ['desktop-ipc-turn-1']);
+  assert.equal(preserved['desktop-ipc-turn-1'], ipcRuntime);
 });
 
 test('selected desktop activity counts as running for composer controls', () => {
@@ -345,12 +340,7 @@ test('session runtime reconciliation keeps index hints out of the live running b
     ]
   });
 
-  assert.equal(runtimeById['thread-1'].status, 'running');
-  assert.equal(runtimeById['thread-1'].fromSessionIndex, true);
-  assert.equal(runtimeById['turn-1'].sessionId, 'thread-1');
-  assert.equal(runtimeById['thread-2'].status, 'running');
-  assert.equal(runtimeById['thread-2'].fromSessionIndex, true);
-  assert.equal(runtimeById['turn-2'].sessionId, 'thread-2');
+  assert.deepEqual(runtimeById, {});
   assert.equal(sessionRunBadgeState({ id: 'thread-1' }, { threadRuntimeById: runtimeById }), null);
   assert.equal(sessionRunBadgeState({ id: 'thread-2' }, { threadRuntimeById: runtimeById }), null);
 });

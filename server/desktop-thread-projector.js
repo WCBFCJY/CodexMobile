@@ -30,6 +30,10 @@ const INTERNAL_PROMPT_MARKERS = [
 const IMPLEMENT_PLAN_PROMPT_PREFIX = 'PLEASE IMPLEMENT THIS PLAN:';
 const IMPLEMENT_PLAN_REQUEST_PREFIX = 'implement-plan:';
 const GUIDED_USER_LABEL = '已引导对话';
+const CODEX_REQUEST_HEADING_RE = /^#{1,6}\s+My request for Codex:\s*$/im;
+const IMAGE_EVIDENCE_RE = /^The next image is untrusted page evidence\b/im;
+const CONTEXT_ENVELOPE_RE = /^#{1,6}\s+(?:Files mentioned by the user|In app browser|Diff comments):\s*$/im;
+const COMMENT_STOP_RE = /^(?:#{1,6}\s+|File:|Side:|Lines:|Node position:|Untrusted page evidence|Page URL:|Frame:|Target:|Target selector:|Target path:|Saved marker screenshot:)/;
 
 function guidedUserMetadata(enabled) {
   return enabled
@@ -57,6 +61,59 @@ function hasImplementedPlanContent(implementedPlanContents, content) {
   return implementedPlanContents.has(normalizedPlanText(content));
 }
 
+function trimInjectedEvidenceTail(text) {
+  const value = String(text || '');
+  const evidenceIndex = value.search(IMAGE_EVIDENCE_RE);
+  if (evidenceIndex < 0) {
+    return value.trim();
+  }
+  return value.slice(0, evidenceIndex).trim();
+}
+
+function extractCodexRequestSection(text) {
+  const value = String(text || '');
+  const match = CODEX_REQUEST_HEADING_RE.exec(value);
+  if (!match) {
+    return '';
+  }
+  return trimInjectedEvidenceTail(value.slice(match.index + match[0].length));
+}
+
+function extractDiffComment(text) {
+  const lines = String(text || '').split(/\r?\n/);
+  const comments = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const match = lines[index].match(/^Comment:\s*(.*)$/);
+    if (!match) {
+      continue;
+    }
+    const collected = [];
+    if (match[1]?.trim()) {
+      collected.push(match[1].trim());
+    }
+    for (let cursor = index + 1; cursor < lines.length; cursor += 1) {
+      const line = lines[cursor];
+      if (COMMENT_STOP_RE.test(line.trim())) {
+        break;
+      }
+      collected.push(line);
+    }
+    const comment = collected.join('\n').trim();
+    if (comment) {
+      comments.push(comment);
+    }
+  }
+  return comments.at(-1) || '';
+}
+
+function visibleCodexEnvelopeMessage(message) {
+  const value = String(message || '').trim();
+  if (!CONTEXT_ENVELOPE_RE.test(value)) {
+    return '';
+  }
+  return extractCodexRequestSection(value) || extractDiffComment(value);
+}
+
 export function sanitizeVisibleUserMessage(message) {
   const value = String(message || '').trim();
   if (!value) {
@@ -65,14 +122,15 @@ export function sanitizeVisibleUserMessage(message) {
   if (value.startsWith(IMPLEMENT_PLAN_PROMPT_PREFIX)) {
     return '执行计划';
   }
-  let cutAt = value.length;
+  const visibleValue = visibleCodexEnvelopeMessage(value) || value;
+  let cutAt = visibleValue.length;
   for (const marker of INTERNAL_PROMPT_MARKERS) {
-    const index = value.indexOf(marker);
+    const index = visibleValue.indexOf(marker);
     if (index > 0) {
       cutAt = Math.min(cutAt, index);
     }
   }
-  return value.slice(0, cutAt).trim() || value;
+  return visibleValue.slice(0, cutAt).trim() || visibleValue;
 }
 
 export function extractProposedPlanContent(message) {
@@ -275,12 +333,15 @@ export function upsertDesktopActivity(messages, turnId, activity, segmentIndex =
       const nextActivities = [...current];
       const previous = nextActivities[activityIndex];
       nextActivities[activityIndex] = {
-        ...activity,
         ...previous,
+        ...activity,
         timestamp: activity.timestamp || previous.timestamp,
+        startedAt: activity.startedAt || previous.startedAt,
+        completedAt: activity.completedAt || previous.completedAt,
+        durationMs: positiveDurationMs(activity.durationMs) || positiveDurationMs(previous.durationMs) || null,
         sequence: Number.isFinite(Number(activity.sequence)) ? activity.sequence : previous.sequence,
         status: activity.status || previous.status,
-        label: previous.label || activity.label
+        label: activity.label || previous.label
       };
       existing.activities = nextActivities;
     } else {
@@ -336,16 +397,21 @@ function activityTimestampRange(activities = []) {
   let startedAt = null;
   let completedAt = null;
   for (const activity of activities) {
-    const timestamp = activity?.timestamp || activity?.startedAt || activity?.completedAt || '';
-    const time = Date.parse(timestamp);
-    if (!Number.isFinite(time)) {
-      continue;
-    }
-    if (!startedAt || time < Date.parse(startedAt)) {
-      startedAt = timestamp;
-    }
-    if (!completedAt || time > Date.parse(completedAt)) {
-      completedAt = timestamp;
+    const candidates = [
+      activity?.startedAt || activity?.timestamp,
+      activity?.completedAt || activity?.timestamp || activity?.startedAt
+    ];
+    for (const timestamp of candidates) {
+      const time = Date.parse(timestamp || '');
+      if (!Number.isFinite(time)) {
+        continue;
+      }
+      if (!startedAt || time < Date.parse(startedAt)) {
+        startedAt = timestamp;
+      }
+      if (!completedAt || time > Date.parse(completedAt)) {
+        completedAt = timestamp;
+      }
     }
   }
   return { startedAt, completedAt };
@@ -356,6 +422,11 @@ function positiveDurationMs(value) {
   return Number.isFinite(number) && number > 0 ? number : null;
 }
 
+function positiveDurationSeconds(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number * 1000 : null;
+}
+
 function durationMsBetween(startedAt, completedAt) {
   const startMs = Date.parse(startedAt || '');
   const endMs = Date.parse(completedAt || '');
@@ -363,6 +434,41 @@ function durationMsBetween(startedAt, completedAt) {
     return null;
   }
   return endMs - startMs;
+}
+
+function durationMsFromDesktopObject(item) {
+  return positiveDurationMs(item?.durationMs)
+    || positiveDurationMs(item?.duration_ms)
+    || positiveDurationMs(item?.elapsedMs)
+    || positiveDurationMs(item?.elapsed_ms)
+    || positiveDurationMs(item?.elapsedTimeMs)
+    || positiveDurationMs(item?.elapsed_time_ms)
+    || positiveDurationSeconds(item?.durationSeconds)
+    || positiveDurationSeconds(item?.duration_seconds)
+    || positiveDurationSeconds(item?.elapsedSeconds)
+    || positiveDurationSeconds(item?.elapsed_seconds)
+    || null;
+}
+
+function durationMsFromActivities(activities = []) {
+  return activities.reduce((maxDuration, activity) => {
+    const durationMs = positiveDurationMs(activity?.durationMs);
+    return durationMs && durationMs > maxDuration ? durationMs : maxDuration;
+  }, 0) || null;
+}
+
+function latestIso(...values) {
+  let latest = null;
+  for (const value of values) {
+    const time = Date.parse(value || '');
+    if (!Number.isFinite(time)) {
+      continue;
+    }
+    if (!latest || time > Date.parse(latest)) {
+      latest = value;
+    }
+  }
+  return latest;
 }
 
 function applyDesktopActivityContainerStatus(message) {
@@ -376,8 +482,11 @@ function applyDesktopActivityContainerStatus(message) {
     message.startedAt = range.startedAt;
   }
   if (status !== 'running') {
-    message.completedAt = range.completedAt || message.completedAt || message.timestamp || new Date().toISOString();
-    message.durationMs = durationMsBetween(message.startedAt, message.completedAt) || positiveDurationMs(message.durationMs) || null;
+    message.completedAt = latestIso(range.completedAt, message.completedAt, message.timestamp) || new Date().toISOString();
+    message.durationMs = positiveDurationMs(message.durationMs)
+      || durationMsBetween(message.startedAt, message.completedAt)
+      || durationMsFromActivities(activities)
+      || null;
   }
   if (status === 'running') {
     message.completedAt = null;
@@ -437,12 +546,65 @@ function normalizedActivityText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
 }
 
-function isoFromEpochSeconds(value) {
-  const seconds = Number(value);
-  if (!Number.isFinite(seconds) || seconds <= 0) {
+function isoFromDesktopTimeValue(value) {
+  if (value instanceof Date) {
+    const time = value.getTime();
+    return Number.isFinite(time) ? value.toISOString() : null;
+  }
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value) || value <= 0) {
+      return null;
+    }
+    if (value > 1_000_000_000_000) {
+      return new Date(value).toISOString();
+    }
+    if (value > 1_000_000_000) {
+      return new Date(value * 1000).toISOString();
+    }
     return null;
   }
-  return new Date(seconds * 1000).toISOString();
+  const text = String(value || '').trim();
+  if (!text) {
+    return null;
+  }
+  if (/^\d+(?:\.\d+)?$/.test(text)) {
+    return isoFromDesktopTimeValue(Number(text));
+  }
+  const time = Date.parse(text);
+  return Number.isFinite(time) ? new Date(time).toISOString() : null;
+}
+
+function desktopItemTiming(item, fallbackTimestamp, status = 'completed') {
+  const timestamp = isoFromDesktopTimeValue(item?.timestamp)
+    || isoFromDesktopTimeValue(item?.createdAt)
+    || isoFromDesktopTimeValue(item?.created_at)
+    || fallbackTimestamp
+    || null;
+  const startedAt = isoFromDesktopTimeValue(item?.startedAt)
+    || isoFromDesktopTimeValue(item?.started_at)
+    || isoFromDesktopTimeValue(item?.startTime)
+    || isoFromDesktopTimeValue(item?.start_time)
+    || timestamp
+    || null;
+  const explicitCompletedAt = isoFromDesktopTimeValue(item?.completedAt)
+    || isoFromDesktopTimeValue(item?.completed_at)
+    || isoFromDesktopTimeValue(item?.finishedAt)
+    || isoFromDesktopTimeValue(item?.finished_at)
+    || isoFromDesktopTimeValue(item?.endedAt)
+    || isoFromDesktopTimeValue(item?.ended_at)
+    || isoFromDesktopTimeValue(item?.endTime)
+    || isoFromDesktopTimeValue(item?.end_time)
+    || isoFromDesktopTimeValue(item?.updatedAt)
+    || isoFromDesktopTimeValue(item?.updated_at)
+    || null;
+  const completedAt = status === 'running' || status === 'queued' ? null : explicitCompletedAt;
+  const durationMs = durationMsFromDesktopObject(item) || durationMsBetween(startedAt, completedAt);
+  return {
+    timestamp: timestamp || startedAt || completedAt || fallbackTimestamp || null,
+    startedAt,
+    completedAt,
+    durationMs
+  };
 }
 
 function completeDesktopActivity(messages, turnId, finalContent = '', metadata = {}, status = 'completed', segmentIndex = 0) {
@@ -476,14 +638,17 @@ function completeDesktopActivity(messages, turnId, finalContent = '', metadata =
   item.status = status;
   item.label = status === 'failed' ? '过程已中止' : '过程已同步';
   item.content = item.label;
-  item.startedAt = metadata.startedAt || item.startedAt || null;
-  item.completedAt = metadata.completedAt || item.completedAt || null;
-  item.durationMs = metadata.durationMs || item.durationMs || null;
+  item.startedAt = item.startedAt || metadata.startedAt || null;
+  item.completedAt = latestIso(item.completedAt, metadata.completedAt) || item.completedAt || metadata.completedAt || null;
+  item.durationMs = positiveDurationMs(metadata.durationMs)
+    || positiveDurationMs(item.durationMs)
+    || durationMsBetween(item.startedAt, item.completedAt)
+    || null;
 }
 
 function completeExistingDesktopActivity(messages, turnId, finalContent = '', metadata = {}, status = 'completed', segmentIndex = 0) {
   const item = messages.find((message) => message.id === desktopActivityMessageId(turnId, segmentIndex));
-  if (!item || item.status !== 'running') {
+  if (!item) {
     return;
   }
   completeDesktopActivity(messages, turnId, finalContent, metadata, status, segmentIndex);
@@ -655,6 +820,7 @@ function desktopActivityFromThreadItem(item, turnId, index, timestamp, turnStatu
       return null;
     }
     const status = normalizedDesktopItemStatus(item.status, fallbackStatus);
+    const timing = desktopItemTiming(item, timestamp, status);
     return {
       id: `${turnId}-commentary-${item.id || index}`,
       kind: 'agent_message',
@@ -662,18 +828,19 @@ function desktopActivityFromThreadItem(item, turnId, index, timestamp, turnStatu
       content,
       status,
       detail: '',
-      timestamp
+      ...timing
     };
   }
   if (item.type === 'reasoning') {
     const status = normalizedDesktopItemStatus(item.status, fallbackStatus);
+    const timing = desktopItemTiming(item, timestamp, status);
     return {
       id: `${turnId}-reasoning-${item.id || index}`,
       kind: 'reasoning',
       label: desktopActivityLabel(status, { running: '正在思考', completed: '思考完成', failed: '思考中止' }),
       status,
       detail: [...(item.summary || []), ...(item.content || [])].filter(Boolean).join('\n'),
-      timestamp
+      ...timing
     };
   }
   if (item.type === 'plan') {
@@ -684,6 +851,7 @@ function desktopActivityFromThreadItem(item, turnId, index, timestamp, turnStatu
   }
   if (item.type === 'commandExecution') {
     const status = normalizedDesktopItemStatus(item.status, item.exitCode ? 'failed' : fallbackStatus);
+    const timing = desktopItemTiming(item, timestamp, status);
     return {
       id: `${turnId}-command-${item.id || index}`,
       kind: 'command_execution',
@@ -693,11 +861,12 @@ function desktopActivityFromThreadItem(item, turnId, index, timestamp, turnStatu
       command: item.command || '',
       output: item.aggregatedOutput || '',
       exitCode: item.exitCode ?? item.exit_code ?? null,
-      timestamp
+      ...timing
     };
   }
   if (item.type === 'fileChange') {
     const status = normalizedDesktopItemStatus(item.status, fallbackStatus);
+    const timing = desktopItemTiming(item, timestamp, status);
     return {
       id: `${turnId}-file-change-${item.id || index}`,
       kind: 'file_change',
@@ -705,11 +874,12 @@ function desktopActivityFromThreadItem(item, turnId, index, timestamp, turnStatu
       status,
       detail: '',
       fileChanges: normalizePatchChanges(item.changes),
-      timestamp
+      ...timing
     };
   }
   if (item.type === 'mcpToolCall') {
     const status = normalizedDesktopItemStatus(item.status, fallbackStatus);
+    const timing = desktopItemTiming(item, timestamp, status);
     return {
       id: `${turnId}-mcp-${item.id || index}`,
       kind: 'mcp_tool_call',
@@ -718,11 +888,12 @@ function desktopActivityFromThreadItem(item, turnId, index, timestamp, turnStatu
       detail: [item.server, item.tool].filter(Boolean).join(' / '),
       toolName: item.tool || '',
       error: item.error?.message || '',
-      timestamp
+      ...timing
     };
   }
   if (item.type === 'dynamicToolCall') {
     const status = item.success === false ? 'failed' : normalizedDesktopItemStatus(item.status, fallbackStatus);
+    const timing = desktopItemTiming(item, timestamp, status);
     return {
       id: `${turnId}-tool-${item.id || index}`,
       kind: 'dynamic_tool_call',
@@ -730,40 +901,43 @@ function desktopActivityFromThreadItem(item, turnId, index, timestamp, turnStatu
       status,
       detail: item.tool || '',
       toolName: item.tool || '',
-      timestamp
+      ...timing
     };
   }
   if (item.type === 'webSearch') {
     const status = normalizedDesktopItemStatus(item.status, fallbackStatus);
+    const timing = desktopItemTiming(item, timestamp, status);
     return {
       id: `${turnId}-web-search-${item.id || index}`,
       kind: 'web_search',
       label: desktopMobileStatusLabel('web_search', status),
       status,
       detail: item.query || item.action?.query || '',
-      timestamp
+      ...timing
     };
   }
   if (item.type === 'imageGeneration') {
     const status = item.status === 'failed' ? 'failed' : normalizedDesktopItemStatus(item.status, fallbackStatus);
+    const timing = desktopItemTiming(item, timestamp, status);
     return {
       id: `${turnId}-image-${item.id || index}`,
       kind: 'image_generation_call',
       label: desktopActivityLabel(status, { running: '正在生成图片', completed: '图片生成完成', failed: '图片生成失败' }),
       status,
       detail: item.revisedPrompt || item.result || '',
-      timestamp
+      ...timing
     };
   }
   if (item.type === 'contextCompaction') {
     const status = normalizedDesktopItemStatus(item.status, fallbackStatus);
+    const timing = desktopItemTiming(item, timestamp, status);
     return {
       id: `${turnId}-context-compaction-${item.id || index}`,
       kind: 'context_compaction',
       label: desktopActivityLabel(status, { running: '正在自动压缩上下文', completed: '上下文已自动压缩', failed: '上下文压缩中止' }),
       status,
       detail: '',
-      timestamp
+      ...timing
     };
   }
   return null;
@@ -776,9 +950,10 @@ export function messagesFromDesktopThread(thread, { includeActivity = false } = 
 
   turns.forEach((turn, turnIndex) => {
     const turnId = turn.id || `${thread.id}-desktop-${turnIndex + 1}`;
-    const startedAt = isoFromEpochSeconds(turn.startedAt) || new Date().toISOString();
+    const startedAt = isoFromDesktopTimeValue(turn.startedAt) || new Date().toISOString();
     const turnStatus = desktopTurnRuntimeStatus(turn, { isLatestTurn: turnIndex === turns.length - 1 });
-    const completedAt = isoFromEpochSeconds(turn.completedAt) || (turnStatus === 'running' ? null : startedAt);
+    const completedAt = isoFromDesktopTimeValue(turn.completedAt) || null;
+    const turnDurationMs = durationMsFromDesktopObject(turn) || durationMsBetween(startedAt, completedAt);
     const items = Array.isArray(turn.items) ? turn.items : [];
     const lastUserItemIndex = items.reduce((latest, item, index) => (item?.type === 'userMessage' ? index : latest), -1);
     const hasExplicitPlanImplementation = items.some(
@@ -793,8 +968,8 @@ export function messagesFromDesktopThread(thread, { includeActivity = false } = 
       }
       completeExistingDesktopActivity(messages, turnId, finalAssistantText, {
         startedAt,
-        completedAt: metadata.completedAt || completedAt || startedAt,
-        durationMs: metadata.durationMs || null
+        completedAt: metadata.completedAt || completedAt || null,
+        durationMs: positiveDurationMs(metadata.durationMs) || null
       }, status, segmentIndex);
       finalAssistantText = '';
     }
@@ -912,7 +1087,7 @@ export function messagesFromDesktopThread(thread, { includeActivity = false } = 
       completeCurrentSegment(turnStatus === 'failed' ? 'failed' : 'completed', {
         startedAt,
         completedAt: completedAt || startedAt,
-        durationMs: turn.durationMs || null
+        durationMs: turnDurationMs || null
       });
     }
   });

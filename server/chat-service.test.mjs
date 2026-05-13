@@ -174,7 +174,7 @@ test('sendChat sends existing desktop-ipc threads through the desktop follower b
   assert.equal(started.params.input[0].text, '从手机发到桌面已有线程');
 });
 
-test('sendChat starts server-side desktop IPC monitoring after desktop handoff', async () => {
+test('sendChat records desktop IPC handoff without server-side monitor', async () => {
   const { service, broadcasts } = makeChatService({
     getDesktopBridgeStatus: async () => ({
       strict: true,
@@ -191,28 +191,17 @@ test('sendChat starts server-side desktop IPC monitoring after desktop handoff',
     projectId: 'project-1',
     sessionId: 'thread-1',
     clientTurnId: 'client-turn-1',
-    message: '从手机发到桌面后由后端监控'
+    message: '从手机发到桌面后由 IPC 接管'
   });
 
   assert.equal(result.turnId, 'desktop-turn-1');
   assert.equal(service.getTurn('client-turn-1').status, 'running');
   assert.equal(service.getTurn('client-turn-1').source, 'desktop-ipc');
-  assert.equal(service.getTurn('desktop-turn-1').status, 'running');
-  assert.deepEqual(service.getActiveDesktopIpcRuns(), [{
-    source: 'desktop-ipc',
-    projectId: 'project-1',
-    sessionId: 'thread-1',
-    previousSessionId: 'thread-1',
-    turnId: 'desktop-turn-1',
-    clientTurnId: 'client-turn-1',
-    startedAt: service.getTurn('desktop-turn-1').startedAt,
-    status: 'running',
-    steerable: false
-  }]);
+  assert.equal(service.getTurn('desktop-turn-1'), null);
   assert.equal(broadcasts.some((payload) => payload.type === 'status-update' && payload.source === 'desktop-ipc'), true);
 });
 
-test('abortChat can abort a server-side desktop IPC monitor run', async () => {
+test('abortChat interrupts desktop IPC by session id after handoff', async () => {
   const interrupted = [];
   const { service, broadcasts } = makeChatService({
     getDesktopBridgeStatus: async () => ({
@@ -235,7 +224,7 @@ test('abortChat can abort a server-side desktop IPC monitor run', async () => {
     projectId: 'project-1',
     sessionId: 'thread-1',
     clientTurnId: 'client-turn-1',
-    message: '准备从手机中止桌面监控'
+    message: '准备从手机中止桌面 IPC'
   });
 
   const aborted = await service.abortChat({
@@ -246,9 +235,7 @@ test('abortChat can abort a server-side desktop IPC monitor run', async () => {
 
   assert.equal(aborted, true);
   assert.deepEqual(interrupted, ['thread-1']);
-  assert.equal(service.getActiveDesktopIpcRuns().length, 0);
   assert.equal(service.getTurn('client-turn-1').status, 'aborted');
-  assert.equal(service.getTurn('desktop-turn-1').status, 'aborted');
   assert.equal(broadcasts.filter((payload) => payload.type === 'chat-aborted' && payload.source === 'desktop-ipc').length, 1);
 });
 
@@ -285,8 +272,7 @@ test('abortChat falls back to session id when desktop IPC turn id does not match
 
   assert.equal(aborted, true);
   assert.deepEqual(interrupted, ['thread-1']);
-  assert.equal(service.getActiveDesktopIpcRuns().length, 0);
-  assert.equal(service.getTurn('desktop-turn-1').status, 'aborted');
+  assert.equal(service.getTurn('client-turn-1').status, 'aborted');
 });
 
 test('abortChat aborts an active headless run before a desktop IPC monitor on the same session', async () => {
@@ -365,7 +351,7 @@ test('abortChat interrupts a desktop-origin running session by session id', asyn
   assert.equal(aborted, true);
   assert.deepEqual(interrupted, ['thread-1']);
   assert.equal(broadcasts.at(-1).type, 'chat-aborted');
-  assert.equal(broadcasts.at(-1).source, 'desktop-thread');
+  assert.equal(broadcasts.at(-1).source, 'desktop-ipc');
   assert.equal(broadcasts.at(-1).sessionId, 'thread-1');
 });
 
@@ -551,6 +537,45 @@ test('sendChat falls back to headless local when settings sync times out before 
   assert.equal(runPayload.reasoningEffort, 'medium');
 });
 
+test('sendChat falls back to headless local when desktop start turn times out', async () => {
+  let runPayload = null;
+  const { service } = makeChatService({
+    getDesktopBridgeStatus: async () => ({
+      strict: true,
+      connected: true,
+      mode: 'desktop-ipc',
+      reason: null,
+      capabilities: {
+        sendToOpenDesktopThread: true,
+        createThread: false,
+        backgroundCodex: true
+      }
+    }),
+    startDesktopFollowerTurn: async () => {
+      const error = new Error('桌面端 Codex IPC 请求超时: thread-follower-start-turn');
+      error.code = 'CODEXMOBILE_DESKTOP_IPC_TIMEOUT';
+      throw error;
+    },
+    runCodexTurn: async (payload, emit) => {
+      runPayload = payload;
+      emit({ type: 'chat-complete', sessionId: payload.sessionId, turnId: payload.turnId });
+      return payload.sessionId;
+    }
+  });
+
+  const result = await service.sendChat({
+    projectId: 'project-1',
+    sessionId: 'thread-1',
+    clientTurnId: 'client-turn',
+    message: '桌面端卡住时也不要让手机发送失败'
+  });
+
+  assert.equal(result.accepted, true);
+  assert.equal(result.desktopBridge.mode, 'headless-local');
+  assert.equal(runPayload.sessionId, 'thread-1');
+  assert.match(runPayload.message, /桌面端卡住/);
+});
+
 test('sendChat waits for a desktop-ipc owner before falling back to headless local', async () => {
   let modelAttempts = 0;
   let started = null;
@@ -637,6 +662,65 @@ test('sendChat can create a background thread when desktop-ipc cannot create des
   assert.equal(result.desktopBridge.mode, 'headless-local');
   assert.equal(runPayload.draftSessionId, 'draft-project-1-1');
   assert.match(runPayload.message, /从手机后台新建/);
+});
+
+test('sendChat asks desktop to hot-refresh after a background thread is created', async () => {
+  const desktopRefreshes = [];
+  const { service } = makeChatService({
+    getDesktopBridgeStatus: async () => ({
+      strict: true,
+      connected: true,
+      mode: 'desktop-ipc',
+      reason: null,
+      capabilities: {
+        sendToOpenDesktopThread: true,
+        createThread: false,
+        createThreadViaBackground: true,
+        backgroundCodex: true
+      }
+    }),
+    runCodexTurn: async (payload, emit) => {
+      emit({
+        type: 'thread-started',
+        sessionId: 'background-thread-1',
+        previousSessionId: payload.draftSessionId,
+        turnId: payload.turnId,
+        cwd: '/tmp/project'
+      });
+      emit({
+        type: 'chat-complete',
+        sessionId: 'background-thread-1',
+        previousSessionId: payload.draftSessionId,
+        turnId: payload.turnId
+      });
+      return 'background-thread-1';
+    },
+    notifyDesktopThreadListChanged: async (payload) => {
+      desktopRefreshes.push(payload);
+      return { sent: true };
+    }
+  });
+
+  await service.sendChat({
+    projectId: 'project-1',
+    draftSessionId: 'draft-project-1-1',
+    clientTurnId: 'client-turn',
+    message: '从手机后台新建'
+  });
+  await flushQueuedWork();
+
+  assert.deepEqual(desktopRefreshes, [
+    {
+      threadId: 'background-thread-1',
+      cwd: '/tmp/project',
+      reason: 'background-thread-started'
+    },
+    {
+      threadId: 'background-thread-1',
+      cwd: '/tmp/project',
+      reason: 'background-thread-completed'
+    }
+  ]);
 });
 
 test('sendChat reuses a background-created thread alias for later desktop-ipc sends', async () => {

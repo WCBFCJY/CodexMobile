@@ -1,22 +1,18 @@
 /**
- * 选中会话的实时消息合并、桌面运行中活动载荷、轮询条件与项目名称同步。
+ * 选中会话的消息补账合并与项目名称同步。
  *
- * Keywords: session, live-refresh, polling, merge-messages, desktop-runtime
+ * Keywords: session, live-refresh, polling, merge-messages
  *
  * Exports:
- * - desktopRunningActivityPayload — 从消息列表提取运行中活动载荷。
- * - syncDesktopActivityRuntimeFromMessages — 同步运行时快照。
- * - shouldPollSelectedSessionMessages — 是否应对当前会话轮询消息。
  * - mergeLiveSelectedThreadMessages — 合并本地与已加载消息。
  * - applySessionRenameToProjectSessions — 重命名写回 projects map。
  *
- * Inward: chat/message-identity、app/runtime-debug-client。
+ * Inward: chat/message-identity。
  *
  * Outward: App 选中会话刷新、WebSocket 与轮询协调。
  */
 
 import { sameUserMessageContent } from './chat/message-identity.js';
-import { clientRuntimeDebug } from './app/runtime-debug-client.js';
 
 function normalizeText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
@@ -34,12 +30,13 @@ function messageRunKeys(message) {
   return [message?.turnId, message?.sessionId, message?.previousSessionId].filter(Boolean).map(String);
 }
 
-function isRunningStatus(value) {
-  return ['running', 'queued'].includes(String(value || ''));
-}
-
 function isTransientActivityMessage(message) {
   return message?.role === 'activity' && Boolean(message?.transient);
+}
+
+function messageTime(message) {
+  const time = new Date(message?.completedAt || message?.timestamp || message?.startedAt || 0).getTime();
+  return Number.isFinite(time) ? time : 0;
 }
 
 function loadedHasAssistantForActivity(loaded, activity) {
@@ -50,8 +47,24 @@ function loadedHasAssistantForActivity(loaded, activity) {
   return loaded.some((item) => item?.role === 'assistant' && messageMatchesRunKeys(item, keys) && normalizeText(item.content));
 }
 
-function isDesktopRuntimeSource(value) {
-  return value === 'desktop-thread' || value === 'desktop-ipc' || value === 'headless-local';
+function loadedHasTerminalAssistantAfterActivity(loaded, activity) {
+  const activityTime = messageTime(activity);
+  return loaded.some((item) =>
+    item?.role === 'assistant' &&
+    normalizeText(item.content) &&
+    (!activityTime || messageTime(item) >= activityTime)
+  );
+}
+
+export function hasStaleRunningActivityResolvedByLoaded(current = [], loaded = []) {
+  if (!Array.isArray(current) || !Array.isArray(loaded)) {
+    return false;
+  }
+  return current.some((message) =>
+    message?.role === 'activity' &&
+    ['running', 'queued'].includes(String(message?.status || '')) &&
+    loadedHasTerminalAssistantAfterActivity(loaded, message)
+  );
 }
 
 function messageMatchesRunKeys(message, keys) {
@@ -65,6 +78,9 @@ function completeLocalActivityMessage(message, loaded = []) {
   const keys = new Set(messageRunKeys(message));
   const assistant = loaded.find((item) => item?.role === 'assistant' && messageMatchesRunKeys(item, keys) && normalizeText(item.content));
   if (!assistant && !['running', 'queued'].includes(String(message?.status || ''))) {
+    return message;
+  }
+  if (!assistant && ['running', 'queued'].includes(String(message?.status || ''))) {
     return message;
   }
   return {
@@ -89,7 +105,7 @@ function activityInsertIndex(loaded, activity) {
   return index >= 0 ? index : loaded.length;
 }
 
-function preserveLocalActivityMessages(current = [], loaded = []) {
+function preserveLocalActivityMessages(current = [], loaded = [], { forceDropStaleRunning = false } = {}) {
   const loadedIds = new Set(loaded.map((message) => String(message?.id || '')).filter(Boolean));
   const preserved = current
     .filter((message) => message?.role === 'activity' && !loadedIds.has(String(message?.id || '')))
@@ -102,6 +118,13 @@ function preserveLocalActivityMessages(current = [], loaded = []) {
         return false;
       }
       if (isTransientActivityMessage(message) && loadedHasAssistantForActivity(loaded, message)) {
+        return false;
+      }
+      if (
+        forceDropStaleRunning &&
+        ['running', 'queued'].includes(String(message?.status || '')) &&
+        loadedHasTerminalAssistantAfterActivity(loaded, message)
+      ) {
         return false;
       }
       return loaded.some((item) => messageMatchesRunKeys(item, keys)) || ['running', 'queued'].includes(String(message?.status || ''));
@@ -123,139 +146,7 @@ function preserveLocalActivityMessages(current = [], loaded = []) {
   return result;
 }
 
-function desktopBridgeUsesExternalThreadRefresh(bridge = null) {
-  return Boolean(bridge?.connected && ['desktop-ipc', 'headless-local'].includes(bridge?.mode));
-}
-
-export function desktopRunningActivityPayload(messages = [], sessionId = '', selectedRunRuntime = null) {
-  if (!Array.isArray(messages)) {
-    return null;
-  }
-  const targetSessionId = String(sessionId || '');
-  const runningActivity = messages
-    .filter((message) => {
-      if (message?.role !== 'activity' || String(message?.kind || '') !== 'desktop') {
-        return false;
-      }
-      if (!isRunningStatus(message?.status)) {
-        return false;
-      }
-      if (!targetSessionId) {
-        return true;
-      }
-      return messageRunKeys(message).includes(targetSessionId);
-    })
-    .at(-1);
-
-  if (!runningActivity) {
-    return null;
-  }
-
-  return {
-    source: selectedRunRuntime?.source || 'desktop-thread',
-    sessionId: runningActivity.sessionId || targetSessionId || null,
-    turnId: runningActivity.turnId || selectedRunRuntime?.turnId || runningActivity.sessionId || targetSessionId || null,
-    startedAt: runningActivity.startedAt || runningActivity.timestamp || null,
-    timestamp: runningActivity.timestamp || runningActivity.startedAt || new Date().toISOString(),
-    steerable: false
-  };
-}
-
-function desktopCompletedActivityPayload(messages = [], sessionId = '', selectedRunRuntime = null) {
-  if (!Array.isArray(messages) || selectedRunRuntime?.status !== 'running' || !isDesktopRuntimeSource(selectedRunRuntime?.source)) {
-    return null;
-  }
-  const targetSessionId = String(sessionId || '');
-  const targetTurnId = String(selectedRunRuntime?.turnId || '');
-  const completedActivity = messages
-    .filter((message) => {
-      if (message?.role !== 'activity' || String(message?.kind || '') !== 'desktop') {
-        return false;
-      }
-      if (String(message?.status || '') !== 'completed') {
-        return false;
-      }
-      const keys = messageRunKeys(message);
-      if (targetTurnId && keys.includes(targetTurnId)) {
-        return true;
-      }
-      return targetSessionId ? keys.includes(targetSessionId) : true;
-    })
-    .at(-1);
-
-  if (!completedActivity) {
-    return null;
-  }
-
-  return {
-    source: selectedRunRuntime.source || 'desktop-thread',
-    sessionId: completedActivity.sessionId || targetSessionId || null,
-    turnId: completedActivity.turnId || selectedRunRuntime.turnId || null,
-    completedAt: completedActivity.completedAt || completedActivity.timestamp || new Date().toISOString(),
-    timestamp: completedActivity.timestamp || completedActivity.completedAt || new Date().toISOString()
-  };
-}
-
-export function syncDesktopActivityRuntimeFromMessages({
-  messages = [],
-  sessionId = '',
-  selectedRunRuntime = null,
-  markRun = null,
-  clearRun = null,
-  markSessionCompleteNotice = null
-} = {}) {
-  const payload = desktopRunningActivityPayload(messages, sessionId, selectedRunRuntime);
-  if (payload) {
-    markRun?.(payload);
-    clientRuntimeDebug('desktopActivityRuntimeSync', { sessionId, outcome: 'marked', source: payload.source });
-    return 'marked';
-  }
-
-  const completedPayload = desktopCompletedActivityPayload(messages, sessionId, selectedRunRuntime);
-  if (completedPayload) {
-    clearRun?.({
-      source: selectedRunRuntime.source || 'desktop-thread',
-      sessionId,
-      turnId: selectedRunRuntime.turnId || null
-    });
-    markSessionCompleteNotice?.(completedPayload);
-    clientRuntimeDebug('desktopActivityRuntimeSync', {
-      sessionId,
-      outcome: 'completed',
-      source: selectedRunRuntime?.source
-    });
-    return 'completed';
-  }
-
-  if (selectedRunRuntime?.status === 'running' && isDesktopRuntimeSource(selectedRunRuntime?.source)) {
-    clearRun?.({
-      source: selectedRunRuntime.source || 'desktop-thread',
-      sessionId,
-      turnId: selectedRunRuntime.turnId || null
-    });
-    clientRuntimeDebug('desktopActivityRuntimeSync', {
-      sessionId,
-      outcome: 'cleared',
-      source: selectedRunRuntime?.source
-    });
-    return 'cleared';
-  }
-
-  return 'idle';
-}
-
-export function shouldPollSelectedSessionMessages({
-  hasSelectedRunning = false,
-  desktopBridge = null,
-  hasExternalThreadRefresh = false
-} = {}) {
-  if (!hasSelectedRunning) {
-    return true;
-  }
-  return desktopBridgeUsesExternalThreadRefresh(desktopBridge) && Boolean(hasExternalThreadRefresh);
-}
-
-export function mergeLiveSelectedThreadMessages(current = [], loaded = []) {
+export function mergeLiveSelectedThreadMessages(current = [], loaded = [], options = {}) {
   if (!Array.isArray(loaded)) {
     return Array.isArray(current) ? current : [];
   }
@@ -271,7 +162,7 @@ export function mergeLiveSelectedThreadMessages(current = [], loaded = []) {
   );
 
   if (!hasUncaughtLocalUser) {
-    return preserveLocalActivityMessages(current, loaded);
+    return preserveLocalActivityMessages(current, loaded, options);
   }
 
   const loadedIds = new Set(loaded.map((message) => String(message?.id || '')).filter(Boolean));
@@ -288,7 +179,7 @@ export function mergeLiveSelectedThreadMessages(current = [], loaded = []) {
     return true;
   });
 
-  return preserveLocalActivityMessages(current, [...loaded, ...pending]).sort(
+  return preserveLocalActivityMessages(current, [...loaded, ...pending], options).sort(
     (a, b) => new Date(a?.timestamp || 0).getTime() - new Date(b?.timestamp || 0).getTime()
   );
 }

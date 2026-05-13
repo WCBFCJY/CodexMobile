@@ -71,6 +71,68 @@ test('messagesFromDesktopThread uses mobile labels for completed desktop command
   assert.equal(activityMessage.activities[0].label, '本地任务已处理');
 });
 
+test('messagesFromDesktopThread keeps desktop turn duration as activity summary time', () => {
+  const messages = messagesFromDesktopThread({
+    id: 'thread-1',
+    turns: [
+      {
+        id: 'turn-1',
+        status: 'completed',
+        startedAt: Date.parse('2026-02-02T00:00:00.000Z') / 1000,
+        completedAt: Date.parse('2026-02-02T00:00:10.000Z') / 1000,
+        durationMs: 114000,
+        items: [
+          { id: 'user-1', type: 'userMessage', content: [{ type: 'text', text: '同步一下处理时间' }] },
+          {
+            id: 'cmd-1',
+            type: 'commandExecution',
+            status: 'completed',
+            command: 'npm test',
+            aggregatedOutput: 'ok'
+          },
+          { id: 'answer-1', type: 'agentMessage', phase: 'final_answer', text: '好了' }
+        ]
+      }
+    ]
+  }, { includeActivity: true });
+
+  const activityMessage = messages.find((message) => message.role === 'activity');
+  assert.equal(activityMessage.durationMs, 114000);
+  assert.equal(activityMessage.startedAt, '2026-02-02T00:00:00.000Z');
+  assert.equal(activityMessage.completedAt, '2026-02-02T00:00:10.000Z');
+});
+
+test('messagesFromDesktopThread derives activity duration from item timing when turn has none', () => {
+  const messages = messagesFromDesktopThread({
+    id: 'thread-1',
+    turns: [
+      {
+        id: 'turn-1',
+        status: 'completed',
+        startedAt: Date.parse('2026-02-02T00:00:00.000Z') / 1000,
+        items: [
+          { id: 'user-1', type: 'userMessage', content: [{ type: 'text', text: '跑一下命令' }] },
+          {
+            id: 'cmd-1',
+            type: 'commandExecution',
+            status: 'completed',
+            startedAt: '2026-02-02T00:00:03.000Z',
+            completedAt: '2026-02-02T00:00:12.000Z',
+            command: 'npm test',
+            aggregatedOutput: 'ok'
+          },
+          { id: 'answer-1', type: 'agentMessage', phase: 'final_answer', text: '好了' }
+        ]
+      }
+    ]
+  }, { includeActivity: true });
+
+  const activityMessage = messages.find((message) => message.role === 'activity');
+  assert.equal(activityMessage.startedAt, '2026-02-02T00:00:03.000Z');
+  assert.equal(activityMessage.completedAt, '2026-02-02T00:00:12.000Z');
+  assert.equal(activityMessage.durationMs, 9000);
+});
+
 test('messagesFromDesktopThread marks steered user messages inside the same turn', () => {
   const messages = messagesFromDesktopThread({
     id: 'thread-1',
@@ -214,6 +276,45 @@ test('completed raw desktop activities create terminal activity containers', () 
   assert.equal(activity.durationMs, 3000);
 });
 
+test('upsertDesktopActivity lets desktop completion replace running timing', () => {
+  const messages = [
+    {
+      id: 'user-1',
+      role: 'user',
+      content: '跑一下测试',
+      turnId: 'turn-1',
+      timestamp: '2026-02-02T00:00:00.000Z'
+    }
+  ];
+
+  upsertDesktopActivity(messages, 'turn-1', {
+    id: 'turn-1-command-0',
+    kind: 'command_execution',
+    label: '正在处理本地任务',
+    command: 'npm test',
+    status: 'running',
+    startedAt: '2026-02-02T00:00:01.000Z',
+    timestamp: '2026-02-02T00:00:01.000Z'
+  });
+  upsertDesktopActivity(messages, 'turn-1', {
+    id: 'turn-1-command-0',
+    kind: 'command_execution',
+    label: '本地任务已处理',
+    command: 'npm test',
+    status: 'completed',
+    startedAt: '2026-02-02T00:00:01.000Z',
+    completedAt: '2026-02-02T00:00:08.000Z',
+    durationMs: 7000,
+    timestamp: '2026-02-02T00:00:08.000Z'
+  });
+
+  const activity = messages.find((message) => message.role === 'activity');
+  assert.equal(activity.status, 'completed');
+  assert.equal(activity.activities[0].label, '本地任务已处理');
+  assert.equal(activity.completedAt, '2026-02-02T00:00:08.000Z');
+  assert.equal(activity.durationMs, 7000);
+});
+
 test('messagesFromDesktopThread renders desktop plans and implementation requests as standalone messages', () => {
   const messages = messagesFromDesktopThread({
     id: 'thread-1',
@@ -325,6 +426,41 @@ test('messagesFromDesktopThread renders internal implement-plan followups as a s
 
   assert.equal(messages[0].role, 'user');
   assert.equal(messages[0].content, '执行计划');
+});
+
+test('messagesFromDesktopThread hides desktop injected browser context from user bubbles', () => {
+  const messages = messagesFromDesktopThread({
+    id: 'thread-1',
+    turns: [
+      {
+        id: 'turn-1',
+        status: 'completed',
+        startedAt: 1770000000,
+        completedAt: 1770000003,
+        items: [
+          {
+            id: 'user-1',
+            type: 'userMessage',
+            content: [{
+              type: 'text',
+              text: [
+                '# In app browser:',
+                '- The user has the in-app browser open.',
+                '- Current URL: http://localhost:3321/',
+                '',
+                '## My request for Codex:',
+                '移动端点线程重命名，没弹窗 没反应啊'
+              ].join('\n')
+            }]
+          },
+          { id: 'answer-1', type: 'agentMessage', phase: 'final_answer', text: '修好了' }
+        ]
+      }
+    ]
+  });
+
+  assert.equal(messages[0].role, 'user');
+  assert.equal(messages[0].content, '移动端点线程重命名，没弹窗 没反应啊');
 });
 
 test('messagesFromDesktopThread removes stale plan request after implementation starts', () => {

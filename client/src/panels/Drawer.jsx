@@ -11,7 +11,7 @@
  * Outward: App 根布局在菜单打开时渲染。
  */
 
-import { Archive, BarChart3, ChevronDown, ChevronLeft, Folder, Loader2, MessageSquare, MoreHorizontal, Pencil, Plus, RefreshCw, Search, Settings, X } from 'lucide-react';
+import { Archive, BarChart3, Check, ChevronDown, ChevronLeft, Folder, Loader2, MessageSquare, MoreHorizontal, Pencil, Plus, RefreshCw, Search, Settings, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api.js';
 import { setClientRuntimeDebugEnabled } from '../app/runtime-debug-client.js';
@@ -120,6 +120,9 @@ export function Drawer({
   const [quotaAccounts, setQuotaAccounts] = useState([]);
   const [drawerQuery, setDrawerQuery] = useState('');
   const [threadActionMenu, setThreadActionMenu] = useState(null);
+  const [renameDraft, setRenameDraft] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [renameSaving, setRenameSaving] = useState(false);
   const [newConversationOpen, setNewConversationOpen] = useState(false);
   const [runtimeDebugError, setRuntimeDebugError] = useState('');
   const [runtimeDebugSaving, setRuntimeDebugSaving] = useState(false);
@@ -138,9 +141,26 @@ export function Drawer({
   useEffect(() => {
     if (!open) {
       setThreadActionMenu(null);
+      setRenameDraft(null);
+      setRenameValue('');
+      setRenameSaving(false);
       setNewConversationOpen(false);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!renameDraft) {
+      return undefined;
+    }
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setRenameDraft(null);
+        setRenameValue('');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [renameDraft]);
 
   function startNewConversation(project, event) {
     event?.preventDefault();
@@ -166,8 +186,42 @@ export function Drawer({
     if (!threadActionMenu) {
       return;
     }
-    onRenameSession(threadActionMenu.project, threadActionMenu.session);
+    setRenameDraft({ project: threadActionMenu.project, session: threadActionMenu.session });
+    setRenameValue(threadActionMenu.session?.title || '对话');
     setThreadActionMenu(null);
+  }
+
+  function closeRenameDialog() {
+    if (renameSaving) {
+      return;
+    }
+    setRenameDraft(null);
+    setRenameValue('');
+  }
+
+  async function submitRenameDialog(event) {
+    event.preventDefault();
+    if (!renameDraft || renameSaving) {
+      return;
+    }
+    const nextTitle = renameValue.trim().slice(0, 52);
+    if (!nextTitle) {
+      return;
+    }
+    if (nextTitle === (renameDraft.session?.title || '对话')) {
+      closeRenameDialog();
+      return;
+    }
+    setRenameSaving(true);
+    try {
+      const ok = await onRenameSession(renameDraft.project, renameDraft.session, nextTitle);
+      if (ok !== false) {
+        setRenameDraft(null);
+        setRenameValue('');
+      }
+    } finally {
+      setRenameSaving(false);
+    }
   }
 
   function handleThreadArchive() {
@@ -676,6 +730,35 @@ export function Drawer({
                 <span>归档</span>
               </button>
             </div>
+          </div>
+        ) : null}
+        {renameDraft ? (
+          <div className="thread-rename-backdrop" onClick={closeRenameDialog}>
+            <form className="thread-rename-dialog" onSubmit={submitRenameDialog} onClick={(event) => event.stopPropagation()}>
+              <div className="thread-rename-head">
+                <strong>重命名线程</strong>
+                <button type="button" className="thread-rename-icon" onClick={closeRenameDialog} aria-label="取消重命名">
+                  <X size={16} />
+                </button>
+              </div>
+              <input
+                autoFocus
+                value={renameValue}
+                onChange={(event) => setRenameValue(event.target.value.slice(0, 52))}
+                placeholder="输入线程名称"
+                aria-label="线程名称"
+                maxLength={52}
+              />
+              <div className="thread-rename-actions">
+                <button type="button" className="thread-rename-secondary" onClick={closeRenameDialog} disabled={renameSaving}>
+                  取消
+                </button>
+                <button type="submit" className="thread-rename-primary" disabled={renameSaving || !renameValue.trim()}>
+                  {renameSaving ? <Loader2 className="spin" size={15} /> : <Check size={15} />}
+                  <span>{renameSaving ? '保存中' : '保存'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         ) : null}
       </aside>

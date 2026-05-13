@@ -8,6 +8,7 @@
  * - CodexAppServerClient / createCodexAppServerClient — 客户端构造。
  * - getDesktopBridgeStatus — 当前桥接健康与能力摘要。
  * - listDesktopThreads / readDesktopThread / setDesktopThreadName / archiveDesktopThread — Thread CRUD 辅助。
+ * - notifyDesktopThreadListChanged — 通过桌面 IPC 请求 Codex Desktop 热刷新线程列表。
  *
  * Inward（本模块依赖/组装的关键符号）: desktop-ipc-client（广播/probe）、child_process.spawn。
  *
@@ -22,6 +23,7 @@ import path from 'node:path';
 import readline from 'node:readline';
 import {
   broadcastDesktopThreadArchived,
+  broadcastDesktopThreadListRefresh,
   broadcastDesktopThreadTitleUpdated,
   probeDesktopIpc
 } from './desktop-ipc-client.js';
@@ -531,4 +533,22 @@ export async function archiveDesktopThread(threadId) {
   } finally {
     client.close();
   }
+}
+
+export async function notifyDesktopThreadListChanged({
+  threadId = '',
+  cwd = null,
+  hostId = 'local',
+  reason = 'thread-list-refresh'
+} = {}) {
+  const broadcast = await broadcastDesktopThreadListRefresh({
+    hostId,
+    conversationId: threadId || null,
+    cwd,
+    reason
+  });
+  if (!broadcast.sent) {
+    console.warn(`[desktop-ipc] thread list refresh skipped thread=${threadId || ''}: ${broadcast.reason}`);
+  }
+  return broadcast;
 }

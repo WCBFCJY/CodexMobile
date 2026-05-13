@@ -27,6 +27,7 @@ import {
   verifyToken
 } from './auth.js';
 import {
+  applySessionTitleUpdate,
   deleteSession,
   getCacheSnapshot,
   getHostName,
@@ -67,6 +68,7 @@ import { publicVoiceSpeechStatus } from './voice-speaker.js';
 import { publicVoiceRealtimeStatus, startVoiceRealtimeProxy } from './realtime-voice.js';
 import { maybeAutoNameSession } from './session-title-generator.js';
 import { createChatService } from './chat-service.js';
+import { createDesktopIpcBroadcastListener } from './desktop-ipc-broadcast-listener.js';
 import {
   configureRuntimeDebug,
   getRuntimeDebugPublicState,
@@ -209,6 +211,116 @@ const chatService = createChatService({
   maybeAutoNameSession,
   rememberLiveSession
 });
+
+function desktopBroadcastSessionId(message = {}) {
+  const params = message.params || {};
+  const change = params.change || params.state || params.thread || {};
+  return String(
+    params.conversationId ||
+    params.conversation_id ||
+    params.threadId ||
+    params.thread_id ||
+    params.sessionId ||
+    params.session_id ||
+    change.conversationId ||
+    change.conversation_id ||
+    change.threadId ||
+    change.thread_id ||
+    change.sessionId ||
+    change.session_id ||
+    ''
+  ).trim();
+}
+
+function desktopBroadcastRuntimeStatus(message = {}) {
+  const params = message.params || {};
+  const change = params.change || params.state || params.thread || {};
+  const status = String(
+    params.status ||
+    params.streamState ||
+    params.stream_state ||
+    change.status ||
+    change.streamState ||
+    change.stream_state ||
+    ''
+  ).toLowerCase();
+  if (['running', 'queued', 'streaming', 'active'].includes(status)) {
+    return 'running';
+  }
+  if (['completed', 'complete', 'success', 'succeeded', 'idle', 'stopped'].includes(status)) {
+    return 'completed';
+  }
+  if (['failed', 'error', 'cancelled', 'canceled', 'interrupted', 'aborted'].includes(status)) {
+    return 'failed';
+  }
+  if (params.isStreaming === false || params.streaming === false || change.isStreaming === false || change.streaming === false) {
+    return 'completed';
+  }
+  return '';
+}
+
+function desktopBroadcastIsThreadStateChange(message = {}) {
+  return ['thread-stream-state-changed', 'thread-read-state-changed'].includes(String(message.method || ''));
+}
+
+const desktopIpcBroadcastListener = createDesktopIpcBroadcastListener({
+  async onBroadcast(message) {
+    const params = message.params || {};
+    if (desktopBroadcastIsThreadStateChange(message)) {
+      const sessionId = desktopBroadcastSessionId(message);
+      if (!sessionId) {
+        return;
+      }
+      const session = getSession(sessionId);
+      const status = desktopBroadcastRuntimeStatus(message);
+      broadcast({
+        type: 'desktop-thread-updated',
+        source: 'desktop-ipc',
+        method: message.method,
+        sessionId,
+        projectId: params.projectId || params.project_id || session?.projectId || null,
+        status: status || undefined,
+        timestamp: new Date().toISOString()
+      });
+      if (status && status !== 'running') {
+        startSyncRefresh()
+          .then((snapshot) => {
+            if (snapshot?.projects) {
+              broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
+            }
+          })
+          .catch((error) => {
+            console.warn('[desktop-ipc] sync refresh after thread state change failed:', error.message);
+          });
+      }
+      return;
+    }
+    if (message?.method !== 'thread-title-updated') {
+      return;
+    }
+    const sessionId = String(params.conversationId || params.threadId || '').trim();
+    const title = String(params.title || params.name || '').trim();
+    if (!sessionId || !title) {
+      return;
+    }
+    const renamed = await applySessionTitleUpdate(sessionId, title, { projectId: params.projectId || null });
+    if (!renamed?.projectId) {
+      return;
+    }
+    broadcast({
+      type: 'session-renamed',
+      source: 'desktop-ipc',
+      projectId: renamed.projectId,
+      sessionId: renamed.id,
+      title: renamed.title,
+      titleLocked: renamed.titleLocked,
+      updatedAt: renamed.updatedAt,
+      session: renamed
+    });
+    const snapshot = getCacheSnapshot();
+    broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
+  }
+});
 const handleNotificationApi = createNotificationRouteHandler({
   pushService,
   remoteAddress
@@ -254,6 +366,17 @@ function startSyncRefresh() {
 }
 
 async function refreshCodexCacheForSyncResponse() {
+  const currentSnapshot = getCacheSnapshot();
+  if (currentSnapshot.projects?.length) {
+    startSyncRefresh()
+      .then((snapshot) => {
+        broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
+      })
+      .catch((error) => {
+        console.warn('[sync] Background refresh failed:', error.message);
+      });
+    return { timedOut: false, snapshot: currentSnapshot, staleWhileRevalidate: true };
+  }
   const refresh = startSyncRefresh();
   const timeout = new Promise((resolve) => {
     const timer = setTimeout(() => {
@@ -290,7 +413,6 @@ async function publicStatus(authenticated) {
   const desktopBridge = await getDesktopBridgeStatus();
   const activeRuns = [
     ...getActiveRuns(),
-    ...chatService.getActiveDesktopIpcRuns(),
     ...chatService.getActiveImageRuns()
   ];
   runtimeDebugStatusActiveRuns(activeRuns);
@@ -466,6 +588,7 @@ async function main() {
   };
 
   server.on('upgrade', handleUpgrade);
+  desktopIpcBroadcastListener.start();
 
   server.listen(PORT, HOST, () => {
     console.log(`CodexMobile listening on http://${HOST}:${PORT}`);
