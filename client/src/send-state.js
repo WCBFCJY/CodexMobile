@@ -1,11 +1,11 @@
 /**
- * 桌面桥规范化、建线程能力与 Composer 发送按钮禁用态/文案推导。
+ * 桌面桥规范化与 Composer 发送按钮禁用态/文案推导。
  *
  * Keywords: desktop-bridge, composer, send-state, capabilities
  *
  * Exports:
  * - normalizeDesktopBridge — 统一 bridge 形状。
- * - desktopBridgeCanCreateThread — 是否允许发起新线程。
+ * - desktopBridgeCanCreateThread — 兼容旧调用；移动端发送不再依赖此能力。
  * - composerSendState — disabled、label、mode 等发送区状态。
  *
  * Inward: 无。
@@ -30,6 +30,9 @@ export function desktopBridgeCanCreateThread(bridge = null) {
   if (!normalized.connected) {
     return false;
   }
+  if (normalized.mode === 'desktop-ipc') {
+    return true;
+  }
   if (normalized.capabilities.backgroundCodex || normalized.capabilities.createThreadViaBackground) {
     return true;
   }
@@ -51,28 +54,8 @@ export function composerSendState({
   sessionIsDraft = false
 } = {}) {
   const bridge = normalizeDesktopBridge(desktopBridge);
-  if (!bridge.connected) {
-    return {
-      disabled: true,
-      label: '桌面端 Codex 未连接',
-      mode: 'unavailable',
-      showMenu: false,
-      canSteer: false,
-      canQueue: false,
-      canInterrupt: false
-    };
-  }
-  if (sessionIsDraft && !desktopBridgeCanCreateThread(bridge)) {
-    return {
-      disabled: true,
-      label: '只能继续桌面端已有对话',
-      mode: 'create-unavailable',
-      showMenu: false,
-      canSteer: false,
-      canQueue: false,
-      canInterrupt: false
-    };
-  }
+  void bridge;
+  void sessionIsDraft;
   if (uploading) {
     return {
       disabled: true,

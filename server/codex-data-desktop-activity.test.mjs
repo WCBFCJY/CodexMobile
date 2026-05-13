@@ -10,6 +10,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { messagesFromDesktopThread, rawSessionActivitiesFromJsonl } from './codex-data.js';
+import { removeDuplicateGuidedUserSegments } from './desktop-thread-projector.js';
 import { upsertDesktopActivity } from './desktop-thread-projector.js';
 
 test('messagesFromDesktopThread preserves running desktop file activity', () => {
@@ -461,6 +462,57 @@ test('messagesFromDesktopThread hides desktop injected browser context from user
 
   assert.equal(messages[0].role, 'user');
   assert.equal(messages[0].content, '移动端点线程重命名，没弹窗 没反应啊');
+});
+
+test('messagesFromDesktopThread drops duplicate guided browser request envelopes', () => {
+  const messages = messagesFromDesktopThread({
+    id: 'thread-1',
+    turns: [
+      {
+        id: 'turn-1',
+        status: 'completed',
+        startedAt: 1770000000,
+        completedAt: 1770000003,
+        items: [
+          { id: 'user-1', type: 'userMessage', content: [{ type: 'text', text: 'ok 现在是移动端随便发一条消息测试' }] },
+          {
+            id: 'browser-envelope-1',
+            type: 'userMessage',
+            content: [{
+              type: 'text',
+              text: [
+                '# In app browser:',
+                '- The user has the in-app browser open.',
+                '- Current URL: http://localhost:3321/',
+                '',
+                '## My request for Codex:',
+                'ok 现在是移动端随便发一条消息测试'
+              ].join('\n')
+            }]
+          },
+          { id: 'answer-1', type: 'agentMessage', phase: 'final_answer', text: 'OK' }
+        ]
+      }
+    ]
+  }, { includeActivity: true });
+
+  const userMessages = messages.filter((message) => message.role === 'user');
+  assert.deepEqual(userMessages.map((message) => [message.content, Boolean(message.guided)]), [
+    ['ok 现在是移动端随便发一条消息测试', false]
+  ]);
+  assert.equal(messages.some((message) => message.role === 'activity' && message.segmentIndex === 1), false);
+});
+
+test('removeDuplicateGuidedUserSegments drops orphan activity for removed duplicate segment', () => {
+  const messages = removeDuplicateGuidedUserSegments([
+    { id: 'user-1', role: 'user', content: '同一条消息', turnId: 'turn-1', segmentIndex: 0 },
+    { id: 'user-2', role: 'user', content: '同一条消息', turnId: 'turn-1', segmentIndex: 1, guided: true },
+    { id: 'activity-1', role: 'activity', content: '过程已同步', turnId: 'turn-1', segmentIndex: 1, status: 'completed' },
+    { id: 'user-3', role: 'user', content: '真正的新引导', turnId: 'turn-1', segmentIndex: 2, guided: true },
+    { id: 'activity-2', role: 'activity', content: '过程已同步', turnId: 'turn-1', segmentIndex: 2, status: 'completed' }
+  ]);
+
+  assert.deepEqual(messages.map((message) => message.id), ['user-1', 'user-3', 'activity-2']);
 });
 
 test('messagesFromDesktopThread removes stale plan request after implementation starts', () => {

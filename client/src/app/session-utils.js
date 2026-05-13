@@ -7,7 +7,7 @@
  * - 通用与展示 — `formatTime`、`formatDuration*`、`subAgentRoleLabel`、`compactPath`、`safeStoredJsonArray` 等。
  * - 上下文与媒体 — `emptyContextStatus`、`imageUrlWithRetry`、本地源与 `local*ApiPath`、`dataImageObjectUrl`、`useResolvedImageSource`。
  * - 会话生命周期 — `createClientTurnId`、`createDraftSession`、`resolveNewConversationProject`、`isDraftSession`、`sessionMessagesApiPath`、标题补丁、`upsertSessionInProject`。
- * - Runtime — `payloadRunKeys`、`selectedRunKeys`、`externalThreadRuntimeById`、`reconcileThreadRuntimeWithSessions`、`is*Runtime`、`should*`、`runningByIdWithSelectedActivity`、`sessionRunBadgeState`、`buildComposerRunStatus`、`selectedSessionIsRunning`、`hasVisibleAssistantForTurn` 等。
+ * - Runtime — `payloadRunKeys`、`selectedRunKeys`、`reconcileThreadRuntimeWithSessions`、`is*Runtime`、`runningByIdWithSelectedActivity`、`sessionRunBadgeState`、`buildComposerRunStatus`、`selectedSessionIsRunning`、`hasVisibleAssistantForTurn` 等。
  *
  * Inward: `api`（blob）；`context-status`；`shared/session-title`。
  *
@@ -361,39 +361,12 @@ export function sessionRunKeys(session) {
   return [session?.id, session?.turnId, session?.previousSessionId].filter(Boolean);
 }
 
-export function isExternalThreadRuntimeSource(value) {
-  return String(value || '') === 'desktop-ipc';
-}
-
-export function isExternalThreadRuntime(runtime) {
-  return runtime?.status === 'running' && isExternalThreadRuntimeSource(runtime?.source);
-}
-
 export function isSessionIndexRuntime(runtime) {
   return runtime?.fromSessionIndex === true;
 }
 
 export function isLiveThreadRuntime(runtime) {
   return Boolean(runtime && !isSessionIndexRuntime(runtime));
-}
-
-export function isPersistentDesktopThreadRuntime(runtime) {
-  void runtime;
-  return false;
-}
-
-export function shouldClearRuntimeWhenNoActiveRuns(runtime) {
-  return runtime?.status === 'running';
-}
-
-export function externalThreadRuntimeById(threadRuntimeById = {}) {
-  const next = {};
-  for (const [key, runtime] of Object.entries(threadRuntimeById || {})) {
-    if (isExternalThreadRuntime(runtime)) {
-      next[key] = runtime;
-    }
-  }
-  return next;
 }
 
 function allProjectSessions(sessionsByProject = {}) {
@@ -438,14 +411,9 @@ export function reconcileThreadRuntimeWithSessions(threadRuntimeById = {}, sessi
 }
 
 export function runningByIdWithSelectedActivity(runningById = {}, selectedSession = null, hasRunningActivity = false) {
-  if (!hasRunningActivity || !selectedSession?.id) {
-    return runningById || {};
-  }
-  const next = { ...(runningById || {}) };
-  for (const key of sessionRunKeys(selectedSession)) {
-    next[key] = true;
-  }
-  return next;
+  void selectedSession;
+  void hasRunningActivity;
+  return runningById || {};
 }
 
 export function sessionRunBadgeState(session, {
@@ -470,47 +438,9 @@ export function sessionRunBadgeState(session, {
   return null;
 }
 
-export function shouldPreserveLocalRunsFromStatus({
-  activePollCount = 0,
-  turnRefreshTimerCount = 0,
-  forceClear = false
-} = {}) {
-  void turnRefreshTimerCount;
-  if (forceClear) {
-    return false;
-  }
-  return activePollCount > 0;
-}
-
-export function shouldDropRunningActivityWhenNoActiveRuns(message) {
-  if (message?.role !== 'activity') {
-    return false;
-  }
-  if (!['running', 'queued'].includes(String(message?.status || ''))) {
-    return false;
-  }
-  if (message?.transient) {
-    return false;
-  }
-  if (String(message?.kind || '') === 'desktop') {
-    return false;
-  }
-  return !isExternalThreadRuntimeSource(message?.source);
-}
-
-export function shouldDropRunningActivityMissingFromActiveRuns(message, activeRunKeys = new Set()) {
-  if (!shouldDropRunningActivityWhenNoActiveRuns(message)) {
-    return false;
-  }
-  const keys = payloadRunKeys(message);
-  if (!keys.length) {
-    return true;
-  }
-  return !keys.some((key) => activeRunKeys.has(key));
-}
-
 export function selectedSessionIsRunning({ running = false, hasRunningActivity = false } = {}) {
-  return Boolean(running || hasRunningActivity);
+  void hasRunningActivity;
+  return Boolean(running);
 }
 
 function compactComposerActivityText(value, maxLength = 28) {
@@ -569,12 +499,12 @@ function describeComposerActivityStep(step) {
 }
 
 export function buildComposerRunStatus(messages, running, now = Date.now()) {
+  if (!running) {
+    return null;
+  }
   const activity = [...(messages || [])]
     .reverse()
     .find((message) => message.role === 'activity' && (message.status === 'running' || message.status === 'queued'));
-  if (!running && !activity) {
-    return null;
-  }
 
   const steps = Array.isArray(activity?.activities) ? activity.activities : [];
   const visibleSteps = steps.filter((step) => isVisibleComposerActivityStep(step, activity?.status || 'running'));

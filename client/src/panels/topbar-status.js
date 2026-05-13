@@ -39,9 +39,9 @@ export function bridgeConnectionLabel(connectionState, desktopBridge, { selected
   if (selectedRuntime?.status === 'running') {
     if (isDesktopRuntime(selectedRuntime)) {
       return {
-        label: '桌面运行中',
+        label: '桌面镜像中',
         className: 'is-connected is-thread-ipc',
-        description: '当前线程正在桌面端接管窗口里执行。'
+        description: '当前线程来自桌面端 live mirror，移动端只同步桌面运行过程。'
       };
     }
     if (isHeadlessRuntime(selectedRuntime)) {
@@ -54,7 +54,7 @@ export function bridgeConnectionLabel(connectionState, desktopBridge, { selected
     return {
       label: '运行确认中',
       className: 'is-connected is-route-pending',
-      description: '当前线程正在运行，正在确认这次执行来自桌面接管还是后台 Codex。'
+      description: '当前线程正在运行，正在等待 sync runtime 标明来源。'
     };
   }
 
@@ -68,11 +68,11 @@ export function bridgeConnectionLabel(connectionState, desktopBridge, { selected
 
   if (desktopBridge?.mode === 'desktop-ipc') {
     return {
-      label: selectedSession?.id ? '线程待确认' : '桌面在线',
+      label: selectedSession?.id ? '桌面同步' : '桌面在线',
       className: 'is-connected is-ipc-ready',
       description: selectedSession?.id
-        ? '桌面 IPC 总线在线，但当前线程是否已被桌面接管要在发送时确认；若桌面未打开该线程会转后台执行。'
-        : '桌面 IPC 总线在线；新对话会按当前能力选择桌面或后台路径。'
+        ? '桌面 IPC 总线在线，用于 live mirror、线程刷新、重命名和模型观察；移动端发送固定走后台 Codex。'
+        : '桌面 IPC 总线在线，用于同步桌面会话；移动端发送固定走后台 Codex。'
     };
   }
 

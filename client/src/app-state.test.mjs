@@ -11,7 +11,7 @@ import { appReducer, createInitialUiState } from './app/AppState.js';
 import { applyPwaTheme } from './app/pwa-theme.js';
 import {
   createDraftSession,
-  externalThreadRuntimeById,
+  buildComposerRunStatus,
   localFileApiPath,
   localFilePreviewPath,
   payloadRunKeys,
@@ -20,10 +20,6 @@ import {
   runningByIdWithSelectedActivity,
   selectedSessionIsRunning,
   sessionRunBadgeState,
-  shouldClearRuntimeWhenNoActiveRuns,
-  shouldDropRunningActivityMissingFromActiveRuns,
-  shouldDropRunningActivityWhenNoActiveRuns,
-  shouldPreserveLocalRunsFromStatus,
   titleFromFirstMessage
 } from './app/session-utils.js';
 import { completeMessagesForTurnCompletion, runtimeKeysForPayload } from './app/useTurnRuntime.js';
@@ -96,112 +92,14 @@ test('applyPwaTheme resolves system preference from media query', () => {
   assert.equal(elements.get('meta[data-app-theme-color]').content, '#000000');
 });
 
-test('status sync preserves only active local submission polling', () => {
-  assert.equal(
-    shouldPreserveLocalRunsFromStatus({ activePollCount: 1 }),
-    true
-  );
-  assert.equal(
-    shouldPreserveLocalRunsFromStatus({ activePollCount: 1, forceClear: true }),
-    false
-  );
-  assert.equal(
-    shouldPreserveLocalRunsFromStatus({ turnRefreshTimerCount: 1 }),
-    false
-  );
-  assert.equal(
-    shouldPreserveLocalRunsFromStatus({
-      activePollCount: 0,
-      turnRefreshTimerCount: 0
-    }),
-    false
-  );
-});
-
-test('empty activeRuns status clears stale running runtime locks', () => {
-  assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
-    role: 'activity',
-    kind: 'desktop',
-    status: 'running'
-  }), false);
-  assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
-    role: 'activity',
-    kind: 'turn',
-    status: 'running'
-  }), true);
-  assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
-    role: 'activity',
-    kind: 'turn',
-    status: 'running',
-    source: 'headless-local'
-  }), true);
-  assert.equal(shouldDropRunningActivityWhenNoActiveRuns({
-    role: 'activity',
-    kind: 'turn',
-    status: 'running',
-    transient: true
-  }), false);
-  assert.equal(shouldClearRuntimeWhenNoActiveRuns({
-    status: 'running',
-    source: 'desktop-thread'
-  }), true);
-  assert.equal(shouldClearRuntimeWhenNoActiveRuns({
-    status: 'running',
-    source: 'desktop-ipc'
-  }), true);
-  assert.equal(shouldClearRuntimeWhenNoActiveRuns({
-    status: 'running',
-    source: 'headless-local'
-  }), true);
-  assert.equal(shouldClearRuntimeWhenNoActiveRuns({
-    status: 'running',
-    source: 'codexmobile'
-  }), true);
-});
-
-test('activeRuns status drops stale mobile running activity from other turns', () => {
-  const activeRunKeys = new Set(['active-session', 'active-turn']);
-
-  assert.equal(shouldDropRunningActivityMissingFromActiveRuns({
-    role: 'activity',
-    kind: 'turn',
-    status: 'running',
-    sessionId: 'stale-session',
-    turnId: 'stale-turn'
-  }, activeRunKeys), true);
-  assert.equal(shouldDropRunningActivityMissingFromActiveRuns({
-    role: 'activity',
-    kind: 'turn',
-    status: 'running',
-    sessionId: 'active-session',
-    turnId: 'active-turn'
-  }, activeRunKeys), false);
-  assert.equal(shouldDropRunningActivityMissingFromActiveRuns({
-    role: 'activity',
-    kind: 'desktop',
-    status: 'running',
-    sessionId: 'stale-desktop'
-  }, activeRunKeys), false);
-});
-
-test('activeRuns status merge preserves only IPC desktop runtimes beside mobile runs', () => {
-  const ipcRuntime = { status: 'running', source: 'desktop-ipc' };
-  const preserved = externalThreadRuntimeById({
-    'desktop-thread-1': { status: 'running', source: 'desktop-thread' },
-    'desktop-ipc-turn-1': ipcRuntime,
-    'headless-turn-1': { status: 'running', source: 'headless-local' },
-    'mobile-turn-1': { status: 'running', source: 'codexmobile' },
-    'completed-thread': { status: 'completed', source: 'desktop-thread' }
-  });
-
-  assert.deepEqual(Object.keys(preserved), ['desktop-ipc-turn-1']);
-  assert.equal(preserved['desktop-ipc-turn-1'], ipcRuntime);
-});
-
-test('selected desktop activity counts as running for composer controls', () => {
+test('selected desktop activity does not count as composer runtime without live sync state', () => {
   assert.equal(selectedSessionIsRunning({
     running: false,
     hasRunningActivity: true
+  }), false);
+  assert.equal(selectedSessionIsRunning({
+    running: true,
+    hasRunningActivity: false
   }), true);
   assert.equal(selectedSessionIsRunning({
     running: false,
@@ -209,22 +107,28 @@ test('selected desktop activity counts as running for composer controls', () => 
   }), false);
 });
 
-test('selected running activity marks the matching sidebar session as running', () => {
+test('selected running activity does not synthesize sidebar runtime badges', () => {
   const runningById = runningByIdWithSelectedActivity(
     {},
     { id: 'thread-1', turnId: 'turn-1' },
     true
   );
 
-  assert.equal(runningById['thread-1'], true);
-  assert.equal(runningById['turn-1'], true);
+  assert.deepEqual(runningById, {});
   assert.equal(
     sessionRunBadgeState(
       { id: 'thread-1', turnId: 'turn-1' },
       { runningById }
     ),
-    'running'
+    null
   );
+});
+
+test('composer run status appears immediately from runtime even before activity arrives', () => {
+  const status = buildComposerRunStatus([], true, Date.parse('2026-05-13T08:40:00.000Z'));
+
+  assert.equal(status.running, true);
+  assert.equal(status.label, '正在思考');
 });
 
 test('desktop ipc active runs expose both app and client turn ids', () => {

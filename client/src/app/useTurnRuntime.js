@@ -1,7 +1,7 @@
 /**
- * 回合运行期副作用：根据 WS/轮询结果合并消息与 context，维护本地 running 活动与 turn 完成收尾。
+ * 回合运行期副作用：只响应统一 sync runtime，维护运行态清理与完成后消息补账。
  *
- * Keywords: turn-runtime, polling, activity-merge, running-keys
+ * Keywords: turn-runtime, sync-runtime, activity-merge, running-keys
  *
  * Exports:
  * - `runtimeKeysForPayload` / `completeMessagesForTurnCompletion` — payload 与会话对齐、轮次完成时的消息补齐。
@@ -12,7 +12,7 @@
  * Outward: `App.jsx` 编排会话与聊天数据流。
  */
 
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { apiFetch } from '../api.js';
 import {
   completeActivityMessagesForTurn,
@@ -22,15 +22,10 @@ import {
 } from '../chat/activity-model.js';
 import { mergeContextStatus } from './context-status.js';
 import {
-  externalThreadRuntimeById,
   hasVisibleAssistantForTurn,
   isDraftSession,
   payloadRunKeys,
-  sessionMessagesApiPath,
-  shouldClearRuntimeWhenNoActiveRuns,
-  shouldDropRunningActivityMissingFromActiveRuns,
-  shouldDropRunningActivityWhenNoActiveRuns,
-  shouldPreserveLocalRunsFromStatus
+  sessionMessagesApiPath
 } from './session-utils.js';
 import { clientRuntimeDebug } from './runtime-debug-client.js';
 
@@ -62,18 +57,12 @@ export function completeMessagesForTurnCompletion(current, payload, detail = '�
   if (hasAssistantMessageForTurn(current, payload)) {
     return messagesWithCompletedActivity;
   }
-  return upsertStatusMessage(messagesWithCompletedActivity, {
-    ...completedPayload,
-    kind: 'turn',
-    status: 'completed',
-    label: '任务已完成',
-    detail
-  });
+  void detail;
+  return messagesWithCompletedActivity;
 }
 
 export function useTurnRuntime({
   defaultStatus,
-  activePollsRef,
   turnRefreshTimersRef,
   selectedSessionRef,
   runningByIdRef,
@@ -208,94 +197,6 @@ export function useTurnRuntime({
     });
   }
 
-  const syncActiveRunsFromStatus = useCallback((nextStatus, options = {}) => {
-    const activeRuns = Array.isArray(nextStatus?.activeRuns) ? nextStatus.activeRuns : [];
-    const shouldPreserveLocalRuns = shouldPreserveLocalRunsFromStatus({
-      activePollCount: activePollsRef.current.size,
-      turnRefreshTimerCount: turnRefreshTimersRef.current.size,
-      forceClear: Boolean(options.forceClear)
-    });
-
-    clientRuntimeDebug('syncActiveRunsFromStatus.enter', {
-      activeRunsCount: activeRuns.length,
-      shouldPreserveLocalRuns,
-      forceClear: Boolean(options.forceClear),
-      activePollCount: activePollsRef.current.size,
-      turnRefreshTimerCount: turnRefreshTimersRef.current.size,
-      runs: activeRuns.map((r) => ({
-        sessionId: r.sessionId || null,
-        turnId: r.turnId || null,
-        source: r.source || null
-      }))
-    });
-
-    if (!activeRuns.length) {
-      if (!shouldPreserveLocalRuns) {
-        setRunningById(() => {
-          runningByIdRef.current = {};
-          return {};
-        });
-        setThreadRuntimeById((current) => {
-          const next = { ...current };
-          for (const [key, value] of Object.entries(next)) {
-            if (shouldClearRuntimeWhenNoActiveRuns(value)) {
-              delete next[key];
-            }
-          }
-          return next;
-        });
-      }
-      setMessages((current) => {
-        if (shouldPreserveLocalRuns) {
-          return current;
-        }
-        return current.filter((message) => !shouldDropRunningActivityWhenNoActiveRuns(message));
-      });
-      clientRuntimeDebug('syncActiveRunsFromStatus.exit', {
-        branch: 'empty-activeRuns',
-        clearedRuntime: !shouldPreserveLocalRuns
-      });
-      return;
-    }
-
-    const nextRunning = {};
-    const nextRuntime = {};
-    const activeRunKeys = new Set();
-    for (const run of activeRuns) {
-      for (const key of payloadRunKeys(run)) {
-        activeRunKeys.add(key);
-        nextRunning[key] = true;
-        nextRuntime[key] = {
-          status: 'running',
-          steerable: run.steerable !== false,
-          updatedAt: run.startedAt || new Date().toISOString(),
-          source: run.source || null
-        };
-      }
-    }
-    setRunningById((current) => {
-      const next = shouldPreserveLocalRuns ? { ...current, ...nextRunning } : nextRunning;
-      runningByIdRef.current = next;
-      return next;
-    });
-    setThreadRuntimeById((current) => {
-      const next = shouldPreserveLocalRuns
-        ? { ...current, ...nextRuntime }
-        : { ...externalThreadRuntimeById(current), ...nextRuntime };
-      return next;
-    });
-    if (!shouldPreserveLocalRuns) {
-      setMessages((current) =>
-        current.filter((message) => !shouldDropRunningActivityMissingFromActiveRuns(message, activeRunKeys))
-      );
-    }
-    clientRuntimeDebug('syncActiveRunsFromStatus.exit', {
-      branch: 'merged-activeRuns',
-      shouldPreserveLocalRuns,
-      activeRunKeys: [...activeRunKeys]
-    });
-  }, [activePollsRef, runningByIdRef, setMessages, setRunningById, setThreadRuntimeById, turnRefreshTimersRef]);
-
   function payloadMatchesCurrentConversation(payload) {
     const current = selectedSessionRef.current;
     if (!current) {
@@ -392,7 +293,6 @@ export function useTurnRuntime({
     clearRun,
     markSessionCompleteNotice,
     clearSessionCompleteNotice,
-    syncActiveRunsFromStatus,
     payloadMatchesCurrentConversation,
     markTurnCompleted,
     scheduleTurnRefresh

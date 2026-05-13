@@ -31,7 +31,6 @@ export function useAppBootstrap({
   selectedSessionRef,
   setStatus,
   setAuthenticated,
-  syncActiveRunsFromStatus,
   setSelectedSession,
   setMessages,
   setContextStatus,
@@ -45,9 +44,8 @@ export function useAppBootstrap({
     const data = await apiFetch('/api/status');
     setStatus(data);
     setAuthenticated(Boolean(data.auth?.authenticated));
-    syncActiveRunsFromStatus(data);
     return data;
-  }, [setAuthenticated, setStatus, syncActiveRunsFromStatus]);
+  }, [setAuthenticated, setStatus]);
 
   const loadSessions = useCallback(async (project, options = true) => {
     const settings =

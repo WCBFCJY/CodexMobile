@@ -1,7 +1,7 @@
 /**
- * 定时拉取选中会话消息并做轻量合并，作为 WebSocket live events 的补账层。
+ * 空闲时拉取选中会话消息并做轻量合并，作为 WebSocket sync events 的补账层。
  *
- * Keywords: live-polling, session-messages, reconcile
+ * Keywords: idle-polling, session-messages, reconcile
  *
  * Exports:
  * - `useSessionLivePolling` — 基于认证与选中会话驱动轮询的 effect hook。
@@ -17,7 +17,6 @@ import {
   messageStreamSignature
 } from '../chat/activity-model.js';
 import {
-  hasStaleRunningActivityResolvedByLoaded,
   mergeLiveSelectedThreadMessages
 } from '../session-live-refresh.js';
 import { mergeContextStatus } from './context-status.js';
@@ -34,9 +33,6 @@ export function useSessionLivePolling({
   defaultStatus,
   sessionLivePollRef,
   selectedSessionRef,
-  messagesRef,
-  clearRun,
-  markSessionCompleteNotice,
   setContextStatus,
   setMessages
 }) {
@@ -51,29 +47,18 @@ export function useSessionLivePolling({
       if (stopped || sessionLivePollRef.current) {
         return;
       }
+      if (running || hasRunningActivity) {
+        return;
+      }
       sessionLivePollRef.current = true;
       try {
         const data = await apiFetch(sessionMessagesApiPath(sessionId));
         if (!stopped && selectedSessionRef.current?.id === sessionId && Array.isArray(data.messages)) {
-          const currentMessages = Array.isArray(messagesRef?.current) ? messagesRef.current : [];
-          const forceDropStaleRunning = hasStaleRunningActivityResolvedByLoaded(currentMessages, data.messages);
-          if (forceDropStaleRunning) {
-            const assistant = [...data.messages].reverse().find((message) => message?.role === 'assistant');
-            const completedAt = assistant?.completedAt || assistant?.timestamp || new Date().toISOString();
-            const payload = {
-              sessionId,
-              turnId: selectedSessionRef.current?.turnId || '',
-              completedAt,
-              timestamp: completedAt
-            };
-            markSessionCompleteNotice?.(payload);
-            clearRun?.(payload);
-          }
           setContextStatus((current) => mergeContextStatus(current, data.context || defaultStatus.context, defaultStatus.context));
           setMessages((current) =>
             messageStreamSignature(current) === messageStreamSignature(data.messages)
               ? current
-              : mergeLiveSelectedThreadMessages(current, data.messages, { forceDropStaleRunning })
+              : mergeLiveSelectedThreadMessages(current, data.messages)
           );
         }
       } catch {
@@ -83,7 +68,7 @@ export function useSessionLivePolling({
       }
     }
 
-    const intervalMs = hasRunningActivity || running ? 700 : 1600;
+    const intervalMs = 1800;
     const timer = window.setInterval(pollSelectedSession, intervalMs);
     pollSelectedSession();
     return () => {

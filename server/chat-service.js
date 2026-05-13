@@ -1,5 +1,5 @@
 /**
- * 组装聊天业务：队列、桌面桥接/后台 fallback、图片与自动标题等子能力。
+ * 组装聊天业务：队列、后台 Codex、图片与自动标题等子能力。
  *
  * Keywords: chat-service, desktop-bridge, codex-turn, queue, attachments
  *
@@ -7,7 +7,7 @@
  * - createChatService — 创建可注入依赖的聊天服务实例。
  * - normalizeSelectedSkills — 再导出自 chat-request-prep。
  *
- * Inward（本模块依赖/组装的关键符号）: chat-queue、chat-delivery、chat-request-prep、chat-image-handler、runtime-debug。
+ * Inward（本模块依赖/组装的关键符号）: chat-queue、chat-delivery（headless）、chat-request-prep、chat-image-handler、runtime-debug。
  *
  * Outward（谁在用/调用场景）: HTTP 聊天路由或上层服务装配。
  *
@@ -22,11 +22,8 @@ import {
 import { registerMobileSession as registerMobileSessionInIndex } from './mobile-session-index.js';
 import { createChatQueue } from './chat-queue.js';
 import {
-  assertDesktopBridgeAvailable,
-  backgroundFallbackBridge,
-  desktopIpcCanUseBackgroundFallback,
-  runQueuedHeadlessChatJob,
-  sendViaDesktopIpc
+  readDesktopBridgeStatus,
+  runQueuedHeadlessChatJob
 } from './chat-delivery.js';
 import {
   prepareChatRequest,
@@ -54,11 +51,6 @@ export function createChatService({
   broadcast,
   runCodexTurn,
   steerCodexTurn,
-  startDesktopFollowerTurn,
-  steerDesktopFollowerTurn,
-  interruptDesktopFollowerTurn,
-  setDesktopFollowerModelAndReasoning,
-  setDesktopFollowerCollaborationMode,
   abortCodexTurn,
   getActiveRuns,
   runImageTurn,
@@ -68,13 +60,10 @@ export function createChatService({
   registerProjectlessThread = registerProjectlessThreadInCodexState,
   registerMobileSession = registerMobileSessionInIndex,
   rememberLiveSession = () => null,
-  notifyDesktopThreadListChanged = notifyDesktopThreadListChangedInCodexApp,
-  desktopOwnerRetryDelays = [250, 700, 1500],
-  desktopIpcTimeoutMs = Math.max(1500, Number(process.env.CODEXMOBILE_DESKTOP_IPC_SEND_TIMEOUT_MS) || 6000)
+  notifyDesktopThreadListChanged = notifyDesktopThreadListChangedInCodexApp
 }) {
   const chatQueue = createChatQueue();
   const getConversationQueue = chatQueue.getConversationQueue;
-  const findActiveTurnForSession = chatQueue.findActiveTurnForSession;
   const rememberConversationAlias = chatQueue.rememberConversationAlias;
   const rememberTurn = chatQueue.rememberTurn;
   const rememberTurnEvent = chatQueue.rememberTurnEvent;
@@ -105,6 +94,23 @@ export function createChatService({
       run?.status === 'running' &&
       [run.turnId, run.sessionId, run.previousSessionId].some((value) => ids.has(String(value || '').trim()))
     )) || null;
+  }
+
+  function headlessDeliveryBridge(bridge) {
+    return {
+      ...(bridge || {}),
+      connected: true,
+      strict: false,
+      mode: 'headless-local',
+      reason: '移动端发送已改为后台 Codex 执行，不再交给桌面端 IPC 接管。',
+      capabilities: {
+        ...(bridge?.capabilities || {}),
+        createThread: true,
+        sendToOpenDesktopThread: false,
+        headless: true,
+        backgroundCodex: true
+      }
+    };
   }
 
   function emitJobEvent(job, payload) {
@@ -151,6 +157,7 @@ export function createChatService({
     if (queued) {
       const sessionId = state.sessionId || job.selectedSessionId || job.draftSessionId;
       rememberTurn(job.turnId, {
+        source: 'headless-local',
         status: 'queued',
         label: '已加入队列',
         sessionId: sessionId || null
@@ -160,6 +167,7 @@ export function createChatService({
         projectId: job.project.id,
         sessionId,
         turnId: job.turnId,
+        source: 'headless-local',
         kind: 'turn',
         status: 'queued',
         label: '已加入队列',
@@ -244,7 +252,7 @@ export function createChatService({
     } = prepared;
     let selectedSessionId = prepared.selectedSessionId;
     let conversationSessionId = prepared.conversationSessionId;
-    let bridge = await assertDesktopBridgeAvailable(getDesktopBridgeStatus);
+    const bridge = await readDesktopBridgeStatus(getDesktopBridgeStatus);
 
     const imagePrompt = chatImage.resolveImagePrompt({
       enabled: useLegacyImageGenerator(),
@@ -254,11 +262,9 @@ export function createChatService({
     });
     const queueKey = resolveConversationKey(selectedSessionId, draftSessionId, requestedSessionId);
     const existingConversationState = getConversationQueue(queueKey);
-    let selectedSessionResolvedFromBackgroundAlias = false;
     if (!selectedSessionId && draftSessionId && existingConversationState.sessionId) {
       selectedSessionId = existingConversationState.sessionId;
       conversationSessionId = selectedSessionId;
-      selectedSessionResolvedFromBackgroundAlias = true;
     }
     const shouldHoldInLocalQueue =
       sendMode === 'queue' &&
@@ -277,7 +283,6 @@ export function createChatService({
       turnId,
       queueKey,
       shouldHoldInLocalQueue,
-      selectedSessionResolvedFromBackgroundAlias,
       headlessRuns: compactActiveRuns(getActiveRuns()),
       imageRuns: compactActiveRuns(chatImage.getActiveImageRuns())
     });
@@ -300,7 +305,7 @@ export function createChatService({
         reasoningEffort: reasoningEffortForTurn,
         serviceTier: serviceTierForTurn,
         permissionMode: body.permissionMode || 'bypassPermissions',
-        collaborationMode
+        collaborationMode: collaborationMode?.mode === 'plan' ? collaborationMode : null
       }, { forceQueued: true, autoStart: false });
       runtimeDebugLine('sendChat.exit', { branch: 'hold-local-queue', delivery: 'queued', turnId });
       return {
@@ -310,82 +315,8 @@ export function createChatService({
         draftSessionId,
         turnId,
         delivery: 'queued',
-        desktopBridge: bridge
+        desktopBridge: headlessDeliveryBridge(bridge)
       };
-    }
-
-    if (bridge?.mode === 'desktop-ipc' && !imagePrompt) {
-      runtimeDebugLine('sendChat.branch', { branch: 'try-desktop-ipc', bridgeMode: bridge?.mode });
-      if (!selectedSessionId && desktopIpcCanUseBackgroundFallback(bridge)) {
-        bridge = backgroundFallbackBridge(bridge, '桌面端还不能从手机新建真实桌面线程，已改用后台 Codex 新建。');
-        runtimeDebugLine('sendChat.bridge', {
-          reason: 'no-session-background-fallback',
-          bridgeModeAfter: bridge?.mode
-        });
-      } else {
-        try {
-          const result = await sendViaDesktopIpc({
-            bridge,
-            project,
-            selectedSessionId,
-            draftSessionId,
-            turnId,
-            sendMode,
-            codexMessage,
-            visibleMessage,
-            attachments,
-            selectedSkills,
-            model: modelForTurn,
-            reasoningEffort: reasoningEffortForTurn,
-            serviceTier: serviceTierForTurn,
-            permissionMode: body.permissionMode || 'bypassPermissions',
-            collaborationMode,
-            getSession,
-            rememberTurn,
-            broadcast,
-            setDesktopFollowerModelAndReasoning,
-            setDesktopFollowerCollaborationMode,
-            steerDesktopFollowerTurn,
-            startDesktopFollowerTurn,
-            interruptDesktopFollowerTurn,
-            desktopOwnerRetryDelays,
-            desktopIpcTimeoutMs
-          });
-          runtimeDebugLine('sendChat.exit', {
-            branch: 'desktop-ipc',
-            delivery: result?.delivery || 'desktop-ipc',
-            sessionId: result.sessionId,
-            turnId: result.turnId || turnId
-          });
-          return result;
-        } catch (error) {
-          const canFallBackToBackground =
-            error?.code === 'CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE' &&
-            desktopIpcCanUseBackgroundFallback(bridge);
-          if (!canFallBackToBackground) {
-            runtimeDebugLine('sendChat.exit', {
-              branch: 'desktop-ipc',
-              delivery: 'failed',
-              sessionId: selectedSessionId,
-              turnId,
-              code: error?.code || null,
-              error: error?.message || 'desktop ipc failed'
-            });
-            throw error;
-          }
-          bridge = backgroundFallbackBridge(
-            bridge,
-            selectedSessionResolvedFromBackgroundAlias
-              ? undefined
-              : '桌面端当前没有接管这个线程，已改用后台 Codex 继续执行。'
-          );
-          runtimeDebugLine('sendChat.bridge', {
-            reason: 'desktop-ipc-error-fallback',
-            code: error?.code || null,
-            bridgeModeAfter: bridge?.mode
-          });
-        }
-      }
     }
 
     if (sendMode === 'steer') {
@@ -448,7 +379,7 @@ export function createChatService({
         draftSessionId,
         turnId: result.turnId || turnId,
         clientTurnId: turnId,
-        desktopBridge: bridge
+        desktopBridge: headlessDeliveryBridge(bridge)
       };
     }
 
@@ -458,6 +389,7 @@ export function createChatService({
       sessionId: conversationSessionId,
       previousSessionId: draftSessionId || selectedSessionId || null,
       draftSessionId,
+      source: 'headless-local',
       status: 'accepted',
       label: '正在思考',
       hadAssistantText: false,
@@ -528,7 +460,7 @@ export function createChatService({
       reasoningEffort: reasoningEffortForTurn,
       serviceTier: serviceTierForTurn,
       permissionMode: body.permissionMode || 'bypassPermissions',
-      collaborationMode
+      collaborationMode: collaborationMode?.mode === 'plan' ? collaborationMode : null
     });
 
     const delivery =
@@ -547,7 +479,7 @@ export function createChatService({
       draftSessionId,
       turnId,
       delivery,
-      desktopBridge: bridge
+      desktopBridge: headlessDeliveryBridge(bridge)
     };
   }
 
@@ -590,44 +522,37 @@ export function createChatService({
       runtimeDebugLine('abortChat.exit', { branch: 'headless-local', aborted: Boolean(aborted || turnId || sessionId) });
       return Boolean(aborted || turnId || sessionId);
     }
-    const aborted = abortCodexTurn(turnId || sessionId);
-    if (!aborted && sessionId && interruptDesktopFollowerTurn) {
-      const bridge = await getDesktopBridgeStatus().catch(() => null);
-      if (bridge?.connected && bridge.mode === 'desktop-ipc') {
-        try {
-          await interruptDesktopFollowerTurn(sessionId);
-        } catch (error) {
-          const wrapped = new Error(`桌面端中止失败：${error.message || '请在电脑端手动停止。'}`);
-          wrapped.statusCode = error.statusCode || 502;
-          throw wrapped;
-        }
-        const completedAt = new Date().toISOString();
-        const activeDesktopTurn = findActiveTurnForSession(sessionId, { source: 'desktop-ipc' });
-        const resolvedTurnId = activeDesktopTurn?.turnId || turnId || sessionId;
-        const payload = {
-          type: 'chat-aborted',
-          source: 'desktop-ipc',
-          projectId: body.projectId || undefined,
-          sessionId,
-          previousSessionId: previousSessionId || undefined,
-          turnId: resolvedTurnId,
-          completedAt,
-          timestamp: completedAt
-        };
-        rememberTurn(payload.turnId, {
-          projectId: payload.projectId,
-          sessionId: payload.sessionId,
-          previousSessionId: payload.previousSessionId,
-          source: 'desktop-ipc',
-          status: 'aborted',
-          label: '已中止',
-          completedAt
-        });
-        broadcast(payload);
-        runtimeDebugLine('abortChat.exit', { branch: 'desktop-ipc-fallback', aborted: true });
-        return true;
-      }
+
+    const activeTurn = chatQueue.findActiveTurnForSession(sessionId, { source: 'headless-local' });
+    if (activeTurn) {
+      const abortIdentifier = activeTurn.turnId || turnId || sessionId;
+      const aborted = abortCodexTurn(abortIdentifier);
+      const completedAt = new Date().toISOString();
+      const payload = {
+        type: 'chat-aborted',
+        source: 'headless-local',
+        projectId: body.projectId || activeTurn.projectId || undefined,
+        sessionId: sessionId || activeTurn.sessionId || undefined,
+        previousSessionId: previousSessionId || activeTurn.previousSessionId || undefined,
+        turnId: abortIdentifier,
+        completedAt,
+        timestamp: completedAt
+      };
+      rememberTurn(payload.turnId, {
+        projectId: payload.projectId,
+        sessionId: payload.sessionId,
+        previousSessionId: payload.previousSessionId,
+        source: 'headless-local',
+        status: 'aborted',
+        label: '已中止',
+        completedAt
+      });
+      broadcast(payload);
+      runtimeDebugLine('abortChat.exit', { branch: 'headless-recent-turn', aborted: Boolean(aborted || abortIdentifier) });
+      return true;
     }
+
+    const aborted = abortCodexTurn(turnId || sessionId);
     if (!turnId && !aborted) {
       runtimeDebugLine('abortChat.exit', { branch: 'noop', aborted: false });
       return false;

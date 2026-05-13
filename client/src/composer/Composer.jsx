@@ -12,7 +12,7 @@
  * Outward: App.jsx 或上层布局挂载输入条处。
  */
 
-import { ArrowUp, Bot, Check, ChevronDown, FileText, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, Zap } from 'lucide-react';
+import { ArrowUp, Bot, Check, ChevronDown, ClipboardList, FileText, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X, Zap } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiFetch, getToken } from '../api.js';
 import { detectComposerToken, filteredSlashCommands, replaceComposerToken } from '../composer-shortcuts.js';
@@ -41,6 +41,8 @@ export function Composer({
   onSelectModelSpeed,
   selectedReasoningEffort,
   onSelectReasoningEffort,
+  selectedCollaborationMode,
+  onSelectCollaborationMode,
   skills,
   selectedSkillPaths,
   onToggleSkill,
@@ -214,7 +216,7 @@ export function Composer({
       return;
     }
     if (hasInput) {
-      onSubmit({ mode: 'start' });
+      onSubmit({ mode: 'start', collaborationMode: selectedCollaborationMode });
       setOpenMenu(null);
     }
   }
@@ -273,6 +275,18 @@ export function Composer({
       />
       {openMenu === 'attach' ? (
         <div className="composer-menu attach-menu">
+          <button
+            type="button"
+            className={selectedCollaborationMode === 'plan' ? 'is-selected' : ''}
+            onClick={() => {
+              onSelectCollaborationMode?.(selectedCollaborationMode === 'plan' ? null : 'plan');
+              setOpenMenu(null);
+              textareaRef.current?.focus();
+            }}
+          >
+            {selectedCollaborationMode === 'plan' ? <Check size={16} /> : <ClipboardList size={17} />}
+            计划模式
+          </button>
           <button type="button" onClick={() => imageInputRef.current?.click()}>
             <Image size={17} />
             相册
@@ -495,20 +509,20 @@ export function Composer({
               if (!sendState.canSteer) {
                 return;
               }
-              onSubmit({ mode: 'steer' });
+              onSubmit({ mode: 'steer', collaborationMode: selectedCollaborationMode });
               setOpenMenu(null);
             }}
           >
             <MessageSquare size={16} />
             <span>
               <strong>发送到当前任务</strong>
-              <small>{sendState.canSteer ? '直接补充给桌面端正在执行的任务' : '当前任务暂时不能接收补充消息'}</small>
+              <small>{sendState.canSteer ? '直接补充给正在执行的后台任务' : '当前任务暂时不能接收补充消息'}</small>
             </span>
           </button>
           <button
             type="button"
             onClick={() => {
-              onSubmit({ mode: 'queue' });
+              onSubmit({ mode: 'queue', collaborationMode: selectedCollaborationMode });
               setOpenMenu(null);
             }}
           >
@@ -522,7 +536,7 @@ export function Composer({
             type="button"
             className="is-danger"
             onClick={() => {
-              onSubmit({ mode: 'interrupt' });
+              onSubmit({ mode: 'interrupt', collaborationMode: selectedCollaborationMode });
               setOpenMenu(null);
             }}
           >
@@ -535,8 +549,17 @@ export function Composer({
         </div>
       ) : null}
       <div className="composer">
-        {attachments.length || selectedFileMentions.length ? (
+        {attachments.length || selectedFileMentions.length || selectedCollaborationMode === 'plan' ? (
           <div className="attachment-tray">
+            {selectedCollaborationMode === 'plan' ? (
+              <span className="attachment-chip plan-mode-chip">
+                <ClipboardList size={14} />
+                <span>计划模式</span>
+                <button type="button" onClick={() => onSelectCollaborationMode?.(null)} aria-label="退出计划模式">
+                  <X size={13} />
+                </button>
+              </span>
+            ) : null}
             {attachments.map((attachment) => {
               if (isImageAttachment(attachment)) {
                 const previewUrl = attachmentPreviewUrl(attachment, deviceToken);

@@ -13,36 +13,11 @@ import {
   implementationPromptForPlan,
   prepareComposerSubmission,
   projectForTurnSelection,
-  realSessionIdFromTurn,
   restoredComposerText,
   sessionForTurnSelection,
   selectedSkillsForPaths,
-  shouldPollTurnEndpointAfterSend,
-  turnMatchesSelection,
   userMessageMetadataForSendMode
 } from './app/turn-submission-utils.js';
-
-test('realSessionIdFromTurn ignores draft and codex placeholder sessions', () => {
-  assert.equal(realSessionIdFromTurn({ sessionId: 'thread-1' }), 'thread-1');
-  assert.equal(realSessionIdFromTurn({ sessionId: 'draft-project-1' }), null);
-  assert.equal(realSessionIdFromTurn({ sessionId: 'codex-local-1' }), null);
-  assert.equal(realSessionIdFromTurn({ sessionId: '' }), null);
-});
-
-test('turnMatchesSelection accepts optimistic, real, previous, turn, and draft matches', () => {
-  const ids = {
-    turnId: 'turn-1',
-    optimisticSessionId: 'draft-1',
-    realSessionId: 'thread-1',
-    previousSessionId: 'old-thread'
-  };
-  assert.equal(turnMatchesSelection({ id: 'draft-1' }, ids), true);
-  assert.equal(turnMatchesSelection({ id: 'thread-1' }, ids), true);
-  assert.equal(turnMatchesSelection({ id: 'old-thread' }, ids), true);
-  assert.equal(turnMatchesSelection({ id: 'other', turnId: 'turn-1' }, ids), true);
-  assert.equal(turnMatchesSelection({ id: 'other', draft: true }, ids), true);
-  assert.equal(turnMatchesSelection({ id: 'other' }, ids), false);
-});
 
 test('sessionForTurnSelection prefers the synchronous selection ref', () => {
   const staleSession = { id: 'thread-before-render' };
@@ -81,6 +56,13 @@ test('prepareComposerSubmission strips leading plan command and marks collaborat
   });
   assert.deepEqual(prepareComposerSubmission('/计划模式', [], [{ path: '/tmp/a.js' }]), {
     message: '请查看引用文件。',
+    collaborationMode: 'plan'
+  });
+});
+
+test('prepareComposerSubmission can mark plan mode from the plus menu without slash text', () => {
+  assert.deepEqual(prepareComposerSubmission('先给我方案', [], [], 'plan'), {
+    message: '先给我方案',
     collaborationMode: 'plan'
   });
 });
@@ -146,19 +128,4 @@ test('completeLocalAbortMessages finishes the optimistic running activity', () =
   assert.equal(next[0].label, '已中止');
   assert.equal(next[0].activities[0].status, 'completed');
   assert.equal(next[0].completedAt, '2026-05-08T02:00:05.000Z');
-});
-
-test('only desktop IPC handoff skips client turn polling', () => {
-  assert.equal(
-    shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'desktop-ipc' } }),
-    false
-  );
-  assert.equal(
-    shouldPollTurnEndpointAfterSend({ desktopBridge: { mode: 'headless-local' } }),
-    true
-  );
-  assert.equal(
-    shouldPollTurnEndpointAfterSend({}),
-    true
-  );
 });

@@ -6,13 +6,12 @@
  * Exports:
  * - `useSessionActions` — 返回会话相关 `handle*` 的 hook。
  *
- * Inward: `api`；`session-utils`、`context-status`、`shared/session-title`、`send-state`。
+ * Inward: `api`；`session-utils`、`context-status`、`shared/session-title`。
  *
  * Outward: `App.jsx` 注入侧栏与聊天操作。
  */
 
 import { apiFetch } from '../api.js';
-import { desktopBridgeCanCreateThread } from '../send-state.js';
 import { sessionTitleFromConversation } from '../../../shared/session-title.js';
 import { normalizeContextStatus } from './context-status.js';
 import {
@@ -26,7 +25,6 @@ import {
 
 export function useSessionActions({
   defaultStatus,
-  status,
   selectedProject,
   selectedProjectRef,
   selectedSessionRef,
@@ -304,19 +302,6 @@ export function useSessionActions({
   }
 
   function handleNewConversation(targetProject = null) {
-    if (!desktopBridgeCanCreateThread(status?.desktopBridge)) {
-      setMessages((current) => [
-        ...current,
-        {
-          id: `desktop-create-unavailable-${Date.now()}`,
-          role: 'activity',
-          content: status?.desktopBridge?.capabilities?.createThreadReason || '当前桌面端还没有开放从手机新建同源对话的入口。请先在桌面端新建或打开一个对话，再从手机继续发送。',
-          timestamp: new Date().toISOString()
-        }
-      ]);
-      setDrawerOpen(false);
-      return;
-    }
     const project = resolveNewConversationProject(targetProject, selectedProject, projects);
     if (!project) {
       return;

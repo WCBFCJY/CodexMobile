@@ -1,17 +1,18 @@
 /**
- * 与 Codex 桌面端 Unix domain socket 的 IPC 帧协议客户端与便捷方法。
+ * 与 Codex 桌面端 Unix domain socket 的 IPC 帧协议客户端与 mirror 控制方法。
  *
- * Keywords: desktop-ipc, unix-socket, net-socket, follower-turn
+ * Keywords: desktop-ipc, unix-socket, net-socket, mirror, model-sync
  *
  * Exports:
  * - desktopIpcMethodVersion / desktopIpcSocketPath / getDesktopIpcSocketStatus。
  * - DesktopIpcClient — 连接与请求封装。
- * - probeDesktopIpc / startDesktopFollowerTurn / steerDesktopFollowerTurn / interruptDesktopFollowerTurn 等。
+ * - probeDesktopIpc — 探测桌面端 IPC 是否可连。
+ * - setDesktopFollowerModelAndReasoning — 同步桌面端当前线程模型设置。
  * - broadcastDesktopThreadListRefresh — 通知 Codex Desktop 刷新线程列表相关查询。
  *
  * Inward（本模块依赖/组装的关键符号）: node:net、平台相关 socket 路径约定。
  *
- * Outward（谁在用/调用场景）: chat-delivery、codex-app-server、测试。
+ * Outward（谁在用/调用场景）: codex-app-server、index 模型同步、测试。
  *
  * 不负责: HTTP 层。
  */
@@ -26,12 +27,8 @@ const DEFAULT_TIMEOUT_MS = 15_000;
 const DESKTOP_IPC_METHOD_VERSIONS = new Map([
   ['thread-archived', 2],
   ['thread-unarchived', 1],
-  ['thread-follower-start-turn', 1],
   ['thread-follower-compact-thread', 1],
-  ['thread-follower-steer-turn', 1],
-  ['thread-follower-interrupt-turn', 1],
   ['thread-follower-set-model-and-reasoning', 1],
-  ['thread-follower-set-collaboration-mode', 1],
   ['thread-follower-edit-last-user-turn', 1],
   ['thread-follower-command-approval-decision', 1],
   ['thread-follower-file-approval-decision', 1],
@@ -289,35 +286,6 @@ async function requestDesktopFollower(method, params, options = {}) {
   } finally {
     client.close();
   }
-}
-
-export async function startDesktopFollowerTurn(conversationId, turnStartParams, options = {}) {
-  return requestDesktopFollower('thread-follower-start-turn', {
-    conversationId,
-    turnStartParams
-  }, options);
-}
-
-export async function steerDesktopFollowerTurn(conversationId, { input, attachments = [], restoreMessage = {} }, options = {}) {
-  return requestDesktopFollower('thread-follower-steer-turn', {
-    conversationId,
-    input,
-    attachments,
-    restoreMessage
-  }, options);
-}
-
-export async function interruptDesktopFollowerTurn(conversationId, options = {}) {
-  return requestDesktopFollower('thread-follower-interrupt-turn', {
-    conversationId
-  }, options);
-}
-
-export async function setDesktopFollowerCollaborationMode(conversationId, collaborationMode, options = {}) {
-  return requestDesktopFollower('thread-follower-set-collaboration-mode', {
-    conversationId,
-    collaborationMode
-  }, options);
 }
 
 export async function setDesktopFollowerModelAndReasoning(conversationId, model, reasoningEffort, options = {}) {

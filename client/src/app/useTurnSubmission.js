@@ -1,7 +1,7 @@
 /**
- * 封装用户回合提交：校验选择、拼装请求、乐观更新消息列表、错误与中断处理及必要时轮询 turn 状态。
+ * 封装用户回合提交：校验选择、拼装请求、乐观用户消息、错误与中断处理。
  *
- * Keywords: turn-submission, optimistic-ui, session-messages, composer-send
+ * Keywords: turn-submission, optimistic-user-message, composer-send
  *
  * Exports:
  * - `useTurnSubmission` — 绑定发送/队列所需状态与回调的 React hook。
@@ -16,37 +16,28 @@ import { contentWithAttachmentPreviews } from '../chat/MarkdownContent.jsx';
 import { serviceTierForModelSpeed } from '../composer/composer-options.js';
 import {
   dismissPlanImplementationPrompts,
-  mergeLoadedMessagesPreservingActivity,
   upsertStatusMessage
 } from '../chat/activity-model.js';
-import { mergeContextStatus } from './context-status.js';
 import {
   autoTitlePatch,
   createClientTurnId,
   createDraftSession,
-  hasVisibleAssistantForTurn,
   isDraftSession,
-  sessionMessagesApiPath,
   titleFromFirstMessage
 } from './session-utils.js';
 import {
   displayMessageForTurn,
   completeLocalAbortMessages,
   implementationPromptForPlan,
-  localHandoffStatusPayload,
   prepareComposerSubmission,
   projectForTurnSelection,
-  realSessionIdFromTurn,
   restoredComposerText,
   sessionForTurnSelection,
   selectedSkillsForPaths,
-  shouldPollTurnEndpointAfterSend,
-  turnMatchesSelection,
   userMessageMetadataForSendMode
 } from './turn-submission-utils.js';
 
 export function useTurnSubmission({
-  defaultStatus,
   defaultReasoningEffort,
   selectedProject,
   selectedProjectRef,
@@ -62,7 +53,6 @@ export function useTurnSubmission({
   input,
   attachments,
   fileMentions,
-  activePollsRef,
   runningById,
   runningByIdRef,
   setInput,
@@ -72,175 +62,11 @@ export function useTurnSubmission({
   setExpandedProjectIds,
   setSessionsByProject,
   setMessages,
-  setContextStatus,
   upsertSessionInProject,
   markRun,
   clearRun,
-  markSessionCompleteNotice,
-  markTurnCompleted,
-  scheduleTurnRefresh,
   loadQueueDrafts
 }) {
-  function applyTurnSession(turn, optimisticSessionId, projectId, previousSessionId) {
-    const realSessionId = realSessionIdFromTurn(turn);
-    if (!realSessionId) {
-      return null;
-    }
-
-    const currentSession = selectedSessionRef.current;
-    const nextSession = {
-      ...(currentSession || {}),
-      id: realSessionId,
-      projectId,
-      title: currentSession?.title || '新对话',
-      turnId: turn.turnId || currentSession?.turnId || null,
-      updatedAt: turn.completedAt || turn.updatedAt || new Date().toISOString(),
-      draft: false
-    };
-
-    if (turnMatchesSelection(currentSession, { turnId: turn.turnId, optimisticSessionId, realSessionId, previousSessionId })) {
-      selectedSessionRef.current = nextSession;
-    }
-    setSelectedSession((current) => {
-      if (!current) {
-        return nextSession;
-      }
-      if (!turnMatchesSelection(current, { turnId: turn.turnId, optimisticSessionId, realSessionId, previousSessionId })) {
-        return current;
-      }
-      return { ...current, ...nextSession };
-    });
-    setSessionsByProject((current) =>
-      upsertSessionInProject(current, projectId, nextSession, previousSessionId || optimisticSessionId)
-    );
-    setMessages((current) =>
-      current.map((message) =>
-        message.turnId === turn.turnId || message.sessionId === optimisticSessionId || message.sessionId === previousSessionId
-          ? { ...message, sessionId: realSessionId }
-          : message
-      )
-    );
-    if (turn.status === 'running' || turn.status === 'queued') {
-      markRun({ turnId: turn.turnId, sessionId: realSessionId, previousSessionId: previousSessionId || optimisticSessionId });
-    }
-    return realSessionId;
-  }
-
-  async function loadTurnMessages(realSessionId, turnId, optimisticSessionId, previousSessionId) {
-    if (!realSessionId) {
-      return false;
-    }
-    const current = selectedSessionRef.current;
-    if (
-      current &&
-      current.id !== realSessionId &&
-      current.id !== optimisticSessionId &&
-      current.id !== previousSessionId &&
-      current.turnId !== turnId
-    ) {
-      return false;
-    }
-    const data = await apiFetch(sessionMessagesApiPath(realSessionId));
-    if (data.messages?.length && hasVisibleAssistantForTurn(data.messages, { turnId })) {
-      setContextStatus((currentContext) => mergeContextStatus(currentContext, data.context || defaultStatus.context, defaultStatus.context));
-      setMessages((currentMessages) =>
-        mergeLoadedMessagesPreservingActivity(currentMessages, data.messages, {
-          sessionId: realSessionId,
-          previousSessionId,
-          turnId
-        })
-      );
-      return true;
-    }
-    return false;
-  }
-
-  async function pollTurnUntilComplete({ turnId, optimisticSessionId, projectId, previousSessionId }) {
-    if (!turnId || activePollsRef.current.has(turnId)) {
-      return;
-    }
-    activePollsRef.current.add(turnId);
-    const startedAt = Date.now();
-    try {
-      while (Date.now() - startedAt < 1800000) {
-        await new Promise((resolve) => window.setTimeout(resolve, 1400));
-        let turn = null;
-        try {
-          const result = await apiFetch(`/api/chat/turns/${encodeURIComponent(turnId)}`);
-          turn = result.turn;
-        } catch {
-          continue;
-        }
-        if (!turn) {
-          continue;
-        }
-
-        const realSessionId = applyTurnSession(turn, optimisticSessionId, projectId, previousSessionId);
-        if (turn.status === 'failed') {
-          clearRun({ turnId, sessionId: realSessionId || optimisticSessionId, previousSessionId });
-          setMessages((current) =>
-            upsertStatusMessage(current, {
-              sessionId: realSessionId || optimisticSessionId,
-              turnId,
-              kind: 'turn',
-              status: 'failed',
-              label: '任务失败',
-              detail: turn.error || turn.detail || '任务失败'
-            })
-          );
-          break;
-        }
-        if (turn.status === 'aborted') {
-          clearRun({ turnId, sessionId: realSessionId || optimisticSessionId, previousSessionId });
-          setMessages((current) =>
-            upsertStatusMessage(current, {
-              sessionId: realSessionId || optimisticSessionId,
-              turnId,
-              kind: 'turn',
-              status: 'completed',
-              label: '已中止'
-            })
-          );
-          break;
-        }
-        if (turn.status === 'completed') {
-          const terminalPayload = {
-            sessionId: realSessionId || optimisticSessionId,
-            turnId,
-            previousSessionId,
-            startedAt: turn.startedAt || '',
-            completedAt: turn.completedAt || turn.updatedAt || '',
-            durationMs: turn.durationMs || null,
-            detail: turn.detail || ''
-          };
-          if (turn.context) {
-            setContextStatus((current) => mergeContextStatus(current, turn.context, defaultStatus.context));
-          }
-          markSessionCompleteNotice(terminalPayload);
-          markTurnCompleted(terminalPayload);
-          const loaded = await loadTurnMessages(realSessionId, turnId, optimisticSessionId, previousSessionId);
-          if (loaded) {
-            clearRun(terminalPayload);
-          } else {
-            scheduleTurnRefresh({
-              sessionId: realSessionId || optimisticSessionId,
-              turnId,
-              previousSessionId,
-              startedAt: turn.startedAt || '',
-              completedAt: turn.completedAt || turn.updatedAt || '',
-              durationMs: turn.durationMs || null,
-              hadAssistantText: turn.hadAssistantText || Boolean(turn.assistantPreview),
-              usage: turn.usage || null
-            });
-          }
-          break;
-        }
-      }
-    } finally {
-      activePollsRef.current.delete(turnId);
-    }
-  }
-
   function restoreTextToInput(text) {
     setInput((current) => restoredComposerText(current, text));
   }
@@ -292,7 +118,6 @@ export function useTurnSubmission({
       setFileMentions([]);
     }
 
-    markRun({ turnId, sessionId: optimisticSessionId, previousSessionId: draftSessionId || outgoingSessionId });
     const optimisticSessionPatch = { turnId, ...autoTitlePatch(initialTitle) };
     selectedSessionRef.current = { ...sessionForTurn, ...optimisticSessionPatch };
     setSelectedSession((current) =>
@@ -318,14 +143,19 @@ export function useTurnSubmission({
       sessionId: optimisticSessionId,
       turnId
     };
-    setMessages((current) => {
-      const next = [...current, localUserMessage];
-      return upsertStatusMessage(next, localHandoffStatusPayload({
-        sessionId: optimisticSessionId,
-        previousSessionId: draftSessionId,
-        turnId,
-        timestamp: submittedAt
-      }));
+    setMessages((current) => [...current, localUserMessage]);
+    markRun?.({
+      source: 'local-optimistic',
+      projectId: project.id,
+      sessionId: optimisticSessionId,
+      previousSessionId: draftSessionId || outgoingSessionId,
+      draftSessionId,
+      turnId,
+      status: 'running',
+      label: '正在思考',
+      startedAt: submittedAt,
+      timestamp: submittedAt,
+      steerable: false
     });
 
     try {
@@ -350,32 +180,6 @@ export function useTurnSubmission({
         }
       });
       const resultTurnId = result.turnId || turnId;
-      const resultSessionId = result.sessionId || optimisticSessionId;
-      const resultBridgeMode = result.desktopBridge?.mode || null;
-      const resultRuntimeSource =
-        resultBridgeMode === 'desktop-ipc'
-          ? 'desktop-ipc'
-          : resultBridgeMode === 'headless-local'
-            ? 'headless-local'
-            : null;
-      if (resultTurnId !== turnId || resultSessionId !== optimisticSessionId || resultRuntimeSource) {
-        markRun({
-          turnId: resultTurnId,
-          sessionId: resultSessionId,
-          previousSessionId: draftSessionId || outgoingSessionId,
-          clientTurnId: turnId,
-          source: resultRuntimeSource,
-          steerable: resultBridgeMode === 'desktop-ipc' ? false : undefined
-        });
-      }
-      if (shouldPollTurnEndpointAfterSend(result)) {
-        pollTurnUntilComplete({
-          turnId: resultTurnId,
-          optimisticSessionId,
-          projectId: project.id,
-          previousSessionId: draftSessionId || outgoingSessionId
-        });
-      }
       return {
         turnId: resultTurnId,
         optimisticSessionId,
@@ -449,8 +253,8 @@ export function useTurnSubmission({
     return true;
   }
 
-  async function handleSubmit({ mode = 'start' } = {}) {
-    const prepared = prepareComposerSubmission(input, attachments, fileMentions);
+  async function handleSubmit({ mode = 'start', collaborationMode = null } = {}) {
+    const prepared = prepareComposerSubmission(input, attachments, fileMentions, collaborationMode);
     const project = projectForTurnSelection(selectedProject, selectedProjectRef, selectedSession, selectedSessionRef, projects);
     if ((!prepared.message && !attachments.length && !fileMentions.length) || !project) {
       return;
@@ -487,7 +291,7 @@ export function useTurnSubmission({
         codexMessageOverride: prompt,
         clearComposer: false,
         sendMode: 'start',
-        collaborationMode: null
+        collaborationMode: 'default'
       });
       const requestId = String(planImplementation?.requestId || '').trim();
       const requestTurnId = String(planImplementation?.turnId || '').trim();
@@ -531,7 +335,6 @@ export function useTurnSubmission({
     handleImplementPlan,
     handleAdjustPlan,
     handleAbort,
-    abortCurrentRun,
-    pollTurnUntilComplete
+    abortCurrentRun
   };
 }

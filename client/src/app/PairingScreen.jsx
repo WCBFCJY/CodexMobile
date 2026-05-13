@@ -48,7 +48,7 @@ export default function PairingScreen({ onPaired }) {
       </div>
       <h1>CodexMobile</h1>
       <p className="pairing-lead">
-        我的本机 Codex 移动工作台。电脑继续执行，iPhone 随时接管、追问、看过程、处理确认和收完成通知。
+        我的本机 Codex 移动工作台。电脑端负责同步与镜像，iPhone 可以追问、看过程、处理确认和收完成通知。
       </p>
       <div className="pairing-points" aria-label="CodexMobile 核心能力">
         <span>桌面线程同步</span>

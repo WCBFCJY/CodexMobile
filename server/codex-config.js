@@ -6,7 +6,8 @@
  * Exports:
  * - CODEX_HOME 等路径常量。
  * - readCodexSkills / readCodexModels / readCodexWorkspaceState。
- * - registerProjectlessThread(s) / readCodexConfig。
+ * - registerProjectlessThread(s) / readCodexConfig / readCodexModelSettings / writeCodexModelSettings。
+ * - readCodexThreadModelSettings / normalizeCodexThreadModelSettingsRow / modelSettingsKey。
  *
  * Inward（本模块依赖/组装的关键符号）: Node fs、CODEX_HOME 目录布局。
  *
@@ -14,10 +15,12 @@
  *
  * 不负责: 执行 Codex 二进制。
  */
+import { execFile } from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { promisify } from 'node:util';
 
 export const CODEX_HOME = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
 export const CODEX_CONFIG_PATH = path.join(CODEX_HOME, 'config.toml');
@@ -27,6 +30,8 @@ export const CODEX_SESSIONS_DIR = path.join(CODEX_HOME, 'sessions');
 export const CODEX_SESSION_INDEX = path.join(CODEX_HOME, 'session_index.jsonl');
 export const CODEX_STATE_DB = path.join(CODEX_HOME, 'state_5.sqlite');
 let codexGlobalStateMutationQueue = Promise.resolve();
+let codexConfigMutationQueue = Promise.resolve();
+const execFileAsync = promisify(execFile);
 const DEFAULT_SKILL_ROOTS = [
   path.join(process.cwd(), 'skills'),
   path.join(CODEX_HOME, 'skills'),
@@ -47,6 +52,52 @@ function stripQuotes(value) {
   return trimmed;
 }
 
+function tomlString(value) {
+  return JSON.stringify(String(value || ''));
+}
+
+function rootTomlAssignmentValue(line, key) {
+  const match = String(line || '').match(new RegExp(`^\\s*${key}\\s*=\\s*(.+?)\\s*(?:#.*)?$`));
+  return match ? stripQuotes(match[1]).trim() : null;
+}
+
+export function updateRootTomlAssignments(raw, assignments = {}) {
+  const text = String(raw || '');
+  const hadTrailingNewline = text.endsWith('\n');
+  const lines = text ? text.replace(/\r\n/g, '\n').split('\n') : [];
+  const entries = Object.entries(assignments)
+    .map(([key, value]) => [String(key || '').trim(), value])
+    .filter(([key, value]) => key && value != null && String(value).trim());
+  if (!entries.length) {
+    return text;
+  }
+  const pending = new Map(entries);
+  let firstSectionIndex = lines.length;
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const trimmed = lines[index].trim();
+    if (trimmed.startsWith('[')) {
+      firstSectionIndex = index;
+      break;
+    }
+    const assignment = trimmed.match(/^([A-Za-z0-9_]+)\s*=/);
+    const key = assignment?.[1];
+    if (key && pending.has(key)) {
+      lines[index] = `${key} = ${tomlString(pending.get(key))}`;
+      pending.delete(key);
+    }
+  }
+
+  if (pending.size) {
+    const insertions = [...pending.entries()].map(([key, value]) => `${key} = ${tomlString(value)}`);
+    const needsSpacer = firstSectionIndex < lines.length && lines[firstSectionIndex]?.trim();
+    lines.splice(firstSectionIndex, 0, ...insertions, ...(needsSpacer ? [''] : []));
+  }
+
+  const body = lines.join('\n');
+  return hadTrailingNewline ? `${body.replace(/\n+$/, '')}\n` : body;
+}
+
 function shortModelName(model) {
   if (!model) {
     return '5.5 中';
@@ -55,6 +106,34 @@ function shortModelName(model) {
     .replace(/^gpt-/i, '')
     .replace(/-codex.*$/i, '')
     .replace(/-mini$/i, ' mini') + ' 中';
+}
+
+export function modelSettingsKey(settings = {}) {
+  return [
+    settings.sessionId || '',
+    settings.provider || 'codex',
+    settings.model || '',
+    settings.reasoningEffort || ''
+  ].join('\n');
+}
+
+export function normalizeCodexThreadModelSettingsRow(row = {}) {
+  const sessionId = String(row.sessionId || row.id || '').trim();
+  const model = String(row.model || '').trim();
+  const reasoningEffort = String(row.reasoningEffort || row.reasoning_effort || '').trim();
+  if (!sessionId || (!model && !reasoningEffort)) {
+    return null;
+  }
+  const provider = String(row.provider || row.modelProvider || row.model_provider || 'openai').trim() || 'openai';
+  const updatedAtMs = Number(row.updatedAtMs ?? row.updated_at_ms);
+  return {
+    provider,
+    model: model || 'gpt-5.5',
+    modelShort: shortModelName(model || 'gpt-5.5'),
+    reasoningEffort: reasoningEffort || null,
+    sessionId,
+    updatedAtMs: Number.isFinite(updatedAtMs) ? updatedAtMs : null
+  };
 }
 
 function publicModel(entry) {
@@ -284,6 +363,13 @@ async function writeCodexGlobalStateAtomically(nextState) {
   await fs.rename(tempPath, CODEX_GLOBAL_STATE_PATH);
 }
 
+async function writeCodexConfigAtomically(raw) {
+  await fs.mkdir(CODEX_HOME, { recursive: true });
+  const tempPath = `${CODEX_CONFIG_PATH}.tmp-${process.pid}-${Date.now()}-${randomUUID()}`;
+  await fs.writeFile(tempPath, raw, 'utf8');
+  await fs.rename(tempPath, CODEX_CONFIG_PATH);
+}
+
 function mutateCodexGlobalState(mutator) {
   const run = async () => {
     const state = await readCodexGlobalStateForMutation();
@@ -295,6 +381,27 @@ function mutateCodexGlobalState(mutator) {
   };
   const task = codexGlobalStateMutationQueue.then(run, run);
   codexGlobalStateMutationQueue = task.catch(() => {});
+  return task;
+}
+
+function mutateCodexConfig(mutator) {
+  const run = async () => {
+    let raw = '';
+    try {
+      raw = await fs.readFile(CODEX_CONFIG_PATH, 'utf8');
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        throw error;
+      }
+    }
+    const { nextRaw, result } = await mutator(raw);
+    if (typeof nextRaw === 'string' && nextRaw !== raw) {
+      await writeCodexConfigAtomically(nextRaw);
+    }
+    return result;
+  };
+  const task = codexConfigMutationQueue.then(run, run);
+  codexConfigMutationQueue = task.catch(() => {});
   return task;
 }
 
@@ -358,6 +465,102 @@ export async function registerProjectlessThreads(entries = []) {
       result: results
     };
   });
+}
+
+export async function readCodexModelSettings() {
+  const settings = {
+    provider: 'codex',
+    model: 'gpt-5.5',
+    modelShort: '5.5 中',
+    reasoningEffort: null
+  };
+  let raw = '';
+  try {
+    raw = await fs.readFile(CODEX_CONFIG_PATH, 'utf8');
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.warn('[config] Failed to read Codex model settings:', error.message);
+    }
+    return settings;
+  }
+
+  let inRoot = true;
+  for (const rawLine of raw.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) {
+      continue;
+    }
+    if (line.startsWith('[')) {
+      inRoot = false;
+      continue;
+    }
+    if (!inRoot) {
+      continue;
+    }
+    const provider = rootTomlAssignmentValue(rawLine, 'model_provider');
+    const model = rootTomlAssignmentValue(rawLine, 'model');
+    const reasoning = rootTomlAssignmentValue(rawLine, 'model_reasoning_effort');
+    if (provider) {
+      settings.provider = provider;
+    }
+    if (model) {
+      settings.model = model;
+    }
+    if (reasoning) {
+      settings.reasoningEffort = reasoning;
+    }
+  }
+  settings.modelShort = shortModelName(settings.model);
+  return settings;
+}
+
+export async function readCodexThreadModelSettings({ limit = 200 } = {}) {
+  try {
+    await fs.access(CODEX_STATE_DB);
+    const cappedLimit = Math.max(1, Math.min(1000, Number(limit) || 200));
+    const query = `
+      select
+        id as sessionId,
+        model,
+        reasoning_effort as reasoningEffort,
+        model_provider as provider,
+        updated_at_ms as updatedAtMs
+      from threads
+      where (model is not null and trim(model) != '')
+         or (reasoning_effort is not null and trim(reasoning_effort) != '')
+      order by updated_at_ms desc
+      limit ${cappedLimit}
+    `;
+    const { stdout } = await execFileAsync('sqlite3', ['-json', CODEX_STATE_DB, query], {
+      maxBuffer: 2 * 1024 * 1024
+    });
+    const parsed = JSON.parse(stdout || '[]');
+    return (Array.isArray(parsed) ? parsed : [])
+      .map((row) => normalizeCodexThreadModelSettingsRow(row))
+      .filter(Boolean);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.warn('[config] Failed to read Codex thread model settings:', error.message);
+    }
+    return [];
+  }
+}
+
+export async function writeCodexModelSettings({ model, reasoningEffort } = {}) {
+  const assignments = {};
+  if (model != null && String(model).trim()) {
+    assignments.model = String(model).trim();
+  }
+  if (reasoningEffort != null && String(reasoningEffort).trim()) {
+    assignments.model_reasoning_effort = String(reasoningEffort).trim();
+  }
+  if (!Object.keys(assignments).length) {
+    return readCodexModelSettings();
+  }
+  return mutateCodexConfig(async (raw) => ({
+    nextRaw: updateRootTomlAssignments(raw, assignments),
+    result: null
+  })).then(() => readCodexModelSettings());
 }
 
 export async function readCodexConfig() {

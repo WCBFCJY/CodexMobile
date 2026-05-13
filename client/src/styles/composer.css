@@ -250,6 +250,18 @@
   display: none;
 }
 
+.plan-mode-chip {
+  color: #155e75;
+  background: rgba(6, 182, 212, 0.12);
+  border-color: rgba(8, 145, 178, 0.18);
+}
+
+[data-theme="dark"] .plan-mode-chip {
+  color: #67e8f9;
+  background: rgba(8, 145, 178, 0.18);
+  border-color: rgba(103, 232, 249, 0.16);
+}
+
 .attachment-preview-card {
   position: relative;
   flex: 0 0 112px;
@@ -798,15 +810,22 @@
   gap: 10px;
   width: 100%;
   min-width: 0;
-  margin: 0 0 6px;
-  padding: 4px 10px 7px;
-  border: 0;
-  border-radius: 0;
+  margin: 0 0 7px;
+  padding: 6px 9px;
+  border: 1px solid rgba(37, 99, 235, 0.11);
+  border-radius: 12px;
   color: #1f2937;
-  background: transparent;
-  box-shadow: none;
+  background: rgba(247, 250, 255, 0.76);
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.055);
   overflow: hidden;
   isolation: isolate;
+}
+
+[data-theme="dark"] .composer-run-status {
+  border-color: rgba(96, 165, 250, 0.16);
+  color: var(--text);
+  background: rgba(18, 24, 36, 0.82);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .composer-run-status.is-running::before {
@@ -837,8 +856,9 @@
 
 .composer-run-status.is-warning {
   margin-bottom: 7px;
-  padding: 8px 10px;
-  border-radius: 13px;
+  padding: 7px 9px;
+  border-color: rgba(183, 121, 31, 0.14);
+  border-radius: 12px;
   background: rgba(255, 248, 230, 0.82);
 }
 
@@ -850,8 +870,8 @@
 .composer-run-dot {
   position: relative;
   flex: 0 0 auto;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 0 5px rgba(23, 78, 184, 0.1);
@@ -883,23 +903,35 @@
 
 .composer-run-main strong {
   color: #24292f;
-  font-size: 13px;
-  line-height: 17px;
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 680;
 }
 
 .composer-run-main small {
   color: #737a83;
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 11px;
+  line-height: 15px;
+}
+
+[data-theme="dark"] .composer-run-main strong {
+  color: #e4e4e7;
+}
+
+[data-theme="dark"] .composer-run-main small {
+  color: #a1a1aa;
 }
 
 .composer-run-time {
   flex: 0 0 auto;
   color: #68707b;
-  font-size: 12px;
-  line-height: 17px;
+  font-size: 11px;
+  line-height: 16px;
   font-variant-numeric: tabular-nums;
+}
+
+[data-theme="dark"] .composer-run-time {
+  color: #a1a1aa;
 }
 
 @keyframes runShine {

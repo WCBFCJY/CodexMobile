@@ -17,12 +17,14 @@ import * as desktopIpc from './desktop-ipc-client.js';
 
 const { DesktopIpcClient, desktopIpcMethodVersion } = desktopIpc;
 
-test('desktop follower IPC methods use the current desktop protocol version', () => {
+test('desktop mirror IPC methods use the current desktop protocol version', () => {
   assert.equal(desktopIpcMethodVersion('initialize'), 0);
   assert.equal(desktopIpcMethodVersion('thread-archived'), 2);
-  assert.equal(desktopIpcMethodVersion('thread-follower-start-turn'), 1);
-  assert.equal(desktopIpcMethodVersion('thread-follower-steer-turn'), 1);
-  assert.equal(desktopIpcMethodVersion('thread-follower-interrupt-turn'), 1);
+  assert.equal(desktopIpcMethodVersion('thread-follower-set-model-and-reasoning'), 1);
+  assert.equal(desktopIpcMethodVersion('thread-stream-state-changed'), 6);
+  assert.equal(desktopIpcMethodVersion('thread-follower-start-turn'), 0);
+  assert.equal(desktopIpcMethodVersion('thread-follower-steer-turn'), 0);
+  assert.equal(desktopIpcMethodVersion('thread-follower-interrupt-turn'), 0);
 });
 
 function frameFor(payload) {

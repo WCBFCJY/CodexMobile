@@ -49,9 +49,6 @@ test('filteredSlashCommands matches Chinese commands and English aliases', () =>
   assert.equal(filteredSlashCommands('review')[0].id, 'review');
 });
 
-test('filteredSlashCommands exposes plan mode without turning it into model text', () => {
-  const command = filteredSlashCommands('plan')[0];
-  assert.equal(command.id, 'plan');
-  assert.equal(command.action, 'insert-prompt');
-  assert.equal(command.prompt, '/plan');
+test('filteredSlashCommands leaves plan mode to the plus menu', () => {
+  assert.equal(filteredSlashCommands('plan').some((command) => command.id === 'plan'), false);
 });

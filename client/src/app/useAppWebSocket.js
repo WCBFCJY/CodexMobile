@@ -1,31 +1,22 @@
 /**
- * WebSocket 入站处理：直接合并服务端 live events，并暴露 `useAppWebSocket` 建立连接与分发副作用。
+ * WebSocket 入站连接器：只消费 connected 与统一 sync payload，旧 live payload 不再直接驱动 UI。
  *
- * Keywords: websocket, live-events, activity-sync, session-rename
+ * Keywords: websocket, sync-state, sync-event, connection
  *
  * Exports:
- * - 若干 `is*` / `should*` 纯函数 — 兼容旧调用，当前所有 live payload 都直接渲染。
- * - `useAppWebSocket` — 订阅 WS、应用 payload 到会话与 context 的 hook。
+ * - 若干 `should*` 纯函数 — 旧测试兼容守卫，统一返回不直连旧 UI。
+ * - useAppWebSocket — 建立 WS 连接并把 sync payload 分发到同步消费层。
  *
- * Inward: `api`（REST 与 `websocketUrl`）、`session-live-refresh`、`activity-model`、`context-status`。
+ * Inward: api、sync/useSyncSocket、model-sync、session-live-refresh。
  *
- * Outward: `App.jsx` 根编排。
+ * Outward: App.jsx 根编排。
  */
 
 import { apiFetch, getToken, websocketUrl } from '../api.js';
-import {
-  applySessionRenameToProjectSessions,
-  mergeLiveSelectedThreadMessages
-} from '../session-live-refresh.js';
-import {
-  messageStreamSignature,
-  upsertActivityMessage,
-  upsertAssistantMessage,
-  upsertStatusMessage
-} from '../chat/activity-model.js';
-import { sameUserMessageContent } from '../chat/message-identity.js';
-import { mergeContextStatus, normalizeContextStatus } from './context-status.js';
-import { sessionMessagesApiPath } from './session-utils.js';
+import { applySessionRenameToProjectSessions } from '../session-live-refresh.js';
+import { mergeModelSettingsIntoStatus, shouldApplyModelSettings } from './model-sync.js';
+import { normalizeContextStatus } from './context-status.js';
+import { applySyncSocketPayload } from '../sync/useSyncSocket.js';
 
 export function isExternalThreadPayload(payload = {}) {
   void payload;
@@ -33,29 +24,23 @@ export function isExternalThreadPayload(payload = {}) {
 }
 
 export function isDesktopThreadStatusPayload(payload = {}) {
-  return isExternalThreadPayload(payload);
+  void payload;
+  return false;
 }
 
 export function shouldRenderStatusMessageForPayload(payload = {}) {
-  if (
-    payload?.source === 'desktop-ipc' &&
-    payload?.kind === 'turn' &&
-    ['running', 'queued'].includes(String(payload?.status || ''))
-  ) {
-    return false;
-  }
-  if (isExternalThreadPayload(payload)) {
-    return false;
-  }
-  return true;
+  void payload;
+  return false;
 }
 
 export function shouldRenderActivityMessageForPayload(payload = {}) {
-  return !isExternalThreadPayload(payload);
+  void payload;
+  return false;
 }
 
 export function shouldRenderAssistantMessageForPayload(payload = {}) {
-  return !isExternalThreadPayload(payload);
+  void payload;
+  return false;
 }
 
 export function shouldRefreshDesktopThreadForPayload(payload = {}) {
@@ -64,13 +49,8 @@ export function shouldRefreshDesktopThreadForPayload(payload = {}) {
 }
 
 export function shouldCompleteLocalTurnBeforeRefresh(payload = {}) {
-  if (!shouldRefreshDesktopThreadForPayload(payload)) {
-    return false;
-  }
-  if (payload.type === 'chat-complete') {
-    return true;
-  }
-  return payload.type === 'status-update' && payload.kind === 'turn' && payload.status === 'completed';
+  void payload;
+  return false;
 }
 
 export function shouldRefreshCurrentSessionAfterReconnect(session = null) {
@@ -87,25 +67,23 @@ export function useAppWebSocket({
   selectedSessionRef,
   setConnectionState,
   setStatus,
-  syncActiveRunsFromStatus,
+  setRunningById,
+  runningByIdRef,
+  setThreadRuntimeById,
+  setSelectedSession,
+  setSessionsByProject,
+  setMessages,
+  setContextStatus,
+  setProjects,
+  setSelectedProject,
+  setExpandedProjectIds,
+  loadSessions,
   markRun,
   clearRun,
   markSessionCompleteNotice,
   markTurnCompleted,
   scheduleTurnRefresh,
-  payloadMatchesCurrentConversation,
-  upsertSessionInProject,
-  setSelectedSession,
-  setSessionsByProject,
-  setMessages,
-  setContextStatus,
-  applyAutoSessionTitle,
-  notifyFromPayload,
-  loadQueueDrafts,
-  setProjects,
-  setSelectedProject,
-  setExpandedProjectIds,
-  loadSessions
+  upsertSessionInProject
 }) {
   useEffect(() => {
     if (!authenticated || !getToken()) {
@@ -115,7 +93,6 @@ export function useAppWebSocket({
 
     let stopped = false;
     let reconnectTimer = null;
-    let reconnectingAfterDrop = false;
 
     async function refreshCurrentSessionAfterReconnect() {
       const project = selectedProjectRef.current;
@@ -132,20 +109,104 @@ export function useAppWebSocket({
       });
     }
 
-    async function refreshSelectedSessionMessages({ forceDropStaleRunning = false } = {}) {
-      const session = selectedSessionRef.current;
-      if (!session?.id) {
+    function applyModelFromSyncPayload(payload = {}) {
+      const settings =
+        payload.type === 'sync-state'
+          ? payload.state?.modelSettings
+          : payload.event?.eventType === 'model.updated'
+            ? payload.event
+            : null;
+      if (settings && shouldApplyModelSettings(settings, selectedSessionRef.current)) {
+        setStatus((current) => mergeModelSettingsIntoStatus(current, settings));
+      }
+    }
+
+    function handleThreadRenamed(event = {}) {
+      const sessionId = event.sessionId || event.session?.id;
+      const projectId = event.projectId || event.session?.projectId;
+      const title = String(event.title || event.session?.title || '').trim();
+      if (!sessionId || !projectId || !title) {
         return;
       }
-      const data = await apiFetch(sessionMessagesApiPath(session.id)).catch(() => null);
-      if (!data || selectedSessionRef.current?.id !== session.id || !Array.isArray(data.messages)) {
-        return;
-      }
-      setContextStatus((current) => mergeContextStatus(current, data.context || defaultStatus.context, defaultStatus.context));
-      setMessages((current) => {
-        const merged = mergeLiveSelectedThreadMessages(current, data.messages, { forceDropStaleRunning });
-        return messageStreamSignature(current) === messageStreamSignature(merged) ? current : merged;
+      const renamePayload = {
+        type: 'session-renamed',
+        projectId,
+        sessionId,
+        title,
+        titleLocked: event.titleLocked ?? event.session?.titleLocked ?? true,
+        updatedAt: event.timestamp,
+        session: event.session
+      };
+      setSessionsByProject((current) => applySessionRenameToProjectSessions(current, renamePayload));
+      setSelectedSession((current) => {
+        if (!current || String(current.id) !== String(sessionId)) {
+          return current;
+        }
+        return { ...current, ...(event.session || {}), id: sessionId, projectId, title };
       });
+    }
+
+    function handleSessionsSynced(event = {}) {
+      if (!Array.isArray(event.projects)) {
+        return;
+      }
+      setProjects(event.projects);
+      const project = selectedProjectRef.current;
+      if (!project?.id) {
+        const preferred =
+          event.projects.find((item) => item.name.toLowerCase() === 'codexmobile') ||
+          event.projects.find((item) => item.path.toLowerCase().includes('codexmobile')) ||
+          event.projects[0] ||
+          null;
+        if (preferred) {
+          setSelectedProject(preferred);
+          setExpandedProjectIds((current) => ({ ...current, [preferred.id]: true }));
+          loadSessions(preferred, {
+            chooseLatest: true,
+            preserveSelection: false
+          }).catch(() => null);
+        }
+        return;
+      }
+      apiFetch(`/api/projects/${encodeURIComponent(project.id)}/sessions`)
+        .then((data) => {
+          const nextSessions = data.sessions || [];
+          setSessionsByProject((current) => ({ ...current, [project.id]: nextSessions }));
+          const currentSession = selectedSessionRef.current;
+          const refreshedSession = nextSessions.find((session) => session.id === currentSession?.id);
+          if (refreshedSession) {
+            setSelectedSession((current) => (current?.id === refreshedSession.id ? { ...current, ...refreshedSession } : current));
+            setContextStatus(normalizeContextStatus(refreshedSession.context || defaultStatus.context, defaultStatus.context));
+          }
+        })
+        .catch(() => null);
+    }
+
+    function applySyncPayload(payload = {}) {
+      applyModelFromSyncPayload(payload);
+      applySyncSocketPayload(payload, {
+        defaultStatus,
+        selectedProjectRef,
+        selectedSessionRef,
+        setRunningById,
+        runningByIdRef,
+        setThreadRuntimeById,
+        markRun,
+        clearRun,
+        markSessionCompleteNotice,
+        markTurnCompleted,
+        scheduleTurnRefresh,
+        setMessages,
+        setContextStatus,
+        setProjects,
+        setSelectedSession,
+        setSessionsByProject,
+        upsertSessionInProject,
+        handleThreadRenamed
+      });
+      if (payload.type === 'sync-event' && payload.event?.eventType === 'sessions.synced') {
+        handleSessionsSynced(payload.event);
+      }
     }
 
     const connect = () => {
@@ -157,7 +218,6 @@ export function useAppWebSocket({
       ws.onclose = () => {
         setConnectionState('disconnected');
         if (!stopped) {
-          reconnectingAfterDrop = true;
           reconnectTimer = window.setTimeout(connect, 1200);
         }
       };
@@ -165,279 +225,18 @@ export function useAppWebSocket({
       ws.onmessage = (event) => {
         const payload = JSON.parse(event.data);
         if (payload.type === 'connected') {
-          const forceClearLocalRuns = reconnectingAfterDrop;
-          reconnectingAfterDrop = false;
           setStatus(payload.status || defaultStatus);
           setConnectionState(payload.status?.connected ? 'connected' : 'disconnected');
-          syncActiveRunsFromStatus(payload.status || defaultStatus, { forceClear: forceClearLocalRuns });
+          if (payload.status?.syncState) {
+            applySyncPayload({ type: 'sync-state', state: payload.status.syncState });
+          }
           if (payload.status?.connected) {
             refreshCurrentSessionAfterReconnect().catch(() => null);
           }
           return;
         }
-        if (payload.type === 'chat-started') {
-          markRun(payload);
-          if (!payloadMatchesCurrentConversation(payload)) {
-            return;
-          }
-          if (!selectedSessionRef.current && payload.sessionId) {
-            setSelectedSession({ id: payload.sessionId, projectId: payload.projectId, title: '新对话' });
-          }
-          return;
-        }
-        if (payload.type === 'thread-started' && payload.sessionId) {
-          const projectId = payload.projectId || selectedProjectRef.current?.id || selectedSessionRef.current?.projectId;
-          const currentSession = selectedSessionRef.current;
-          const nextSession = {
-            ...(currentSession || {}),
-            id: payload.sessionId,
-            projectId,
-            title: currentSession?.title || '新对话',
-            turnId: payload.turnId || currentSession?.turnId || null,
-            updatedAt: new Date().toISOString(),
-            draft: false
-          };
-          markRun(payload);
-          setSelectedSession((current) => {
-            if (!current) {
-              return nextSession;
-            }
-            const shouldReplace =
-              current.id === payload.previousSessionId ||
-              current.id === payload.sessionId ||
-              current.turnId === payload.turnId ||
-              (current.draft && current.projectId === projectId);
-            return shouldReplace ? { ...current, ...nextSession } : current;
-          });
-          setSessionsByProject((current) =>
-            upsertSessionInProject(current, projectId, nextSession, payload.previousSessionId)
-          );
-          setMessages((current) =>
-            current.map((message) =>
-              message.turnId === payload.turnId || message.sessionId === payload.previousSessionId
-                ? { ...message, sessionId: payload.sessionId }
-                : message
-            )
-          );
-          return;
-        }
-        if (payload.type === 'message-deleted') {
-          if (payloadMatchesCurrentConversation(payload)) {
-            setMessages((current) => current.filter((message) => String(message.id) !== String(payload.messageId)));
-          }
-          return;
-        }
-        if (payload.type === 'session-renamed') {
-          const sessionId = payload.sessionId || payload.session?.id;
-          const projectId = payload.projectId || payload.session?.projectId;
-          const title = String(payload.title || payload.session?.title || '').trim();
-          if (!sessionId || !projectId || !title) {
-            return;
-          }
-          setSessionsByProject((current) => applySessionRenameToProjectSessions(current, payload));
-          setSelectedSession((current) => {
-            if (!current || String(current.id) !== String(sessionId)) {
-              return current;
-            }
-            return {
-              ...current,
-              ...(payload.session || {}),
-              id: sessionId,
-              projectId,
-              title,
-              titleLocked: payload.titleLocked ?? payload.session?.titleLocked ?? true,
-              updatedAt: payload.updatedAt || payload.session?.updatedAt || current.updatedAt
-            };
-          });
-          return;
-        }
-        if (payload.type === 'desktop-thread-updated') {
-          if (!payloadMatchesCurrentConversation(payload)) {
-            return;
-          }
-          if (payload.status && payload.status !== 'running') {
-            markSessionCompleteNotice(payload);
-            clearRun(payload);
-          }
-          refreshSelectedSessionMessages({ forceDropStaleRunning: true }).catch(() => null);
-          return;
-        }
-        if (payload.type === 'user-message') {
-          if (!payloadMatchesCurrentConversation(payload)) {
-            return;
-          }
-          setMessages((current) => {
-            const alreadyShown = current.some(
-              (message) => message.role === 'user' && sameUserMessageContent(message.content, payload.message.content)
-            );
-            if (alreadyShown) {
-              return current;
-            }
-            return [...current, payload.message];
-          });
-          return;
-        }
-        if (payload.type === 'assistant-update') {
-          if (!payload.content?.trim()) {
-            return;
-          }
-          markRun(payload);
-          if (!payloadMatchesCurrentConversation(payload)) {
-            return;
-          }
-          if (!shouldRenderAssistantMessageForPayload(payload)) {
-            return;
-          }
-          if (payload.phase === 'commentary') {
-            setMessages((current) =>
-              upsertStatusMessage(current, {
-                ...payload,
-                kind: payload.kind || 'agent_message',
-                label: String(payload.content || '').trim(),
-                status: payload.status || 'running'
-              })
-            );
-            return;
-          }
-          setMessages((current) => upsertAssistantMessage(current, payload));
-          if (payload.done !== false) {
-            applyAutoSessionTitle(payload, payload.content);
-          }
-          return;
-        }
-        if (payload.type === 'status-update') {
-          if (payload.status === 'running' || payload.status === 'queued') {
-            markRun(payload);
-          }
-          notifyFromPayload(payload);
-          if (payload.kind === 'turn' && payload.status === 'completed') {
-            markSessionCompleteNotice(payload);
-            clearRun(payload);
-          }
-          if (payload.status === 'queued' && payloadMatchesCurrentConversation(payload)) {
-            loadQueueDrafts(selectedSessionRef.current).catch(() => null);
-          }
-          if (!payloadMatchesCurrentConversation(payload)) {
-            return;
-          }
-          if (shouldRefreshDesktopThreadForPayload(payload)) {
-            if (shouldCompleteLocalTurnBeforeRefresh(payload)) {
-              markTurnCompleted(payload);
-            }
-            scheduleTurnRefresh(payload);
-            return;
-          }
-          if (payload.kind === 'turn' && payload.status === 'completed') {
-            markTurnCompleted(payload);
-            return;
-          }
-          if (!shouldRenderStatusMessageForPayload(payload)) {
-            return;
-          }
-          setMessages((current) => upsertStatusMessage(current, payload));
-          return;
-        }
-        if (payload.type === 'activity-update') {
-          if (payload.status === 'running' || payload.status === 'queued') {
-            markRun(payload);
-          }
-          notifyFromPayload(payload);
-          if (!payloadMatchesCurrentConversation(payload)) {
-            return;
-          }
-          if (!shouldRenderActivityMessageForPayload(payload)) {
-            return;
-          }
-          setMessages((current) => upsertActivityMessage(current, payload));
-          return;
-        }
-        if (payload.type === 'context-status-update') {
-          markRun(payload);
-          if (payloadMatchesCurrentConversation(payload)) {
-            setContextStatus((current) => mergeContextStatus(current, payload, defaultStatus.context));
-          }
-          return;
-        }
-        if (payload.type === 'chat-complete' || payload.type === 'chat-error' || payload.type === 'chat-aborted') {
-          notifyFromPayload(payload);
-          loadQueueDrafts(selectedSessionRef.current).catch(() => null);
-          if (payload.type === 'chat-complete') {
-            markSessionCompleteNotice(payload);
-            clearRun(payload);
-          }
-          if (!payloadMatchesCurrentConversation(payload)) {
-            clearRun(payload);
-            return;
-          }
-          if (payload.type === 'chat-complete') {
-            if (payload.context) {
-              setContextStatus((current) => mergeContextStatus(current, payload.context, defaultStatus.context));
-            }
-            if (shouldRefreshDesktopThreadForPayload(payload)) {
-              if (shouldCompleteLocalTurnBeforeRefresh(payload)) {
-                markTurnCompleted(payload);
-              }
-              scheduleTurnRefresh(payload);
-              return;
-            }
-            markTurnCompleted(payload);
-            scheduleTurnRefresh(payload);
-            return;
-          }
-          clearRun(payload);
-          if (payload.type === 'chat-error' && payload.error) {
-            setMessages((current) =>
-              upsertStatusMessage(current, {
-                ...payload,
-                status: 'failed',
-                label: '任务失败',
-                detail: payload.error
-              })
-            );
-          } else if (payload.type === 'chat-aborted') {
-            setMessages((current) =>
-              upsertStatusMessage(current, {
-                ...payload,
-                status: 'completed',
-                label: '已中止'
-              })
-            );
-          }
-          return;
-        }
-        if (payload.type === 'sync-complete' && payload.projects) {
-          setProjects(payload.projects);
-          const project = selectedProjectRef.current;
-          if (!project?.id) {
-            const preferred =
-              payload.projects.find((item) => item.name.toLowerCase() === 'codexmobile') ||
-              payload.projects.find((item) => item.path.toLowerCase().includes('codexmobile')) ||
-              payload.projects[0] ||
-              null;
-            if (preferred) {
-              setSelectedProject(preferred);
-              setExpandedProjectIds((current) => ({ ...current, [preferred.id]: true }));
-              loadSessions(preferred, {
-                chooseLatest: true,
-                preserveSelection: false
-              }).catch(() => null);
-            }
-            return;
-          }
-          if (project?.id) {
-            apiFetch(`/api/projects/${encodeURIComponent(project.id)}/sessions`)
-              .then((data) => {
-                const nextSessions = data.sessions || [];
-                setSessionsByProject((current) => ({ ...current, [project.id]: nextSessions }));
-                const currentSession = selectedSessionRef.current;
-                const refreshedSession = nextSessions.find((session) => session.id === currentSession?.id);
-                if (refreshedSession) {
-                  setSelectedSession((current) => (current?.id === refreshedSession.id ? { ...current, ...refreshedSession } : current));
-                  setContextStatus(normalizeContextStatus(refreshedSession.context || defaultStatus.context, defaultStatus.context));
-                }
-              })
-              .catch(() => null);
-          }
+        if (payload.type === 'sync-state' || payload.type === 'sync-event') {
+          applySyncPayload(payload);
         }
       };
     };

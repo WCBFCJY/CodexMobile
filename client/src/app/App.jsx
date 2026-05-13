@@ -36,22 +36,24 @@ import { useTurnSubmission } from './useTurnSubmission.js';
 import { useTurnRuntime } from './useTurnRuntime.js';
 import { useViewportSizing } from './useViewportSizing.js';
 import { applyPwaTheme } from './pwa-theme.js';
-import { nextSyncedComposerSettings } from './model-sync.js';
+import { mergeModelSettingsIntoStatus, nextSyncedComposerSettings } from './model-sync.js';
 import { rememberSelectedSession } from './selection-persistence.js';
 import {
   buildComposerRunStatus,
   emptyContextStatus,
   hasRunningKey,
   isDraftSession,
-  isLiveThreadRuntime,
   reconcileThreadRuntimeWithSessions,
-  runningByIdWithSelectedActivity,
   selectedRunKeys,
   selectedSessionIsRunning,
   upsertSessionInProject
 } from './session-utils.js';
 import { AppShell } from './AppShell.jsx';
 import PairingScreen from './PairingScreen.jsx';
+import {
+  selectRuntimeForSession,
+  syncRunningByIdFromRuntime
+} from '../sync/sync-selectors.js';
 
 const MODEL_SPEED_KEY = 'codexmobile.modelSpeed';
 
@@ -74,7 +76,6 @@ export default function App() {
     notificationEnabled,
     dismissToast,
     showToast,
-    notifyFromPayload,
     enableNotifications
   } = useNotifications();
   const [projects, setProjects] = useState([]);
@@ -94,6 +95,7 @@ export default function App() {
   const [permissionMode, setPermissionMode] = useState(DEFAULT_PERMISSION_MODE);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_STATUS.model);
   const [selectedModelSpeed, setSelectedModelSpeed] = useState(() => normalizeModelSpeed(localStorage.getItem(MODEL_SPEED_KEY)));
+  const [selectedCollaborationMode, setSelectedCollaborationMode] = useState(null);
   const [selectedReasoningEffort, setSelectedReasoningEffort] = useState(() => {
     const defaultVersion = localStorage.getItem('codexmobile.reasoningDefaultVersion');
     if (defaultVersion !== REASONING_DEFAULT_VERSION) {
@@ -124,12 +126,15 @@ export default function App() {
   const messagesRef = useRef([]);
   const autoTitleSyncRef = useRef(new Set());
   const runningByIdRef = useRef({});
-  const activePollsRef = useRef(new Set());
   const turnRefreshTimersRef = useRef(new Map());
   const lastStatusSettingsRef = useRef({
     model: DEFAULT_STATUS.model,
     reasoningEffort: DEFAULT_STATUS.reasoningEffort || DEFAULT_REASONING_EFFORT
   });
+  const selectedModelRef = useRef(selectedModel);
+  const selectedReasoningEffortRef = useRef(selectedReasoningEffort);
+  const modelSettingsRequestRef = useRef(0);
+  const modelSettingsSyncQueueRef = useRef(Promise.resolve());
   const sessionLivePollRef = useRef(false);
   const bootstrapStartedRef = useRef(false);
   const drawerSyncAtRef = useRef(0);
@@ -152,12 +157,12 @@ export default function App() {
 
   useViewportSizing(composerRef);
 
-  const selectedRuntime = selectedRunKeys(selectedSession)
-    .map((key) => threadRuntimeById[key])
-    .find(isLiveThreadRuntime) || null;
+  const syncRunningById = useMemo(() => syncRunningByIdFromRuntime(threadRuntimeById), [threadRuntimeById]);
+  const selectedRuntime = selectRuntimeForSession(selectedSession, threadRuntimeById);
   const running =
-    hasRunningKey(runningById, selectedRunKeys(selectedSession)) ||
-    selectedRuntime?.status === 'running';
+    hasRunningKey(syncRunningById, selectedRunKeys(selectedSession)) ||
+    selectedRuntime?.status === 'running' ||
+    selectedRuntime?.status === 'queued';
   const hasRunningActivity = useMemo(
     () =>
       messages.some(
@@ -167,11 +172,8 @@ export default function App() {
       ),
     [messages]
   );
-  const selectedRunning = selectedSessionIsRunning({ running, hasRunningActivity });
-  const drawerRunningById = useMemo(
-    () => runningByIdWithSelectedActivity(runningById, selectedSession, hasRunningActivity),
-    [runningById, selectedSession, hasRunningActivity]
-  );
+  const selectedRunning = selectedSessionIsRunning({ running });
+  const drawerRunningById = syncRunningById;
   const composerRunStatus = useMemo(
     () => buildComposerRunStatus(messages, selectedRunning, activityClockNow),
     [messages, selectedRunning, activityClockNow]
@@ -181,6 +183,9 @@ export default function App() {
       return [];
     }
     const keys = new Set();
+    if (selectedSession?.id) {
+      keys.add(selectedSession.id);
+    }
     if (selectedSession?.turnId) {
       keys.add(selectedSession.turnId);
     }
@@ -218,13 +223,10 @@ export default function App() {
     clearRun,
     markSessionCompleteNotice,
     clearSessionCompleteNotice,
-    syncActiveRunsFromStatus,
-    payloadMatchesCurrentConversation,
     markTurnCompleted,
     scheduleTurnRefresh
   } = useTurnRuntime({
     defaultStatus: DEFAULT_STATUS,
-    activePollsRef,
     turnRefreshTimersRef,
     selectedSessionRef,
     runningByIdRef,
@@ -260,16 +262,9 @@ export default function App() {
     selectedSession,
     hasRunningActivity,
     running,
-    desktopBridge: status.desktopBridge,
-    threadRuntimeById,
     defaultStatus: DEFAULT_STATUS,
     sessionLivePollRef,
     selectedSessionRef,
-    runningByIdRef,
-    messagesRef,
-    markRun,
-    clearRun,
-    markSessionCompleteNotice,
     setContextStatus,
     setMessages
   });
@@ -300,6 +295,11 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
+    selectedModelRef.current = selectedModel;
+  }, [selectedModel]);
+
+  useEffect(() => {
+    selectedReasoningEffortRef.current = selectedReasoningEffort;
     if (selectedReasoningEffort) {
       localStorage.setItem('codexmobile.reasoningEffort', selectedReasoningEffort);
     }
@@ -333,6 +333,22 @@ export default function App() {
     }
   }, [selectedModel, selectedReasoningEffort, status.model, status.reasoningEffort]);
 
+  useEffect(() => {
+    const model = selectedSession?.model;
+    const reasoningEffort = selectedSession?.reasoningEffort;
+    if (!model && !reasoningEffort) {
+      return;
+    }
+    setStatus((current) =>
+      mergeModelSettingsIntoStatus(current, {
+        provider: selectedSession?.provider,
+        model,
+        reasoningEffort,
+        sessionId: selectedSession?.id
+      })
+    );
+  }, [selectedSession?.id, selectedSession?.model, selectedSession?.reasoningEffort, selectedSession?.provider]);
+
   const {
     loadStatus,
     loadSessions,
@@ -344,7 +360,6 @@ export default function App() {
     selectedSessionRef,
     setStatus,
     setAuthenticated,
-    syncActiveRunsFromStatus,
     setSelectedSession,
     setMessages,
     setContextStatus,
@@ -354,6 +369,58 @@ export default function App() {
     setSelectedProject,
     setExpandedProjectIds
   });
+
+  const syncModelSettings = useCallback(async ({ model, reasoningEffort }) => {
+    const next = {
+      model: model || selectedModelRef.current || DEFAULT_STATUS.model,
+      reasoningEffort: reasoningEffort || selectedReasoningEffortRef.current || DEFAULT_REASONING_EFFORT
+    };
+    const requestId = modelSettingsRequestRef.current + 1;
+    modelSettingsRequestRef.current = requestId;
+    setStatus((current) => mergeModelSettingsIntoStatus(current, next));
+    const task = modelSettingsSyncQueueRef.current.catch(() => null).then(async () => {
+      const data = await apiFetch('/api/model-settings', {
+        method: 'POST',
+        body: {
+          ...next,
+          sessionId: selectedSessionRef.current?.id || null
+        }
+      });
+      if (modelSettingsRequestRef.current === requestId && data.settings) {
+        setStatus((current) => mergeModelSettingsIntoStatus(current, data.settings));
+      }
+      if (data.desktopSync?.attempted && !data.desktopSync?.synced) {
+        showToast({
+          level: 'warning',
+          title: '模型已保存',
+          body: '桌面端当前线程没有立即接收模型设置，后续会按配置同步。'
+        });
+      }
+    });
+    modelSettingsSyncQueueRef.current = task;
+    try {
+      await task;
+    } catch (error) {
+      showToast({
+        level: 'error',
+        title: '模型同步失败',
+        body: error.message || '无法同步模型设置。'
+      });
+      loadStatus().catch(() => null);
+    }
+  }, [loadStatus, showToast]);
+
+  const handleSelectModel = useCallback((model) => {
+    setSelectedModel(model);
+    selectedModelRef.current = model;
+    syncModelSettings({ model, reasoningEffort: selectedReasoningEffortRef.current });
+  }, [syncModelSettings]);
+
+  const handleSelectReasoningEffort = useCallback((reasoningEffort) => {
+    setSelectedReasoningEffort(reasoningEffort);
+    selectedReasoningEffortRef.current = reasoningEffort;
+    syncModelSettings({ model: selectedModelRef.current, reasoningEffort });
+  }, [syncModelSettings]);
 
   useEffect(() => {
     if (bootstrapStartedRef.current) {
@@ -395,11 +462,9 @@ export default function App() {
     handleRenameSession,
     handleDeleteSession,
     handleDeleteMessage,
-    handleNewConversation,
-    applyAutoSessionTitle
+    handleNewConversation
   } = useSessionActions({
     defaultStatus: DEFAULT_STATUS,
-    status,
     selectedProject,
     selectedProjectRef,
     selectedSessionRef,
@@ -435,21 +500,19 @@ export default function App() {
     selectedSessionRef,
     setConnectionState,
     setStatus,
-    syncActiveRunsFromStatus,
     markRun,
     clearRun,
     markSessionCompleteNotice,
     markTurnCompleted,
     scheduleTurnRefresh,
-    payloadMatchesCurrentConversation,
     upsertSessionInProject,
+    setRunningById,
+    runningByIdRef,
+    setThreadRuntimeById,
     setSelectedSession,
     setSessionsByProject,
     setMessages,
     setContextStatus,
-    applyAutoSessionTitle,
-    notifyFromPayload,
-    loadQueueDrafts,
     setProjects,
     setSelectedProject,
     setExpandedProjectIds,
@@ -488,7 +551,6 @@ export default function App() {
     handleAdjustPlan,
     handleAbort
   } = useTurnSubmission({
-    defaultStatus: DEFAULT_STATUS,
     defaultReasoningEffort: DEFAULT_REASONING_EFFORT,
     selectedProject,
     selectedProjectRef,
@@ -504,8 +566,7 @@ export default function App() {
     input,
     attachments,
     fileMentions,
-    activePollsRef,
-    runningById,
+    runningById: syncRunningById,
     runningByIdRef,
     setInput,
     setAttachments,
@@ -514,13 +575,9 @@ export default function App() {
     setExpandedProjectIds,
     setSessionsByProject,
     setMessages,
-    setContextStatus,
     upsertSessionInProject,
     markRun,
     clearRun,
-    markSessionCompleteNotice,
-    markTurnCompleted,
-    scheduleTurnRefresh,
     loadQueueDrafts
   });
 
@@ -563,6 +620,14 @@ export default function App() {
     syncing
   });
   const topBarRuntime = selectedRuntime || (selectedRunning ? { status: 'running' } : null);
+
+  const handleComposerSubmit = useCallback((options = {}) => {
+    const collaborationMode = options.collaborationMode || selectedCollaborationMode || null;
+    handleSubmit({ ...options, collaborationMode });
+    if (collaborationMode) {
+      setSelectedCollaborationMode(null);
+    }
+  }, [handleSubmit, selectedCollaborationMode]);
 
   if (!authenticated) {
     return <PairingScreen onPaired={bootstrap} />;
@@ -665,16 +730,18 @@ export default function App() {
     setInput,
     selectedProject,
     selectedSession,
-    onSubmit: handleSubmit,
+    onSubmit: handleComposerSubmit,
     running: selectedRunning,
     onAbort: handleAbort,
     models: status.models,
     selectedModel,
-    onSelectModel: setSelectedModel,
+    onSelectModel: handleSelectModel,
     selectedModelSpeed,
     onSelectModelSpeed: (value) => setSelectedModelSpeed(normalizeModelSpeed(value)),
     selectedReasoningEffort,
-    onSelectReasoningEffort: setSelectedReasoningEffort,
+    onSelectReasoningEffort: handleSelectReasoningEffort,
+    selectedCollaborationMode,
+    onSelectCollaborationMode: setSelectedCollaborationMode,
     skills: status.skills,
     selectedSkillPaths,
     onToggleSkill: toggleSelectedSkill,

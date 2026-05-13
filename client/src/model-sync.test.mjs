@@ -8,7 +8,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { nextSyncedComposerSettings } from './app/model-sync.js';
+import {
+  mergeModelSettingsIntoStatus,
+  nextSyncedComposerSettings,
+  shouldApplyModelSettings
+} from './app/model-sync.js';
 
 test('composer model follows desktop status changes while it is still synced', () => {
   const next = nextSyncedComposerSettings({
@@ -40,4 +44,36 @@ test('composer model keeps an explicit mobile choice until desktop status catche
     model: 'gpt-5.3-codex',
     reasoningEffort: 'high'
   });
+});
+
+test('model settings broadcasts patch status without dropping other fields', () => {
+  assert.deepEqual(
+    mergeModelSettingsIntoStatus(
+      { connected: true, model: 'gpt-5.4', reasoningEffort: 'medium', docs: { connected: false } },
+      { model: 'gpt-5.5', modelShort: '5.5 中', reasoningEffort: 'high', provider: 'codex' }
+    ),
+    {
+      connected: true,
+      provider: 'codex',
+      model: 'gpt-5.5',
+      modelShort: '5.5 中',
+      reasoningEffort: 'high',
+      docs: { connected: false }
+    }
+  );
+});
+
+test('thread-scoped model settings only apply to the selected session', () => {
+  assert.equal(
+    shouldApplyModelSettings({ model: 'gpt-5.4', sessionId: 'thread-a' }, { id: 'thread-a' }),
+    true
+  );
+  assert.equal(
+    shouldApplyModelSettings({ model: 'gpt-5.4', sessionId: 'thread-a' }, { id: 'thread-b' }),
+    false
+  );
+  assert.equal(
+    shouldApplyModelSettings({ model: 'gpt-5.4' }, { id: 'thread-b' }),
+    true
+  );
 });

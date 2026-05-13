@@ -6,7 +6,7 @@
  * Exports:
  * - implementedPlanContentFromMessage / sanitizeVisibleUserMessage — 计划与用户消息清洗。
  * - extractProposedPlanContent / planTitleFromContent / planMessageFromContent — 计划块构造。
- * - upsertDesktopActivity / removeFallbackActivitiesCoveredByRaw / sortDesktopActivitySteps。
+ * - upsertDesktopActivity / removeDuplicateGuidedUserSegments / removeFallbackActivitiesCoveredByRaw / sortDesktopActivitySteps。
  * - messagesFromDesktopThread — thread → messages[]。
  *
  * Inward（本模块依赖/组装的关键符号）: codex-native-images、codex-runner.statusLabel。
@@ -43,6 +43,10 @@ function guidedUserMetadata(enabled) {
       kind: 'guided_user'
     }
     : {};
+}
+
+function normalizedVisibleUserContent(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
 }
 
 function normalizedPlanText(value) {
@@ -131,6 +135,62 @@ export function sanitizeVisibleUserMessage(message) {
     }
   }
   return visibleValue.slice(0, cutAt).trim() || visibleValue;
+}
+
+export function removeDuplicateGuidedUserSegments(messages = []) {
+  const seenByTurn = new Map();
+  const inferredSegmentByTurn = new Map();
+  const visibleUserSegments = new Set();
+  const duplicateSegments = new Set();
+  for (const message of messages) {
+    if (message?.role !== 'user') {
+      continue;
+    }
+    const turnId = String(message.turnId || '').trim();
+    const content = normalizedVisibleUserContent(message.content);
+    if (!turnId || !content) {
+      continue;
+    }
+    const seen = seenByTurn.get(turnId) || new Set();
+    const fallbackSegmentIndex = inferredSegmentByTurn.get(turnId) || 0;
+    const segmentIndex = Number.isFinite(Number(message.segmentIndex)) ? Number(message.segmentIndex) : fallbackSegmentIndex;
+    inferredSegmentByTurn.set(turnId, Math.max(fallbackSegmentIndex, segmentIndex) + 1);
+    if (message.guided && seen.has(content) && segmentIndex !== null) {
+      duplicateSegments.add(`${turnId}:${segmentIndex}`);
+      message.__codexmobileDuplicateGuided = true;
+      continue;
+    }
+    if (segmentIndex !== null) {
+      visibleUserSegments.add(`${turnId}:${segmentIndex}`);
+    }
+    seen.add(content);
+    seenByTurn.set(turnId, seen);
+  }
+  if (!duplicateSegments.size) {
+    return messages.filter((message) => {
+      const segmentIndex = Number.isFinite(Number(message?.segmentIndex)) ? Number(message.segmentIndex) : null;
+      if (message?.role === 'activity' && segmentIndex > 0 && !visibleUserSegments.has(`${message.turnId || ''}:${segmentIndex}`)) {
+        return false;
+      }
+      return true;
+    });
+  }
+  return messages.filter((message) => {
+    if (message?.__codexmobileDuplicateGuided) {
+      delete message.__codexmobileDuplicateGuided;
+      return false;
+    }
+    const segmentIndex = Number.isFinite(Number(message?.segmentIndex)) ? Number(message.segmentIndex) : null;
+    if (
+      message?.role === 'activity' &&
+      segmentIndex !== null &&
+      (duplicateSegments.has(`${message.turnId || ''}:${segmentIndex}`) ||
+        (segmentIndex > 0 && !visibleUserSegments.has(`${message.turnId || ''}:${segmentIndex}`)))
+    ) {
+      return false;
+    }
+    return true;
+  });
 }
 
 export function extractProposedPlanContent(message) {
@@ -986,6 +1046,7 @@ export function messagesFromDesktopThread(thread, { includeActivity = false } = 
             id: item.id || `${turnId}-user-${itemIndex}`,
             role: 'user',
             content: sanitizeVisibleUserMessage(content),
+            segmentIndex,
             ...guidedUserMetadata(segmentIndex > 0),
             timestamp,
             turnId,
@@ -1092,5 +1153,5 @@ export function messagesFromDesktopThread(thread, { includeActivity = false } = 
     }
   });
 
-  return messages;
+  return removeDuplicateGuidedUserSegments(messages);
 }

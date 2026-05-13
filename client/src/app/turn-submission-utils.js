@@ -1,13 +1,13 @@
 /**
- * 回合发送辅助纯函数：选择体与 turn id 对齐、本地展示消息、Composer 提交体、技能路径、计划实施 prompt、中止后本地消息补齐与轮询决策。
+ * 回合发送辅助纯函数：会话/项目选择、本地展示消息、Composer 提交体、技能路径、计划实施 prompt 与中止后本地消息补齐。
  *
- * Keywords: turn-submission, composer-payload, optimistic-id, handoff-status
+ * Keywords: turn-submission, composer-payload, optimistic-user, abort-status
  *
  * Exports:
- * - 选择对齐 — `realSessionIdFromTurn`、`turnMatchesSelection`、`sessionForTurnSelection`、`projectForTurnSelection`。
+ * - 选择对齐 — `sessionForTurnSelection`、`projectForTurnSelection`。
  * - 消息与发送 — `displayMessageForTurn`、`prepareComposerSubmission`、`userMessageMetadataForSendMode`。
  * - 计划与技能 — `IMPLEMENT_PLAN_PROMPT_PREFIX`、`implementationPromptForPlan`、`selectedSkillsForPaths`、`restoredComposerText`。
- * - 轮询与中止 — `shouldPollTurnEndpointAfterSend`、`localHandoffStatusPayload`、`completeLocalAbortMessages`。
+ * - 中止 — `completeLocalAbortMessages`。
  *
  * Inward: `activity-model` 中活动/状态消息合并。
  *
@@ -18,27 +18,6 @@ import {
   completeActivityMessagesForTurn,
   upsertStatusMessage
 } from '../chat/activity-model.js';
-
-export function realSessionIdFromTurn(turn) {
-  const sessionIdText = String(turn?.sessionId || '');
-  if (!sessionIdText || sessionIdText.startsWith('draft-') || sessionIdText.startsWith('codex-')) {
-    return null;
-  }
-  return sessionIdText;
-}
-
-export function turnMatchesSelection(currentSession, { turnId, optimisticSessionId, realSessionId, previousSessionId } = {}) {
-  if (!currentSession) {
-    return true;
-  }
-  return (
-    currentSession.id === optimisticSessionId ||
-    currentSession.id === realSessionId ||
-    currentSession.id === previousSessionId ||
-    currentSession.turnId === turnId ||
-    Boolean(currentSession.draft)
-  );
-}
 
 export function sessionForTurnSelection(selectedSession, selectedSessionRef) {
   return selectedSessionRef?.current || selectedSession || null;
@@ -91,13 +70,14 @@ export function implementationPromptForPlan(planContent) {
   return `${IMPLEMENT_PLAN_PROMPT_PREFIX}\n${text}`;
 }
 
-export function prepareComposerSubmission(message, attachments = [], fileMentions = []) {
+export function prepareComposerSubmission(message, attachments = [], fileMentions = [], requestedCollaborationMode = null) {
   const raw = String(message || '').trim();
   const planMatch = raw.match(/^\/(?:plan|计划模式)(?:\s+|$)/iu);
   const messageText = planMatch ? raw.slice(planMatch[0].length).trim() : raw;
+  const requestedMode = String(requestedCollaborationMode || '').trim().toLowerCase();
   return {
     message: displayMessageForTurn(messageText, attachments, fileMentions),
-    collaborationMode: planMatch ? 'plan' : null
+    collaborationMode: planMatch || requestedMode === 'plan' ? 'plan' : null
   };
 }
 
@@ -124,26 +104,6 @@ export function restoredComposerText(current, nextText) {
     return current;
   }
   return `${base}\n${value}`;
-}
-
-export function shouldPollTurnEndpointAfterSend(result = {}) {
-  return result?.desktopBridge?.mode !== 'desktop-ipc';
-}
-
-export function localHandoffStatusPayload({ sessionId, previousSessionId = null, turnId, timestamp = new Date().toISOString() } = {}) {
-  return {
-    sessionId,
-    previousSessionId,
-    turnId,
-    kind: 'turn',
-    status: 'running',
-    label: '后台启动中',
-    detail: '',
-    timestamp,
-    startedAt: timestamp,
-    transient: true,
-    source: 'local-handoff'
-  };
 }
 
 export function completeLocalAbortMessages(current, payload = {}) {

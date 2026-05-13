@@ -102,7 +102,11 @@ export function normalizeSelectedSkills(value, availableSkills = []) {
 
 export function normalizeCollaborationMode(value, { model = '', reasoningEffort = null } = {}) {
   const requestedMode = typeof value === 'string' ? value : value?.mode;
-  if (String(requestedMode || '').trim().toLowerCase() !== 'plan') {
+  const mode = String(requestedMode || '').trim().toLowerCase();
+  if (['default', 'normal', 'none', 'off'].includes(mode)) {
+    return { mode: 'default' };
+  }
+  if (mode !== 'plan') {
     return null;
   }
   const settings = typeof value === 'object' && value?.settings ? value.settings : {};

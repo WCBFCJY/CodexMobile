@@ -28,7 +28,7 @@ test('desktop IPC status updates render through the same live path', () => {
   );
 });
 
-test('headless fallback status updates render like local background work', () => {
+test('legacy status updates never render directly after sync rewrite', () => {
   assert.equal(
     shouldRenderStatusMessageForPayload({
       type: 'status-update',
@@ -36,7 +36,7 @@ test('headless fallback status updates render like local background work', () =>
       kind: 'turn',
       status: 'completed'
     }),
-    true
+    false
   );
   assert.equal(
     shouldRenderStatusMessageForPayload({
@@ -45,7 +45,7 @@ test('headless fallback status updates render like local background work', () =>
       kind: 'turn',
       status: 'running'
     }),
-    true
+    false
   );
   assert.equal(
     shouldRenderStatusMessageForPayload({
@@ -54,7 +54,7 @@ test('headless fallback status updates render like local background work', () =>
       kind: 'reasoning',
       status: 'running'
     }),
-    true
+    false
   );
 });
 
@@ -109,14 +109,14 @@ test('terminal events no longer trigger desktop-thread refresh path', () => {
   );
 });
 
-test('headless fallback activity and assistant updates render from the local live stream', () => {
+test('legacy activity and assistant updates no longer render directly', () => {
   assert.equal(
     shouldRenderActivityMessageForPayload({
       type: 'activity-update',
       source: 'headless-local',
       status: 'running'
     }),
-    true
+    false
   );
   assert.equal(
     shouldRenderAssistantMessageForPayload({
@@ -124,14 +124,14 @@ test('headless fallback activity and assistant updates render from the local liv
       source: 'headless-local',
       content: '完成'
     }),
-    true
+    false
   );
   assert.equal(
     shouldRenderActivityMessageForPayload({
       type: 'activity-update',
       status: 'running'
     }),
-    true
+    false
   );
 });
 

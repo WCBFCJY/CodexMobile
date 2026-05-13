@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { bridgeConnectionLabel } from './panels/topbar-status.js';
 
-test('bridgeConnectionLabel shows idle desktop IPC as pending thread takeover', () => {
+test('bridgeConnectionLabel shows idle desktop IPC as mirror-only sync', () => {
   const label = bridgeConnectionLabel('connected', {
     connected: true,
     mode: 'desktop-ipc'
@@ -17,8 +17,8 @@ test('bridgeConnectionLabel shows idle desktop IPC as pending thread takeover', 
     selectedSession: { id: 'thread-1' }
   });
 
-  assert.equal(label.label, '线程待确认');
-  assert.match(label.description, /是否已被桌面接管要在发送时确认/);
+  assert.equal(label.label, '桌面同步');
+  assert.match(label.description, /移动端发送固定走后台 Codex/);
 });
 
 test('bridgeConnectionLabel distinguishes desktop and background running routes', () => {
@@ -27,7 +27,7 @@ test('bridgeConnectionLabel distinguishes desktop and background running routes'
       selectedSession: { id: 'thread-1' },
       selectedRuntime: { status: 'running', source: 'desktop-ipc' }
     }).label,
-    '桌面运行中'
+    '桌面镜像中'
   );
 
   assert.equal(
@@ -46,7 +46,7 @@ test('bridgeConnectionLabel avoids claiming IPC route before running source is k
   });
 
   assert.equal(label.label, '运行确认中');
-  assert.match(label.description, /正在确认/);
+  assert.match(label.description, /等待 sync runtime/);
 });
 
 test('bridgeConnectionLabel uses compact background and disconnected labels', () => {

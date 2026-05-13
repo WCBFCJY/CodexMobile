@@ -5,6 +5,8 @@
  *
  * Exports:
  * - `nextSyncedComposerSettings` — 基于当前/上一次 status 计算下一组 `model` 与 `reasoningEffort`。
+ * - `mergeModelSettingsIntoStatus` — 将服务端模型设置广播合并回 status。
+ * - `shouldApplyModelSettings` — 判断线程级模型广播是否属于当前会话。
  *
  * Inward: 无外部模块；纯比较逻辑。
  *
@@ -53,4 +55,26 @@ export function nextSyncedComposerSettings({
       fallbackValue: fallbackReasoningEffort
     })
   };
+}
+
+export function mergeModelSettingsIntoStatus(status = {}, settings = {}) {
+  const model = clean(settings.model);
+  const reasoningEffort = clean(settings.reasoningEffort);
+  const modelShort = clean(settings.modelShort);
+  const provider = clean(settings.provider);
+  return {
+    ...(status || {}),
+    ...(provider ? { provider } : {}),
+    ...(model ? { model } : {}),
+    ...(modelShort ? { modelShort } : {}),
+    ...(reasoningEffort ? { reasoningEffort } : {})
+  };
+}
+
+export function shouldApplyModelSettings(settings = {}, selectedSession = null) {
+  const sessionId = clean(settings.sessionId);
+  if (!sessionId) {
+    return true;
+  }
+  return sessionId === clean(selectedSession?.id);
 }

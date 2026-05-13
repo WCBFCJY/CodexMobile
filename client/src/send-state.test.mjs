@@ -9,18 +9,18 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { composerSendState } from './send-state.js';
 
-test('composerSendState blocks sending when the desktop bridge is unavailable', () => {
+test('composerSendState allows mobile headless sending when the desktop bridge is unavailable', () => {
   const state = composerSendState({
     hasInput: true,
     desktopBridge: { connected: false, mode: 'unavailable' }
   });
 
-  assert.equal(state.disabled, true);
-  assert.equal(state.mode, 'unavailable');
-  assert.equal(state.label, '桌面端 Codex 未连接');
+  assert.equal(state.disabled, false);
+  assert.equal(state.mode, 'start');
+  assert.equal(state.label, '发送消息');
 });
 
-test('composerSendState starts a desktop turn when idle', () => {
+test('composerSendState starts a turn when idle', () => {
   const state = composerSendState({
     hasInput: true,
     desktopBridge: { connected: true, mode: 'desktop-proxy', capabilities: { createThread: true } },
@@ -59,7 +59,7 @@ test('composerSendState preserves queue and interrupt when active turn cannot st
   assert.equal(state.canInterrupt, true);
 });
 
-test('composerSendState blocks draft sends when desktop direct creation is unavailable', () => {
+test('composerSendState allows draft sends through headless when desktop direct creation is unavailable', () => {
   const state = composerSendState({
     hasInput: true,
     sessionIsDraft: true,
@@ -70,9 +70,8 @@ test('composerSendState blocks draft sends when desktop direct creation is unava
     }
   });
 
-  assert.equal(state.disabled, true);
-  assert.equal(state.mode, 'create-unavailable');
-  assert.equal(state.label, '只能继续桌面端已有对话');
+  assert.equal(state.disabled, false);
+  assert.equal(state.mode, 'start');
 });
 
 test('composerSendState still allows existing desktop threads when createThread is unavailable', () => {

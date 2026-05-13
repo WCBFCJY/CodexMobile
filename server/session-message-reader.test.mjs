@@ -548,6 +548,52 @@ test('messagesFromRolloutJsonl hides desktop injected browser context from user 
   assert.equal(result.messages[0].content, '移动端点线程重命名，没弹窗 没反应啊');
 });
 
+test('messagesFromRolloutJsonl drops duplicate guided browser request envelopes', () => {
+  const content = [
+    JSON.stringify({
+      timestamp: '2026-05-13T05:49:20.000Z',
+      type: 'turn_context',
+      payload: { turn_id: 'turn-1' }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-13T05:49:21.000Z',
+      type: 'response_item',
+      payload: {
+        id: 'user-1',
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: 'ok 现在是移动端随便发一条消息测试' }]
+      }
+    }),
+    JSON.stringify({
+      timestamp: '2026-05-13T05:49:22.000Z',
+      type: 'response_item',
+      payload: {
+        id: 'browser-envelope-1',
+        type: 'message',
+        role: 'user',
+        content: [{
+          type: 'input_text',
+          text: [
+            '# In app browser:',
+            '- The user has the in-app browser open.',
+            '- Current URL: http://localhost:3321/',
+            '',
+            '## My request for Codex:',
+            'ok 现在是移动端随便发一条消息测试'
+          ].join('\n')
+        }]
+      }
+    })
+  ].join('\n');
+
+  const result = messagesFromRolloutJsonl(content, 'session-1');
+
+  assert.deepEqual(result.messages.map((message) => [message.content, Boolean(message.guided)]), [
+    ['ok 现在是移动端随便发一条消息测试', false]
+  ]);
+});
+
 test('messagesFromRolloutJsonl uses diff comment when the injected request section is empty', () => {
   const content = [
     JSON.stringify({

@@ -28,6 +28,7 @@ import {
   messagesFromDesktopThread as defaultMessagesFromDesktopThread,
   planMessageFromContent,
   planRequestMessageFromContent,
+  removeDuplicateGuidedUserSegments,
   removeFallbackActivitiesCoveredByRaw as defaultRemoveFallbackActivitiesCoveredByRaw,
   sanitizeVisibleUserMessage,
   sortDesktopActivitySteps as defaultSortDesktopActivitySteps,
@@ -171,6 +172,7 @@ export function messagesFromRolloutJsonl(content, sessionId) {
       id: entry.payload.id || `${turn.id}-${role}-${messages.length + 1}`,
       role,
       content: role === 'user' ? sanitizeVisibleUserMessage(contentText) : contentText,
+      ...(role === 'user' ? { segmentIndex: userIndex } : {}),
       ...(role === 'user' ? guidedUserMetadata(userIndex > 0) : {}),
       timestamp,
       turnId: turn.id,
@@ -178,15 +180,16 @@ export function messagesFromRolloutJsonl(content, sessionId) {
     });
   }
 
+  const dedupedMessages = removeDuplicateGuidedUserSegments(messages);
   const filteredMessages = implementedPlanContents.size
-    ? messages.filter((message) => {
+    ? dedupedMessages.filter((message) => {
       if (message.role !== 'plan_request') {
         return true;
       }
       const planContent = String(message.planImplementation?.planContent || '').replace(/\s+/g, ' ').trim();
       return !implementedPlanContents.has(planContent);
     })
-    : messages;
+    : dedupedMessages;
 
   return { messages: filteredMessages, turns };
 }
@@ -545,6 +548,7 @@ export function createSessionMessageReader({
       for (const item of collabActivities) {
         upsertDesktopActivity(messages, item.turnId, item.activity, item.segmentIndex);
       }
+      messages.splice(0, messages.length, ...removeDuplicateGuidedUserSegments(messages));
       sortDesktopActivitySteps(messages);
     }
     const orderedMessages = sortMessagesByConversationOrder(messages);

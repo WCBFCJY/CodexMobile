@@ -851,6 +851,9 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
   const abortPromise = new Promise((_, reject) => {
     abortController.signal.addEventListener('abort', () => reject(abortError()), { once: true });
   });
+  abortPromise.catch(() => {
+    // The abort can arrive before the turn reaches Promise.race; keep Node from treating it as unhandled.
+  });
   let turnTimeoutTimer = null;
   let turnInactivityTimeoutTimer = null;
   let resetTurnInactivityTimeout = () => {};
@@ -866,6 +869,13 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
       cwd: workingDirectory,
       clientInfo: { name: 'CodexMobile', title: null, version: '0.1.0' },
       allowHeadlessLocal: true,
+      transport: {
+        mode: 'headless-local',
+        strict: false,
+        sockPath: null,
+        connected: true,
+        reason: '移动端后台 Codex 执行固定使用独立 headless app-server'
+      },
       onServerRequest: async (appMessage) => {
         resetTurnInactivityTimeout();
         if (appMessage?.method === 'item/plan/requestImplementation') {

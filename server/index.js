@@ -42,7 +42,13 @@ import {
   renameSession
 } from './codex-data.js';
 import { getCodexQuota } from './codex-quota.js';
-import { readCodexConfig } from './codex-config.js';
+import {
+  modelSettingsKey,
+  readCodexConfig,
+  readCodexModelSettings,
+  readCodexThreadModelSettings,
+  writeCodexModelSettings
+} from './codex-config.js';
 import { getDesktopBridgeStatus } from './codex-app-server.js';
 import { createChatRouteHandler } from './chat-routes.js';
 import { createFeishuIntegration } from './feishu-routes.js';
@@ -53,13 +59,7 @@ import { createNotificationRouteHandler } from './notification-routes.js';
 import { createSessionRouteHandler } from './session-routes.js';
 import { createVoiceRouteHandler } from './voice-routes.js';
 import { abortCodexTurn, getActiveRuns, runCodexTurn, steerCodexTurn } from './codex-runner.js';
-import {
-  interruptDesktopFollowerTurn,
-  setDesktopFollowerCollaborationMode,
-  setDesktopFollowerModelAndReasoning,
-  startDesktopFollowerTurn,
-  steerDesktopFollowerTurn
-} from './desktop-ipc-client.js';
+import { setDesktopFollowerModelAndReasoning } from './desktop-ipc-client.js';
 import { GENERATED_ROOT, isImageRequest, runImageTurn } from './image-generator.js';
 import { useLegacyImageGenerator } from './codex-native-images.js';
 import { getLarkDocsStatus, logoutLarkCli, startLarkCliAuth } from './lark-cli.js';
@@ -78,6 +78,7 @@ import {
 import { readBody, sendJson } from './http-utils.js';
 import { createPushService } from './push-service.js';
 import { createStaticService } from './static-service.js';
+import { createSyncBridge } from './sync/sync-bridge.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -116,6 +117,7 @@ const pushService = createPushService({
   statePath: PUSH_STATE,
   subject: PUSH_SUBJECT
 });
+const syncBridge = createSyncBridge();
 const feishuIntegration = createFeishuIntegration({
   statePath: FEISHU_AUTH_STATE,
   appId: FEISHU_APP_ID,
@@ -130,6 +132,9 @@ const feishuIntegration = createFeishuIntegration({
   remoteAddress
 });
 let statusConfigFallback = null;
+let liveModelSettings = null;
+let lastObservedModelSettingsKey = '';
+const lastObservedThreadModelSettingsKeys = new Map();
 
 async function getStatusConfigFallback() {
   if (!statusConfigFallback) {
@@ -144,6 +149,39 @@ async function getStatusConfigFallback() {
 function fallbackModels(config) {
   const model = config.model || 'gpt-5.5';
   return [{ value: model, label: model }];
+}
+
+function publicModelSettings(settings = {}, extra = {}) {
+  const model = String(settings.model || 'gpt-5.5').trim() || 'gpt-5.5';
+  const reasoningEffort = String(settings.reasoningEffort || DEFAULT_REASONING_EFFORT).trim() || DEFAULT_REASONING_EFFORT;
+  return {
+    provider: String(settings.provider || 'codex').trim() || 'codex',
+    model,
+    modelShort: settings.modelShort || `${model.replace(/^gpt-/i, '').replace(/-codex.*$/i, '').replace(/-mini$/i, ' mini')} 中`,
+    reasoningEffort,
+    ...(settings.sessionId ? { sessionId: String(settings.sessionId) } : {}),
+    updatedAt: new Date().toISOString(),
+    ...extra
+  };
+}
+
+function mergeStatusModelSettings(config = {}) {
+  const settings = liveModelSettings || publicModelSettings(config);
+  return {
+    ...config,
+    ...settings,
+    reasoningEffort: settings.reasoningEffort || config.reasoningEffort || DEFAULT_REASONING_EFFORT
+  };
+}
+
+function normalizeReasoningEffort(value) {
+  const text = String(value || '').trim();
+  return ['low', 'medium', 'high', 'xhigh', 'minimal'].includes(text) ? text : null;
+}
+
+function normalizeRequestedModel(value) {
+  const text = String(value || '').trim();
+  return /^[A-Za-z0-9._:-]+$/.test(text) ? text : null;
 }
 
 function requestOrigin(req) {
@@ -173,15 +211,106 @@ async function requireAuth(req, res, pathname = '', url = null) {
 }
 
 function broadcast(payload) {
+  const outbound =
+    payload?.type === 'sync-event' || payload?.type === 'sync-state'
+      ? [payload]
+      : syncBridge.consumeLegacyPayload(payload);
+  for (const item of outbound) {
+    sendSocketPayload(item);
+  }
+  if (payload.type !== 'sync-event' && payload.type !== 'sync-state') {
+    pushService.notifyForPayload(payload).catch((error) => {
+      console.warn('[push] Notification dispatch failed:', error.message);
+    });
+  }
+}
+
+function sendSocketPayload(payload) {
   const serialized = JSON.stringify(payload);
   for (const socket of sockets) {
     if (socket.readyState === socket.OPEN) {
       socket.send(serialized);
     }
   }
-  pushService.notifyForPayload(payload).catch((error) => {
-    console.warn('[push] Notification dispatch failed:', error.message);
-  });
+}
+
+function broadcastModelSettings(settings, { source = 'server', desktopSync = null, sessionId = null } = {}) {
+  const payload = {
+    type: 'model-settings-updated',
+    source,
+    ...publicModelSettings(settings, sessionId ? { sessionId } : {}),
+    desktopSync,
+    timestamp: new Date().toISOString()
+  };
+  if (!payload.sessionId) {
+    liveModelSettings = publicModelSettings(payload);
+    lastObservedModelSettingsKey = modelSettingsKey(liveModelSettings);
+  }
+  broadcast(payload);
+  return payload;
+}
+
+function startModelSettingsWatcher() {
+  async function tick() {
+    try {
+      const settings = publicModelSettings(await readCodexModelSettings(), { source: 'codex-config' });
+      const key = modelSettingsKey(settings);
+      if (!lastObservedModelSettingsKey) {
+        liveModelSettings = settings;
+        lastObservedModelSettingsKey = key;
+        return;
+      }
+      if (key === lastObservedModelSettingsKey) {
+        return;
+      }
+      statusConfigFallback = null;
+      broadcastModelSettings(settings, { source: 'desktop-config' });
+    } catch (error) {
+      console.warn('[model-settings] Watch failed:', error.message);
+    }
+  }
+  tick();
+  const timer = setInterval(tick, 2500);
+  if (typeof timer.unref === 'function') {
+    timer.unref();
+  }
+}
+
+function startThreadModelSettingsWatcher() {
+  async function tick() {
+    try {
+      const settingsRows = await readCodexThreadModelSettings({ limit: 250 });
+      const seen = new Set();
+      for (const settings of settingsRows) {
+        if (!settings.sessionId) {
+          continue;
+        }
+        seen.add(settings.sessionId);
+        const key = modelSettingsKey(settings);
+        const previousKey = lastObservedThreadModelSettingsKeys.get(settings.sessionId);
+        lastObservedThreadModelSettingsKeys.set(settings.sessionId, key);
+        if (!previousKey || previousKey === key) {
+          continue;
+        }
+        broadcastModelSettings(settings, {
+          source: 'desktop-thread',
+          sessionId: settings.sessionId
+        });
+      }
+      for (const sessionId of lastObservedThreadModelSettingsKeys.keys()) {
+        if (!seen.has(sessionId)) {
+          lastObservedThreadModelSettingsKeys.delete(sessionId);
+        }
+      }
+    } catch (error) {
+      console.warn('[model-settings] Thread watch failed:', error.message);
+    }
+  }
+  tick();
+  const timer = setInterval(tick, 2500);
+  if (typeof timer.unref === 'function') {
+    timer.unref();
+  }
 }
 
 const chatService = createChatService({
@@ -197,11 +326,6 @@ const chatService = createChatService({
   renameSession,
   broadcast,
   runCodexTurn,
-  setDesktopFollowerModelAndReasoning,
-  setDesktopFollowerCollaborationMode,
-  startDesktopFollowerTurn,
-  steerDesktopFollowerTurn,
-  interruptDesktopFollowerTurn,
   abortCodexTurn,
   getActiveRuns,
   steerCodexTurn,
@@ -263,6 +387,39 @@ function desktopBroadcastIsThreadStateChange(message = {}) {
   return ['thread-stream-state-changed', 'thread-read-state-changed'].includes(String(message.method || ''));
 }
 
+function syncStateHasDesktopRuntime(sessionId) {
+  const id = String(sessionId || '').trim();
+  if (!id) {
+    return false;
+  }
+  const runtimeById = syncBridge.publicState()?.runtimeById || {};
+  return Object.values(runtimeById).some(
+    (runtime) => runtime?.source === 'desktop-ipc' && String(runtime?.sessionId || '') === id
+  );
+}
+
+async function refreshAfterDesktopThreadStateChange({ sessionId, projectId, inferIdleCompletion = false } = {}) {
+  const snapshot = await startSyncRefresh();
+  if (snapshot?.projects) {
+    broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
+  }
+  if (!inferIdleCompletion || !sessionId) {
+    return;
+  }
+  const refreshedSession = getSession(sessionId);
+  if (!refreshedSession || refreshedSession.runtime?.status === 'running') {
+    return;
+  }
+  broadcast({
+    type: 'desktop-thread-updated',
+    source: 'desktop-ipc',
+    sessionId,
+    projectId: projectId || refreshedSession.projectId || null,
+    status: 'completed',
+    timestamp: new Date().toISOString()
+  });
+}
+
 const desktopIpcBroadcastListener = createDesktopIpcBroadcastListener({
   async onBroadcast(message) {
     const params = message.params || {};
@@ -282,16 +439,17 @@ const desktopIpcBroadcastListener = createDesktopIpcBroadcastListener({
         status: status || undefined,
         timestamp: new Date().toISOString()
       });
-      if (status && status !== 'running') {
-        startSyncRefresh()
-          .then((snapshot) => {
-            if (snapshot?.projects) {
-              broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
-            }
-          })
-          .catch((error) => {
-            console.warn('[desktop-ipc] sync refresh after thread state change failed:', error.message);
-          });
+      const shouldRefresh =
+        (status && status !== 'running') ||
+        (!status && syncStateHasDesktopRuntime(sessionId));
+      if (shouldRefresh) {
+        refreshAfterDesktopThreadStateChange({
+          sessionId,
+          projectId: params.projectId || params.project_id || session?.projectId || null,
+          inferIdleCompletion: !status
+        }).catch((error) => {
+          console.warn('[desktop-ipc] sync refresh after thread state change failed:', error.message);
+        });
       }
       return;
     }
@@ -409,8 +567,9 @@ async function refreshCodexCacheForSyncResponse() {
 
 async function publicStatus(authenticated) {
   const snapshot = getCacheSnapshot();
-  const config = snapshot.config || await getStatusConfigFallback() || {};
+  const config = mergeStatusModelSettings(snapshot.config || await getStatusConfigFallback() || {});
   const desktopBridge = await getDesktopBridgeStatus();
+  syncBridge.setBridgeStatus(desktopBridge);
   const activeRuns = [
     ...getActiveRuns(),
     ...chatService.getActiveImageRuns()
@@ -434,6 +593,8 @@ async function publicStatus(authenticated) {
     docs: await feishuIntegration.publicDocsStatus(authenticated),
     syncedAt: snapshot.syncedAt,
     activeRuns,
+    localHeadlessRuns: activeRuns,
+    syncState: syncBridge.publicState(),
     runtimeDebug: getRuntimeDebugPublicState(),
     auth: {
       required: true,
@@ -481,6 +642,36 @@ async function handleApi(req, res, url) {
     const body = await readBody(req);
     setRuntimeDebugUiEnabled(Boolean(body.enabled));
     sendJson(res, 200, getRuntimeDebugPublicState());
+    return;
+  }
+
+  if (method === 'POST' && pathname === '/api/model-settings') {
+    const body = await readBody(req);
+    const baseConfig = mergeStatusModelSettings(getCacheSnapshot().config || await getStatusConfigFallback() || {});
+    const model = normalizeRequestedModel(body.model) || normalizeRequestedModel(baseConfig.model);
+    const reasoningEffort = normalizeReasoningEffort(body.reasoningEffort) || normalizeReasoningEffort(baseConfig.reasoningEffort) || DEFAULT_REASONING_EFFORT;
+    if (!model) {
+      sendJson(res, 400, { error: 'Invalid model setting', code: 'CODEXMOBILE_INVALID_MODEL' });
+      return;
+    }
+
+    const written = publicModelSettings(await writeCodexModelSettings({ model, reasoningEffort }), { source: 'mobile' });
+    statusConfigFallback = null;
+    let desktopSync = { attempted: false, synced: false, error: null };
+    const sessionId = String(body.sessionId || body.conversationId || '').trim();
+    const desktopBridge = await getDesktopBridgeStatus();
+    if (sessionId && desktopBridge?.connected && desktopBridge?.capabilities?.sendToOpenDesktopThread) {
+      desktopSync = { attempted: true, synced: false, error: null };
+      try {
+        await setDesktopFollowerModelAndReasoning(sessionId, written.model, written.reasoningEffort, { timeoutMs: 2500 });
+        desktopSync.synced = true;
+      } catch (error) {
+        desktopSync.error = error.code || error.message || 'desktop-sync-failed';
+        console.warn('[model-settings] Desktop IPC model sync failed:', error.message);
+      }
+    }
+    const payload = broadcastModelSettings(written, { source: 'mobile', desktopSync });
+    sendJson(res, 200, { success: true, settings: payload, desktopSync });
     return;
   }
 
@@ -584,11 +775,14 @@ async function main() {
       sockets.add(ws);
       ws.on('close', () => sockets.delete(ws));
       ws.send(JSON.stringify({ type: 'connected', status: await publicStatus(true) }));
+      ws.send(JSON.stringify(syncBridge.publicStatePayload()));
     });
   };
 
   server.on('upgrade', handleUpgrade);
   desktopIpcBroadcastListener.start();
+  startModelSettingsWatcher();
+  startThreadModelSettingsWatcher();
 
   server.listen(PORT, HOST, () => {
     console.log(`CodexMobile listening on http://${HOST}:${PORT}`);
