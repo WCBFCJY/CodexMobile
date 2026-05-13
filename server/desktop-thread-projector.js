@@ -608,6 +608,17 @@ export function removeFallbackActivitiesCoveredByRaw(messages, rawActivities) {
       return String(activity?.id || '').includes('-raw-');
     });
   }
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (
+      message?.role === 'activity' &&
+      covered.has(message.turnId) &&
+      Array.isArray(message.activities) &&
+      message.activities.length === 0
+    ) {
+      messages.splice(index, 1);
+    }
+  }
 }
 
 function activityOrderValue(activity) {

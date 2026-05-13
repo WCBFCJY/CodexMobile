@@ -65,6 +65,7 @@ export function ChatMessage({
   const canAct = message.role === 'user' || message.role === 'assistant';
   const userMedia = isUser ? splitMessageImages(message.content) : { text: message.content, images: [] };
   const visibleContent = isUser ? userMedia.text : message.content;
+  const userDeliveryText = isUser ? deliveryStatusText(message) : '';
 
   async function handleCopy() {
     const copiedText = await copyTextToClipboard(message.content);
@@ -92,7 +93,9 @@ export function ChatMessage({
         {visibleContent ? (
           <div className="message-bubble">
             <MessageContent content={visibleContent} onPreviewImage={onPreviewImage} />
-            {message.timestamp ? <time>{formatTime(message.timestamp)}</time> : null}
+            {isUser && userDeliveryText ? (
+              <span className={`message-delivery is-${message.deliveryState || 'confirmed'}`}>{userDeliveryText}</span>
+            ) : message.timestamp ? <time>{formatTime(message.timestamp)}</time> : null}
           </div>
         ) : null}
         {afterContent ? <div className="message-after-content">{afterContent}</div> : null}
@@ -111,4 +114,14 @@ export function ChatMessage({
       </div>
     </div>
   );
+}
+
+function deliveryStatusText(message) {
+  if (message.deliveryState === 'pending') {
+    return '发送中...';
+  }
+  if (message.deliveryState === 'failed') {
+    return '发送失败';
+  }
+  return message.timestamp ? formatTime(message.timestamp) : '';
 }

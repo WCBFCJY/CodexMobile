@@ -1048,15 +1048,21 @@
   background: rgba(255, 255, 255, 0.92);
 }
 
-.message-bubble time {
+.message-bubble time,
+.message-delivery {
   display: block;
   margin-top: 6px;
   color: rgba(111, 116, 122, 0.78);
   font-size: 10px;
 }
 
-.message-row.is-user .message-bubble time {
+.message-row.is-user .message-bubble time,
+.message-row.is-user .message-delivery {
   color: rgba(255, 255, 255, 0.64);
+}
+
+.message-delivery.is-failed {
+  color: var(--danger);
 }
 
 [data-theme="dark"] .empty-orbit {
@@ -1467,11 +1473,13 @@
   background: rgba(10, 10, 11, 0.76);
 }
 
-[data-theme="dark"] .message-bubble time {
+[data-theme="dark"] .message-bubble time,
+[data-theme="dark"] .message-delivery {
   color: rgba(212, 212, 216, 0.62);
 }
 
-[data-theme="dark"] .message-row.is-user .message-bubble time {
+[data-theme="dark"] .message-row.is-user .message-bubble time,
+[data-theme="dark"] .message-row.is-user .message-delivery {
   color: rgba(212, 212, 216, 0.66);
 }
 

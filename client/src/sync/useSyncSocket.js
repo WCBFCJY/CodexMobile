@@ -77,6 +77,41 @@ function clearRuntimeForEvent(event, { clearRun, setThreadRuntimeById }) {
   setThreadRuntimeById((current) => applySyncRuntimeEvent(current, event));
 }
 
+function confirmOrAppendUserMessage(current, event) {
+  const incoming = {
+    ...event.message,
+    sessionId: event.message.sessionId || event.sessionId || null,
+    turnId: event.message.turnId || event.turnId || event.clientTurnId || null,
+    deliveryState: 'confirmed'
+  };
+  const runKeys = new Set([event.turnId, event.clientTurnId, incoming.turnId].filter(Boolean).map(String));
+  const pendingIndex = current.findIndex((message) =>
+    message.role === 'user' &&
+    message.deliveryState === 'pending' &&
+    sameUserMessageContent(message.content, incoming.content) &&
+    (!runKeys.size || !message.turnId || runKeys.has(String(message.turnId)))
+  );
+  if (pendingIndex >= 0) {
+    return current.map((message, index) =>
+      index === pendingIndex
+        ? {
+          ...message,
+          sessionId: incoming.sessionId || message.sessionId || null,
+          turnId: incoming.turnId || message.turnId || null,
+          deliveryState: 'confirmed',
+          timestamp: message.timestamp || incoming.timestamp
+        }
+        : message
+    );
+  }
+  const existingConfirmed = current.some((message) =>
+    message.role === 'user' &&
+    sameUserMessageContent(message.content, incoming.content) &&
+    (!runKeys.size || !message.turnId || runKeys.has(String(message.turnId)))
+  );
+  return existingConfirmed ? current : removeStalePlanRequestsAfterUserMessages([...current, incoming]);
+}
+
 export function applySyncSocketPayload(payload, context) {
   if (payload?.type === 'sync-state') {
     applyRuntimeStateFromSnapshot(payload.state, context);
@@ -168,12 +203,7 @@ export function applySyncSocketPayload(payload, context) {
   }
 
   if (event.eventType === 'message.user' && event.message && syncEventMatchesCurrent(event, context.selectedSessionRef)) {
-    context.setMessages((current) => {
-      const exists = current.some((message) =>
-        message.role === 'user' && sameUserMessageContent(message.content, event.message.content)
-      );
-      return exists ? current : removeStalePlanRequestsAfterUserMessages([...current, event.message]);
-    });
+    context.setMessages((current) => confirmOrAppendUserMessage(current, event));
     return true;
   }
 

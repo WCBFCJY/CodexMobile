@@ -47,6 +47,35 @@ test('mergeLiveSelectedThreadMessages keeps running local activity while loaded 
   assert.equal(merged.some((message) => message.role === 'activity' && message.status === 'running'), true);
 });
 
+test('mergeLiveSelectedThreadMessages dedupes activity cards by client turn id across refresh', () => {
+  const current = [
+    {
+      id: 'status-client-turn',
+      role: 'activity',
+      status: 'running',
+      turnId: 'client-turn',
+      clientTurnId: 'client-turn',
+      sessionId: 'thread-1',
+      timestamp: '2026-05-13T00:00:01.000Z'
+    }
+  ];
+  const loaded = [
+    {
+      id: 'activity-real-turn',
+      role: 'activity',
+      status: 'running',
+      turnId: 'real-turn',
+      clientTurnId: 'client-turn',
+      sessionId: 'thread-1',
+      timestamp: '2026-05-13T00:00:02.000Z',
+      activities: [{ id: 'exec-1', kind: 'command_execution', status: 'running' }]
+    }
+  ];
+
+  const merged = mergeLiveSelectedThreadMessages(current, loaded);
+  assert.deepEqual(merged.map((message) => message.id), ['activity-real-turn']);
+});
+
 test('mergeLiveSelectedThreadMessages can drop stale desktop running activity after final reply arrives', () => {
   const current = [
     { id: 'u-local', role: 'user', content: 'run', sessionId: 'thread-1', timestamp: '2026-05-13T00:00:00.000Z' },

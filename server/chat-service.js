@@ -368,10 +368,14 @@ export function createChatService({
         type: 'user-message',
         sessionId: result.sessionId || selectedSessionId,
         projectId: project.id,
+        turnId: result.turnId || turnId,
+        clientTurnId: turnId,
         message: {
           id: `local-${Date.now()}`,
           role: 'user',
           content: visibleMessage,
+          turnId: result.turnId || turnId,
+          deliveryState: 'confirmed',
           timestamp: new Date().toISOString()
         }
       });
@@ -421,10 +425,14 @@ export function createChatService({
       type: 'user-message',
       sessionId: conversationSessionId,
       projectId: project.id,
+      turnId,
+      clientTurnId: turnId,
       message: {
         id: `local-${Date.now()}`,
         role: 'user',
         content: visibleMessage,
+        turnId,
+        deliveryState: 'confirmed',
         timestamp: new Date().toISOString()
       }
     });

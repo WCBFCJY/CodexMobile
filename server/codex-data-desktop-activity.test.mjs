@@ -10,8 +10,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { messagesFromDesktopThread, rawSessionActivitiesFromJsonl } from './codex-data.js';
-import { removeDuplicateGuidedUserSegments } from './desktop-thread-projector.js';
-import { upsertDesktopActivity } from './desktop-thread-projector.js';
+import {
+  removeDuplicateGuidedUserSegments,
+  removeFallbackActivitiesCoveredByRaw,
+  upsertDesktopActivity
+} from './desktop-thread-projector.js';
 
 test('messagesFromDesktopThread preserves running desktop file activity', () => {
   const messages = messagesFromDesktopThread({
@@ -306,6 +309,38 @@ test('completed raw desktop activities create terminal activity containers', () 
   assert.equal(activity.startedAt, '2026-02-02T00:00:01.000Z');
   assert.equal(activity.completedAt, '2026-02-02T00:00:04.000Z');
   assert.equal(activity.durationMs, 3000);
+});
+
+test('removeFallbackActivitiesCoveredByRaw removes empty fallback containers', () => {
+  const messages = [
+    {
+      id: 'activity-turn-1',
+      role: 'activity',
+      turnId: 'turn-1',
+      status: 'running',
+      activities: [
+        {
+          id: 'fallback-command',
+          kind: 'command_execution',
+          label: '正在处理本地任务',
+          status: 'running'
+        }
+      ]
+    }
+  ];
+
+  removeFallbackActivitiesCoveredByRaw(messages, [
+    {
+      turnId: 'turn-1',
+      activity: {
+        id: 'turn-1-raw-command-0',
+        kind: 'command_execution',
+        status: 'completed'
+      }
+    }
+  ]);
+
+  assert.deepEqual(messages, []);
 });
 
 test('upsertDesktopActivity lets desktop completion replace running timing', () => {

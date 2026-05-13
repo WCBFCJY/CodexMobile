@@ -16,8 +16,7 @@ import { contentWithAttachmentPreviews } from '../chat/MarkdownContent.jsx';
 import { serviceTierForModelSpeed } from '../composer/composer-options.js';
 import {
   dismissPlanImplementationPrompts,
-  removeStalePlanRequestsAfterUserMessages,
-  upsertStatusMessage
+  removeStalePlanRequestsAfterUserMessages
 } from '../chat/activity-model.js';
 import {
   autoTitlePatch,
@@ -136,29 +135,19 @@ export function useTurnSubmission({
       )
     }));
     const submittedAt = new Date().toISOString();
+    const localUserMessageId = `local-${Date.now()}`;
     const localUserMessage = {
-      id: `local-${Date.now()}`,
+      id: localUserMessageId,
       role: 'user',
       content: optimisticContent,
       ...userMessageMetadataForSendMode(sendMode),
       timestamp: submittedAt,
       sessionId: optimisticSessionId,
-      turnId
+      turnId,
+      deliveryState: 'pending'
     };
     setMessages((current) =>
-      upsertStatusMessage(removeStalePlanRequestsAfterUserMessages([...current, localUserMessage]), {
-        source: 'local-optimistic',
-        projectId: project.id,
-        sessionId: optimisticSessionId,
-        previousSessionId: draftSessionId || outgoingSessionId,
-        turnId,
-        kind: 'reasoning',
-        status: 'running',
-        label: '正在思考',
-        transient: true,
-        startedAt: submittedAt,
-        timestamp: submittedAt
-      })
+      removeStalePlanRequestsAfterUserMessages([...current, localUserMessage])
     );
     markRun?.({
       source: 'local-optimistic',
@@ -197,6 +186,18 @@ export function useTurnSubmission({
         }
       });
       const resultTurnId = result.turnId || turnId;
+      setMessages((current) =>
+        current.map((item) =>
+          item.id === localUserMessageId
+            ? {
+              ...item,
+              deliveryState: 'confirmed',
+              turnId: resultTurnId,
+              sessionId: result.sessionId || optimisticSessionId
+            }
+            : item
+        )
+      );
       return {
         turnId: resultTurnId,
         optimisticSessionId,
@@ -216,15 +217,11 @@ export function useTurnSubmission({
         restoreTextToInput(displayMessage);
       }
       setMessages((current) =>
-        upsertStatusMessage(current, {
-          sessionId: optimisticSessionId,
-          turnId,
-          kind: 'turn',
-          status: 'failed',
-          label: '发送失败',
-          detail: error.message,
-          timestamp: new Date().toISOString()
-        })
+        current.map((item) =>
+          item.id === localUserMessageId
+            ? { ...item, deliveryState: 'failed', error: error.message }
+            : item
+        )
       );
       throw error;
     }

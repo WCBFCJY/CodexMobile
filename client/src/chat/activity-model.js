@@ -20,6 +20,72 @@ export function statusMessageId(payload) {
   return `status-${payload.clientTurnId || payload.turnId || payload.sessionId || 'current'}`;
 }
 
+function cleanIdentity(value) {
+  return String(value || '').trim();
+}
+
+export function processItemId(payload = {}, fallbackKind = 'status', label = '') {
+  const explicit = cleanIdentity(
+    payload.itemId ||
+    payload.messageId ||
+    payload.callId ||
+    payload.call_id ||
+    payload.id
+  );
+  if (explicit) {
+    return explicit;
+  }
+  const kind = cleanIdentity(payload.kind || fallbackKind || 'activity');
+  const segment = cleanIdentity(payload.segmentIndex ?? payload.segment_index ?? 0) || '0';
+  const clientTurnId = cleanIdentity(payload.clientTurnId);
+  if (clientTurnId) {
+    return `client:${clientTurnId}:segment:${segment}:kind:${kind}`;
+  }
+  const turnId = cleanIdentity(payload.turnId);
+  if (turnId) {
+    return `turn:${turnId}:segment:${segment}:kind:${kind}`;
+  }
+  const sessionId = cleanIdentity(payload.sessionId);
+  const suffix = cleanIdentity(label || payload.status || 'step');
+  return `session:${sessionId || 'current'}:kind:${kind}:label:${suffix}`;
+}
+
+function activityMessageRunKeys(message = {}) {
+  const specific = [
+    message.turnId,
+    message.clientTurnId
+  ].map(cleanIdentity).filter(Boolean);
+  if (specific.length) {
+    return specific;
+  }
+  return [
+    message.previousSessionId,
+    message.sessionId
+  ].map(cleanIdentity).filter(Boolean);
+}
+
+function sameActivitySegment(message = {}, payload = {}) {
+  const messageSegment = cleanIdentity(message.segmentIndex ?? 0) || '0';
+  const payloadSegment = cleanIdentity(payload.segmentIndex ?? payload.segment_index ?? 0) || '0';
+  return messageSegment === payloadSegment;
+}
+
+function findActivityMessageIndex(current = [], payload = {}, proposedId = '') {
+  const exactIndex = current.findIndex((message) => message.id === proposedId);
+  if (exactIndex >= 0) {
+    return exactIndex;
+  }
+  const keys = new Set(activityMessageRunKeys(payload));
+  if (!keys.size) {
+    return -1;
+  }
+  return current.findIndex((message) =>
+    message?.role === 'activity' &&
+    sameActivitySegment(message, payload) &&
+    activityMessageRunKeys(message).some((key) => keys.has(key))
+  );
+}
+
 export function extractProposedPlanContent(message) {
   const value = String(message || '').trim();
   if (!value) {
@@ -394,7 +460,8 @@ export function activityStepFromPayload(payload, fallbackKind = 'status') {
     return null;
   }
   return {
-    id: payload.messageId || `${statusMessageId(payload)}-${payload.kind || fallbackKind}-${label || payload.status || 'step'}`,
+    id: processItemId(payload, fallbackKind, label || payload.status || 'step'),
+    itemId: cleanIdentity(payload.itemId || payload.messageId || payload.id),
     kind: payload.kind || fallbackKind,
     label,
     status: payload.status || 'running',
@@ -405,6 +472,7 @@ export function activityStepFromPayload(payload, fallbackKind = 'status') {
     fileChanges: payload.fileChanges || [],
     planImplementation: payload.planImplementation || null,
     toolName: payload.toolName || payload.name || '',
+    segmentIndex: payload.segmentIndex ?? payload.segment_index ?? null,
     timestamp: payload.timestamp || new Date().toISOString()
   };
 }
@@ -543,7 +611,7 @@ export function isPlaceholderActivityMessage(message) {
   }
   const activities = Array.isArray(message.activities) ? message.activities : [];
   if (!activities.length) {
-    return false;
+    return true;
   }
   return !activities.some((activity) => {
     if (isThinkingActivityStep(activity)) {
@@ -737,15 +805,16 @@ export function messageStreamSignature(messages) {
           return `${signature}:${output.length}:${output.slice(-160)}:${fileSignature}`;
         })
         .join('|');
-      return `${message.id}:${message.role}:${message.status || ''}:${message.content || ''}:${activitySignature}`;
+      return `${message.id}:${message.role}:${message.status || ''}:${message.deliveryState || ''}:${message.content || ''}:${activitySignature}`;
     })
     .join('\n');
 }
 
 export function upsertStatusMessage(current, payload) {
-  const id = statusMessageId(payload);
-  const existingIndex = current.findIndex((message) => message.id === id);
+  const proposedId = statusMessageId(payload);
+  const existingIndex = findActivityMessageIndex(current, payload, proposedId);
   const previous = existingIndex >= 0 ? current[existingIndex] : null;
+  const id = previous?.id || proposedId;
   const normalizedPayload =
     payload.kind === 'agent_message'
       ? { ...payload, label: String(payload.label || payload.content || '').trim() }
@@ -767,6 +836,7 @@ export function upsertStatusMessage(current, payload) {
     clientTurnId: normalizedPayload.clientTurnId || previous?.clientTurnId || null,
     sessionId: normalizedPayload.sessionId || previous?.sessionId || null,
     previousSessionId: normalizedPayload.previousSessionId || previous?.previousSessionId || null,
+    segmentIndex: normalizedPayload.segmentIndex ?? normalizedPayload.segment_index ?? previous?.segmentIndex ?? 0,
     source: normalizedPayload.source || previous?.source || null,
     transient: activityMessageTransientState(previous, normalizedPayload, activity),
     content: isTurnLevel ? (normalizedPayload.label || previous?.content || '正在处理') : (previous?.content || '正在处理'),
@@ -831,9 +901,10 @@ export function upsertActivityMessage(current, payload) {
       planRequestMessageFromPayload(payload, proposedPlan)
     );
   }
-  const id = statusMessageId(payload);
-  const existingIndex = current.findIndex((message) => message.id === id);
+  const proposedId = statusMessageId(payload);
+  const existingIndex = findActivityMessageIndex(current, payload, proposedId);
   const previous = existingIndex >= 0 ? current[existingIndex] : null;
+  const id = previous?.id || proposedId;
   const isTurnLevel = payload.kind === 'turn' || payload.kind === 'error';
   const activity = activityStepFromPayload(payload, 'activity');
   if (!activity && !previous) {
@@ -860,6 +931,7 @@ export function upsertActivityMessage(current, payload) {
     clientTurnId: payload.clientTurnId || previous?.clientTurnId || null,
     sessionId: payload.sessionId || previous?.sessionId || null,
     previousSessionId: payload.previousSessionId || previous?.previousSessionId || null,
+    segmentIndex: payload.segmentIndex ?? payload.segment_index ?? previous?.segmentIndex ?? 0,
     source: payload.source || previous?.source || null,
     transient: activityMessageTransientState(previous, payload, activity),
     content: previous?.content || '正在处理',

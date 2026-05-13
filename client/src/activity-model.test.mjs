@@ -222,6 +222,44 @@ test('completed thinking-only activity is suppressed from chat stream', () => {
   }), true);
 });
 
+test('empty activity container is suppressed from chat stream', () => {
+  assert.equal(shouldRenderActivityMessageInChat({
+    id: 'activity-turn-1',
+    role: 'activity',
+    status: 'completed',
+    activities: []
+  }), false);
+});
+
+test('activity steps merge by stable item id while the execution card stays singular', () => {
+  const current = upsertActivityMessage([], {
+    sessionId: 'thread-1',
+    turnId: 'turn-1',
+    messageId: 'exec-1',
+    kind: 'command_execution',
+    status: 'running',
+    label: '正在处理本地任务',
+    command: 'npm test'
+  });
+
+  const result = upsertActivityMessage(current, {
+    sessionId: 'thread-1',
+    turnId: 'turn-1',
+    messageId: 'exec-1',
+    kind: 'command_execution',
+    status: 'completed',
+    label: '本地任务已处理',
+    command: 'npm test',
+    output: 'ok'
+  });
+
+  assert.equal(result.length, 1);
+  assert.equal(result[0].activities.length, 1);
+  assert.equal(result[0].activities[0].id, 'exec-1');
+  assert.equal(result[0].activities[0].status, 'completed');
+  assert.equal(result[0].activities[0].output, 'ok');
+});
+
 test('upsertStatusMessage appends local thinking placeholder after optimistic user message', () => {
   const result = upsertStatusMessage([
     {

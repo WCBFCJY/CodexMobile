@@ -27,7 +27,11 @@ function isPendingLocalMessage(message) {
 }
 
 function messageRunKeys(message) {
-  return [message?.turnId, message?.sessionId, message?.previousSessionId].filter(Boolean).map(String);
+  const specific = [message?.turnId, message?.clientTurnId].filter(Boolean).map(String);
+  if (specific.length) {
+    return specific;
+  }
+  return [message?.previousSessionId, message?.sessionId].filter(Boolean).map(String);
 }
 
 function isTransientActivityMessage(message) {
