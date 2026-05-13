@@ -383,6 +383,107 @@ function rawMcpActivityFromCall({ payload, outputRecord, turns, sequence }) {
   };
 }
 
+function applyPatchInputText(payload = {}) {
+  const value = payload.input ?? payload.arguments ?? '';
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (value === null || value === undefined) {
+    return '';
+  }
+  return JSON.stringify(value);
+}
+
+function applyPatchFileHeader(line) {
+  const match = String(line || '').match(/^\*\*\* (Update|Add|Delete) File: (.+)$/);
+  if (!match) {
+    return null;
+  }
+  const kindByAction = {
+    Update: 'update',
+    Add: 'create',
+    Delete: 'delete'
+  };
+  return {
+    kind: kindByAction[match[1]] || 'update',
+    path: match[2].trim()
+  };
+}
+
+function diffStatsFromLines(lines) {
+  let additions = 0;
+  let deletions = 0;
+  for (const line of lines) {
+    if (line.startsWith('+++') || line.startsWith('---')) {
+      continue;
+    }
+    if (line.startsWith('+')) {
+      additions += 1;
+    } else if (line.startsWith('-')) {
+      deletions += 1;
+    }
+  }
+  return { additions, deletions };
+}
+
+function fileChangesFromApplyPatchInput(input) {
+  const text = String(input || '');
+  if (!text.includes('*** Begin Patch')) {
+    return [];
+  }
+  const changes = [];
+  let current = null;
+
+  const flush = () => {
+    if (!current?.path) {
+      return;
+    }
+    const stats = diffStatsFromLines(current.diffLines);
+    changes.push({
+      path: current.path,
+      kind: current.kind,
+      additions: stats.additions,
+      deletions: stats.deletions,
+      unifiedDiff: current.diffLines.join('\n'),
+      movePath: current.movePath || null
+    });
+  };
+
+  for (const line of text.split(/\r?\n/)) {
+    const header = applyPatchFileHeader(line);
+    if (header) {
+      flush();
+      current = { ...header, diffLines: [], movePath: null };
+      continue;
+    }
+    if (!current) {
+      continue;
+    }
+    const moveMatch = line.match(/^\*\*\* Move to: (.+)$/);
+    if (moveMatch) {
+      current.movePath = moveMatch[1].trim();
+      continue;
+    }
+    if (line === '*** End Patch' || line === '*** End of File') {
+      continue;
+    }
+    if (line.startsWith('@@') || line.startsWith('+') || line.startsWith('-') || line.startsWith(' ')) {
+      current.diffLines.push(line);
+    }
+  }
+  flush();
+  return changes;
+}
+
+function fileChangeDetail(fileChanges) {
+  return fileChanges
+    .map((change) => {
+      const stats = [`+${change.additions || 0}`, `-${change.deletions || 0}`].join(' ');
+      return [change.path, stats].filter(Boolean).join(' ');
+    })
+    .join('\n');
+}
+
 function rawFileChangeActivityFromCustomCall({ payload, outputRecord, turns, sequence }) {
   if (payload.name !== 'apply_patch') {
     return null;
@@ -393,6 +494,7 @@ function rawFileChangeActivityFromCustomCall({ payload, outputRecord, turns, seq
     return null;
   }
   const status = rawToolStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
+  const fileChanges = fileChangesFromApplyPatchInput(applyPatchInputText(payload));
   return {
     turnId,
     activity: {
@@ -400,8 +502,8 @@ function rawFileChangeActivityFromCustomCall({ payload, outputRecord, turns, seq
       kind: 'file_change',
       label: desktopMobileStatusLabel('file_change', status),
       status,
-      detail: '',
-      fileChanges: [],
+      detail: fileChangeDetail(fileChanges),
+      fileChanges,
       timestamp,
       sequence
     }

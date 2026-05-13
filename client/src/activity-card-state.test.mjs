@@ -19,8 +19,8 @@ test('activity card opens only while a visible process is running', () => {
   assert.equal(activityCardShouldOpen({ running: true, hasProcess: false }), false);
 });
 
-test('activity card stays open after completion when edited files are summarized', () => {
-  assert.equal(activityCardShouldOpen({ running: false, hasProcess: true, hasFileSummary: true }), true);
+test('activity card folds process after completion even when edited files are summarized', () => {
+  assert.equal(activityCardShouldOpen({ running: false, hasProcess: true, hasFileSummary: true }), false);
 });
 
 test('activity card treats running child steps as an active desktop process', () => {

@@ -4,6 +4,7 @@
  * Keywords: idle-polling, session-messages, reconcile
  *
  * Exports:
+ * - shouldPollSelectedSession — 判断当前选中会话是否应发起补账轮询。
  * - `useSessionLivePolling` — 基于认证与选中会话驱动轮询的 effect hook。
  *
  * Inward: `api`、`session-live-refresh`、`activity-model` 签名、`session-utils`。
@@ -25,10 +26,24 @@ import {
   sessionMessagesApiPath
 } from './session-utils.js';
 
+export function shouldPollSelectedSession({
+  authenticated,
+  selectedSession,
+  running,
+  pollInFlight
+} = {}) {
+  if (!authenticated || !selectedSession?.id || isDraftSession(selectedSession)) {
+    return false;
+  }
+  if (pollInFlight || running) {
+    return false;
+  }
+  return true;
+}
+
 export function useSessionLivePolling({
   authenticated,
   selectedSession,
-  hasRunningActivity,
   running,
   defaultStatus,
   sessionLivePollRef,
@@ -44,10 +59,15 @@ export function useSessionLivePolling({
     const sessionId = selectedSession.id;
     let stopped = false;
     async function pollSelectedSession() {
-      if (stopped || sessionLivePollRef.current) {
-        return;
-      }
-      if (running || hasRunningActivity) {
+      if (
+        stopped ||
+        !shouldPollSelectedSession({
+          authenticated,
+          selectedSession,
+          running,
+          pollInFlight: sessionLivePollRef.current
+        })
+      ) {
         return;
       }
       sessionLivePollRef.current = true;
@@ -78,7 +98,6 @@ export function useSessionLivePolling({
   }, [
     authenticated,
     selectedSession?.id,
-    hasRunningActivity,
     running
   ]);
 }

@@ -260,7 +260,6 @@ export default function App() {
   useSessionLivePolling({
     authenticated,
     selectedSession,
-    hasRunningActivity,
     running,
     defaultStatus: DEFAULT_STATUS,
     sessionLivePollRef,

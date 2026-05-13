@@ -1,12 +1,12 @@
 /**
- * 聊天主滚动区：会话切换时跟底、显示回到底部按钮与消息列表容器。
+ * 聊天主滚动区：会话切换时跟底、显示回到底部按钮，并把文件卡片挂到结果下方。
  *
  * Keywords: ChatPane, scroll, chat messages
  *
  * Exports:
  * - ChatPane — 包裹 ChatMessage 列表与底部对齐逻辑。
  *
- * Inward: ../chat-scroll.js、session-utils、ChatMessage.jsx
+ * Inward: ../chat-scroll.js、session-utils、ChatMessage.jsx、chat-render-items。
  *
  * Outward: App.jsx
  */
@@ -15,7 +15,9 @@ import { AlertCircle, ArrowDown, Loader2, ShieldCheck } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { isNearChatBottom, shouldFollowChatOutput } from '../chat-scroll.js';
 import { payloadRunKeys, selectedRunKeys } from '../app/session-utils.js';
+import { ActivityFileSummary } from './ActivityFileSummary.jsx';
 import { ChatMessage } from './ChatMessage.jsx';
+import { chatRenderItems } from './chat-render-items.js';
 
 export function ChatPane({
   messages,
@@ -39,6 +41,7 @@ export function ChatPane({
   const sessionId = selectedSession?.id || '';
   const pinnedBeforeRender = bottomPinnedRef.current;
   const activeActivityMessageId = running ? latestSelectedActivityMessageId(messages, selectedSession, activeRunKeys) : '';
+  const renderItems = chatRenderItems(messages, { activeActivityMessageId });
 
   const scrollToBottom = useCallback((behavior = 'auto') => {
     const pane = paneRef.current;
@@ -147,18 +150,30 @@ export function ChatPane({
   return (
     <section className="chat-pane" ref={paneRef}>
       <div className="chat-content" ref={contentRef}>
-        {messages.map((message) => (
-          <ChatMessage
-            key={message.id}
-            message={message}
-            now={now}
-            activeActivityMessageId={activeActivityMessageId}
-            onPreviewImage={onPreviewImage}
-            onDeleteMessage={onDeleteMessage}
-            onImplementPlan={onImplementPlan}
-            onAdjustPlan={onAdjustPlan}
-          />
-        ))}
+        {renderItems.map((item) => {
+          if (item.type === 'fileSummary') {
+            return (
+              <div key={item.key} className="message-row is-file-summary">
+                <ActivityFileSummary summary={item.summary} />
+              </div>
+            );
+          }
+          return (
+            <ChatMessage
+              key={item.key}
+              message={item.message}
+              now={now}
+              activeActivityMessageId={activeActivityMessageId}
+              afterContent={item.fileSummaries?.map((summary, index) => (
+                <ActivityFileSummary key={`${item.key}-file-summary-${index}`} summary={summary} />
+              ))}
+              onPreviewImage={onPreviewImage}
+              onDeleteMessage={onDeleteMessage}
+              onImplementPlan={onImplementPlan}
+              onAdjustPlan={onAdjustPlan}
+            />
+          );
+        })}
       </div>
       {showScrollLatest ? (
         <button

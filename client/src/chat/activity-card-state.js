@@ -28,7 +28,7 @@ export function effectiveActivityMessageIsRunning({ message = {}, activities = m
   return Boolean(forceRunning || activityMessageIsRunning(message, activities));
 }
 
-export function activityCardShouldOpen({ running, hasProcess, hasFileSummary = false, message, activities } = {}) {
+export function activityCardShouldOpen({ running, hasProcess, message, activities } = {}) {
   const active = running ?? activityMessageIsRunning(message, activities);
-  return Boolean(hasProcess && (active || hasFileSummary));
+  return Boolean(hasProcess && active);
 }

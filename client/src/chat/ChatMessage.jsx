@@ -1,5 +1,5 @@
 /**
- * 单条聊天消息壳层：用户/助手复制、活动气泡、计划消息与图片条分发。
+ * 单条聊天消息壳层：用户/助手复制、结果尾部内容、活动气泡、计划消息与图片条分发。
  *
  * Keywords: ChatMessage, copy, plan, activity
  *
@@ -27,7 +27,8 @@ export function ChatMessage({
   onPreviewImage,
   onDeleteMessage,
   onImplementPlan,
-  onAdjustPlan
+  onAdjustPlan,
+  afterContent = null
 }) {
   const [copied, setCopied] = useState(false);
   const copiedTimerRef = useRef(null);
@@ -92,6 +93,7 @@ export function ChatMessage({
             {message.timestamp ? <time>{formatTime(message.timestamp)}</time> : null}
           </div>
         ) : null}
+        {afterContent ? <div className="message-after-content">{afterContent}</div> : null}
         {canAct ? (
           <div className="message-actions" aria-label="消息操作">
             <button type="button" className="message-action" onClick={handleCopy}>

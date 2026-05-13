@@ -1,5 +1,5 @@
 /**
- * 活动类消息气泡：折叠摘要、时长、失败态与 projectActivityView 时间线。
+ * 活动类消息气泡：折叠摘要、时长与执行时间线。
  *
  * Keywords: activity message, timeline, running
  *
@@ -27,22 +27,27 @@ export function ActivityMessage({ message, now = Date.now(), forceRunning = fals
   const running = effectiveActivityMessageIsRunning({ message, activities, forceRunning });
   const failed = message.status === 'failed';
   const visibleSteps = activities.filter((activity) => isVisibleActivityStep(activity, message.status));
-  const { timeRange, timeline, fileSummary } = projectActivityView(visibleSteps, { running });
-  const hasFileSummary = Boolean(fileSummary);
-  const hasProcess = timeline.length > 0 || Boolean(fileSummary);
-  const [open, setOpen] = useState(() => activityCardShouldOpen({ running, hasProcess, hasFileSummary }));
+  const { timeRange, timeline } = projectActivityView(visibleSteps, { running });
+  const hasProcess = timeline.length > 0;
+  const [open, setOpen] = useState(() => activityCardShouldOpen({ running, hasProcess }));
   const startedAt = message.startedAt || timeRange.startedAt || message.timestamp;
   const endedAt = running ? now : message.completedAt || timeRange.endedAt || message.timestamp || now;
   const duration = !running ? formatDurationMs(message.durationMs) || formatDuration(startedAt, endedAt) : formatDuration(startedAt, endedAt);
   const headline = failed ? '处理失败' : running ? '处理中' : '已处理';
 
   useEffect(() => {
-    setOpen(activityCardShouldOpen({ running, hasProcess, hasFileSummary }));
-  }, [message.id, running, hasProcess, hasFileSummary]);
+    setOpen(activityCardShouldOpen({ running, hasProcess }));
+  }, [message.id, running, hasProcess]);
 
   return (
     <div className="message-row is-activity">
-      <div className={`message-bubble activity-bubble ${failed ? 'is-failed' : ''}`}>
+      <div
+        className={[
+          'message-bubble activity-bubble',
+          failed ? 'is-failed' : '',
+          open ? 'is-open' : 'is-folded'
+        ].filter(Boolean).join(' ')}
+      >
         <button
           type="button"
           className="activity-summary"
@@ -58,7 +63,6 @@ export function ActivityMessage({ message, now = Date.now(), forceRunning = fals
         {open && hasProcess ? (
           <ActivityTimeline
             timeline={timeline}
-            fileSummary={fileSummary}
           />
         ) : null}
       </div>

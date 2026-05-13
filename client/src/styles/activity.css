@@ -1,13 +1,14 @@
 .activity-summary {
   display: flex;
   align-items: center;
-  gap: 7px;
-  width: auto;
+  gap: 8px;
+  width: 100%;
   max-width: min(100%, 736px);
-  min-height: 30px;
-  padding: 4px 6px;
-  border: 1px solid transparent;
-  border-radius: 7px;
+  min-height: 35px;
+  padding: 2px 0 9px;
+  border: 0;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.1);
+  border-radius: 0;
   color: inherit;
   background: transparent;
   text-align: left;
@@ -34,7 +35,7 @@
 }
 
 .activity-summary-title {
-  color: #3f4650;
+  color: #4d5662;
   font-weight: 520;
 }
 
@@ -45,8 +46,8 @@
 
 .activity-summary-dot {
   flex: 0 0 auto;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 999px;
   background: #9ca3af;
 }
@@ -59,20 +60,22 @@
 .activity-chevron {
   flex: 0 0 auto;
   color: #9ca3af;
+  margin-left: 0;
+  transform: rotate(-90deg);
   transition: transform 140ms ease;
 }
 
 .activity-chevron.is-open {
-  transform: rotate(180deg);
+  transform: rotate(0deg);
 }
 
 .activity-timeline {
   display: grid;
   gap: 8px;
   max-width: min(100%, 736px);
-  margin-top: 2px;
+  margin-top: 10px;
   margin-left: 9px;
-  padding: 4px 0 4px 13px;
+  padding: 1px 0 3px 13px;
   border-left: 1px solid rgba(17, 24, 39, 0.12);
   background: transparent;
   box-shadow: none;
@@ -495,6 +498,7 @@
 
 .activity-file-summary {
   max-width: min(100%, 574px);
+  margin-top: 12px;
   overflow: hidden;
   border: 1px solid rgba(222, 223, 220, 0.92);
   border-radius: 8px;
@@ -600,7 +604,7 @@
 
 .activity-diff-row {
   display: grid;
-  grid-template-columns: 34px 34px minmax(0, 1fr);
+  grid-template-columns: 34px 34px 22px minmax(0, 1fr);
   min-width: 0;
 }
 
@@ -610,6 +614,14 @@
   text-align: right;
   user-select: none;
   border-right: 1px solid rgba(17, 24, 39, 0.07);
+}
+
+.activity-diff-mark {
+  padding: 0 6px;
+  color: #8b949e;
+  text-align: center;
+  user-select: none;
+  border-right: 1px solid rgba(17, 24, 39, 0.05);
 }
 
 .activity-diff-row code {
@@ -624,7 +636,14 @@
 }
 
 .activity-diff-row.is-add {
-  background: #e9f8ed;
+  background: #ddf4e4;
+}
+
+.activity-diff-row.is-add .activity-diff-num,
+.activity-diff-row.is-add .activity-diff-mark {
+  color: #1a7f37;
+  background: #c7eed8;
+  border-right-color: rgba(26, 127, 55, 0.18);
 }
 
 .activity-diff-row.is-add code {
@@ -633,6 +652,13 @@
 
 .activity-diff-row.is-del {
   background: #ffebe9;
+}
+
+.activity-diff-row.is-del .activity-diff-num,
+.activity-diff-row.is-del .activity-diff-mark {
+  color: #cf222e;
+  background: #ffd7d5;
+  border-right-color: rgba(207, 34, 46, 0.18);
 }
 
 .activity-diff-row.is-del code {

@@ -6,46 +6,12 @@
  * Exports:
  * - ActivityFileSummary — 汇总 additions/deletions 与各文件可折叠 diff。
  *
- * Inward: 无跨包依赖；解析 diff 文本为行结构。
+ * Inward: activity-diff-lines。
  *
- * Outward: ActivityTimeline.jsx
+ * Outward: ChatPane.jsx
  */
 
-function parseUnifiedDiffLines(unifiedDiff = '') {
-  const rows = [];
-  let oldLine = null;
-  let newLine = null;
-  for (const rawLine of String(unifiedDiff || '').split(/\r?\n/)) {
-    const hunk = rawLine.match(/^@@\s+-(\d+)(?:,\d+)?\s+\+(\d+)(?:,\d+)?\s+@@(.*)$/);
-    if (hunk) {
-      oldLine = Number(hunk[1]);
-      newLine = Number(hunk[2]);
-      rows.push({ type: 'hunk', oldLine: '', newLine: '', text: rawLine });
-      continue;
-    }
-    if (/^(diff --git|index |--- |\+\+\+ )/.test(rawLine)) {
-      continue;
-    }
-    if (rawLine.startsWith('\\ No newline')) {
-      rows.push({ type: 'meta', oldLine: '', newLine: '', text: rawLine });
-      continue;
-    }
-    if (oldLine === null || newLine === null) {
-      if (rawLine.trim()) {
-        rows.push({ type: 'meta', oldLine: '', newLine: '', text: rawLine });
-      }
-      continue;
-    }
-    if (rawLine.startsWith('+')) {
-      rows.push({ type: 'add', oldLine: '', newLine: newLine++, text: rawLine.slice(1) });
-    } else if (rawLine.startsWith('-')) {
-      rows.push({ type: 'del', oldLine: oldLine++, newLine: '', text: rawLine.slice(1) });
-    } else {
-      rows.push({ type: 'ctx', oldLine: oldLine++, newLine: newLine++, text: rawLine.startsWith(' ') ? rawLine.slice(1) : rawLine });
-    }
-  }
-  return rows;
-}
+import { parseUnifiedDiffLines } from './activity-diff-lines.js';
 
 function ActivityDiffView({ diffs }) {
   const rows = (diffs || []).flatMap((diff, diffIndex) => {
@@ -66,6 +32,7 @@ function ActivityDiffView({ diffs }) {
           <div key={`${index}-${row.oldLine}-${row.newLine}`} className={`activity-diff-row is-${row.type}`}>
             <span className="activity-diff-num">{row.oldLine}</span>
             <span className="activity-diff-num">{row.newLine}</span>
+            <span className="activity-diff-mark">{row.marker || ' '}</span>
             <code>{row.text || ' '}</code>
           </div>
         ))}

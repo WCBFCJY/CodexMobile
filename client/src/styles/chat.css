@@ -16,6 +16,11 @@
   margin-bottom: 20px;
 }
 
+.message-row.is-file-summary {
+  margin-top: -8px;
+  margin-bottom: 18px;
+}
+
 .message-stack {
   display: flex;
   flex-direction: column;
@@ -78,6 +83,18 @@
   box-shadow: none;
 }
 
+.message-after-content {
+  width: 100%;
+  max-width: min(100%, 760px);
+  margin-top: 10px;
+}
+
+.message-after-content .activity-file-summary,
+.message-row.is-file-summary .activity-file-summary {
+  max-width: min(100%, 740px);
+  margin-top: 0;
+}
+
 .message-image-strip {
   display: flex;
   justify-content: flex-end;
@@ -99,9 +116,9 @@
   min-width: 172px;
   width: 100%;
   max-width: min(100%, 760px);
-  padding: 0;
+  padding: 0 0 2px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 0;
   color: #69717c;
   background: transparent;
   box-shadow: none;
@@ -362,8 +379,8 @@
 
 .activity-bubble.is-failed {
   color: var(--danger);
-  background: rgba(194, 65, 58, 0.08);
-  border-color: rgba(194, 65, 58, 0.16);
+  background: transparent;
+  border-color: transparent;
 }
 
 .message-actions {
@@ -1143,8 +1160,8 @@
 
 [data-theme="dark"] .activity-bubble.is-failed {
   color: #ffb4ae;
-  background: rgba(255, 107, 98, 0.12);
-  border-color: rgba(255, 107, 98, 0.26);
+  background: transparent;
+  border-color: transparent;
 }
 
 [data-theme="dark"] .activity-text {
@@ -1168,15 +1185,19 @@
   border-top-color: rgba(255, 255, 255, 0.11);
 }
 
+[data-theme="dark"] .activity-summary {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
 [data-theme="dark"] .activity-divider::before,
 [data-theme="dark"] .activity-divider::after {
   border-top-color: rgba(255, 255, 255, 0.11);
 }
 
 [data-theme="dark"] .activity-timeline {
-  background: rgba(8, 8, 9, 0.72);
   border-color: rgba(255, 255, 255, 0.11);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
+  background: transparent;
+  box-shadow: none;
 }
 
 [data-theme="dark"] .activity-meta-line {
@@ -1261,12 +1282,24 @@
   border-right-color: #202024;
 }
 
+[data-theme="dark"] .activity-diff-mark {
+  color: #7b7f87;
+  border-right-color: #202024;
+}
+
 [data-theme="dark"] .activity-diff-row code {
   color: #d8d8de;
 }
 
 [data-theme="dark"] .activity-diff-row.is-add {
-  background: rgba(35, 134, 54, 0.2);
+  background: rgba(35, 134, 54, 0.22);
+}
+
+[data-theme="dark"] .activity-diff-row.is-add .activity-diff-num,
+[data-theme="dark"] .activity-diff-row.is-add .activity-diff-mark {
+  color: #7ee787;
+  background: rgba(35, 134, 54, 0.28);
+  border-right-color: rgba(126, 231, 135, 0.18);
 }
 
 [data-theme="dark"] .activity-diff-row.is-add code {
@@ -1274,7 +1307,14 @@
 }
 
 [data-theme="dark"] .activity-diff-row.is-del {
-  background: rgba(248, 81, 73, 0.18);
+  background: rgba(248, 81, 73, 0.2);
+}
+
+[data-theme="dark"] .activity-diff-row.is-del .activity-diff-num,
+[data-theme="dark"] .activity-diff-row.is-del .activity-diff-mark {
+  color: #ffb4ae;
+  background: rgba(248, 81, 73, 0.26);
+  border-right-color: rgba(255, 180, 174, 0.18);
 }
 
 [data-theme="dark"] .activity-diff-row.is-del code {

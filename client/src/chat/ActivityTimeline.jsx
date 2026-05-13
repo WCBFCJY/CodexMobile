@@ -1,18 +1,17 @@
 /**
- * 渲染活动任务时间线：文本/实时态/分隔/子代理等节点及底部文件汇总。
+ * 渲染活动任务时间线：文本/实时态/分隔/子代理等节点。
  *
  * Keywords: activity timeline, lucide, markdown
  *
  * Exports:
- * - ActivityTimeline — timeline 列表 + ActivityFileSummary。
+ * - ActivityTimeline — timeline 列表。
  *
- * Inward: activity-timeline-model、ActivityFileSummary、MarkdownContent。
+ * Inward: activity-timeline-model、MarkdownContent。
  *
  * Outward: ActivityMessage.jsx
  */
 
 import { BookOpenCheck, Bot, FileText, Pencil, Search, SquareTerminal } from 'lucide-react';
-import { ActivityFileSummary } from './ActivityFileSummary.jsx';
 import {
   activityBodyItemsForDisplay,
   activityDetailText,
@@ -21,8 +20,8 @@ import {
 } from './activity-timeline-model.js';
 import { MarkdownContent } from './MarkdownContent.jsx';
 
-export function ActivityTimeline({ timeline, fileSummary }) {
-  if (!timeline?.length && !fileSummary) {
+export function ActivityTimeline({ timeline }) {
+  if (!timeline?.length) {
     return null;
   }
   return (
@@ -30,7 +29,6 @@ export function ActivityTimeline({ timeline, fileSummary }) {
       {(timeline || []).map((item) => (
         <ActivityTimelineItem key={item.id} item={item} />
       ))}
-      {fileSummary ? <ActivityFileSummary summary={fileSummary} /> : null}
     </div>
   );
 }

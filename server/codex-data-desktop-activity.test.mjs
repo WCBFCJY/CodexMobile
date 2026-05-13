@@ -719,6 +719,61 @@ test('rawSessionActivitiesFromJsonl restores exec_command events omitted by desk
   assert.equal(activities[0].activity.output, 'client/src/App.jsx:foo');
 });
 
+test('rawSessionActivitiesFromJsonl extracts file changes from apply_patch calls', () => {
+  const content = [
+    {
+      timestamp: '2026-02-02T00:00:01.000Z',
+      type: 'response_item',
+      payload: {
+        type: 'custom_tool_call',
+        name: 'apply_patch',
+        call_id: 'patch-1',
+        input: [
+          '*** Begin Patch',
+          '*** Update File: client/src/chat/ActivityMessage.jsx',
+          '@@',
+          '-  const hasProcess = timeline.length > 0 || Boolean(fileSummary);',
+          '+  const hasProcess = timeline.length > 0;',
+          '+  const showFileSummary = Boolean(fileSummary) && !running;',
+          '*** End Patch'
+        ].join('\n')
+      }
+    },
+    {
+      timestamp: '2026-02-02T00:00:01.500Z',
+      type: 'response_item',
+      payload: {
+        type: 'custom_tool_call_output',
+        call_id: 'patch-1',
+        output: 'Exit code: 0\nOutput:\nSuccess. Updated the following files:\nM client/src/chat/ActivityMessage.jsx'
+      }
+    }
+  ].map((entry) => JSON.stringify(entry)).join('\n');
+
+  const activities = rawSessionActivitiesFromJsonl(content, [
+    {
+      id: 'turn-1',
+      startedAt: Date.parse('2026-02-02T00:00:00.000Z') / 1000,
+      completedAt: Date.parse('2026-02-02T00:00:03.000Z') / 1000
+    }
+  ]);
+
+  assert.equal(activities.length, 1);
+  assert.equal(activities[0].activity.kind, 'file_change');
+  assert.deepEqual(activities[0].activity.fileChanges.map((change) => ({
+    path: change.path,
+    additions: change.additions,
+    deletions: change.deletions
+  })), [
+    {
+      path: 'client/src/chat/ActivityMessage.jsx',
+      additions: 2,
+      deletions: 1
+    }
+  ]);
+  assert.match(activities[0].activity.fileChanges[0].unifiedDiff, /\+  const showFileSummary/);
+});
+
 test('rawSessionActivitiesFromJsonl treats missing output in interrupted turns as terminal', () => {
   const content = JSON.stringify({
     timestamp: '2026-02-02T00:00:01.000Z',
