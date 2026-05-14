@@ -1,7 +1,7 @@
 /**
  * 主聊天输入区：附件、模型/推理/权限/技能、首页项目选择、剪贴板粘贴与发送流程。
  *
- * Keywords: composer, chat input, attachments, model, skills
+ * Keywords: composer, chat input, attachments, model, skills, git-branch
  *
  * Exports:
  * - DEFAULT_PERMISSION_MODE — re-export 默认权限模式常量。
@@ -12,7 +12,7 @@
  * Outward: App.jsx 或上层布局挂载输入条处。
  */
 
-import { ArrowUp, Bot, Check, ChevronDown, ChevronRight, ClipboardList, FileText, Folder, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X, Zap } from 'lucide-react';
+import { ArrowUp, Bot, Check, ChevronDown, ChevronRight, ClipboardList, FileText, Folder, GitBranch, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X, Zap } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiFetch, getToken } from '../api.js';
 import { detectComposerToken, exactSlashCommandForInput, filteredSlashCommands, replaceComposerToken } from '../composer-shortcuts.js';
@@ -30,6 +30,7 @@ export function Composer({
   input,
   setInput,
   selectedProject,
+  gitProject,
   selectedSession,
   onSubmit,
   running,
@@ -64,6 +65,7 @@ export function Composer({
   onRestoreQueueDraft,
   onRemoveQueueDraft,
   onSteerQueueDraft,
+  onCreateGitBranch,
   onCompactContext,
   readOnly = false,
   readOnlyReason = '',
@@ -78,6 +80,8 @@ export function Composer({
   const [modelSubmenu, setModelSubmenu] = useState(null);
   const [skillFilter, setSkillFilter] = useState('');
   const [projectFilter, setProjectFilter] = useState('');
+  const [branchFilter, setBranchFilter] = useState('');
+  const [branchState, setBranchState] = useState({ loading: false, error: '', data: null });
   const [cursorPosition, setCursorPosition] = useState(0);
   const [fileSearch, setFileSearch] = useState({ query: '', loading: false, results: [] });
   const selectedFileMentions = Array.isArray(fileMentions) ? fileMentions : [];
@@ -102,6 +106,17 @@ export function Composer({
     return [project.name, project.pathLabel, project.path]
       .filter(Boolean)
       .some((value) => String(value).toLowerCase().includes(normalizedProjectFilter));
+  });
+  const branchData = branchState.data || null;
+  const currentBranchName = branchData?.current || branchData?.status?.branch || '';
+  const branchFileCount = Number.isFinite(branchData?.status?.fileCount) ? branchData.status.fileCount : 0;
+  const branchList = Array.isArray(branchData?.branches) ? branchData.branches : [];
+  const normalizedBranchFilter = branchFilter.trim().toLowerCase();
+  const filteredBranches = branchList.filter((branch) => {
+    if (!normalizedBranchFilter) return true;
+    return [branch.name, branch.upstream, branch.worktreePath]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(normalizedBranchFilter));
   });
   const homeProjectLabel = homeProject?.projectless
     ? '不使用项目'
@@ -197,6 +212,28 @@ export function Composer({
     };
   }, [composerToken?.type, composerToken?.query, selectedProject?.id]);
 
+  useEffect(() => {
+    if (openMenu !== 'branch' || !gitProject?.id) {
+      return undefined;
+    }
+    let cancelled = false;
+    setBranchState((current) => ({ ...current, loading: true, error: '' }));
+    apiFetch(`/api/git/branches?projectId=${encodeURIComponent(gitProject.id)}`)
+      .then((result) => {
+        if (!cancelled) {
+          setBranchState({ loading: false, error: '', data: result.branches || null });
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setBranchState({ loading: false, error: error.message || '读取分支失败', data: null });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [openMenu, gitProject?.id]);
+
   function updateCursorFromTextarea() {
     const textarea = textareaRef.current;
     setCursorPosition(textarea?.selectionStart ?? input.length);
@@ -290,6 +327,65 @@ export function Composer({
     }
     if (name !== 'project') {
       setProjectFilter('');
+    }
+    if (name !== 'branch') {
+      setBranchFilter('');
+    }
+  }
+
+  async function selectBranch(branch) {
+    if (!gitProject?.id || !branch?.name || branch.current || branch.checkedOutElsewhere) {
+      return;
+    }
+    setBranchState((current) => ({ ...current, loading: true, error: '' }));
+    try {
+      const result = await apiFetch('/api/git/checkout', {
+        method: 'POST',
+        body: { projectId: gitProject.id, branch: branch.name }
+      });
+      setBranchState((current) => ({
+        ...current,
+        loading: false,
+        error: '',
+        data: {
+          ...(current.data || {}),
+          current: result.branch || branch.name,
+          status: result.status || current.data?.status || null,
+          branches: (current.data?.branches || []).map((item) => ({
+            ...item,
+            current: item.name === (result.branch || branch.name)
+          }))
+        }
+      }));
+      setOpenMenu(null);
+    } catch (error) {
+      setBranchState((current) => ({ ...current, loading: false, error: error.message || '切换分支失败' }));
+    }
+  }
+
+  async function createBranchFromComposer() {
+    if (!gitProject?.id) return;
+    setOpenMenu(null);
+    try {
+      const result = await onCreateGitBranch?.();
+      if (result?.branch || result?.status) {
+        setBranchState((current) => ({
+          ...current,
+          data: {
+            ...(current.data || {}),
+            current: result.branch || result.status?.branch || current.data?.current || '',
+            status: result.status || current.data?.status || null,
+            branches: Array.isArray(current.data?.branches)
+              ? current.data.branches.map((branch) => ({
+                ...branch,
+                current: branch.name === (result.branch || result.status?.branch)
+              }))
+              : current.data?.branches || []
+          }
+        }));
+      }
+    } catch (error) {
+      setBranchState((current) => ({ ...current, error: error.message || '创建分支失败' }));
     }
   }
 
@@ -525,6 +621,61 @@ export function Composer({
             </div>
           ) : null}
         </>
+      ) : null}
+      {openMenu === 'branch' && gitProject ? (
+        <div className="composer-menu branch-menu" aria-label="选择分支">
+          <div className="skill-search-wrap">
+            <Search size={14} />
+            <input
+              type="search"
+              value={branchFilter}
+              onChange={(event) => setBranchFilter(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                }
+              }}
+              placeholder="搜索分支"
+              aria-label="搜索分支"
+            />
+          </div>
+          <div className="menu-section-label">分支</div>
+          {branchState.loading && !branchList.length ? (
+            <div className="menu-empty"><Loader2 className="spin" size={15} /> 正在读取分支</div>
+          ) : branchState.error ? (
+            <div className="menu-empty">{branchState.error}</div>
+          ) : filteredBranches.length ? (
+            filteredBranches.map((branch) => (
+              <button
+                key={branch.name}
+                type="button"
+                className={`branch-menu-item ${branch.current ? 'is-selected' : ''}`}
+                disabled={branch.checkedOutElsewhere}
+                onClick={() => selectBranch(branch)}
+              >
+                <GitBranch size={16} />
+                <span>
+                  <strong>{branch.name}</strong>
+                  {branch.current && branchFileCount > 0 ? (
+                    <small>未提交：{branchFileCount} 个文件</small>
+                  ) : branch.checkedOutElsewhere ? (
+                    <small>已在 {branch.worktreePath}</small>
+                  ) : branch.upstream ? (
+                    <small>{branch.upstream}</small>
+                  ) : null}
+                </span>
+                {branch.current ? <Check size={16} /> : null}
+              </button>
+            ))
+          ) : (
+            <div className="menu-empty">{branchList.length ? '没有匹配的分支' : '暂无可用分支'}</div>
+          )}
+          <div className="menu-divider" />
+          <button type="button" onClick={createBranchFromComposer}>
+            <Plus size={16} />
+            <span>创建并检出新分支...</span>
+          </button>
+        </div>
       ) : null}
       {openMenu === 'context' ? (
         <div className="context-popover" role="status">
@@ -797,6 +948,19 @@ export function Composer({
             >
               <Bot size={17} strokeWidth={1.85} />
             </button>
+            {gitProject ? (
+              <button
+                type="button"
+                className="composer-tool-icon"
+                onClick={() => toggleMenu('branch')}
+                disabled={composerReadOnly}
+                title={currentBranchName ? `分支：${currentBranchName}` : '选择分支'}
+                aria-label={currentBranchName ? `分支：${currentBranchName}` : '选择分支'}
+                aria-expanded={openMenu === 'branch'}
+              >
+                <GitBranch size={17} strokeWidth={1.85} />
+              </button>
+            ) : null}
             <ContextStatusButton
               variant="compact"
               contextStatus={contextStatus}

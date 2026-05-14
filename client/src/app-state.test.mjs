@@ -15,6 +15,7 @@ import {
   localFilePreviewPath,
   payloadRunKeys,
   reconcileThreadRuntimeWithSessions,
+  resolveComposerGitProject,
   resolveNewConversationProject,
   runningByIdWithSelectedActivity,
   selectedSessionIsRunning,
@@ -180,6 +181,47 @@ test('draft sessions preserve the chosen conversation scope', () => {
   assert.equal(draft.projectId, normal.id);
   assert.equal(draft.draft, true);
   assert.match(draft.id, /^draft-__codexmobile_projectless__-/);
+});
+
+test('resolveComposerGitProject only exposes git for real project-bound composers', () => {
+  const normal = { id: '__codexmobile_projectless__', projectless: true, name: '普通对话' };
+  const codexMobile = { id: 'project-codexmobile', name: 'CodexMobile' };
+  const other = { id: 'project-other', name: 'Other' };
+
+  assert.equal(
+    resolveComposerGitProject({
+      homeVisible: false,
+      projects: [normal, codexMobile, other],
+      selectedProject: codexMobile,
+      selectedSession: { id: 'plain-thread', projectId: normal.id }
+    }),
+    null
+  );
+  assert.equal(
+    resolveComposerGitProject({
+      homeVisible: false,
+      projects: [normal, codexMobile, other],
+      selectedProject: other,
+      selectedSession: { id: 'project-thread', projectId: codexMobile.id }
+    }),
+    codexMobile
+  );
+  assert.equal(
+    resolveComposerGitProject({
+      homeVisible: true,
+      selectedProject: normal,
+      selectedSession: { id: 'draft-normal', projectId: normal.id }
+    }),
+    null
+  );
+  assert.equal(
+    resolveComposerGitProject({
+      homeVisible: true,
+      selectedProject: codexMobile,
+      selectedSession: { id: 'draft-project', projectId: codexMobile.id }
+    }),
+    codexMobile
+  );
 });
 
 test('titleFromFirstMessage uses the shared provisional title helper', () => {

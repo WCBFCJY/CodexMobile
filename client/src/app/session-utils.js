@@ -6,7 +6,7 @@
  * Exports:
  * - 通用与展示 — `formatTime`、`formatDuration*`、`subAgentRoleLabel`、`compactPath`、`safeStoredJsonArray` 等。
  * - 上下文与媒体 — `emptyContextStatus`、`imageUrlWithRetry`、本地源与 `local*ApiPath`、`dataImageObjectUrl`、`useResolvedImageSource`。
- * - 会话生命周期 — `createClientTurnId`、`createDraftSession`、`resolveNewConversationProject`、`isDraftSession`、`sessionMessagesApiPath`、标题补丁、`upsertSessionInProject`。
+ * - 会话生命周期 — `createClientTurnId`、`createDraftSession`、`resolveNewConversationProject`、`resolveComposerGitProject`、`isDraftSession`、`sessionMessagesApiPath`、标题补丁、`upsertSessionInProject`。
  * - Runtime — `payloadRunKeys`、`selectedRunKeys`、`reconcileThreadRuntimeWithSessions`、`is*Runtime`、`runningByIdWithSelectedActivity`、`sessionRunBadgeState`、`selectedSessionIsRunning`、`hasVisibleAssistantForTurn` 等。
  *
  * Inward: `api`（blob）；`context-status`；`shared/session-title`。
@@ -309,6 +309,22 @@ export function resolveNewConversationProject(targetProject, selectedProject, pr
     return list.find((project) => project.id === targetProject.id) || targetProject;
   }
   return selectedProject || list.find((project) => project.projectless) || list[0] || null;
+}
+
+export function resolveComposerGitProject({ homeVisible = false, projects = [], selectedProject = null, selectedSession = null } = {}) {
+  const realProject = (project) => (project?.id && !project.projectless ? project : null);
+  if (homeVisible) {
+    return realProject(selectedProject);
+  }
+  const projectId = selectedSession?.projectId || '';
+  if (!projectId) {
+    return null;
+  }
+  return realProject(
+    selectedProject?.id === projectId
+      ? selectedProject
+      : (Array.isArray(projects) ? projects : []).find((project) => project.id === projectId)
+  );
 }
 
 export function isDraftSession(session) {

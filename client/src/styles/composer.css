@@ -64,6 +64,13 @@
   min-width: 238px;
 }
 
+.branch-menu {
+  right: 12px;
+  left: auto;
+  width: min(84vw, 294px);
+  min-width: min(84vw, 264px);
+}
+
 .project-menu {
   left: 12px;
   min-width: min(84vw, 288px);
@@ -240,12 +247,19 @@
   display: block;
 }
 
+.branch-menu-item > span {
+  display: block;
+  flex: 1 1 auto;
+}
+
 .project-menu-item > span:last-child {
   display: block;
 }
 
 .skill-menu-item strong,
 .skill-menu-item small,
+.branch-menu-item strong,
+.branch-menu-item small,
 .project-menu-item strong,
 .project-menu-item small {
   display: block;
@@ -256,17 +270,25 @@
 }
 
 .skill-menu-item strong,
+.branch-menu-item strong,
 .project-menu-item strong {
   font-size: 14px;
   font-weight: 650;
 }
 
 .skill-menu-item small,
+.branch-menu-item small,
 .project-menu-item small {
   margin-top: 2px;
   color: var(--muted);
   font-size: 11px;
   line-height: 14px;
+}
+
+.branch-menu-item > svg:last-child {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: currentColor;
 }
 
 .skill-clear-button {

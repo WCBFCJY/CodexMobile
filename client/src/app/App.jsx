@@ -45,6 +45,7 @@ import {
   hasRunningKey,
   isDraftSession,
   reconcileThreadRuntimeWithSessions,
+  resolveComposerGitProject,
   selectedRunKeys,
   selectedSessionIsRunning,
   upsertSessionInProject
@@ -622,27 +623,33 @@ export default function App() {
     loadQueueDrafts
   });
 
+  async function createGitBranchFromDialog(project = selectedProject) {
+    if (!project?.id) return null;
+    const branchName = await requestGitInput({
+      kind: 'branch',
+      title: '创建分支',
+      label: '分支名',
+      defaultValue: gitBranchDraft(project),
+      confirmText: '创建'
+    });
+    if (!branchName?.trim()) return null;
+    showToast({ level: 'info', title: '创建分支', body: '正在创建并切换分支...' });
+    const result = await apiFetch('/api/git/branch', {
+      method: 'POST',
+      body: { projectId: project.id, branchName: branchName.trim() }
+    });
+    showToast({ level: 'success', title: '创建分支', body: `已切换到 ${result.branch || branchName.trim()}` });
+    return result;
+  }
+
   async function handleGitAction(action) {
     if (!selectedProject || selectedRunning) {
       return;
-      }
-      const projectId = selectedProject.id;
-      try {
-        if (action === 'branch') {
-        const branchName = await requestGitInput({
-          kind: 'branch',
-          title: '创建分支',
-          label: '分支名',
-          defaultValue: gitBranchDraft(selectedProject),
-          confirmText: '创建'
-        });
-        if (!branchName?.trim()) return;
-        showToast({ level: 'info', title: '创建分支', body: '正在创建并切换分支...' });
-        const result = await apiFetch('/api/git/branch', {
-          method: 'POST',
-          body: { projectId, branchName: branchName.trim() }
-        });
-        showToast({ level: 'success', title: '创建分支', body: `已切换到 ${result.branch || branchName.trim()}` });
+    }
+    const projectId = selectedProject.id;
+    try {
+      if (action === 'branch') {
+        await createGitBranchFromDialog(selectedProject);
         return;
       }
 
@@ -729,6 +736,10 @@ export default function App() {
   const sessionLoading = Boolean(sessionLoadingId && selectedSession?.id === sessionLoadingId);
   const homeVisible = !sessionLoading && !sessionLoadError && messages.length === 0 && (!selectedSession || isDraftSession(selectedSession));
   const homePaneVisible = homeVisible || homeExiting;
+  const composerGitProject = useMemo(
+    () => resolveComposerGitProject({ homeVisible, projects, selectedProject, selectedSession }),
+    [homeVisible, projects, selectedProject, selectedSession]
+  );
   const shellClass = useMemo(() => {
     const classes = ['app-shell'];
     if (drawerOpen) {
@@ -1031,6 +1042,7 @@ export default function App() {
     input,
     setInput,
     selectedProject,
+    gitProject: composerGitProject,
     selectedSession,
     onSubmit: handleComposerSubmit,
     running: selectedRunning,
@@ -1065,6 +1077,7 @@ export default function App() {
     onRestoreQueueDraft: restoreQueueDraft,
     onRemoveQueueDraft: removeQueueDraft,
     onSteerQueueDraft: steerQueueDraft,
+    onCreateGitBranch: () => createGitBranchFromDialog(composerGitProject),
     onCompactContext: handleCompactContext,
     readOnly: selectedSessionArchived,
     readOnlyReason: '已归档线程只能查看，取消归档后才能继续对话',
