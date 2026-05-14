@@ -956,7 +956,7 @@ export default function App() {
   }, [selectedSession, selectedRunning, showToast]);
 
   if (!authenticated) {
-    return <PairingScreen onPaired={bootstrap} />;
+    return <PairingScreen pairing={status.pairing} onPaired={bootstrap} />;
   }
 
   const panelProps = {

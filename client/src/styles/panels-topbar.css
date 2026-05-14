@@ -109,6 +109,14 @@
   backdrop-filter: blur(18px) saturate(1.08);
 }
 
+.app-shell:not(.drawer-active) .top-bar {
+  z-index: 80;
+}
+
+.app-shell:not(.drawer-active) .top-menu-popover {
+  z-index: 81;
+}
+
 .git-menu-popover {
   width: 164px;
 }

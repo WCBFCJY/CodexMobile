@@ -122,7 +122,7 @@ export function chatRenderItems(messages = [], { running = false } = {}) {
   for (let index = 0; index < sourceMessages.length; index += 1) {
     const message = sourceMessages[index];
     const runningActivity = message?.role === 'activity' && activityMessageIsRunning(message);
-    const currentRuntimeActivity = message?.role === 'activity' && (runningActivity || (running && index > liveStartIndex));
+    const currentRuntimeActivity = message?.role === 'activity' && !message.forceTimeline && (runningActivity || (running && index > liveStartIndex));
     if (currentRuntimeActivity) {
       if (pendingActivityMessage) {
         pendingLiveActivity = pendingLiveActivity

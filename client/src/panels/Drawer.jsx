@@ -633,9 +633,9 @@ export function Drawer({
       <div className={`drawer-backdrop drawer-main-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
       <aside className={`drawer ${open ? 'is-open' : ''}`}>
         <div className="drawer-header">
-          <div className="drawer-brand">
+          <div className="drawer-brand" aria-label="CodexMobile">
             <img className="drawer-app-icon" src="/codex-icon-180.png" alt="" aria-hidden="true" />
-            <span className="drawer-brand-name">CodexMobile</span>
+            <img className="drawer-brand-wordmark" src="/pairing-wordmark.png" alt="" aria-hidden="true" />
           </div>
           <button className="drawer-header-action sidebar-toggle-button" onClick={onClose} aria-label="收起侧边栏">
             <SidebarToggleIcon />

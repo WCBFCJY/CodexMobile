@@ -29,7 +29,8 @@ export function ActivityMessage({ message, now = Date.now(), forceRunning = fals
   const visibleSteps = activities.filter((activity) => isVisibleActivityStep(activity, message.status));
   const { timeRange, timeline } = projectActivityView(visibleSteps, { running });
   const hasProcess = timeline.length > 0;
-  const [open, setOpen] = useState(() => initialActivityCardOpenState({ running, hasProcess, forceOpen }));
+  const shouldForceOpen = Boolean(forceOpen || message.forceOpen);
+  const [open, setOpen] = useState(() => initialActivityCardOpenState({ running, hasProcess, forceOpen: shouldForceOpen }));
   const startedAt = message.startedAt || timeRange.startedAt || message.timestamp;
   const endedAt = running ? now : message.completedAt || timeRange.endedAt || message.timestamp || now;
   const rangeDurationMs = new Date(endedAt || now).getTime() - new Date(startedAt || endedAt || now).getTime();
@@ -45,8 +46,8 @@ export function ActivityMessage({ message, now = Date.now(), forceRunning = fals
   const headline = activityCardHeadline({ message, activities: visibleSteps, running });
 
   useEffect(() => {
-    setOpen((previousOpen) => nextActivityCardOpenState({ previousOpen, running, hasProcess, forceOpen }));
-  }, [message.id, running, hasProcess, forceOpen]);
+    setOpen((previousOpen) => nextActivityCardOpenState({ previousOpen, running, hasProcess, forceOpen: shouldForceOpen }));
+  }, [message.id, running, hasProcess, shouldForceOpen]);
 
   return (
     <div className="message-row is-activity">

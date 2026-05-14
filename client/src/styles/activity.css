@@ -23,6 +23,18 @@
   display: none;
 }
 
+.app-shell.is-long-task-demo .activity-summary {
+  display: none;
+}
+
+.app-shell.is-long-task-demo .is-activity-live {
+  display: none;
+}
+
+.app-shell.is-long-task-demo .activity-timeline {
+  margin-top: 0;
+}
+
 .activity-summary-title,
 .activity-summary-duration {
   min-width: 0;

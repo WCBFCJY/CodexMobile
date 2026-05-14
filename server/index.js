@@ -149,6 +149,34 @@ const pushService = createPushService({
   statePath: PUSH_STATE,
   subject: PUSH_SUBJECT
 });
+
+function quotePosixPath(value) {
+  const text = String(value || '');
+  if (/^[A-Za-z0-9_/:.,@%+=\\\-\u4e00-\u9fff]+$/.test(text)) {
+    return text;
+  }
+  return `'${text.replace(/'/g, "'\\''")}'`;
+}
+
+function quoteWindowsPath(value) {
+  const text = String(value || '');
+  if (!/[\s"&<>|^]/.test(text)) {
+    return text;
+  }
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function pairingTerminalStatus() {
+  const cwd = ROOT_DIR;
+  const target = process.platform === 'win32' ? quoteWindowsPath(cwd) : quotePosixPath(cwd);
+  return {
+    cwd,
+    commands: [
+      process.platform === 'win32' ? `cd /d ${target}` : `cd ${target}`,
+      'npm run pair'
+    ]
+  };
+}
 const syncBridge = createSyncBridge();
 const feishuIntegration = createFeishuIntegration({
   statePath: FEISHU_AUTH_STATE,
@@ -665,6 +693,7 @@ async function publicStatus(authenticated, req = null) {
     desktopBridge,
     hostName: getHostName(),
     port: PORT,
+    pairing: pairingTerminalStatus(),
     provider: config.provider || 'codex',
     model: config.model || 'gpt-5.5',
     modelShort: config.modelShort || '5.5 中',

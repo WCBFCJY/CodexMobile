@@ -24,6 +24,10 @@ export const DEFAULT_STATUS = {
   model: 'gpt-5.5',
   modelShort: '5.5 中',
   reasoningEffort: 'xhigh',
+  pairing: {
+    cwd: '',
+    commands: ['cd <CodexMobile 项目目录>', 'npm run pair']
+  },
   models: [{ value: 'gpt-5.5', label: 'gpt-5.5' }],
   skills: [],
   docs: {

@@ -6,12 +6,12 @@
  * Exports:
  * - default — `PairingScreen`（未认证时由 `App` 全屏展示）。
  *
- * Inward: `pairing-flow`。
+ * Inward: `pairing-flow`、`/api/status.pairing`。
  *
  * Outward: `App.jsx` 在 `authenticated === false` 时渲染。
  */
 
-import { Check, Loader2, Monitor } from 'lucide-react';
+import { Check, Loader2, Terminal } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import {
   completePairing,
@@ -19,13 +19,26 @@ import {
   pairingRequestFromSearch
 } from '../pairing-flow.js';
 
-export default function PairingScreen({ onPaired }) {
+export default function PairingScreen({ pairing: pairingStatus = {}, onPaired }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [pairing, setPairing] = useState(false);
   const [inputActive, setInputActive] = useState(false);
   const autoPairRef = useRef(pairingRequestFromSearch(globalThis.location?.search || ''));
   const formRef = useRef(null);
+  const terminalCommands = Array.isArray(pairingStatus?.commands) && pairingStatus.commands.length
+    ? pairingStatus.commands
+    : ['cd <CodexMobile 项目目录>', 'npm run pair'];
+
+  function pairingErrorMessage(error) {
+    if (error?.status === 410 || /expired/i.test(error?.message || '')) {
+      return '这个配对码已过期，请在电脑上重新运行 npm run pair。';
+    }
+    if (error?.status === 403 || error?.status === 404 || /invalid|not found/i.test(error?.message || '')) {
+      return '配对码无效，请检查电脑终端里的 10 位代码，或重新运行 npm run pair。';
+    }
+    return error?.message || '配对失败，请确认电脑端 CodexMobile 正在运行。';
+  }
 
   useEffect(() => {
     const fromSearch = autoPairRef.current;
@@ -48,7 +61,7 @@ export default function PairingScreen({ onPaired }) {
     setError('');
     completePairing({ requestId: fromSearch.requestId, code: fromSearch.code })
       .then(() => onPaired())
-      .catch((err) => setError(err.message || '自动配对失败，请重新运行 npm run pair'))
+      .catch((err) => setError(pairingErrorMessage(err)))
       .finally(() => setPairing(false));
   }, [onPaired, pairing]);
 
@@ -64,7 +77,7 @@ export default function PairingScreen({ onPaired }) {
       await completePairing({ code });
       onPaired();
     } catch (err) {
-      setError(err.message);
+      setError(pairingErrorMessage(err));
     } finally {
       setPairing(false);
     }
@@ -82,36 +95,47 @@ export default function PairingScreen({ onPaired }) {
 
   return (
     <main className={inputActive ? 'pairing-screen is-input-active' : 'pairing-screen'}>
-      <div className="pairing-mark">
-        <Monitor size={30} />
+      <div className="pairing-panel">
+        <div className="pairing-brand" aria-label="CodexMobile">
+          <img className="pairing-logo" src="/codex-icon-180.png" alt="" aria-hidden="true" />
+          <img className="pairing-wordmark" src="/pairing-wordmark.png" alt="" aria-hidden="true" />
+        </div>
+        <h1>连接你的 Codex</h1>
+        <p className="pairing-lead">
+          在电脑终端运行 npm run pair，然后输入显示的 10 位配对码。
+        </p>
+        <div className="pairing-terminal" aria-label="电脑终端命令">
+          <div className="pairing-terminal-title">
+            <Terminal size={15} />
+            <span>电脑终端</span>
+          </div>
+          {terminalCommands.map((command) => (
+            <code key={command}>{command}</code>
+          ))}
+        </div>
+        <form ref={formRef} className="pairing-form" onSubmit={handlePair}>
+          <label htmlFor="pairing-code">配对码</label>
+          <div className="pairing-input-row">
+            <input
+              id="pairing-code"
+              inputMode="text"
+              placeholder="输入 10 位代码"
+              value={code}
+              onBlur={() => setInputActive(false)}
+              onFocus={handleCodeFocus}
+              onChange={(event) => setCode(normalizePairingCode(event.target.value, 10))}
+            />
+            <button type="submit" disabled={!code.trim() || pairing}>
+              {pairing ? <Loader2 className="spin" size={18} /> : <Check size={18} />}
+              信任这台设备
+            </button>
+          </div>
+        </form>
+        {error ? <div className="pairing-error">{error}</div> : null}
+        <p className="pairing-footnote">
+          也可以直接打开终端里显示的链接自动配对。配对成功后，这台手机会保存为可信设备。
+        </p>
       </div>
-      <h1>CodexMobile</h1>
-      <p className="pairing-lead">
-        我的本机 Codex 移动工作台。电脑端负责同步与镜像，iPhone 可以追问、看过程、处理确认和收完成通知。
-      </p>
-      <div className="pairing-points" aria-label="CodexMobile 核心能力">
-        <span>桌面线程同步</span>
-        <span>完整执行过程</span>
-        <span>私有网络访问</span>
-      </div>
-      <p className="pairing-note">
-        在电脑终端运行 npm run pair，然后打开终端链接或输入终端配对码。
-      </p>
-      <form ref={formRef} className="pairing-form" onSubmit={handlePair}>
-        <input
-          inputMode="text"
-          placeholder="10 位配对码"
-          value={code}
-          onBlur={() => setInputActive(false)}
-          onFocus={handleCodeFocus}
-          onChange={(event) => setCode(normalizePairingCode(event.target.value, 10))}
-        />
-        <button type="submit" disabled={!code.trim() || pairing}>
-          {pairing ? <Loader2 className="spin" size={18} /> : <Check size={18} />}
-          连接
-        </button>
-      </form>
-      {error ? <div className="pairing-error">{error}</div> : null}
     </main>
   );
 }

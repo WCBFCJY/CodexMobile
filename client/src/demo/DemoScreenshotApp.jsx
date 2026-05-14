@@ -166,6 +166,113 @@ const finalMessages = [
   }
 ];
 
+const longTaskActivityMessage = {
+  id: 'activity-long-task-demo',
+  role: 'activity',
+  status: 'running',
+  forceOpen: true,
+  forceTimeline: true,
+  clientTurnId: 'turn-long-task-demo',
+  sessionId: SESSION_ID,
+  timestamp: '2026-05-15T02:14:00+08:00',
+  startedAt: '2026-05-15T02:11:00+08:00',
+  label: '正在运行长任务',
+  content: '正在运行长任务',
+  activities: [
+    {
+      id: 'long-note-1',
+      kind: 'agent_message',
+      label: '先确认当前 UI 入口，再用真实组件跑截图；所有项目名、路径和输出都使用脱敏 mock 数据。',
+      status: 'completed',
+      timestamp: '2026-05-15T02:11:13+08:00'
+    },
+    {
+      id: 'long-rg-1',
+      kind: 'command_execution',
+      label: '搜索运行态组件',
+      command: 'rg -n "ActivityMessage|ActivityTimeline|Composer|TopBar" client/src',
+      detail: 'rg -n "ActivityMessage|ActivityTimeline|Composer|TopBar" client/src',
+      output: [
+        'client/src/chat/ActivityMessage.jsx',
+        'client/src/chat/ActivityTimeline.jsx',
+        'client/src/composer/Composer.jsx',
+        'client/src/panels/TopBar.jsx'
+      ].join('\n'),
+      status: 'completed',
+      startedAt: '2026-05-15T02:11:15+08:00',
+      completedAt: '2026-05-15T02:11:24+08:00'
+    },
+    {
+      id: 'long-read-1',
+      kind: 'command_execution',
+      label: '读取截图路由',
+      command: 'sed -n "1,220p" client/src/demo/DemoScreenshotApp.jsx',
+      detail: '检查 demo scene 与 mock props',
+      output: '找到 /demo/screenshots 路由、真实 AppShell 挂载点、mock fetch 和场景切换逻辑。',
+      status: 'completed',
+      startedAt: '2026-05-15T02:11:28+08:00',
+      completedAt: '2026-05-15T02:11:36+08:00'
+    },
+    {
+      id: 'long-agent-1',
+      kind: 'subagent_activity',
+      label: '2 个后台智能体正在并行检查',
+      detail: '分别检查移动端视觉层级和截图数据完整性。',
+      status: 'completed',
+      startedAt: '2026-05-15T02:11:40+08:00',
+      completedAt: '2026-05-15T02:12:08+08:00',
+      subAgents: [
+        { nickname: 'UI 巡检', role: 'explorer', statusText: '已确认抽屉层级' },
+        { nickname: '截图校验', role: 'worker', statusText: '已确认 9:16 输出' }
+      ]
+    },
+    {
+      id: 'long-edit-1',
+      kind: 'file_change',
+      label: '更新演示数据',
+      detail: '把空白 Composer 首页替换为长任务执行时间线。',
+      status: 'completed',
+      startedAt: '2026-05-15T02:12:12+08:00',
+      completedAt: '2026-05-15T02:12:28+08:00',
+      fileChanges: [
+        {
+          path: 'client/src/demo/DemoScreenshotApp.jsx',
+          status: 'modified',
+          diff: '@@\n+const longTaskActivityMessage = { ... };\n+messages: longTaskMessages'
+        },
+        {
+          path: 'client/src/chat/chat-render-items.js',
+          status: 'modified',
+          diff: '@@\n-const currentRuntimeActivity = ...\n+const currentRuntimeActivity = !message.forceTimeline && ...'
+        }
+      ]
+    },
+    {
+      id: 'long-build-1',
+      kind: 'command_execution',
+      label: '构建前端',
+      command: 'npm run build',
+      detail: 'vite build --config client/vite.config.js',
+      output: '✓ 4017 modules transformed\n✓ built in 8.7s',
+      status: 'completed',
+      startedAt: '2026-05-15T02:12:31+08:00',
+      completedAt: '2026-05-15T02:12:45+08:00'
+    },
+    {
+      id: 'long-shot-1',
+      kind: 'command_execution',
+      label: '重新生成 9:16 截图',
+      command: 'node marketing/real-ui-screenshots/generate.mjs',
+      detail: '输出 720x1280 的深色 / 浅色 UI 演示图',
+      output: 'real-ui-03-composer-workflow-dark.png 720x1280\nreal-ui-03-composer-workflow-light.png 720x1280',
+      status: 'running',
+      startedAt: '2026-05-15T02:12:50+08:00'
+    }
+  ]
+};
+
+const longTaskMessages = [longTaskActivityMessage];
+
 const skills = [
   { name: 'qingtian-sales-analysis', label: 'qingtian-sales-analysis', path: '/skills/qingtian-sales-analysis/SKILL.md', description: '青甜销售分析与复盘' },
   { name: 'frontend-design', label: 'frontend-design', path: '/skills/frontend-design/SKILL.md', description: '前端设计与视觉检查' },
@@ -300,7 +407,7 @@ function basePanelProps({ scene, theme }) {
       selectedSession: selectedSessionForScene(scene),
       connectionState: 'connected',
       desktopBridge: { available: true, connected: true, mode: 'ipc' },
-      selectedRuntime: scene === 'chat' ? { status: 'running', startedAt: '2026-05-15T02:07:00+08:00', steerable: true } : null,
+      selectedRuntime: scene === 'chat' || scene === 'composer' ? { status: 'running', startedAt: '2026-05-15T02:07:00+08:00', steerable: true } : null,
       onMenu: noop,
       onOpenDocs: noop,
       onGitAction: noop,
@@ -311,7 +418,7 @@ function basePanelProps({ scene, theme }) {
       notificationEnabled: true,
       onEnableNotifications: noop,
       gitDisabled: false,
-      homeMode: scene === 'composer',
+      homeMode: false,
       initialGitMenuOpen: scene === 'git-menu'
     },
     docsPanelProps: {
@@ -339,7 +446,7 @@ function basePanelProps({ scene, theme }) {
       onSubmit: noop
     },
     recoveryCardProps: {
-      state: { visible: false },
+      state: null,
       onRetry: noop,
       onSync: noop,
       onPair: noop,
@@ -362,10 +469,7 @@ function basePanelProps({ scene, theme }) {
 }
 
 function selectedSessionForScene(scene) {
-  if (scene === 'composer') {
-    return null;
-  }
-  return scene === 'chat' ? runningSession : selectedSession;
+  return scene === 'chat' || scene === 'composer' ? runningSession : selectedSession;
 }
 
 function drawerProps({ scene, theme }) {
@@ -379,7 +483,7 @@ function drawerProps({ scene, theme }) {
     expandedProjectIds: { [PROJECT_ID]: true, projectless: true },
     sessionsByProject,
     loadingProjectId: null,
-    runningById: { [SESSION_ID]: scene === 'chat' || scene === 'drawer' },
+    runningById: { [SESSION_ID]: scene === 'chat' || scene === 'drawer' || scene === 'composer' },
     threadRuntimeById: {
       [SESSION_ID]: { status: 'running', startedAt: '2026-05-15T02:07:00+08:00', updatedAt: '2026-05-15T02:08:00+08:00' }
     },
@@ -407,12 +511,13 @@ function drawerProps({ scene, theme }) {
 }
 
 function chatProps({ scene }) {
+  const isLongTask = scene === 'composer';
   return {
-    messages: scene === 'chat' ? [...baseMessages, activityMessage] : finalMessages,
+    messages: isLongTask ? longTaskMessages : scene === 'chat' ? [...baseMessages, activityMessage] : finalMessages,
     selectedSession: selectedSessionForScene(scene) || selectedSession,
     loading: false,
     loadError: '',
-    running: scene === 'chat',
+    running: scene === 'chat' || isLongTask,
     activeRuntimeStartedAt: '2026-05-15T02:07:00+08:00',
     now: NOW,
     hasMoreBefore: scene === 'chat',
@@ -426,15 +531,16 @@ function chatProps({ scene }) {
 }
 
 function composerProps({ scene }) {
+  const isLongTask = scene === 'composer';
   return {
     composerRef: null,
-    input: scene === 'composer' ? '/代码审查 重点看移动端执行流和截图展示' : '',
+    input: '',
     setInput: noop,
-    selectedProject: scene === 'composer' ? projectless : project,
+    selectedProject: project,
     gitProject: project,
     selectedSession: selectedSessionForScene(scene),
     onSubmit: noopAsync,
-    running: scene === 'chat',
+    running: scene === 'chat' || isLongTask,
     onAbort: noop,
     models,
     selectedModel: 'gpt-5.5',
@@ -443,25 +549,20 @@ function composerProps({ scene }) {
     onSelectModelSpeed: noop,
     selectedReasoningEffort: 'medium',
     onSelectReasoningEffort: noop,
-    selectedCollaborationMode: scene === 'composer' ? 'plan' : null,
+    selectedCollaborationMode: isLongTask ? 'plan' : null,
     onSelectCollaborationMode: noop,
     skills,
-    selectedSkillPaths: scene === 'composer' ? ['/skills/frontend-design/SKILL.md'] : [],
+    selectedSkillPaths: isLongTask ? ['/skills/frontend-design/SKILL.md'] : [],
     onToggleSkill: noop,
     onSelectSkill: noop,
     onClearSkills: noop,
     permissionMode: DEFAULT_PERMISSION_MODE,
     onSelectPermission: noop,
     security: { approvalPolicy: 'on-request', sandboxMode: 'workspace-write' },
-    attachments: scene === 'composer'
-      ? [
-        { id: 'att-1', kind: 'image', name: 'mobile-demo.png', mimeType: 'image/png', path: '/tmp/mobile-demo.png', size: 248_000 },
-        { id: 'att-2', kind: 'file', name: 'README.md', mimeType: 'text/markdown', path: '/tmp/README.md', size: 18_240 }
-      ]
-      : [],
+    attachments: [],
     onUploadFiles: noop,
     onRemoveAttachment: noop,
-    fileMentions: scene === 'composer' ? [{ path: 'client/src/App.jsx', relativePath: 'client/src/App.jsx', name: 'App.jsx' }] : [],
+    fileMentions: [],
     onAddFileMention: noop,
     onRemoveFileMention: noop,
     uploading: false,
@@ -474,7 +575,7 @@ function composerProps({ scene }) {
     },
     runSteerable: true,
     desktopBridge: { available: true, connected: true, mode: 'ipc' },
-    queueDrafts: scene === 'chat'
+    queueDrafts: scene === 'chat' || isLongTask
       ? [{ id: 'queue-1', text: '顺便把 README 截图引用也更新掉', mode: 'queue', createdAt: '2026-05-15T02:08:00+08:00' }]
       : [],
     onRestoreQueueDraft: noop,
@@ -484,7 +585,7 @@ function composerProps({ scene }) {
     onCompactContext: noop,
     readOnly: false,
     readOnlyReason: '',
-    homeMode: scene === 'composer',
+    homeMode: false,
     projects: [projectless, project],
     onSelectHomeProject: noop
   };
@@ -496,7 +597,7 @@ function shellClass(scene) {
     classes.push('drawer-active');
   }
   if (scene === 'composer') {
-    classes.push('is-home');
+    classes.push('is-long-task-demo');
   }
   return classes.join(' ');
 }
@@ -521,7 +622,7 @@ export default function DemoScreenshotApp() {
       drawerProps={drawerProps(context)}
       chatProps={chatProps(context)}
       composerProps={composerProps(context)}
-      homeVisible={scene === 'composer'}
+      homeVisible={false}
     />
   );
 }

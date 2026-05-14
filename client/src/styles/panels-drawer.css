@@ -865,8 +865,21 @@
   letter-spacing: 0;
 }
 
+.drawer-brand-wordmark {
+  display: block;
+  width: 128px;
+  height: auto;
+  min-width: 0;
+  opacity: 0.88;
+}
+
 [data-theme="dark"] .drawer-brand-name {
   color: var(--text);
+}
+
+[data-theme="dark"] .drawer-brand-wordmark {
+  filter: invert(1);
+  opacity: 0.9;
 }
 
 .drawer-header-action {
