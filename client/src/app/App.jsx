@@ -595,7 +595,18 @@ export default function App() {
     loadStatus
   });
 
-  const shellClass = useMemo(() => (drawerOpen ? 'app-shell drawer-active' : 'app-shell'), [drawerOpen]);
+  const sessionLoading = Boolean(sessionLoadingId && selectedSession?.id === sessionLoadingId);
+  const homeVisible = !sessionLoading && !sessionLoadError && messages.length === 0 && (!selectedSession || isDraftSession(selectedSession));
+  const shellClass = useMemo(() => {
+    const classes = ['app-shell'];
+    if (drawerOpen) {
+      classes.push('drawer-active');
+    }
+    if (homeVisible) {
+      classes.push('is-home');
+    }
+    return classes.join(' ');
+  }, [drawerOpen, homeVisible]);
   const visibleContextStatus = useMemo(
     () => {
       if (!selectedSession || isDraftSession(selectedSession)) {
@@ -763,7 +774,6 @@ export default function App() {
     return <PairingScreen onPaired={bootstrap} />;
   }
 
-  const sessionLoading = Boolean(sessionLoadingId && selectedSession?.id === sessionLoadingId);
   const panelProps = {
     topBarProps: {
       selectedProject,
@@ -901,7 +911,10 @@ export default function App() {
     onSteerQueueDraft: steerQueueDraft,
     onCompactContext: handleCompactContext,
     readOnly: selectedSessionArchived,
-    readOnlyReason: '已归档线程只能查看，取消归档后才能继续对话'
+    readOnlyReason: '已归档线程只能查看，取消归档后才能继续对话',
+    homeMode: homeVisible,
+    projects,
+    onSelectHomeProject: handleNewConversation
   };
 
   return (
@@ -911,6 +924,7 @@ export default function App() {
       drawerProps={drawerProps}
       chatProps={chatProps}
       composerProps={composerProps}
+      homeVisible={homeVisible}
     />
   );
 }

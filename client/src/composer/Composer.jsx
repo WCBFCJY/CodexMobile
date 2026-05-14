@@ -1,5 +1,5 @@
 /**
- * 主聊天输入区：附件、模型/推理/权限/技能、剪贴板粘贴与发送流程。
+ * 主聊天输入区：附件、模型/推理/权限/技能、首页项目选择、剪贴板粘贴与发送流程。
  *
  * Keywords: composer, chat input, attachments, model, skills
  *
@@ -12,12 +12,12 @@
  * Outward: App.jsx 或上层布局挂载输入条处。
  */
 
-import { ArrowUp, Bot, Check, ChevronDown, ChevronRight, ClipboardList, FileText, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X, Zap } from 'lucide-react';
+import { ArrowUp, Bot, Check, ChevronDown, ChevronRight, ClipboardList, FileText, Folder, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X, Zap } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiFetch, getToken } from '../api.js';
 import { detectComposerToken, exactSlashCommandForInput, filteredSlashCommands, replaceComposerToken } from '../composer-shortcuts.js';
 import { composerSendState } from '../send-state.js';
-import { isDraftSession } from '../app/session-utils.js';
+import { compactPath, isDraftSession } from '../app/session-utils.js';
 import { attachmentPreviewUrl, isImageAttachment } from './attachment-preview.js';
 import { filesFromClipboardData } from './paste-files.js';
 import { ContextStatusButton, ContextStatusDetails } from './ContextStatus.jsx';
@@ -66,7 +66,10 @@ export function Composer({
   onSteerQueueDraft,
   onCompactContext,
   readOnly = false,
-  readOnlyReason = ''
+  readOnlyReason = '',
+  homeMode = false,
+  projects = [],
+  onSelectHomeProject
 }) {
   const textareaRef = useRef(null);
   const imageInputRef = useRef(null);
@@ -74,6 +77,7 @@ export function Composer({
   const [openMenu, setOpenMenu] = useState(null);
   const [modelSubmenu, setModelSubmenu] = useState(null);
   const [skillFilter, setSkillFilter] = useState('');
+  const [projectFilter, setProjectFilter] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   const [fileSearch, setFileSearch] = useState({ query: '', loading: false, results: [] });
   const selectedFileMentions = Array.isArray(fileMentions) ? fileMentions : [];
@@ -86,6 +90,24 @@ export function Composer({
   const skillList = Array.isArray(skills) ? skills : [];
   const selectedSkillSet = new Set(Array.isArray(selectedSkillPaths) ? selectedSkillPaths : []);
   const selectedSkills = skillList.filter((skill) => selectedSkillSet.has(skill.path));
+  const projectList = Array.isArray(projects) ? projects : [];
+  const projectlessProject = projectList.find((project) => project.projectless) || null;
+  const regularProjects = projectList.filter((project) => !project.projectless);
+  const homeProject = selectedProject || projectlessProject || regularProjects[0] || null;
+  const normalizedProjectFilter = projectFilter.trim().toLowerCase();
+  const filteredHomeProjects = regularProjects.filter((project) => {
+    if (!normalizedProjectFilter) {
+      return true;
+    }
+    return [project.name, project.pathLabel, project.path]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(normalizedProjectFilter));
+  });
+  const homeProjectLabel = homeProject?.projectless
+    ? '不使用项目'
+    : homeProject?.name
+      ? `加入项目：${homeProject.name}`
+      : '选择项目';
   const composerToken = useMemo(
     () => detectComposerToken(input, cursorPosition || input.length),
     [input, cursorPosition]
@@ -265,6 +287,9 @@ export function Composer({
     });
     if (name !== 'skill') {
       setSkillFilter('');
+    }
+    if (name !== 'project') {
+      setProjectFilter('');
     }
   }
 
@@ -504,6 +529,62 @@ export function Composer({
       {openMenu === 'context' ? (
         <div className="context-popover" role="status">
           <ContextStatusDetails contextStatus={contextStatus} />
+        </div>
+      ) : null}
+      {openMenu === 'project' && homeMode ? (
+        <div className="composer-menu project-menu" aria-label="选择项目">
+          <div className="skill-search-wrap">
+            <Search size={14} />
+            <input
+              type="search"
+              value={projectFilter}
+              onChange={(event) => setProjectFilter(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                }
+              }}
+              placeholder="搜索项目"
+              aria-label="搜索项目"
+            />
+          </div>
+          {projectlessProject ? (
+            <button
+              type="button"
+              className={`project-menu-item ${homeProject?.id === projectlessProject.id ? 'is-selected' : ''}`}
+              onClick={() => {
+                onSelectHomeProject?.(projectlessProject);
+                setOpenMenu(null);
+              }}
+            >
+              {homeProject?.id === projectlessProject.id ? <Check size={16} /> : <MessageSquare size={16} />}
+              <span>
+                <strong>不使用项目</strong>
+                <small>作为普通对话发送</small>
+              </span>
+            </button>
+          ) : null}
+          {filteredHomeProjects.length ? (
+            filteredHomeProjects.map((project) => (
+              <button
+                key={project.id}
+                type="button"
+                className={`project-menu-item ${homeProject?.id === project.id ? 'is-selected' : ''}`}
+                onClick={() => {
+                  onSelectHomeProject?.(project);
+                  setOpenMenu(null);
+                }}
+              >
+                {homeProject?.id === project.id ? <Check size={16} /> : <Folder size={16} />}
+                <span>
+                  <strong>{project.name}</strong>
+                  <small>{project.pathLabel || compactPath(project.path)}</small>
+                </span>
+              </button>
+            ))
+          ) : (
+            <div className="menu-empty">{regularProjects.length ? '没有匹配的项目' : '暂无可用项目'}</div>
+          )}
         </div>
       ) : null}
       {tokenPanelOpen ? (
@@ -747,6 +828,22 @@ export function Composer({
             {stopMode ? <Square size={15} /> : uploading ? <Loader2 className="spin" size={16} /> : <ArrowUp size={17} strokeWidth={2.25} />}
           </button>
         </div>
+        {homeMode ? (
+          <div className="home-project-strip" aria-label="首页项目选择">
+            <button
+              type="button"
+              className="home-project-button"
+              onClick={() => toggleMenu('project')}
+              disabled={composerReadOnly || !homeProject}
+              aria-expanded={openMenu === 'project'}
+              title={homeProjectLabel}
+            >
+              {homeProject?.projectless ? <MessageSquare size={15} /> : <Folder size={15} />}
+              <span>{homeProjectLabel}</span>
+              <ChevronDown size={13} />
+            </button>
+          </div>
+        ) : null}
       </div>
     </form>
   );

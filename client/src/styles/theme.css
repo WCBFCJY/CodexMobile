@@ -36,6 +36,7 @@
 }
 
 [data-theme="dark"] .skill-menu-item small,
+[data-theme="dark"] .project-menu-item small,
 [data-theme="dark"] .send-mode-menu small,
 [data-theme="dark"] .shortcut-menu small,
 [data-theme="dark"] .menu-empty {
@@ -46,6 +47,16 @@
   border-color: var(--line);
   background: var(--glass-strong);
   box-shadow: var(--soft-shadow);
+}
+
+[data-theme="dark"] .home-project-button {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .home-project-button:active,
+[data-theme="dark"] .home-project-button[aria-expanded="true"] {
+  color: var(--text);
+  background: var(--panel-2);
 }
 
 [data-theme="dark"] .attachment-chip {

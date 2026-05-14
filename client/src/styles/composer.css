@@ -59,6 +59,12 @@
   min-width: 238px;
 }
 
+.project-menu {
+  left: 12px;
+  min-width: min(84vw, 288px);
+  max-width: min(84vw, 320px);
+}
+
 .model-menu {
   right: 188px;
   width: 168px;
@@ -223,8 +229,14 @@
   display: block;
 }
 
+.project-menu-item > span:last-child {
+  display: block;
+}
+
 .skill-menu-item strong,
-.skill-menu-item small {
+.skill-menu-item small,
+.project-menu-item strong,
+.project-menu-item small {
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -232,12 +244,14 @@
   white-space: nowrap;
 }
 
-.skill-menu-item strong {
+.skill-menu-item strong,
+.project-menu-item strong {
   font-size: 14px;
   font-weight: 650;
 }
 
-.skill-menu-item small {
+.skill-menu-item small,
+.project-menu-item small {
   margin-top: 2px;
   color: var(--muted);
   font-size: 11px;
@@ -277,6 +291,14 @@
   box-shadow: var(--soft-shadow);
   backdrop-filter: blur(22px) saturate(1.18);
   overflow: hidden;
+}
+
+.app-shell.is-home .composer-wrap {
+  bottom: max(var(--keyboard-inset, 0px), calc(env(safe-area-inset-bottom, 0px) + 44px));
+}
+
+[data-keyboard="open"] .app-shell.is-home .composer-wrap {
+  bottom: var(--keyboard-inset, 0px);
 }
 
 .attachment-tray {
@@ -538,6 +560,45 @@
   gap: 6px;
   min-width: 0;
   padding: 6px 8px 9px;
+}
+
+.home-project-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 10px 10px;
+}
+
+.home-project-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+}
+
+.home-project-button:active,
+.home-project-button[aria-expanded="true"] {
+  color: var(--text);
+  background: var(--panel-2);
+}
+
+.home-project-button:disabled {
+  opacity: 0.45;
+}
+
+.home-project-button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
 }
 
 .composer-attach {
@@ -931,6 +992,14 @@
   .attach-menu,
   .shortcut-menu {
     left: var(--desktop-main-gutter);
+  }
+
+  .project-menu {
+    left: var(--desktop-main-gutter);
+  }
+
+  .app-shell.is-home .composer-wrap {
+    bottom: max(var(--keyboard-inset, 0px), 12svh);
   }
 
   .permission-menu {

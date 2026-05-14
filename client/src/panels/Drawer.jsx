@@ -33,15 +33,39 @@ function formatRelativeShort(value) {
     return '刚刚';
   }
   if (diff < 3_600_000) {
-    return `${Math.floor(diff / 60_000)}m`;
+    return `${Math.floor(diff / 60_000)} 分钟`;
   }
   if (diff < 86_400_000) {
-    return `${Math.floor(diff / 3_600_000)}h`;
+    return `${Math.floor(diff / 3_600_000)} 小时`;
   }
   if (diff < 7 * 86_400_000) {
-    return `${Math.floor(diff / 86_400_000)}d`;
+    return `${Math.floor(diff / 86_400_000)} 天`;
+  }
+  if (diff < 30 * 86_400_000) {
+    return `${Math.floor(diff / (7 * 86_400_000))} 周`;
   }
   return formatTime(value);
+}
+
+function projectSourceLabel(project) {
+  if (!project || project.projectless) {
+    return '';
+  }
+  const normalizedPath = String(project.path || '').replaceAll('\\', '/');
+  const lowerPath = normalizedPath.toLowerCase();
+  if (lowerPath.includes('/vaults/')) {
+    return 'Vaults';
+  }
+  if (lowerPath.includes('/agent-skills/')) {
+    return 'agent-skills';
+  }
+  const rawLabel = project.pathLabel || compactPath(project.path);
+  const parts = String(rawLabel || '').replaceAll('\\', '/').split('/').filter(Boolean);
+  const tail = parts.at(-1) || '';
+  if (!tail || tail === project.name) {
+    return '';
+  }
+  return tail;
 }
 
 export function Drawer({
@@ -83,6 +107,7 @@ export function Drawer({
   const [renameValue, setRenameValue] = useState('');
   const [renameSaving, setRenameSaving] = useState(false);
   const [newConversationOpen, setNewConversationOpen] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState({ projects: false, conversations: false });
   const [runtimeDebugError, setRuntimeDebugError] = useState('');
   const [runtimeDebugSaving, setRuntimeDebugSaving] = useState(false);
   const [desktopRefreshError, setDesktopRefreshError] = useState('');
@@ -227,6 +252,20 @@ export function Drawer({
   function toggleQuotaPanel() {
     setQuotaExpanded((current) => !current);
   }
+
+  function toggleSection(section) {
+    if (section === 'conversations' && collapsedSections.conversations && projectlessProject && !expandedProjectIds[projectlessProject.id]) {
+      onToggleProject(projectlessProject);
+    }
+    setCollapsedSections((current) => ({ ...current, [section]: !current[section] }));
+  }
+
+  useEffect(() => {
+    if (!open || !projectlessProject || expandedProjectIds[projectlessProject.id]) {
+      return;
+    }
+    onToggleProject(projectlessProject);
+  }, [open, projectlessProject?.id]);
 
   useEffect(() => {
     if (!runtimeDebug) {
@@ -456,19 +495,7 @@ export function Drawer({
     );
   };
 
-  const renderProjectGroup = (project) => {
-    const isSelected = selectedProject?.id === project.id;
-    const isExpanded = Boolean(expandedProjectIds[project.id]);
-    const projectSessions = sessionsByProject[project.id] || [];
-    const projectMatches = normalizedDrawerQuery
-      ? [project.name, project.pathLabel, project.path].some((value) => String(value || '').toLowerCase().includes(normalizedDrawerQuery))
-      : true;
-    const visibleProjectSessions = normalizedDrawerQuery
-      ? projectSessions.filter((session) => String(session.title || '对话').toLowerCase().includes(normalizedDrawerQuery))
-      : projectSessions;
-    if (normalizedDrawerQuery && !projectMatches && !visibleProjectSessions.length) {
-      return null;
-    }
+  const renderThreadList = (project, visibleProjectSessions, { className = 'thread-list' } = {}) => {
     const projectSessionIds = new Set(visibleProjectSessions.map((session) => session.id));
     const childSessionsByParent = visibleProjectSessions.reduce((acc, session) => {
       if (session.parentSessionId && projectSessionIds.has(session.parentSessionId)) {
@@ -482,18 +509,72 @@ export function Drawer({
     const rootSessions = visibleProjectSessions.filter(
       (session) => !session.parentSessionId || !projectSessionIds.has(session.parentSessionId)
     );
+    return (
+      <div className={className}>
+        {loadingProjectId === project.id ? (
+          <div className="thread-empty">
+            <Loader2 className="spin" size={13} />
+            加载中
+          </div>
+        ) : visibleProjectSessions.length ? (
+          rootSessions.map((session) => {
+            const childSessions = childSessionsByParent.get(session.id) || [];
+            const childSessionsOpen = Boolean(subagentExpandedById[session.id]);
+            return (
+              <div key={session.id} className="thread-stack">
+                {renderThreadRow(project, session)}
+                {childSessions.length && childSessionsOpen ? (
+                  <div className="thread-list is-subagents">
+                    {childSessions.map((childSession) => renderThreadRow(project, childSession, { isSubAgent: true }))}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })
+        ) : (
+          <div className="thread-empty">暂无线程</div>
+        )}
+      </div>
+    );
+  };
+
+  const visibleSessionsForProject = (project) => {
+    const projectSessions = sessionsByProject[project.id] || [];
+    const projectMatches = normalizedDrawerQuery
+      ? [project.name, project.pathLabel, project.path].some((value) => String(value || '').toLowerCase().includes(normalizedDrawerQuery))
+      : true;
+    const visibleProjectSessions = normalizedDrawerQuery
+      ? projectSessions.filter((session) => String(session.title || '对话').toLowerCase().includes(normalizedDrawerQuery))
+      : projectSessions;
+    if (normalizedDrawerQuery && !projectMatches && !visibleProjectSessions.length) {
+      return null;
+    }
+    return visibleProjectSessions;
+  };
+
+  const renderProjectGroup = (project) => {
+    const isExpanded = Boolean(expandedProjectIds[project.id]);
+    const projectSessions = sessionsByProject[project.id] || [];
+    const visibleProjectSessions = visibleSessionsForProject(project);
+    if (!visibleProjectSessions) {
+      return null;
+    }
     const sessionsOpen = isExpanded || Boolean(normalizedDrawerQuery);
     const sessionCount = project.sessionCount ?? projectSessions.length ?? 0;
+    const sourceLabel = projectSourceLabel(project);
     return (
       <div key={project.id} className={`project-group ${project.projectless ? 'is-conversations' : 'is-project'}`}>
         <div className="project-row-shell">
           <button
-            className={`project-row ${isSelected ? 'is-selected' : ''} ${sessionsOpen ? 'is-expanded' : ''}`}
+            className={`project-row ${sessionsOpen ? 'is-expanded' : ''}`}
             onClick={() => onToggleProject(project)}
           >
             {project.projectless ? <MessageSquare size={16} /> : <Folder size={16} />}
-            <span className="project-name">
-              {project.projectless ? '普通对话' : project.name}
+            <span className="project-label">
+              <span className="project-name">
+                {project.projectless ? '对话' : project.name}
+              </span>
+              {sourceLabel ? <small className="project-source">{sourceLabel}</small> : null}
             </span>
             {sessionCount ? <small className="project-count">{sessionCount}</small> : null}
             <ChevronDown size={14} className="project-chevron" />
@@ -508,37 +589,42 @@ export function Drawer({
             <Plus size={15} />
           </button>
         </div>
-        {sessionsOpen ? (
-          <div className="thread-list">
-            {loadingProjectId === project.id ? (
-              <div className="thread-empty">
-                <Loader2 className="spin" size={13} />
-                加载中
-              </div>
-            ) : visibleProjectSessions.length ? (
-              rootSessions.map((session) => {
-                const childSessions = childSessionsByParent.get(session.id) || [];
-                const childSessionsOpen = Boolean(subagentExpandedById[session.id]);
-                return (
-                  <div key={session.id} className="thread-stack">
-                    {renderThreadRow(project, session)}
-                    {childSessions.length && childSessionsOpen ? (
-                      <div className="thread-list is-subagents">
-                        {childSessions.map((childSession) => renderThreadRow(project, childSession, { isSubAgent: true }))}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })
-            ) : (
-              <div className="thread-empty">暂无线程</div>
-            )}
-          </div>
-        ) : null}
+        {sessionsOpen ? renderThreadList(project, visibleProjectSessions) : null}
       </div>
     );
   };
-  const renderedProjectGroups = orderedProjects.map(renderProjectGroup).filter(Boolean);
+
+  const renderConversationThreads = (project) => {
+    const visibleProjectSessions = visibleSessionsForProject(project);
+    if (!visibleProjectSessions) {
+      return null;
+    }
+    return (
+      <div key={project.id} className="project-group is-conversations">
+        {renderThreadList(project, visibleProjectSessions, { className: 'thread-list is-conversations-list' })}
+      </div>
+    );
+  };
+
+  const renderSectionHeading = (section, label, count) => {
+    const collapsed = Boolean(collapsedSections[section]) && !normalizedDrawerQuery;
+    return (
+      <button
+        type="button"
+        className={`drawer-section-heading ${collapsed ? 'is-collapsed' : 'is-open'}`}
+        onClick={() => toggleSection(section)}
+        aria-expanded={!collapsed}
+      >
+        <span>{label}</span>
+        {Number.isFinite(count) ? <small>{count}</small> : null}
+        <ChevronDown size={13} />
+      </button>
+    );
+  };
+
+  const renderedProjectGroups = orderedProjects.filter((project) => !project.projectless).map(renderProjectGroup).filter(Boolean);
+  const renderedConversationGroups = orderedProjects.filter((project) => project.projectless).map(renderConversationThreads).filter(Boolean);
+  const renderedGroups = [...renderedProjectGroups, ...renderedConversationGroups];
 
   const statusText = runningCount ? `${runningCount} 个任务运行中` : '已连接';
 
@@ -612,9 +698,12 @@ export function Drawer({
           ) : null}
 
           <div className="project-list">
-            {renderedProjectGroups}
+            {renderedProjectGroups.length ? renderSectionHeading('projects', '项目') : null}
+            {collapsedSections.projects && !normalizedDrawerQuery ? null : renderedProjectGroups}
+            {renderedConversationGroups.length ? renderSectionHeading('conversations', '对话') : null}
+            {collapsedSections.conversations && !normalizedDrawerQuery ? null : renderedConversationGroups}
           </div>
-          {normalizedDrawerQuery && !renderedProjectGroups.length ? (
+          {normalizedDrawerQuery && !renderedGroups.length ? (
             <div className="drawer-empty-state">没有匹配的对话或项目</div>
           ) : null}
         </div>

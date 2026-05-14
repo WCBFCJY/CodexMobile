@@ -2145,3 +2145,166 @@ button.archive-empty-state {
     box-shadow: none;
   }
 }
+
+/* Native-like project/thread list refinement. Keep header, search, create and footer actions intact. */
+.drawer-section-heading {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 7px;
+  padding: 0 4px;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 560;
+  line-height: 18px;
+  text-align: left;
+}
+
+.drawer-section-heading span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.drawer-section-heading small {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 520;
+}
+
+.drawer-section-heading svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+  transition: transform 160ms ease;
+}
+
+.drawer-section-heading.is-collapsed svg {
+  transform: rotate(-90deg);
+}
+
+.drawer-section-heading:active {
+  color: var(--text);
+}
+
+.drawer-section-heading:first-child {
+  margin-top: 4px;
+}
+
+.project-list {
+  gap: 2px;
+}
+
+.project-group {
+  margin: 0;
+}
+
+.project-row-shell {
+  grid-template-columns: minmax(0, 1fr) 30px;
+  gap: 4px;
+}
+
+.project-row {
+  min-height: 42px;
+  padding: 0 4px;
+  border-radius: 10px;
+  color: var(--muted);
+}
+
+.project-row:active {
+  background: var(--panel-2);
+}
+
+.project-row.is-selected {
+  color: var(--text);
+  background: transparent;
+}
+
+.project-row.is-selected:active {
+  background: var(--panel-2);
+}
+
+.project-row .project-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.project-row .project-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  color: inherit;
+  font-size: 15px;
+  font-weight: 560;
+  line-height: 20px;
+}
+
+.project-row .project-source {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 520;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-row .project-count,
+.project-row .project-chevron {
+  color: var(--muted);
+}
+
+.project-add-button {
+  opacity: 0.82;
+}
+
+.thread-list {
+  margin: 3px 0 9px;
+  display: grid;
+  gap: 2px;
+}
+
+.thread-list.is-subagents {
+  margin: 2px 0 4px 28px;
+}
+
+.thread-list.is-conversations-list {
+  margin: 3px 0 9px;
+}
+
+.thread-row {
+  min-height: 44px;
+  padding: 0 8px 0 40px;
+  border-radius: 12px;
+}
+
+.thread-list.is-conversations-list .thread-row {
+  padding-left: 12px;
+}
+
+.thread-row.is-selected {
+  background: var(--selected-bg);
+}
+
+.thread-title {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 520;
+}
+
+.thread-row.is-subagent .thread-title {
+  font-size: 14px;
+}
+
+.thread-meta small {
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+}

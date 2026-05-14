@@ -12,7 +12,7 @@
  * Outward: App 根布局顶部固定区域。
  */
 
-import { Bell, Check, Copy, FileText, GitBranch, GitCommitHorizontal, Menu, MonitorUp, MoreHorizontal, RefreshCw, UploadCloud } from 'lucide-react';
+import { Bell, Check, Copy, GitBranch, Menu, MonitorUp, MoreHorizontal } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { copyTextToClipboard } from '../utils/clipboard.js';
 import { isDraftSession } from '../app/session-utils.js';
@@ -51,7 +51,6 @@ export function TopBar({
     supported: desktopHandoffSupported,
     pending: desktopHandoffPending
   });
-  const projectId = selectedProject?.id || '';
   const title = selectedSession?.title || selectedProject?.name || 'CodexMobile';
 
   useEffect(() => {
@@ -76,6 +75,11 @@ export function TopBar({
   function handleGitAction(action) {
     setMenuOpen(false);
     onGitAction?.(action);
+  }
+
+  function handleOpenGitPanel() {
+    setMenuOpen(false);
+    onGitAction?.('status');
   }
 
   async function handleCopyThreadId() {
@@ -125,6 +129,16 @@ export function TopBar({
         </span>
       </div>
       <div className="top-actions">
+        <button
+          type="button"
+          className="icon-button"
+          onClick={handleOpenGitPanel}
+          disabled={gitDisabled}
+          aria-label="打开 Git 面板"
+          title="Git"
+        >
+          <GitBranch size={21} />
+        </button>
         <div className="top-menu-wrap" ref={menuRef}>
           <button
             type="button"
@@ -156,43 +170,6 @@ export function TopBar({
               <button type="button" role="menuitem" onClick={handleEnableNotifications}>
                 <Bell size={16} />
                 <span>{notificationEnabled ? '完成通知已开启' : '开启完成通知'}</span>
-              </button>
-              <div className="top-menu-divider" />
-              <div className="top-menu-title">
-                <GitBranch size={16} />
-                <span>Git</span>
-              </div>
-              <button type="button" role="menuitem" onClick={() => handleGitAction('status')} disabled={gitDisabled}>
-                <FileText size={16} />
-                <span>查看状态</span>
-              </button>
-              <button type="button" role="menuitem" onClick={() => handleGitAction('diff')} disabled={gitDisabled}>
-                <FileText size={16} />
-                <span>查看 diff</span>
-              </button>
-              <button type="button" role="menuitem" onClick={() => handleGitAction('pull')} disabled={gitDisabled}>
-                <RefreshCw size={16} />
-                <span>拉取</span>
-              </button>
-              <button type="button" role="menuitem" onClick={() => handleGitAction('sync')} disabled={gitDisabled}>
-                <RefreshCw size={16} />
-                <span>同步</span>
-              </button>
-              <button type="button" role="menuitem" onClick={() => handleGitAction('commit')} disabled={gitDisabled}>
-                <GitCommitHorizontal size={16} />
-                <span>提交</span>
-              </button>
-              <button type="button" role="menuitem" onClick={() => handleGitAction('push')} disabled={gitDisabled}>
-                <UploadCloud size={16} />
-                <span>推送</span>
-              </button>
-              <button type="button" role="menuitem" onClick={() => handleGitAction('commit-push')} disabled={gitDisabled}>
-                <UploadCloud size={16} />
-                <span>提交并推送</span>
-              </button>
-              <button type="button" role="menuitem" onClick={() => handleGitAction('branches')} disabled={gitDisabled || !projectId}>
-                <GitBranch size={16} />
-                <span>分支管理</span>
               </button>
             </div>
           ) : null}
