@@ -156,8 +156,8 @@ export function useTurnSubmission({
       previousSessionId: draftSessionId || outgoingSessionId,
       draftSessionId,
       turnId,
-      status: 'running',
-      label: '正在思考',
+      status: 'queued',
+      label: '消息发送中',
       startedAt: submittedAt,
       timestamp: submittedAt,
       steerable: false
@@ -186,6 +186,21 @@ export function useTurnSubmission({
         }
       });
       const resultTurnId = result.turnId || turnId;
+      const acceptedAt = new Date().toISOString();
+      markRun?.({
+        source: 'headless-local',
+        projectId: project.id,
+        sessionId: result.sessionId || optimisticSessionId,
+        previousSessionId: draftSessionId || outgoingSessionId,
+        draftSessionId,
+        turnId: resultTurnId,
+        clientTurnId: turnId,
+        status: 'running',
+        label: '执行中',
+        startedAt: acceptedAt,
+        timestamp: acceptedAt,
+        steerable: true
+      });
       setMessages((current) =>
         current.map((item) =>
           item.id === localUserMessageId

@@ -69,8 +69,9 @@ export function applySyncRuntimeEvent(runtimeById = {}, event = {}) {
     return runtimeById || {};
   }
   const runtime = runtimeRecordForSyncEvent(event);
+  const anchor = runtimeGroupAnchor(next, keys, runtime.status);
   for (const key of keys) {
-    next[key] = runtime;
+    next[key] = mergeRuntimeRecord(next[key] || anchor, runtime);
   }
   return next;
 }
@@ -80,16 +81,18 @@ export function mergeSyncStateRuntime(runtimeById = {}, syncState = {}) {
     ? syncState.runtimeById
     : {};
   const next = { ...(runtimeById || {}) };
+  const incomingKeys = Object.keys(incoming);
   for (const [key, runtime] of Object.entries(incoming)) {
     if (runtime?.status === 'running' || runtime?.status === 'queued') {
-      next[key] = runtime;
+      const anchor = runtimeGroupAnchor(next, incomingKeys, runtime.status);
+      next[key] = mergeRuntimeRecord(next[key] || anchor, runtime);
     }
   }
-  const incomingKeys = new Set(Object.keys(incoming));
+  const incomingKeySet = new Set(incomingKeys);
   for (const [key, runtime] of Object.entries(next)) {
     if (
       ['desktop-ipc', 'headless-local', 'local-handoff', 'codexmobile'].includes(String(runtime?.source || '')) &&
-      !incomingKeys.has(key)
+      !incomingKeySet.has(key)
     ) {
       delete next[key];
     }
@@ -103,4 +106,39 @@ export function sessionMatchesSyncEvent(session = null, event = {}) {
   }
   const keys = new Set(syncEventRunKeys(event));
   return keys.has(String(session.id || '')) || keys.has(String(session.turnId || ''));
+}
+
+function mergeRuntimeRecord(previous, incoming) {
+  if (!previous || !isLiveRuntimeStatus(previous.status)) {
+    return incoming;
+  }
+  const previousStatus = String(previous.status || '').toLowerCase();
+  const incomingStatus = String(incoming.status || '').toLowerCase();
+  const preserveStartedAt =
+    previousStatus === incomingStatus ||
+    (previousStatus === 'running' && incomingStatus === 'running');
+  return {
+    ...previous,
+    ...incoming,
+    startedAt: preserveStartedAt ? (previous.startedAt || incoming.startedAt) : incoming.startedAt
+  };
+}
+
+function runtimeGroupAnchor(runtimeById = {}, keys = [], incomingStatus = '') {
+  const normalizedStatus = String(incomingStatus || '').toLowerCase();
+  if (!isLiveRuntimeStatus(normalizedStatus)) {
+    return null;
+  }
+  const candidates = keys
+    .map((key) => runtimeById?.[key])
+    .filter((runtime) => isLiveRuntimeStatus(String(runtime?.status || '').toLowerCase()));
+  return candidates.find((runtime) => String(runtime.status || '').toLowerCase() === normalizedStatus) ||
+    candidates.find((runtime) => String(runtime.status || '').toLowerCase() === 'running') ||
+    candidates[0] ||
+    null;
+}
+
+function isLiveRuntimeStatus(status) {
+  const normalized = String(status || '').toLowerCase();
+  return normalized === 'running' || normalized === 'queued';
 }

@@ -50,6 +50,12 @@ test('bridgeConnectionLabel avoids claiming IPC route before running source is k
 test('bridgeConnectionLabel switches queued and failure channel labels', () => {
   assert.equal(
     bridgeConnectionLabel('connected', { connected: true, mode: 'desktop-ipc' }, {
+      selectedRuntime: { status: 'queued', source: 'local-optimistic', label: '消息发送中' }
+    }).label,
+    '消息发送中'
+  );
+  assert.equal(
+    bridgeConnectionLabel('connected', { connected: true, mode: 'desktop-ipc' }, {
       selectedRuntime: { status: 'queued', source: 'headless-local' }
     }).label,
     '后台排队中'

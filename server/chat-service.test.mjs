@@ -1141,6 +1141,57 @@ test('sendChat remembers a started background thread path before broadcasting it
   assert.ok(broadcastIndex > rememberedIndex);
 });
 
+test('sendChat starts project-bound draft threads in the selected project cwd', async () => {
+  let runPayload = null;
+  let projectlessRegistrationCount = 0;
+  let mobileRegistration = null;
+  const { service } = makeChatService({
+    getProject: () => ({
+      id: 'project-codexmobile',
+      name: 'CodexMobile',
+      path: '/Users/xiayanghui/编程项目/CodexMobile',
+      projectless: false
+    }),
+    runCodexTurn: async (payload, emit) => {
+      runPayload = payload;
+      emit({
+        type: 'thread-started',
+        sessionId: 'project-thread-1',
+        previousSessionId: payload.draftSessionId,
+        turnId: payload.turnId,
+        cwd: payload.projectPath,
+        startedAt: '2026-05-14T12:00:00.000Z'
+      });
+      emit({
+        type: 'chat-complete',
+        sessionId: 'project-thread-1',
+        previousSessionId: payload.draftSessionId,
+        turnId: payload.turnId
+      });
+      return 'project-thread-1';
+    },
+    registerProjectlessThread: async () => {
+      projectlessRegistrationCount += 1;
+    },
+    registerMobileSession: async (session) => {
+      mobileRegistration = session;
+    }
+  });
+
+  await service.sendChat({
+    projectId: 'project-codexmobile',
+    draftSessionId: 'draft-project-codexmobile-1',
+    clientTurnId: 'client-turn',
+    message: '在项目里开新线程'
+  });
+  await flushQueuedWork();
+
+  assert.equal(runPayload.projectPath, '/Users/xiayanghui/编程项目/CodexMobile');
+  assert.equal(projectlessRegistrationCount, 0);
+  assert.equal(mobileRegistration.projectPath, '/Users/xiayanghui/编程项目/CodexMobile');
+  assert.equal(mobileRegistration.projectless, false);
+});
+
 test('sendChat starts a headless local Codex turn when desktop bridge is in headless mode', async () => {
   let runPayload = null;
   const { service, broadcasts } = makeChatService({

@@ -4,7 +4,7 @@
  * Keywords: activity message, status message, merge, codex payload
  *
  * Exports:
- * - 无 default；含计划正文提取、活动步骤构建、消息流签名、latestActivityMessageIdForRuntime、upsertStatusMessage/upsertActivityMessage、mergeLoadedMessagesPreservingActivity 等大量会话层工具（详见模块内 export）。
+ * - 无 default；含计划正文提取、活动步骤构建、消息流签名、upsertStatusMessage/upsertActivityMessage、mergeLoadedMessagesPreservingActivity 等大量会话层工具（详见模块内 export）。
  *
  * Inward: activity-display、activity-dedupe、activity-merge、../app/session-utils。
  *
@@ -772,78 +772,6 @@ export function shouldRenderActivityMessageInChat(message) {
     return false;
   }
   return !isPlaceholderActivityMessage(message);
-}
-
-export function activityMessageHasVisibleProcess(message) {
-  if (message?.role !== 'activity' || !shouldRenderActivityMessageInChat(message)) {
-    return false;
-  }
-  const activities = Array.isArray(message.activities) ? message.activities : [];
-  return activities.some((activity) => isVisibleActivityStep(activity, message.status));
-}
-
-export function latestActivityMessageIdForRuntime(messages = [], {
-  running = false,
-  activeRunKeys = [],
-  runtimeStartedAt = null
-} = {}) {
-  if (!running) {
-    return '';
-  }
-  const keys = new Set((activeRunKeys || []).map((key) => String(key || '').trim()).filter(Boolean));
-  let fallbackId = '';
-  for (let index = messages.length - 1; index >= 0; index -= 1) {
-    const message = messages[index];
-    if (!activityMessageHasVisibleProcess(message)) {
-      continue;
-    }
-    const freshForRuntime = activityMessageTouchesRuntimeWindow(message, runtimeStartedAt);
-    if (!fallbackId && freshForRuntime) {
-      fallbackId = message.id || '';
-    }
-    if (keys.size && activityMessageMatchesActiveRunKeys(message, keys, freshForRuntime)) {
-      return message.id || '';
-    }
-  }
-  return fallbackId;
-}
-
-function activityMessageMatchesActiveRunKeys(message, keys, freshForRuntime) {
-  const turnKeys = [message?.turnId, message?.clientTurnId]
-    .map((key) => String(key || '').trim())
-    .filter(Boolean);
-  if (turnKeys.some((key) => keys.has(key))) {
-    return true;
-  }
-  return Boolean(freshForRuntime && payloadRunKeys(message).some((key) => keys.has(String(key))));
-}
-
-function activityMessageTouchesRuntimeWindow(message, runtimeStartedAt) {
-  const runtimeStartMs = runtimeStartedAt ? new Date(runtimeStartedAt).getTime() : NaN;
-  if (!Number.isFinite(runtimeStartMs)) {
-    return true;
-  }
-  const latestMs = latestActivityMessageTimestampMs(message);
-  return Number.isFinite(latestMs) && latestMs >= runtimeStartMs - 1000;
-}
-
-function latestActivityMessageTimestampMs(message) {
-  const values = [
-    message?.timestamp,
-    message?.startedAt,
-    message?.completedAt,
-    ...(Array.isArray(message?.activities)
-      ? message.activities.flatMap((activity) => [
-        activity?.timestamp,
-        activity?.startedAt,
-        activity?.completedAt
-      ])
-      : [])
-  ];
-  return values.reduce((latest, value) => {
-    const time = value ? new Date(value).getTime() : NaN;
-    return Number.isFinite(time) && time > latest ? time : latest;
-  }, Number.NEGATIVE_INFINITY);
 }
 
 export function completeActivityMessagesForTurn(current, payload) {

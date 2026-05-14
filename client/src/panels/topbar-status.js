@@ -56,6 +56,9 @@ function runtimeDescription(runtime, fallback) {
 
 function runtimeChannelLabel(runtime, status) {
   if (status === 'queued') {
+    if (runtimeSource(runtime) === 'local-optimistic') {
+      return runtime?.label || '消息发送中';
+    }
     if (isDesktopRuntime(runtime)) {
       return '桌面端排队中';
     }

@@ -233,6 +233,17 @@ async function readRolloutThreadFromFile(filePath, sessionId) {
   };
 }
 
+function activityContainerStatusForRuntime(item = {}, contextState = {}) {
+  const runtime = contextState?.runtime || null;
+  if (!runtime || !item?.turnId) {
+    return '';
+  }
+  if (runtime.turnId !== item.turnId) {
+    return '';
+  }
+  return runtime.status || '';
+}
+
 function desktopThreadHasMessages(thread) {
   if (Array.isArray(thread?.messages) && thread.messages.length > 0) {
     return true;
@@ -563,22 +574,36 @@ export function createSessionMessageReader({
     const messages = Array.isArray(thread.messages)
       ? thread.messages.map((message) => ({ ...message }))
       : messagesFromDesktopThread(thread, { includeActivity });
+    const contextState = await readRolloutContextStateImpl(thread.path, sessionId);
     if (includeActivity) {
       const rawActivities = await readRawSessionActivities(thread.path, thread.turns || []);
       removeFallbackActivitiesCoveredByRaw(messages, rawActivities);
       for (const item of rawActivities) {
-        upsertDesktopActivity(messages, item.turnId, item.activity, item.segmentIndex);
+        upsertDesktopActivity(
+          messages,
+          item.turnId,
+          item.activity,
+          item.segmentIndex,
+          activityContainerStatusForRuntime(item, contextState),
+          thread.id || sessionId
+        );
       }
       const collabActivities = await readDesktopCollabActivities(thread.path);
       for (const item of collabActivities) {
-        upsertDesktopActivity(messages, item.turnId, item.activity, item.segmentIndex);
+        upsertDesktopActivity(
+          messages,
+          item.turnId,
+          item.activity,
+          item.segmentIndex,
+          activityContainerStatusForRuntime(item, contextState),
+          thread.id || sessionId
+        );
       }
       messages.splice(0, messages.length, ...removeDuplicateGuidedUserSegments(messages));
       sortDesktopActivitySteps(messages);
     }
     const orderedMessages = sortMessagesByConversationOrder(messages);
 
-    const contextState = await readRolloutContextStateImpl(thread.path, sessionId);
     return {
       ...paginateMessages(filterDeletedMessages(orderedMessages, deletedIds), { limit, offset, latest }),
       context: publicContextState(contextState, getConfigContext() || {})

@@ -7,7 +7,8 @@
  * - resolveAppServerTransport / defaultServerRequestResult — 传输层与默认响应。
  * - CodexAppServerClient / createCodexAppServerClient — 客户端构造。
  * - getDesktopBridgeStatus — 当前桥接健康与能力摘要。
- * - listDesktopThreads / readDesktopThread / setDesktopThreadName / archiveDesktopThread — Thread CRUD 辅助。
+ * - listDesktopThreads / desktopThreadListRequestParams / filterDesktopThreadsForArchiveMode — Thread 列表与归档态筛选。
+ * - readDesktopThread / setDesktopThreadName / archiveDesktopThread — Thread CRUD 辅助。
  * - notifyDesktopThreadListChanged — 通过桌面 IPC 请求 Codex Desktop 热刷新线程列表。
  *
  * Inward（本模块依赖/组装的关键符号）: desktop-ipc-client（广播/probe）、child_process.spawn。
@@ -451,7 +452,25 @@ export async function getDesktopBridgeStatus({ force = false } = {}) {
   }
 }
 
-export async function listDesktopThreads({ limit = 1000, pageSize = 100 } = {}) {
+export function desktopThreadListRequestParams({ cursor = null, limit = 100, archived = false } = {}) {
+  return {
+    cursor,
+    limit,
+    sortKey: 'updated_at',
+    sortDirection: 'desc',
+    archived: Boolean(archived)
+  };
+}
+
+export function filterDesktopThreadsForArchiveMode(threads = [], { archived = false } = {}) {
+  const rawThreads = Array.isArray(threads) ? threads : [];
+  if (archived) {
+    return rawThreads.filter((thread) => thread?.id);
+  }
+  return rawThreads.filter((thread) => !isArchivedOrDeletedDesktopThread(thread));
+}
+
+export async function listDesktopThreads({ limit = 1000, pageSize = 100, archived = false } = {}) {
   const client = await createCodexAppServerClient({
     clientInfo: { name: 'CodexMobileList', title: null, version: '0.1.0' },
     allowReadOnlyIsolated: true
@@ -460,15 +479,13 @@ export async function listDesktopThreads({ limit = 1000, pageSize = 100 } = {}) 
     const threads = [];
     let cursor = null;
     while (threads.length < limit) {
-      const response = await client.request('thread/list', {
+      const response = await client.request('thread/list', desktopThreadListRequestParams({
         cursor,
         limit: Math.min(pageSize, limit - threads.length),
-        sortKey: 'updated_at',
-        sortDirection: 'desc',
-        archived: false
-      }, { timeoutMs: 20_000 });
+        archived
+      }), { timeoutMs: 20_000 });
       const rawData = Array.isArray(response?.data) ? response.data : [];
-      const data = rawData.filter((thread) => !isArchivedOrDeletedDesktopThread(thread));
+      const data = filterDesktopThreadsForArchiveMode(rawData, { archived });
       threads.push(...data);
       cursor = response?.nextCursor || null;
       if (!cursor || !rawData.length) {

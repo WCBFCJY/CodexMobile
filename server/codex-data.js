@@ -7,6 +7,7 @@
  * - 再导出 desktop/session 解析符号。
  * - refreshCodexCache / getCacheSnapshot — 缓存生命周期。
  * - listProjects / getProject / listProjectSessions / getSession / rememberLiveSession。
+ * - projectlessMobileSessionRegistrations — 找出需补登记到 Codex 全局 state 的移动端普通对话。
  * - renameSession / deleteSession / hideSessionMessage / readSessionMessages / getHostName。
  *
  * Inward（本模块依赖/组装的关键符号）: session-index-builder、session-message-reader、mobile-session-index、codex-app-server、session-local-state。
@@ -22,7 +23,15 @@ import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { archiveDesktopThread, listDesktopThreads, readDesktopThread } from './codex-app-server.js';
-import { CODEX_SESSION_INDEX, CODEX_SESSIONS_DIR, CODEX_STATE_DB, readCodexConfig, readCodexWorkspaceState } from './codex-config.js';
+import {
+  CODEX_SESSION_INDEX,
+  CODEX_SESSIONS_DIR,
+  CODEX_STATE_DB,
+  defaultProjectlessWorkspaceRoot,
+  readCodexConfig,
+  readCodexWorkspaceState,
+  registerProjectlessThreads
+} from './codex-config.js';
 import { broadcastDesktopThreadTitleUpdated } from './desktop-ipc-client.js';
 import {
   readMobileSessionIndex,
@@ -479,10 +488,148 @@ async function listDesktopThreadsForCache() {
   return listLocalDesktopThreadsFromJsonl({ limit: LOCAL_THREAD_SCAN_LIMIT });
 }
 
+function isoFromThreadTime(value) {
+  if (!value) {
+    return null;
+  }
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    const millis = value > 10_000_000_000 ? value : value * 1000;
+    const date = new Date(millis);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+  const text = String(value || '').trim();
+  if (!text) {
+    return null;
+  }
+  const numeric = Number(text);
+  if (Number.isFinite(numeric)) {
+    return isoFromThreadTime(numeric);
+  }
+  const date = new Date(text);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function isArchivedLocalThread(thread = null) {
+  if (!thread || typeof thread !== 'object') {
+    return false;
+  }
+  const status = String(thread.status || '').toLowerCase();
+  return Boolean(thread.archived) || Boolean(thread.isArchived) || status === 'archived' || Boolean(thread.archivedAt || thread.archived_at);
+}
+
+function shortModelLabel(model = '') {
+  const value = String(model || '').trim();
+  if (!value) {
+    return '';
+  }
+  return `${value.replace(/^gpt-/i, '').replace(/-codex.*$/i, '').replace(/-mini$/i, ' mini')} 中`;
+}
+
+function archivedSessionFromThread(thread = {}) {
+  const id = String(thread.id || '').trim();
+  if (!id) {
+    return null;
+  }
+  const model = String(thread.model || thread.modelName || '').trim();
+  const updatedAt = isoFromThreadTime(thread.updatedAt || thread.updated_at || thread.modifiedAt || thread.mtime);
+  const archivedAt = isoFromThreadTime(thread.archivedAt || thread.archived_at || thread.deletedAt || thread.deleted_at || thread.archiveAt) || updatedAt;
+  return {
+    id,
+    title: String(thread.name || thread.title || '').trim() || '对话',
+    summary: String(thread.preview || thread.summary || thread.firstUserMessage || '').trim(),
+    projectPath: String(thread.cwd || thread.projectPath || '').trim(),
+    updatedAt,
+    archivedAt,
+    model,
+    modelShort: String(thread.modelShort || '').trim() || shortModelLabel(model)
+  };
+}
+
+async function listLocalArchivedSessions({ limit = 200 } = {}) {
+  const threads = await listLocalDesktopThreadsFromJsonl({ limit: LOCAL_THREAD_SCAN_LIMIT });
+  return threads
+    .filter((thread) => isArchivedLocalThread(thread))
+    .map((thread) => archivedSessionFromThread(thread))
+    .filter(Boolean)
+    .sort((a, b) => {
+      const left = new Date(a.archivedAt || a.updatedAt || 0).getTime();
+      const right = new Date(b.archivedAt || b.updatedAt || 0).getTime();
+      return right - left;
+    })
+    .slice(0, limit);
+}
+
+export async function listArchivedSessions({ limit = 200 } = {}) {
+  const cappedLimit = Math.max(1, Math.min(Number(limit) || 200, 500));
+  try {
+    const threads = await listDesktopThreads({ limit: cappedLimit, archived: true });
+    return {
+      sessions: threads.map((thread) => archivedSessionFromThread(thread)).filter(Boolean),
+      syncedAt: new Date().toISOString(),
+      source: 'desktop'
+    };
+  } catch (error) {
+    console.warn('[sessions] Desktop archived thread/list failed, using local archived sessions:', error.message);
+    return {
+      sessions: await listLocalArchivedSessions({ limit: cappedLimit }),
+      syncedAt: new Date().toISOString(),
+      source: 'local',
+      staleReason: error.message || 'desktop archived thread/list failed'
+    };
+  }
+}
+
+function inferredProjectlessWorkspaceRoot(projectPath, defaultWorkspaceRoot = defaultProjectlessWorkspaceRoot) {
+  const fallback = path.resolve(defaultWorkspaceRoot());
+  const resolved = String(projectPath || '').trim() ? path.resolve(projectPath) : fallback;
+  const parent = path.dirname(resolved);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(path.basename(parent))) {
+    return path.dirname(parent);
+  }
+  return resolved || fallback;
+}
+
+export function projectlessMobileSessionRegistrations(mobileSessionIndex = new Map(), workspaceState = {}) {
+  const mobileIndex = mobileSessionIndex instanceof Map
+    ? mobileSessionIndex
+    : new Map(Object.entries(mobileSessionIndex || {}));
+  const registered = new Set(
+    Array.isArray(workspaceState.projectlessThreadIds)
+      ? workspaceState.projectlessThreadIds
+      : []
+  );
+  const registrations = [];
+
+  for (const [key, session] of mobileIndex.entries()) {
+    const id = String(session?.id || key || '').trim();
+    if (!id || id.startsWith('draft-') || id.startsWith('codex-')) {
+      continue;
+    }
+    if (!session?.projectless || registered.has(id)) {
+      continue;
+    }
+    registrations.push({
+      id,
+      workspaceRoot: inferredProjectlessWorkspaceRoot(session.projectPath)
+    });
+  }
+
+  return registrations;
+}
+
 export async function refreshCodexCache() {
   const config = await readCodexConfig();
-  const workspaceState = await readCodexWorkspaceState();
+  let workspaceState = await readCodexWorkspaceState();
   const mobileSessionIndex = await readMobileSessionIndex();
+  const missingProjectlessRegistrations = projectlessMobileSessionRegistrations(mobileSessionIndex, workspaceState);
+  if (missingProjectlessRegistrations.length) {
+    try {
+      await registerProjectlessThreads(missingProjectlessRegistrations);
+      workspaceState = await readCodexWorkspaceState();
+    } catch (error) {
+      console.warn('[sessions] Failed to backfill mobile projectless registrations:', error.message);
+    }
+  }
   const hiddenSessionIds = await readHiddenSessionIds();
   const spawnEdges = await readThreadSpawnEdges();
   const desktopThreads = await listDesktopThreadsForCache();

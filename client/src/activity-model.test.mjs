@@ -14,7 +14,6 @@ import {
   dismissPlanImplementationPrompts,
   isPlaceholderActivityMessage,
   isVisibleActivityStep,
-  latestActivityMessageIdForRuntime,
   removeStalePlanRequestsAfterUserMessages,
   shouldRenderActivityMessageInChat,
   upsertActivityMessage,
@@ -440,90 +439,6 @@ test('real activity update takes over a transient optimistic thinking card', () 
   assert.equal(result[0].sessionId, 'thread-1');
   assert.deepEqual(result[0].activities.map((activity) => activity.kind), ['reasoning', 'mcp_tool_call']);
   assert.equal(shouldRenderActivityMessageInChat(result[0]), true);
-});
-
-test('latestActivityMessageIdForRuntime force-opens completed desktop activity while runtime is active', () => {
-  const messages = [
-    {
-      id: 'activity-old',
-      role: 'activity',
-      sessionId: 'thread-old',
-      status: 'completed',
-      activities: [
-        { id: 'old-command', kind: 'command_execution', label: '运行测试', status: 'completed', command: 'npm test' }
-      ]
-    },
-    {
-      id: 'activity-current',
-      role: 'activity',
-      sessionId: 'thread-1',
-      turnId: 'desktop-turn-1',
-      status: 'completed',
-      activities: [
-        { id: 'current-command', kind: 'command_execution', label: '本地任务已处理', status: 'completed', command: 'node --test' }
-      ]
-    }
-  ];
-
-  assert.equal(
-    latestActivityMessageIdForRuntime(messages, { running: true, activeRunKeys: ['thread-1'] }),
-    'activity-current'
-  );
-  assert.equal(
-    latestActivityMessageIdForRuntime(messages, { running: false, activeRunKeys: ['thread-1'] }),
-    ''
-  );
-});
-
-test('latestActivityMessageIdForRuntime falls back to the latest visible process during desktop runtime', () => {
-  const messages = [
-    {
-      id: 'activity-current',
-      role: 'activity',
-      sessionId: 'thread-1',
-      status: 'completed',
-      activities: [
-        { id: 'command', kind: 'command_execution', label: '本地任务已处理', status: 'completed', command: 'rg foo' }
-      ]
-    }
-  ];
-
-  assert.equal(
-    latestActivityMessageIdForRuntime(messages, { running: true, activeRunKeys: ['desktop-turn-unseen'] }),
-    'activity-current'
-  );
-});
-
-test('latestActivityMessageIdForRuntime ignores stale same-thread cards before new runtime output', () => {
-  const messages = [
-    {
-      id: 'activity-previous-turn',
-      role: 'activity',
-      sessionId: 'thread-1',
-      status: 'completed',
-      timestamp: '2026-05-13T08:39:00.000Z',
-      completedAt: '2026-05-13T08:39:02.000Z',
-      activities: [
-        {
-          id: 'old-command',
-          kind: 'command_execution',
-          label: '本地任务已处理',
-          status: 'completed',
-          command: 'npm test',
-          timestamp: '2026-05-13T08:39:01.000Z'
-        }
-      ]
-    }
-  ];
-
-  assert.equal(
-    latestActivityMessageIdForRuntime(messages, {
-      running: true,
-      activeRunKeys: ['thread-1'],
-      runtimeStartedAt: '2026-05-13T08:40:00.000Z'
-    }),
-    ''
-  );
 });
 
 test('activity with concrete work is not treated as placeholder', () => {

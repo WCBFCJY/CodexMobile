@@ -40,6 +40,103 @@ test('completed turn clears every runtime key for a mobile submitted turn', () =
   assert.deepEqual(completed, {});
 });
 
+test('running runtime keeps one stable startedAt across process updates', () => {
+  const initial = applySyncRuntimeEvent({}, {
+    eventType: 'turn.running',
+    source: 'headless-local',
+    sessionId: 'session-1',
+    turnId: 'turn-1',
+    timestamp: '2026-05-13T01:00:00.000Z'
+  });
+  const updated = applySyncRuntimeEvent(initial, {
+    eventType: 'turn.running',
+    source: 'headless-local',
+    sessionId: 'session-1',
+    turnId: 'turn-1',
+    label: '正在运行命令',
+    timestamp: '2026-05-13T01:00:30.000Z'
+  });
+
+  assert.equal(updated['session-1'].startedAt, '2026-05-13T01:00:00.000Z');
+  assert.equal(updated['session-1'].updatedAt, '2026-05-13T01:00:30.000Z');
+});
+
+test('running runtime propagates startedAt when later events add session keys', () => {
+  const initial = applySyncRuntimeEvent({}, {
+    eventType: 'turn.running',
+    source: 'headless-local',
+    clientTurnId: 'client-1',
+    timestamp: '2026-05-13T01:00:00.000Z'
+  });
+  const expanded = applySyncRuntimeEvent(initial, {
+    eventType: 'turn.running',
+    source: 'headless-local',
+    sessionId: 'session-1',
+    turnId: 'turn-1',
+    clientTurnId: 'client-1',
+    timestamp: '2026-05-13T01:00:20.000Z'
+  });
+
+  assert.equal(expanded['session-1'].startedAt, '2026-05-13T01:00:00.000Z');
+  assert.equal(expanded['turn-1'].startedAt, '2026-05-13T01:00:00.000Z');
+  assert.equal(expanded['client-1'].startedAt, '2026-05-13T01:00:00.000Z');
+});
+
+test('queued send switches to running with a fresh execution startedAt', () => {
+  const queued = applySyncRuntimeEvent({}, {
+    eventType: 'turn.queued',
+    status: 'queued',
+    source: 'local-optimistic',
+    sessionId: 'session-1',
+    turnId: 'turn-1',
+    label: '消息发送中',
+    timestamp: '2026-05-13T01:00:00.000Z'
+  });
+  const running = applySyncRuntimeEvent(queued, {
+    eventType: 'turn.running',
+    source: 'headless-local',
+    sessionId: 'session-1',
+    turnId: 'turn-1',
+    timestamp: '2026-05-13T01:00:02.000Z'
+  });
+
+  assert.equal(running['session-1'].status, 'running');
+  assert.equal(running['session-1'].startedAt, '2026-05-13T01:00:02.000Z');
+});
+
+test('sync-state snapshots preserve active runtime startedAt', () => {
+  const next = mergeSyncStateRuntime(
+    {
+      'client-1': {
+        status: 'running',
+        source: 'headless-local',
+        startedAt: '2026-05-13T01:00:00.000Z',
+        updatedAt: '2026-05-13T01:00:00.000Z'
+      }
+    },
+    {
+      runtimeById: {
+        'session-1': {
+          status: 'running',
+          source: 'headless-local',
+          startedAt: '2026-05-13T01:00:25.000Z',
+          updatedAt: '2026-05-13T01:00:25.000Z'
+        },
+        'client-1': {
+          status: 'running',
+          source: 'headless-local',
+          startedAt: '2026-05-13T01:00:25.000Z',
+          updatedAt: '2026-05-13T01:00:25.000Z'
+        }
+      }
+    }
+  );
+
+  assert.equal(next['session-1'].startedAt, '2026-05-13T01:00:00.000Z');
+  assert.equal(next['client-1'].startedAt, '2026-05-13T01:00:00.000Z');
+  assert.equal(next['session-1'].updatedAt, '2026-05-13T01:00:25.000Z');
+});
+
 test('sync-state replaces stale sync-owned runtime and removes local handoff runtime', () => {
   const next = mergeSyncStateRuntime(
     {

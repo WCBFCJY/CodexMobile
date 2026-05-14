@@ -10262,3 +10262,2775 @@ _**Agent (gpt-5.5 2026-05-09 14:33:45Z)**_
 ::git-stage{cwd="/Users/xiayanghui/编程项目/CodexMobile"}
 ::git-commit{cwd="/Users/xiayanghui/编程项目/CodexMobile"}
 ::git-push{cwd="/Users/xiayanghui/编程项目/CodexMobile" branch="main"}
+
+
+
+---
+
+_**User (2026-05-13 13:56:49Z)**_
+
+我觉得可以推送一个新的release版本到我们仓库了
+
+
+---
+
+_**Agent (gpt-5.5 2026-05-13 13:57:02Z)**_
+
+我先看一下本地仓库现在相对 GitHub 有哪些改动、当前版本号和最近 release，再决定这次应该升到哪个版本号并发布。这个动作我会按 GitHub 发布流程来走，避免把不该进 release 的脏改动带上去。
+
+_**Agent (gpt-5.5 2026-05-13 13:57:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "CodexMobile|release|1\.2|1\.1|verification|deploy" /Users/xiayanghui/.codex/memories/MEMORY.md`</summary>
+```
+Chunk ID: e5f961
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 8251
+Output:
+Total output lines: 103
+
+1:# Task Group: CodexMobile / composer 控件、线程同步、架构拆分与私网访问
+3:scope: `CodexMobile` 手机端 composer 控件、图片/文件预览、`/plan` 协作模式、repo-local skill 发现、自动标题、普通对话/发送链路排障、desktop IPC fallback、draft/new-thread send、abort / running 状态卡片、后端保守拆分、移动端 Git 面板、release 发布、macOS 自启动与 Tailscale/LAN 访问；适用于这个 repo 的 live 前后端联调、app-server 行为核验、私网访问解释和公开仓库卫生，不适用于泛化移动端产品设计。
+4:applies_to: cwd=/Users/xiayanghui/编程项目/CodexMobile; reuse_rule=适合复用到这个 `CodexMobile` 仓库里与 composer、`/plan`、`/api/status`、`thread/*` app-server 能力、本地 Node 服务、README 功能口径、Git HTTP API、launchd、Tailscale/LAN origin 行为有关的任务；具体端口、running process、模型列表和代码结构都要按当前 checkout/live server 重验
+10:- rollout_summaries/2026-05-05T00-12-41-rXsC-codexmobile_skill_picker_and_remove_voice_controls.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T08-12-41-019df57a-d854-73d1-8bec-a9d15f8453c2.jsonl, updated_at=2026-05-05T00:25:11+00:00, thread_id=019df57a-d854-73d1-8bec-a9d15f8453c2, added skill discovery and mobile picker, then proved the first disabled state came from an older live backend on port 3321)
+14:- CodexMobile, skill picker, composer, /api/status, localStorage, buildCodexTurnInput, type: skill, lsof, port 3321, port 3331, readCodexSkills
+20:- rollout_summaries/2026-05-05T00-12-41-rXsC-codexmobile_skill_picker_and_remove_voice_controls.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T08-12-41-019df57a-d854-73d1-8bec-a9d15f8453c2.jsonl, updated_at=2026-05-05T00:25:11+00:00, thread_id=019df57a-d854-73d1-8bec-a9d15f8453c2, removed the in-app voice/dialog entry points and updated docs to match the native-keyboard voice preference)
+24:- CodexMobile, voice-dialog, microphone button, dialog button, VoiceDialogPanel, native keyboard voice path, README.md, npm run build, restart 3321
+30:- rollout_summaries/2026-05-05T11-35-49-5GrC-codexmobile_auto_thread_title_hook_gpt_5_4_mini.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T19-35-49-019df7ec-42b4-7602-94d6-e06d2430e6c0.jsonl, updated_at=2026-05-05T12:01:30+00:00, thread_id=019df7ec-42b4-7602-94d6-e06d2430e6c0, traced `name`/`preview` fallback and added async auto-title writeback for new draft sessions)
+40:- rollout_summaries/2026-05-05T19-24-27-hq5w-codexmobile_mobile_thread_sync_and_hanging_turn_debug.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/06/rollout-2026-05-06T03-24-27-019df999-4f02-70f1-9d0f-895fb3098ee6.jsonl, updated_at=2026-05-07T05:33:58+00:00, thread_id=019df999-4f02-70f1-9d0f-895fb3098ee6, cleaned ordinary-thread history bleed-through, clarified hide-vs-archive behavior, cleared `/Users/xiayanghui/Documents/Codex/`, and fixed normal-chat turn hangs caused by leaked lark-cli env)
+50:- rollout_summaries/2026-05-05T19-18-01-iLno-codexmobile_macos_autostart_launchagent.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/06/rollout-2026-05-06T03-18-01-019df993-6bb9-7ff2-99b2-c34ddc737c76.jsonl, updated_at=2026-05-06T12:17:56+00:00, thread_id=019df993-6bb9-7ff2-99b2-c34ddc737c76, started with a reboot-pairing skill, then replaced it with a user-level LaunchAgent that keeps port 3321 alive after reboot and crash)
+54:- CodexMobile, LaunchAgent, launchctl, macOS autostart, run-server.mjs, start-server.mjs, /api/status, refreshCodexCache, port 3321, fileURLToPath, launchd, com.codexmobile.bridge
+60:- rollout_summaries/2026-05-07T04-46-49-TGny-codexmobile_architecture_git_security_cleanup.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/07/rollout-2026-05-07T12-46-49-019e00c2-88d5-78e1-bc14-ca1f0d1f1084.jsonl, updated_at=2026-05-07T17:54:56+00:00, thread_id=019e00c2-88d5-78e1-bc14-ca1f0d1f1084, explained the PWA + Node + Codex app-server chain, split backend helpers conservatively, replaced prompt-driven Git with real APIs/panel, and cleaned already-published local artifacts from `origin/main`)
+70:- rollout_summaries/2026-05-07T09-15-14-5HCm-codexmobile_tailscale_lan_pwa_origin.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/archived_sessions/rollout-2026-05-07T17-15-14-019e01b8-4577-7b30-8e0c-22916f0dd5ae.jsonl, updated_at=2026-05-07T09:40:01+00:00, thread_id=019e01b8-4577-7b30-8e0
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,180p' '/Users/xiayanghui/.codex/plugins/cache/openai-curated/github/63976030/skills/yeet/SKILL.md'`</summary>
+```
+Chunk ID: cfb6ca
+Wall time: 0.0000 seconds
+Process exited with code 1
+Original token count: 31
+Output:
+sed: /Users/xiayanghui/.codex/plugins/cache/openai-curated/github/63976030/skills/yeet/SKILL.md: No such file or directory
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short --branch`</summary>
+```
+Chunk ID: 459397
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 6
+Output:
+## main...origin/main
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git log --oneline --decorate --max-count=12`</summary>
+```
+Chunk ID: 221d28
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 173
+Output:
+9357f0a (HEAD -> main, origin/main, origin/HEAD) Highlight add and delete lines in file diffs
+a9fb0c1 Improve CodexMobile workflows and polish UI behavior
+0de2b48 Restore composer styling and remove thinking placeholder
+5669ad8 Refactor mobile app routing and shared UI flows
+92cf164 Refine CodexMobile architecture and sync handling
+2577e0b (tag: v1.2.0, sync-consistency-upgrade) Release 1.2.0
+27b0533 Fix desktop IPC completion running state
+6be660a (tag: v1.1.0) Release 1.1.0
+866bb88 (codex/test-866bb88-20260509) 更新 README 等 39 个文件
+49751a8 Fix commit message generation
+e94b1bd docs: clarify cross-platform browser support
+187c303 docs: update project homepage positioning
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:14Z)**_
+
+本地工作区现在是干净的，`main` 也和 `origin/main` 对齐；不过从 `v1.2.0` 之后已经有 5 个提交了，确实可以切一个新 release。我再核版本号、changelog、GitHub release 状态和认证。
+
+_**Agent (gpt-5.5 2026-05-13 13:57:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `find /Users/xiayanghui/.codex/plugins/cache -path '*skills*yeet*SKILL.md' -o -path '*skills*github*SKILL.md' | sed -n '1,20p'`</summary>
+```
+Chunk ID: 7a703c
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 46
+Output:
+/Users/xiayanghui/.codex/plugins/cache/openai-curated/github/7955f1db/skills/github/SKILL.md
+/Users/xiayanghui/.codex/plugins/cache/openai-curated/github/7955f1db/skills/yeet/SKILL.md
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node -e "const p=require('./package.json'); const l=require('./package-lock.json'); console.log(JSON.stringify({pkg:p.version, lock:l.version, root:l.packages&&l.packages['']&&l.packages[''].version}, null, 2))"`</summary>
+```
+Chunk ID: e3b468
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 15
+Output:
+{
+  "pkg": "1.2.0",
+  "lock": "1.2.0",
+  "root": "1.2.0"
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,120p' CHANGELOG.md`</summary>
+```
+Chunk ID: 218abd
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 945
+Output:
+# Changelog
+
+All notable changes to CodexMobile are tracked here.
+
+## Unreleased
+
+## [1.2.0] - 2026-05-09
+
+### Added
+
+- Added a system theme option so CodexMobile can follow the OS light/dark preference across the main app and file preview flow.
+- Added a model speed selector in the composer model menu, with Standard and Fast choices persisted locally.
+- Added end-to-end service tier routing so Fast model speed sends `fast` through chat requests, desktop IPC, and headless Codex runs.
+- Added compact memory citation cards for `<oai-mem-citation>` blocks in chat output.
+
+### Changed
+
+- Replaced the README screenshots with redacted dark/light demos that show the sidebar, running state, and desktop-style tool activity flow.
+- Synced PWA theme color updates with the resolved light/dark mode when following the system theme.
+
+## [1.0.0] - 2026-05-09
+
+### Added
+
+- Added a queue panel for running conversations: queued drafts can be viewed, restored, deleted, or sent immediately as steer input.
+- Added composer shortcuts with `/` commands for status, context compaction, code review, and sub-agent workflows.
+- Added `$skill` autocomplete backed by the existing skills list.
+- Added `@file` search backed by a project-local file search API that ignores generated and dependency directories.
+- Added file mention support for chat sends so selected local paths can be attached as context.
+- Added an expanded Git panel with status, diff preview, pull, sync, and commit+push actions.
+- Added foreground toast notifications for Git progress, task completion, failures, and user-input prompts.
+- Added Web Push support for installed HTTPS PWAs, including service worker handling and server-side subscription storage.
+- Added a compact connection recovery card for reconnecting, syncing, repairing pairing, and checking status.
+- Added desktop thread status badges so mobile can distinguish IPC online, thread pending confirmation, and background execution before sending.
+- Added unified sidebar run indicators for desktop-origin and mobile-origin sends.
+- Added clean dark and light mode project screenshots for the 1.0 README.
+
+### Changed
+
+- Kept completed task activity collapsed by default while preserving the full execution text when expanded.
+- Improved mobile activity rendering and reduced noisy lifecycle messages.
+- Unified desktop IPC and background fallback readback so both paths refresh from the same session stream.
+- Simplified transient background startup UI to avoid duplicate middle activity cards.
+- Matched mobile activity labels and icons more closely to Codex Desktop for commands, files, and skills.
+- Split the large server entrypoint into route and service modules for safer extension.
+- Rewrote README to describe CodexMobile as a local Codex mobile workbench rather than a thin upstream UI fork.
+- Updated package metadata to describe the current mobile workbench scope.
+
+### Fixed
+
+- Fixed mobile abort so it interrupts desktop-side runs instead of only clearing the mobile state.
+- Fixed desktop-origin sends not showing running and completed indicators in the mobile sidebar.
+- Fixed mobile-created background threads briefly losing their live session during startup.
+- Fixed refresh occasionally jumping to another conversation instead of restoring the selected project and session.
+- Fixed duplicate running cards during mobile-to-desktop background handoff.
+- Fixed a scroll jump that could move the conversation back to the top after a send.
+
+### Notes
+
+- `1.0.0` is the first stable local mobile Codex workbench release.
+- iOS background notifications require an HTTPS Home Screen PWA. Local HTTP access still works for chat, sync, and foreground toast.
+- `sync` is defined as `pull --ff-only` followed by `push` when the branch is ahead.
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `gh auth status && gh release list --repo flyyangX/CodexMobile --limit 10`</summary>
+```
+Chunk ID: f059f2
+Wall time: 1.0012 seconds
+Process running with session ID 19103
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:18Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: a10f94
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 82
+Output:
+github.com
+  ✓ Logged in to github.com account flyyangX (keyring)
+  - Active account: true
+  - Git operations protocol: https
+  - Token: gho_************************************
+  - Token scopes: 'gist', 'read:org', 'repo'
+CodexMobile 1.2.0	Latest	v1.2.0	2026-05-09T14:33:16Z
+CodexMobile 1.1.0		v1.1.0	2026-05-09T07:00:53Z
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:21Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,180p' /Users/xiayanghui/.codex/plugins/cache/openai-curated/github/7955f1db/skills/yeet/SKILL.md`</summary>
+```
+Chunk ID: 86c05b
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1005
+Output:
+---
+name: "yeet"
+description: "Publish local changes to GitHub by confirming scope, committing intentionally, pushing the branch, and opening a draft PR through the GitHub app from this plugin, with `gh` used only as a fallback where connector coverage is insufficient."
+---
+
+# GitHub Publish Changes
+
+## Overview
+
+Use this skill only when the user explicitly wants the full publish flow from the local checkout: branch setup if needed, staging, commit, push, and opening a pull request.
+
+This workflow is hybrid:
+
+- Use local `git` for branch creation, staging, commit, and push.
+- Prefer the GitHub app from this plugin for pull request creation after the branch is on the remote.
+- Use `gh` as a fallback for current-branch PR discovery, auth checks, or PR creation when the connector path cannot infer the repository or head branch cleanly.
+
+## Prerequisites
+
+- Require GitHub CLI `gh`. Check `gh --version`. If missing, ask the user to install `gh` and stop.
+- Require authenticated `gh` session. Run `gh auth status`. If not authenticated, ask the user to run `gh auth login` (and re-run `gh auth status`) before continuing.
+- Require a local git repository with a clean understanding of which changes belong in the PR.
+
+## Naming conventions
+
+- Branch: `codex/{description}` when starting from main/master/default.
+- Commit: `{description}` (terse).
+- PR title: `[codex] {description}` summarizing the full diff.
+
+## Workflow
+
+1. Confirm intended scope.
+   - Run `git status -sb` and inspect the diff before staging.
+   - If the working tree contains unrelated changes, do not default to `git add -A`. Ask the user which files belong in the PR.
+2. Determine the branch strategy.
+   - If on `main`, `master`, or another default branch, create `codex/{description}`.
+   - Otherwise stay on the current branch.
+3. Stage only the intended changes.
+   - Prefer explicit file paths when the worktree is mixed.
+   - Use `git add -A` only when the user has confirmed the whole worktree belongs in scope.
+4. Commit tersely with the confirmed description.
+5. Run the most relevant checks available if they have not already been run.
+   - If checks fail due to missing dependencies or tools, install what is needed and rerun once.
+6. Push with tracking: `git push -u origin $(git branch --show-current)`.
+7. Open a draft PR.
+   - Prefer the GitHub app from this plugin for PR creation after the push succeeds.
+   - Derive `repository_full_name` from the remote, for example by normalizing `git remote get-url origin` or by using `gh repo view --json nameWithOwner`.
+   - Derive `head_branch` from `git branch --show-current`.
+   - Derive `base_branch` from the user request when specified; otherwise use the remote default branch, for example via `gh repo view --json defaultBranchRef`.
+   - If the branch is being pushed from a fork or the PR target differs from the remote that was just pushed, prefer `gh pr create` fallback because the connector PR creation flow expects one repository target and may not encode cross-repo head semantics cleanly.
+   - If connector-based PR creation cannot infer the repository or branch cleanly, fall back to `gh pr create --draft --fill --head $(git branch --show-current)`.
+   - Write the PR body to a temp file with real newlines when using CLI fallback so the markdown renders cleanly.
+8. Summarize the result with branch name, commit, PR target, validation, and anything the user still needs to confirm.
+
+## Write Safety
+
+- Never stage unrelated user changes silently.
+- Never push without confirming scope when the worktree is mixed.
+- Default to a draft PR unless the user explicitly asks for a ready-for-review PR.
+- If the repository does not appear to be connected to an accessible GitHub remote, stop and explain the blocker before making assumptions.
+
+## PR Body Expectations
+
+The PR description should use real Markdown prose and cover:
+
+- what changed
+- why it changed
+- the user or developer impact
+- the root cause when the PR is a fix
+- the checks used to validate it
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:34Z)**_
+
+`v1.2.0` 是当前最新 GitHub release；本地 `main` 已经包含 1.2 之后的新提交但还没新 tag。按这批提交的体量，我倾向这次升 `1.3.0`，不是补丁号。先把 v1.2 之后的变化归纳出来。
+
+_**Agent (gpt-5.5 2026-05-13 13:57:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git log --oneline --decorate v1.2.0..HEAD`</summary>
+```
+Chunk ID: 7765f5
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 84
+Output:
+9357f0a (HEAD -> main, origin/main, origin/HEAD) Highlight add and delete lines in file diffs
+a9fb0c1 Improve CodexMobile workflows and polish UI behavior
+0de2b48 Restore composer styling and remove thinking placeholder
+5669ad8 Refactor mobile app routing and shared UI flows
+92cf164 Refine CodexMobile architecture and sync handling
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff --stat v1.2.0..HEAD`</summary>
+```
+Chunk ID: 616426
+Wall time: 0.0291 seconds
+Process exited with code 0
+Original token count: 3634
+Output:
+ .cursorindexingignore                              |      3 +
+ .specstory/.project.json                           |      7 +
+ .specstory/cli/config.toml                         |     79 +
+ .specstory/history/2026-05-07_04-46-55Z.md         |  77709 ++++++++++++
+ ...256\276\350\256\241\345\273\272\350\256\256.md" |   2972 +
+ .specstory/history/2026-05-08_11-19-42Z.md         | 115234 ++++++++++++++++++
+ .specstory/history/2026-05-08_18-14-44Z-bug.md     |  18484 +++
+ ...-05-08_18-19-18Z-github-readme-codex-remodex.md |   1602 +
+ .specstory/history/2026-05-08_19-09-28Z-ui.md      |  17839 +++
+ .../2026-05-08_20-18-46Z-codexmobile-ui-bug.md     |   8011 ++
+ .specstory/history/2026-05-08_20-37-34Z-md-pdf.md  |  24042 ++++
+ ...2026-05-09_01-53-13Z-019e094f-32c4-7451-94d3.md |  14292 +++
+ .specstory/history/2026-05-09_02-50-54Z-git.md     |   2535 +
+ .../history/2026-05-09_02-58-25Z-ui-panel-ui.md    |  44490 +++++++
+ ...26-05-09_03-03-04Z-codexmobile-git-hash-hash.md |   4102 +
+ ...2026-05-09_05-20-31Z-019e0b13-f24d-7763-8f90.md |  10610 ++
+ .specstory/history/2026-05-09_05-38-19Z-ipc.md     |   6475 +
+ ...26-05-09_14-13-32Z-https-github-com-flyyangx.md |  10264 ++
+ ...222\214\345\267\245\344\275\234\346\265\201.md" |  34543 ++++++
+ ...-code-formatting-and-documentation-standards.md |    874 +
+ ...26-05-11_04-17-47Z-https-github-com-emanuele.md |  18229 +++
+ .specstory/statistics.json                         |    166 +
+ AGENTS.md                                          |     44 +
+ client/src/App.jsx                                 |     13 +
+ client/src/activity-card-state.test.mjs            |     43 +-
+ client/src/activity-dedupe.js                      |     14 +
+ client/src/activity-dedupe.test.mjs                |      7 +
+ client/src/activity-display.js                     |     14 +
+ client/src/activity-display.test.mjs               |      7 +
+ client/src/activity-file-summary.test.mjs          |     44 +
+ client/src/activity-merge.js                       |     13 +
+ client/src/activity-merge.test.mjs                 |      7 +
+ client/src/activity-model.test.mjs                 |    119 +-
+ client/src/activity-timeline-model.test.mjs        |     34 +-
+ client/src/activity-timeline.js                    |     13 +
+ client/src/activity-timeline.test.mjs              |      7 +
+ client/src/api.js                                  |     14 +
+ client/src/app-state.test.mjs                      |    141 +-
+ client/src/app-websocket-events.test.mjs           |     28 +-
+ client/src/app/App.jsx                             |    194 +-
+ client/src/app/AppShell.jsx                        |     13 +
+ client/src/app/AppState.js                         |     15 +
+ client/src/app/FilePreviewApp.jsx                  |     13 +
+ client/src/app/PairingScreen.jsx                   |     15 +-
+ client/src/app/PdfPreview.jsx                      |     13 +
+ client/src/app/context-status.js                   |     15 +
+ client/src/app/defaults.js                         |     30 +-
+ client/src/app/model-sync.js                       |     37 +
+ client/src/app/pwa-theme.js                        |     15 +
+ client/src/app/runtime-debug-client.js             |     57 +
+ client/src/app/selection-persistence.js            |     15 +
+ client/src/app/session-utils.js                    |    113 +-
+ client/src/app/turn-submission-utils.js            |     64 +-
+ client/src/app/useAppBootstrap.js                  |     17 +-
+ client/src/app/useAppWebSocket.js                  |    450 +-
+ client/src/app/useConnectionActions.js             |     13 +
+ client/src/app/useDocsActions.js                   |     13 +
+ client/src/app/useFileUploads.js                   |     13 +
+ client/src/app/useSessionActions.js                |     41 +-
+ client/src/app/useSessionLivePolling.js            |     88 +-
+ client/src/app/useTurnRuntime.js                   |    113 +-
+ client/src/app/useTurnSubmission.js                |    259 +-
+ client/src/app/useViewportSizing.js                |     14 +
+ client/src/chat-render-items.test.mjs              |     65 +
+ client/src/chat-scroll.js                          |     15 +
+ client/src/chat-scroll.test.mjs                    |      7 +
+ client/src/chat/ActivityFileSummary.jsx            |     50 +-
+ client/src/chat/ActivityMessage.jsx                |     54 +-
+ client/src/chat/ActivityTimeline.jsx               |     89 +-
+ client/src/chat/ChatMessage.jsx                    |     33 +-
+ client/src/chat/ChatPane.jsx                       |     84 +-
+ client/src/chat/ImagePreview.jsx                   |     13 +
+ client/src/chat/MarkdownContent.jsx                |    188 +-
+ client/src/chat/PlanMessage.jsx                    |     13 +
+ client/src/chat/activity-card-state.js             |     35 +-
+ client/src/chat/activity-diff-lines.js             |     66 +
+ client/src/chat/activity-model
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff --name-only v1.2.0..HEAD`</summary>
+```
+Chunk ID: 674388
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1968
+Output:
+.cursorindexingignore
+.specstory/.project.json
+.specstory/cli/config.toml
+.specstory/history/2026-05-07_04-46-55Z.md
+".specstory/history/2026-05-07_14-44-56Z-\344\276\247\350\276\271\346\240\217ui\350\256\276\350\256\241\345\273\272\350\256\256.md"
+.specstory/history/2026-05-08_11-19-42Z.md
+.specstory/history/2026-05-08_18-14-44Z-bug.md
+.specstory/history/2026-05-08_18-19-18Z-github-readme-codex-remodex.md
+.specstory/history/2026-05-08_19-09-28Z-ui.md
+.specstory/history/2026-05-08_20-18-46Z-codexmobile-ui-bug.md
+.specstory/history/2026-05-08_20-37-34Z-md-pdf.md
+.specstory/history/2026-05-09_01-53-13Z-019e094f-32c4-7451-94d3.md
+.specstory/history/2026-05-09_02-50-54Z-git.md
+.specstory/history/2026-05-09_02-58-25Z-ui-panel-ui.md
+.specstory/history/2026-05-09_03-03-04Z-codexmobile-git-hash-hash.md
+.specstory/history/2026-05-09_05-20-31Z-019e0b13-f24d-7763-8f90.md
+.specstory/history/2026-05-09_05-38-19Z-ipc.md
+.specstory/history/2026-05-09_14-13-32Z-https-github-com-flyyangx.md
+".specstory/history/2026-05-10_19-29-30Z-\347\247\273\345\212\250\347\253\257\344\270\216\347\224\265\350\204\221\347\253\257\344\277\241\346\201\257\346\265\201\345\222\214\345\267\245\344\275\234\346\265\201.md"
+.specstory/history/2026-05-11_04-09-19Z-code-formatting-and-documentation-standards.md
+.specstory/history/2026-05-11_04-17-47Z-https-github-com-emanuele.md
+.specstory/statistics.json
+AGENTS.md
+client/src/App.jsx
+client/src/activity-card-state.test.mjs
+client/src/activity-dedupe.js
+client/src/activity-dedupe.test.mjs
+client/src/activity-display.js
+client/src/activity-display.test.mjs
+client/src/activity-file-summary.test.mjs
+client/src/activity-merge.js
+client/src/activity-merge.test.mjs
+client/src/activity-model.test.mjs
+client/src/activity-timeline-model.test.mjs
+client/src/activity-timeline.js
+client/src/activity-timeline.test.mjs
+client/src/api.js
+client/src/app-state.test.mjs
+client/src/app-websocket-events.test.mjs
+client/src/app/App.jsx
+client/src/app/AppShell.jsx
+client/src/app/AppState.js
+client/src/app/FilePreviewApp.jsx
+client/src/app/PairingScreen.jsx
+client/src/app/PdfPreview.jsx
+client/src/app/context-status.js
+client/src/app/defaults.js
+client/src/app/model-sync.js
+client/src/app/pwa-theme.js
+client/src/app/runtime-debug-client.js
+client/src/app/selection-persistence.js
+client/src/app/session-utils.js
+client/src/app/turn-submission-utils.js
+client/src/app/useAppBootstrap.js
+client/src/app/useAppWebSocket.js
+client/src/app/useConnectionActions.js
+client/src/app/useDocsActions.js
+client/src/app/useFileUploads.js
+client/src/app/useSessionActions.js
+client/src/app/useSessionLivePolling.js
+client/src/app/useTurnRuntime.js
+client/src/app/useTurnSubmission.js
+client/src/app/useViewportSizing.js
+client/src/chat-render-items.test.mjs
+client/src/chat-scroll.js
+client/src/chat-scroll.test.mjs
+client/src/chat/ActivityFileSummary.jsx
+client/src/chat/ActivityMessage.jsx
+client/src/chat/ActivityTimeline.jsx
+client/src/chat/ChatMessage.jsx
+client/src/chat/ChatPane.jsx
+client/src/chat/ImagePreview.jsx
+client/src/chat/MarkdownContent.jsx
+client/src/chat/PlanMessage.jsx
+client/src/chat/activity-card-state.js
+client/src/chat/activity-diff-lines.js
+client/src/chat/activity-model.js
+client/src/chat/activity-timeline-model.js
+client/src/chat/activity-timeline-projection.js
+client/src/chat/chat-render-items.js
+client/src/chat/memory-citation.js
+client/src/chat/message-identity.js
+client/src/chat/message-identity.test.mjs
+client/src/composer-shortcuts.js
+client/src/composer-shortcuts.test.mjs
+client/src/composer/Composer.jsx
+client/src/composer/ContextStatus.jsx
+client/src/composer/attachment-preview.js
+client/src/composer/attachment-preview.test.mjs
+client/src/composer/composer-options.js
+client/src/composer/composer-options.test.mjs
+client/src/composer/paste-files.js
+client/src/composer/paste-files.test.mjs
+client/src/composer/useComposerSelections.js
+client/src/composer/useQueueDrafts.js
+client/src/connection-recovery.js
+client/src/connection-recovery.test.mjs
+client/src/git-panel-actions.js
+client/src/git-panel-actions.test.mjs
+client/src/git-panel-state.js
+client/src/git-panel-state.test.mjs
+client/src/main.jsx
+client/src/memory-citation.test.mjs
+client/src/model-sync.test.mjs
+client/src/notification-events.js
+client/src/notification-events.test.mjs
+client/src/panels/ConnectionRecoveryCard.jsx
+client/src/panels/DocsPanel.jsx
+client/src/panels/Drawer.jsx
+client/src/panels/GitPanel.jsx
+client/src/panels/ToastStack.jsx
+client/src/panels/TopBar.jsx
+client/src/panels/index.js
+client/src/panels/topbar-status.js
+client/src/panels/useNotifications.js
+client/src/selection-persistence.test.mjs
+client/src/send-state.js
+client/src/send-state.test.mjs
+client/src/session-live-polling.test.mjs
+client/src/session-live-refresh.js
+client/src/session-live-refresh.test.mjs
+client/src/styles/activity.css
+client/src/styles/chat.css
+client/src/styles/co
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git tag -l 'v1.3.0' && gh release view v1.3.0 --repo flyyangX/CodexMobile --json tagName,name,url,isDraft,isPrerelease`</summary>
+```
+Chunk ID: 4f29f0
+Wall time: 1.0016 seconds
+Process running with session ID 69047
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:38Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: f5bb25
+Wall time: 0.0000 seconds
+Process exited with code 1
+Original token count: 5
+Output:
+release not found
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:49Z)**_
+
+`v1.3.0` 还不存在。1.2 之后的主线变化比较大：同步链路、移动端流程、UI 拆分、composer 样式、diff 高亮都有提交。我现在补 `1.3.0` 的版本号和 changelog，然后跑验证。
+
+_**Agent (gpt-5.5 2026-05-13 13:57:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git show --stat --oneline --no-renames 92cf164 5669ad8 0de2b48 a9fb0c1 9357f0a --`</summary>
+```
+Chunk ID: bda84c
+Wall time: 0.0341 seconds
+Process exited with code 0
+Original token count: 5695
+Output:
+92cf164 Refine CodexMobile architecture and sync handling
+ .cursorindexingignore                              |      3 +
+ .specstory/.project.json                           |      7 +
+ .specstory/cli/config.toml                         |     79 +
+ .specstory/history/2026-05-07_04-46-55Z.md         |  77709 ++++++++++++
+ ...256\276\350\256\241\345\273\272\350\256\256.md" |   2972 +
+ .specstory/history/2026-05-08_11-19-42Z.md         | 115234 ++++++++++++++++++
+ .specstory/history/2026-05-08_18-14-44Z-bug.md     |  18484 +++
+ ...-05-08_18-19-18Z-github-readme-codex-remodex.md |   1602 +
+ .specstory/history/2026-05-08_19-09-28Z-ui.md      |  17839 +++
+ .../2026-05-08_20-18-46Z-codexmobile-ui-bug.md     |   8011 ++
+ .specstory/history/2026-05-08_20-37-34Z-md-pdf.md  |  24042 ++++
+ ...2026-05-09_01-53-13Z-019e094f-32c4-7451-94d3.md |  14292 +++
+ .specstory/history/2026-05-09_02-50-54Z-git.md     |   2535 +
+ .../history/2026-05-09_02-58-25Z-ui-panel-ui.md    |  44490 +++++++
+ ...26-05-09_03-03-04Z-codexmobile-git-hash-hash.md |   4102 +
+ ...2026-05-09_05-20-31Z-019e0b13-f24d-7763-8f90.md |  10610 ++
+ .specstory/history/2026-05-09_05-38-19Z-ipc.md     |   6475 +
+ ...26-05-09_14-13-32Z-https-github-com-flyyangx.md |  10264 ++
+ ...222\214\345\267\245\344\275\234\346\265\201.md" |  34543 ++++++
+ ...-code-formatting-and-documentation-standards.md |    874 +
+ ...26-05-11_04-17-47Z-https-github-com-emanuele.md |    413 +
+ .specstory/statistics.json                         |    166 +
+ AGENTS.md                                          |     44 +
+ client/src/App.jsx                                 |     13 +
+ client/src/activity-card-state.test.mjs            |      7 +
+ client/src/activity-dedupe.js                      |     14 +
+ client/src/activity-dedupe.test.mjs                |      7 +
+ client/src/activity-display.js                     |     14 +
+ client/src/activity-display.test.mjs               |      7 +
+ client/src/activity-merge.js                       |     13 +
+ client/src/activity-merge.test.mjs                 |      7 +
+ client/src/activity-model.test.mjs                 |      7 +
+ client/src/activity-timeline-model.test.mjs        |      7 +
+ client/src/activity-timeline.js                    |     13 +
+ client/src/activity-timeline.test.mjs              |      7 +
+ client/src/api.js                                  |     14 +
+ client/src/app-state.test.mjs                      |     19 +-
+ client/src/app-websocket-events.test.mjs           |      7 +
+ client/src/app/App.jsx                             |     20 +-
+ client/src/app/AppShell.jsx                        |     13 +
+ client/src/app/AppState.js                         |     15 +
+ client/src/app/FilePreviewApp.jsx                  |     13 +
+ client/src/app/PairingScreen.jsx                   |     13 +
+ client/src/app/PdfPreview.jsx                      |     13 +
+ client/src/app/context-status.js                   |     15 +
+ client/src/app/defaults.js                         |     22 +-
+ client/src/app/model-sync.js                       |     13 +
+ client/src/app/pwa-theme.js                        |     15 +
+ client/src/app/runtime-debug-client.js             |     57 +
+ client/src/app/selection-persistence.js            |     15 +
+ client/src/app/session-utils.js                    |     25 +-
+ client/src/app/turn-submission-utils.js            |     16 +
+ client/src/app/useAppBootstrap.js                  |     13 +
+ client/src/app/useAppWebSocket.js                  |     14 +
+ client/src/app/useConnectionActions.js             |     13 +
+ client/src/app/useDocsActions.js                   |     13 +
+ client/src/app/useFileUploads.js                   |     13 +
+ client/src/app/useSessionActions.js                |     13 +
+ client/src/app/useSessionLivePolling.js            |     13 +
+ client/src/app/useTurnRuntime.js                   |     49 +
+ client/src/app/useTurnSubmission.js                |     16 +-
+ client/src/app/useViewportSizing.js                |     14 +
+ client/src/chat-scroll.js                          |     15 +
+ client/src/chat-scroll.test.mjs                    |      7 +
+ client/src/chat/ActivityFileSummary.jsx            |     13 +
+ client/src/chat/ActivityMessage.jsx                |     13 +
+ client/src/chat/ActivityTimeline.jsx               |     13 +
+ client/src/chat/ChatMessage.jsx                    |     13 +
+ client/src/chat/ChatPane.jsx                       |     13 +
+ client/src/chat/ImagePreview.jsx                   |     13 +
+ client/src/chat/MarkdownContent.jsx                |     14 +
+ client/src/chat/PlanMessage.jsx                    |     13 +
+ client/src/chat/activity-card-state.js             |     13 +
+ client/src/chat/activity-model.js                  |     13 +
+ client/src/chat/activity-timeline-model.js         |     13 +
+ client/src/chat/activity-timeline-projection.js    |   
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node -e "const p=require('./package.json'); console.log(p.scripts)"`</summary>
+```
+Chunk ID: 442a6e
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 145
+Output:
+{
+  'dev:server': 'node server/index.js',
+  'dev:client': 'vite --host 0.0.0.0 --config client/vite.config.js',
+  build: 'vite build --config client/vite.config.js',
+  start: 'node server/index.js',
+  'start:env': 'node --env-file=.env server/index.js',
+  'start:bg': 'node scripts/start-server.mjs',
+  'mac:autostart': 'node scripts/install-macos-autostart.mjs',
+  'mac:autostart:remove': 'node scripts/install-macos-autostart.mjs --uninstall',
+  'asr:start': 'node scripts/start-asr.mjs',
+  postinstall: 'node scripts/patch-codex-sdk.mjs',
+  smoke: 'node scripts/smoke.mjs'
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '360,410p' /Users/xiayanghui/.codex/memories/MEMORY.md && sed -n '448,458p' /Users/xiayanghui/.codex/memories/MEMORY.md`</summary>
+```
+Chunk ID: 70dcdc
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3959
+Output:
+- The voice UI was coupled: removing the composer buttons cleanly required removing `VoiceDialogPanel`, the related state/handlers in `client/src/App.jsx`, the dead `.dialog-button` / `.voice-button` CSS, and the README feature claims in one pass [Task 2]
+- On this codebase, thread titles are a combination of raw Codex thread `name`, `preview`, and local heuristics; if `name` is missing, the UI can surface preview/first-message-derived text. The app-server surface seen here exposes `thread/name/set`, but not any obvious automatic title-generation endpoint [Task 3]
+- The best insertion point for auto-titling here is the server-side completion path after the first completed draft-thread turn. Keep it asynchronous, sanitize aggressively, fall back to `provisionalSessionTitle(...)`, and do not rename locked or older already-established sessions [Task 3]
+- `CodexMobile` ordinary-thread visibility is built from desktop app-server threads plus local mobile sessions, hidden sessions, and projectless fallbacks. `refreshCodexCache()` is the first place to inspect when mobile shows stale ordinary chats or a count that diverges from desktop [Task 4]
+- `readRolloutContextState()` had to be changed to read only the tail of large JSONL rollouts; otherwise big image/base64 payloads slowed sync/status enough to make mobile sends look frozen [Task 4]
+- The real “处理中但没反应” root cause here was not the model itself but leaked `lark-cli` env in ordinary chats. `buildCodexLarkCliContext()` must leave non-feishu sends on plain `process.env`, or proxy stripping plus `NO_PROXY='*'` can stall the turn after `thread/started` [Task 4]
+- `runCodexTurn()` debugging is fastest when paired with a real app-server probe: watch whether events progress from `turn/started` to `reasoning`, `agentMessage`, and `turn/completed`; `/api/status.activeRuns` plus `/api/chat/abort` are the quickest live controls when a run is stuck [Task 4]
+- `CodexMobile` is an iPhone-first local bridge: PWA -> local HTTP/WebSocket -> Node service -> desktop Codex app-server -> `~/.codex` state. `README.md`, `server/index.js`, `server/codex-runner.js`, and `server/codex-app-server.js` are the quickest architecture explainer set [Task 6]
+- The accepted refactor path in this repo is conservative: keep native Node `http/ws`, split helper modules (`server/http-utils.js`, `server/static-service.js`, `server/upload-service.js`, `server/chat-service.js`), and leave protocol/framework migration out unless the user asks [Task 6]
+- The mobile Git surface is now real HTTP APIs, not prompt dispatch: `GET /api/git/status`, `POST /api/git/branch`, `POST /api/git/commit`, and `POST /api/git/push` are backed by `server/git-service.js`, with branch normalization to `codex/` and default commit-message generation [Task 6]
+- For public-repo hygiene in this checkout, `.gitignore` should already exclude `.playwright-mcp/`, `playwright-report/`, `test-results/`, `codexmobile-*.png`, and certificate/env files; if the artifact is already on GitHub, remove it from the index and push the cleanup commit [Task 6]
+- Current network behavior is origin-bound: `client/src/api.js` and WebSocket reconnects use `window.location.host`, `client/manifest.webmanifest` uses `start_url: "/"`, and browser storage is per-origin. In practice that means Tailscale and LAN access behave like two separate sites/PWAs [Task 7]
+- On this Mac, the verified private-network path was Tailscale IP `100.111.148.35:3321`; the practical LAN fallback was `http://Mac-mini-home.local:3321`, with `192.168.3.5` as the observed LAN IP during the rollout [Task 7]
+- In this repo before the change, `plan` existed only as an activity/display concept; the fastest truth set for real collaboration-mode support was `client/src/composer-shortcuts.js`, `client/src/app/useTurnSubmission.js`, `server/chat-service.js`, `server/codex-runner.js`, and `server/codex-data.js` [Task 8]
+- Front-end `/plan` recognition alone was not proof of parity here: the earlier aborted inspection showed the client already emitted `collaborationMode: 'plan'`, but `server/chat-service.js` was still ignoring `body.collaborationMode` and `server/codex-runner.js` did not yet accept a collaboration-mode parameter [Task 8]
+- The accepted implementation is structured, not textual: the composer strips `/plan` or `/计划模式`, maps it to `collaborationMode: 'plan'`, preserves that state in queue drafts, and forwards a normalized `turn/start` payload with `mode: 'plan'` plus settings into both desktop IPC and headless local execution [Task 8]
+- For this kind of `CodexMobile` feature work, the verification baseline is targeted tests first, then `node --test client/src/*.test.mjs server/*.test.mjs shared/*.test.mjs`, then `npm run build`; a Vite chunk-size warning alone is not failure [Task 8]
+- In Node ESM helpers inside this repo, do not use raw `new URL
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:57:56Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm version 1.3.0 --no-git-tag-version`</summary>
+```
+Chunk ID: cc1625
+Wall time: 0.1986 seconds
+Process exited with code 0
+Original token count: 2
+Output:
+v1.3.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:03Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/CHANGELOG.md`**
+
+```diff
+@@
+ ## Unreleased
+ 
++## [1.3.0] - 2026-05-13
++
++### Added
++
++- Added WebSocket-backed sync plumbing for mobile/desktop refresh events, including shared sync reducers, server-side sync storage, and desktop cache invalidation broadcasts.
++- Added runtime debug helpers for inspecting active run state and bridge behavior from the mobile app.
++- Added inline add/delete highlighting for file-diff activity summaries in chat.
++
++### Changed
++
++- Refactored the mobile app into clearer app, chat, composer, panel, and sync flows while preserving the existing local Node bridge shape.
++- Improved desktop IPC and background app-server routing so existing desktop threads, background-created mobile threads, and session refreshes stay better aligned.
++- Polished activity rendering, top-bar status, drawer behavior, and composer styling after the 1.2 release.
++- Updated the package version to `1.3.0`.
++
++### Fixed
++
++- Removed noisy placeholder thinking activity from the visible chat stream.
++- Fixed several stale runtime and live-polling cases that could leave mobile UI state behind the desktop thread state.
++
+ ## [1.2.0] - 2026-05-09
+ 
+ ### Added
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:16Z)**_
+
+版本和 changelog 已补到 `1.3.0`。现在跑全量 Node 测试、构建和 smoke；这版改动跨度大，我会多覆盖一层嵌套目录测试。
+
+_**Agent (gpt-5.5 2026-05-13 13:58:16Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node --test client/src/**/*.test.mjs server/**/*.test.mjs server/**/*.test.js shared/**/*.test.mjs`</summary>
+```
+Chunk ID: 9be88a
+Wall time: 1.0017 seconds
+Process running with session ID 35703
+Original token count: 14523
+Output:
+Total output lines: 1530
+
+TAP version 13
+# Subtest: activity card opens only while a visible process is running
+ok 1 - activity card opens only while a visible process is running
+  ---
+  duration_ms: 1.417875
+  type: 'test'
+  ...
+# Subtest: activity card folds process after completion even when edited files are summarized
+ok 2 - activity card folds process after completion even when edited files are summarized
+  ---
+  duration_ms: 0.304292
+  type: 'test'
+  ...
+# Subtest: activity card treats running child steps as an active desktop process
+ok 3 - activity card treats running child steps as an active desktop process
+  ---
+  duration_ms: 0.273875
+  type: 'test'
+  ...
+# Subtest: activity card can follow external runtime while desktop projection is stale completed
+ok 4 - activity card can follow external runtime while desktop projection is stale completed
+  ---
+  duration_ms: 0.116208
+  type: 'test'
+  ...
+# Subtest: removes matching activity narration when the final answer is shown
+ok 5 - removes matching activity narration when the final answer is shown
+  ---
+  duration_ms: 4.285125
+  type: 'test'
+  ...
+# Subtest: keeps non-matching activity narration
+ok 6 - keeps non-matching activity narration
+  ---
+  duration_ms: 0.366666
+  type: 'test'
+  ...
+# Subtest: isThinkingActivityStep exposes running reasoning as a visible step
+ok 7 - isThinkingActivityStep exposes running reasoning as a visible step
+  ---
+  duration_ms: 1.314417
+  type: 'test'
+  ...
+# Subtest: isThinkingActivityStep does not keep completed reasoning live
+ok 8 - isThinkingActivityStep does not keep completed reasoning live
+  ---
+  duration_ms: 0.174792
+  type: 'test'
+  ...
+# Subtest: thinkingActivityText falls back to mobile thinking label
+ok 9 - thinkingActivityText falls back to mobile thinking label
+  ---
+  duration_ms: 0.242459
+  type: 'test'
+  ...
+# Subtest: parseUnifiedDiffLines classifies apply_patch hunks without line numbers
+ok 10 - parseUnifiedDiffLines classifies apply_patch hunks without line numbers
+  ---
+  duration_ms: 2.895709
+  type: 'test'
+  ...
+# Subtest: parseUnifiedDiffLines keeps standard unified diff line numbers
+ok 11 - parseUnifiedDiffLines keeps standard unified diff line numbers
+  ---
+  duration_ms: 0.394042
+  type: 'test'
+  ...
+# Subtest: mergeActivityStep collapses duplicate thinking labels for one turn
+ok 12 - mergeActivityStep collapses duplicate thinking labels for one turn
+  ---
+  duration_ms: 1.544209
+  type: 'test'
+  ...
+# Subtest: mergeActivityStep keeps distinct narrative commentary steps
+ok 13 - mergeActivityStep keeps distinct narrative commentary steps
+  ---
+  duration_ms: 0.821125
+  type: 'test'
+  ...
+# Subtest: mergeActivityStep updates the same narrative commentary step by id
+ok 14 - mergeActivityStep updates the same narrative commentary step by id
+  ---
+  duration_ms: 0.352708
+  type: 'test'
+  ...
+# Subtest: upsertActivityMessage keeps concrete MCP tool calls with generic status labels
+ok 15 - upsertActivityMessage keeps concrete MCP tool calls with generic status labels
+  ---
+  duration_ms: 21.024667
+  type: 'test'
+  ...
+# Subtest: upsertStatusMessage keeps concrete dynamic tool calls with generic status labels
+ok 16 - upsertStatusMessage keeps concrete dynamic tool calls with generic status labels
+  ---
+  duration_ms: 0.688208
+  type: 'test'
+  ...
+# Subtest: upsertStatusMessage merges desktop turn updates back into the optimistic mobile card
+ok 17 - upsertStatusMessage merges desktop turn updates back into the optimistic mobile card
+  ---
+  duration_ms: 0.691917
+  type: 'test'
+  ...
+# Subtest: upsertActivityMessage also merges desktop activity updates by client turn id
+ok 18 - upsertActivityMessage also merges desktop activity updates by client turn id
+  ---
+  duration_ms: 0.4065
+  type: 'test'
+  ...
+# Subtest: completeActivityMessagesForTurn marks running activity steps completed
+ok 19 - completeActivityMessagesForTurn marks running activity steps completed
+  ---
+  duration_ms: 0.229959
+  type: 'test'
+  ...
+# Subtest: completeActivityMessagesForTurn keeps pending plan implementation actionable
+ok 20 - completeActivityMessagesForTurn keeps pending plan implementation actionable
+  ---
+  duration_ms: 0.354291
+  type: 'test'
+  ...
+# Subtest: placeholder thinking activity is suppressed from chat stream
+ok 21 - placeholder thinking activity is suppressed from chat stream
+  ---
+  duration_ms: 0.32175
+  type: 'test'
+  ...
+# Subtest: activity with concrete work is not treated as placeholder
+ok 22 - activity with concrete work is not treated as placeholder
+  ---
+  duration_ms: 0.439834
+  type: 'test'
+  ...
+# Subtest: transient local handoff activity is kept for runtime but hidden from chat stream
+ok 23 - transient local handoff activity is kept for runtime but hidden from chat stream
+  ---
+  duration_ms: 0.411042
+  type: 'test'
+  ...
+# Subtest: real activity still renders in the chat stream
+ok 24 -
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:22Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 5affbe
+Wall time: 0.0009 seconds
+Process exited with code 0
+Original token count: 4483
+Output:
+# Subtest: file search ignores generated and dependency directories
+ok 244 - file search ignores generated and dependency directories
+  ---
+  duration_ms: 642.32825
+  type: 'test'
+  ...
+# Subtest: file search ignore helper covers required directories
+ok 245 - file search ignore helper covers required directories
+  ---
+  duration_ms: 2.451583
+  type: 'test'
+  ...
+# Subtest: git route handler ignores non-git API routes
+ok 246 - git route handler ignores non-git API routes
+  ---
+  duration_ms: 4.536417
+  type: 'test'
+  ...
+# Subtest: git route handler serves Git status with the existing response shape
+ok 247 - git route handler serves Git status with the existing response shape
+  ---
+  duration_ms: 1.857333
+  type: 'test'
+  ...
+# Subtest: git route handler reads branch creation bodies
+ok 248 - git route handler reads branch creation bodies
+  ---
+  duration_ms: 0.993834
+  type: 'test'
+  ...
+# Subtest: git route handler serves pull, sync, and commit-push actions
+ok 249 - git route handler serves pull, sync, and commit-push actions
+  ---
+  duration_ms: 0.359084
+  type: 'test'
+  ...
+# Subtest: parseGitStatusShort reads branch, ahead/behind, and changed files
+ok 250 - parseGitStatusShort reads branch, ahead/behind, and changed files
+  ---
+  duration_ms: 13.527042
+  type: 'test'
+  ...
+# Subtest: parseGitStatusShort caps large file lists but keeps true dirty count
+ok 251 - parseGitStatusShort caps large file lists but keeps true dirty count
+  ---
+  duration_ms: 13.904667
+  type: 'test'
+  ...
+# Subtest: normalizeBranchName keeps codex prefix and sanitizes unsafe text
+ok 252 - normalizeBranchName keeps codex prefix and sanitizes unsafe text
+  ---
+  duration_ms: 1.083583
+  type: 'test'
+  ...
+# Subtest: defaultCommitMessage summarizes a focused change set
+ok 253 - defaultCommitMessage summarizes a focused change set
+  ---
+  duration_ms: 2.252375
+  type: 'test'
+  ...
+# Subtest: truncateGitOutput caps large diff payloads
+ok 254 - truncateGitOutput caps large diff payloads
+  ---
+  duration_ms: 2.097417
+  type: 'test'
+  ...
+# Subtest: git service returns truncated diff with status
+ok 255 - git service returns truncated diff with status
+  ---
+  duration_ms: 2.012041
+  type: 'test'
+  ...
+# Subtest: git service lists local branches with default and checked-out metadata
+ok 256 - git service lists local branches with default and checked-out metadata
+  ---
+  duration_ms: 0.821708
+  type: 'test'
+  ...
+# Subtest: git service checks out an existing branch
+ok 257 - git service checks out an existing branch
+  ---
+  duration_ms: 1.309041
+  type: 'test'
+  ...
+# Subtest: git service pulls with fast-forward only
+ok 258 - git service pulls with fast-forward only
+  ---
+  duration_ms: 1.0895
+  type: 'test'
+  ...
+# Subtest: git service creates a linked worktree from a codex branch name
+ok 259 - git service creates a linked worktree from a codex branch name
+  ---
+  duration_ms: 4.648584
+  type: 'test'
+  ...
+# Subtest: git service generates a copyable PR draft
+ok 260 - git service generates a copyable PR draft
+  ---
+  duration_ms: 1.306333
+  type: 'test'
+  ...
+# Subtest: git service sync pulls then pushes only when ahead remains
+ok 261 - git service sync pulls then pushes only when ahead remains
+  ---
+  duration_ms: 1.371334
+  type: 'test'
+  ...
+# Subtest: git service commits on non-codex branches when the repository allows it
+ok 262 - git service commits on non-codex branches when the repository allows it
+  ---
+  duration_ms: 2.197166
+  type: 'test'
+  ...
+# Subtest: git service pushes when the dirty file list is too large for display
+ok 263 - git service pushes when the dirty file list is too large for display
+  ---
+  duration_ms: 2.248083
+  type: 'test'
+  ...
+# Subtest: git service commitPush commits and then pushes
+ok 264 - git service commitPush commits and then pushes
+  ---
+  duration_ms: 1.285041
+  type: 'test'
+  ...
+# Subtest: push service creates VAPID keys and persists unique subscriptions
+ok 265 - push service creates VAPID keys and persists unique subscriptions
+  ---
+  duration_ms: 97.34625
+  type: 'test'
+  ...
+# Subtest: push service sends notifications and removes gone subscriptions
+ok 266 - push service sends notifications and removes gone subscriptions
+  ---
+  duration_ms: 277.705416
+  type: 'test'
+  ...
+# Subtest: notificationFromServerPayload maps completion, failure, and user-input events
+ok 267 - notificationFromServerPayload maps completion, failure, and user-input events
+  ---
+  duration_ms: 32.397459
+  type: 'test'
+  ...
+# [voice] speech failed status=502 remote=127.0.0.1 message=bad key sk-[hidden]
+# Subtest: notification route handler keeps public key and subscribe response shapes
+ok 268 - notification route handler keeps public key and subscribe response shapes
+  ---
+  duration_ms: 2.580875
+  type: 'test'
+  ...
+# Subtest: chat route handler routes send and abort through chat service
+ok 269 - chat route handler routes 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:24Z)**_
+
+全量嵌套测试过了：328 个测试全绿。继续跑生产构建和本机 smoke。
+
+_**Agent (gpt-5.5 2026-05-13 13:58:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run build`</summary>
+```
+Chunk ID: 8ffaf7
+Wall time: 1.0021 seconds
+Process running with session ID 86400
+Original token count: 37
+Output:
+
+> codexmobile@1.3.0 build
+> vite build --config client/vite.config.js
+
+vite v7.3.2 building client environment for production...
+transforming...
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:29Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: b7f64f
+Wall time: 5.0016 seconds
+Process running with session ID 86400
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:38Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 875664
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1322
+Output:
+✓ 4005 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/assets/manifest-DkwGc9r2.webmanifest                 0.66 kB
+dist/index.html                                           2.01 kB │ gzip:   0.88 kB
+dist/assets/pdf.worker-B1D2UnXD.mjs                   2,161.15 kB
+dist/assets/index-HTFrvJ4t.css                          111.53 kB │ gzip:  19.61 kB
+dist/assets/channel-BdvI2uXb.js                           0.12 kB │ gzip:   0.13 kB
+dist/assets/init-Gi6I4Gst.js                              0.15 kB │ gzip:   0.13 kB
+dist/assets/chunk-QZHKN3VN-CKcMD6JT.js                    0.19 kB │ gzip:   0.16 kB
+dist/assets/chunk-4BX2VUAB-D2jfPmSm.js                    0.23 kB │ gzip:   0.17 kB
+dist/assets/chunk-55IACEB6-BZt2tCOT.js                    0.24 kB │ gzip:   0.21 kB
+dist/assets/chunk-FMBD7UC4-Cx47LUT6.js                    0.37 kB │ gzip:   0.27 kB
+dist/assets/stateDiagram-v2-BHNVJYJU-DG_nhZkU.js          0.39 kB │ gzip:   0.29 kB
+dist/assets/classDiagram-4FO5ZUOK-gziCG0P9.js             0.47 kB │ gzip:   0.32 kB
+dist/assets/classDiagram-v2-Q7XG4LA2-gziCG0P9.js          0.47 kB │ gzip:   0.32 kB
+dist/assets/chunk-2J33WTMH-Cf_0jUz0.js                    0.51 kB │ gzip:   0.36 kB
+dist/assets/infoDiagram-5YYISTIA-tM1C-49O.js              0.59 kB │ gzip:   0.40 kB
+dist/assets/ordinal-Cboi1Yqb.js                           1.19 kB │ gzip:   0.57 kB
+dist/assets/chunk-ND2GUHAM-DorkMiph.js                    1.88 kB │ gzip:   0.83 kB
+dist/assets/diagram-5GNKFQAL-CfyOI_ri.js                  2.75 kB │ gzip:   1.36 kB
+dist/assets/arc-DBaAw9al.js                               3.44 kB │ gzip:   1.49 kB
+dist/assets/diagram-LMA3HP47-DYzBCHh0.js                  4.21 kB │ gzip:   1.83 kB
+dist/assets/defaultLocale-DX6XiGOO.js                     4.69 kB │ gzip:   2.18 kB
+dist/assets/pieDiagram-4H26LBE5-BdjTPJJ3.js               5.27 kB │ gzip:   2.34 kB
+dist/assets/linear-CMJO_ZZg.js                            5.66 kB │ gzip:   2.31 kB
+dist/assets/diagram-2AECGRRQ-fzJCa0a6.js                  5.81 kB │ gzip:   2.46 kB
+dist/assets/stateDiagram-AJRCARHV-ByK1X0pK.js            10.36 kB │ gzip:   3.62 kB
+dist/assets/diagram-KO2AKTUF-BtpdUqGC.js                 10.72 kB │ gzip:   4.13 kB
+dist/assets/dagre-BM42HDAG-w_o5zWPL.js                   11.14 kB │ gzip:   4.11 kB
+dist/assets/diagram-OG6HWLK6-BGdD-Zls.js                 15.81 kB │ gzip:   5.65 kB
+dist/assets/ishikawaDiagram-YF4QCWOH-D0VarTfz.js         17.47 kB │ gzip:   6.64 kB
+dist/assets/kanban-definition-UN3LZRKU-B_mFbxpK.js       20.29 kB │ gzip:   7.21 kB
+dist/assets/mindmap-definition-RKZ34NQL-DyE9VA4U.js      23.18 kB │ gzip:   7.83 kB
+dist/assets/sankeyDiagram-5OEKKPKP-DSec5Etp.js           23.20 kB │ gzip:   8.56 kB
+dist/assets/journeyDiagram-JHISSGLW-D6aQksiM.js          23.57 kB │ gzip:   8.35 kB
+dist/assets/graph--OzhPTMs.js                            23.92 kB │ gzip:   8.32 kB
+dist/assets/wardleyDiagram-YWT4CUSO-JEIzL90j.js          25.50 kB │ gzip:   6.79 kB
+dist/assets/erDiagram-TEJ5UH35-6L1HmfZA.js               26.86 kB │ gzip:   9.34 kB
+dist/assets/gitGraphDiagram-PVQCEYII-DUjug4Yb.js         29.42 kB │ gzip:   8.70 kB
+dist/assets/timeline-definition-PNZ67QCA-BSQ9HNGD.js     30.83 kB │ gzip:  10.15 kB
+dist/assets/requirementDiagram-4Y6WPE33-BbAGLhii.js      31.00 kB │ gzip:   9.74 kB
+dist/assets/quadrantDiagram-W4KKPZXB-B-QL-nn_.js         34.02 kB │ gzip:   9.98 kB
+dist/assets/layout-SsrduOYp.js                           35.84 kB │ gzip:  12.87 kB
+dist/assets/chunk-AQP2D5EJ-XzXb7NCO.js                   37.11 kB │ gzip:  12.11 kB
+dist/assets/xychartDiagram-2RQKCTM6-Cgq_lzk8.js          40.39 kB │ gzip:  11.56 kB
+dist/assets/vennDiagram-CIIHVFJN-Dq6pyOHL.js             41.43 kB │ gzip:  15.47 kB
+dist/assets/chunk-727SXJPM-BcYM0Sv9.js                   48.94 kB │ gzip:  15.69 kB
+dist/assets/flowDiagram-I6XJVG4X-CiKrqiIr.js             60.50 kB │ gzip:  19.37 kB
+dist/assets/ganttDiagram-6RSMTGT7-pKK3t531.js            69.57 kB │ gzip:  23.48 kB
+dist/assets/c4Diagram-AAUBKEIU-ByEzwZCO.js               69.94 kB │ gzip:  19.63 kB
+dist/assets/blockDiagram-GPEHLZMM-D3wY_eqm.js            73.53 kB │ gzip:  21.22 kB
+dist/assets/cose-bilkent-S5V4N54A-CKC1-E5o.js            81.70 kB │ gzip:  22.47 kB
+dist/assets/sequenceDiagram-3UESZ5HK-BKItaFNJ.js        116.87 kB │ gzip:  31.04 kB
+dist/assets/architectureDiagram-3BPJPVTR-BFB2A3Dd.js    149.43 kB │ gzip:  42.18 kB
+dist/assets/katex-DHMw6HUq.js                           259.05 kB │ gzip:  76.99 kB
+dist/assets/cytoscape.esm-DH6-wILU.js                   441.80 kB │ gzip: 141.55 kB
+dist/assets/mermaid.core-CbxzEw-T.js                    605.97 kB │ gzip: 144.60 kB
+dist/assets/wardley-L42UT6IY-Da9yJs1d.js                612.51 kB │ gzip: 147.50 kB
+dist/assets/index-C0ixXwS1.js                 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:40Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run smoke`</summary>
+```
+Chunk ID: 60cc99
+Wall time: 0.3072 seconds
+Process exited with code 0
+Original token count: 33
+Output:
+
+> codexmobile@1.3.0 smoke
+> node scripts/smoke.mjs
+
+Smoke ok: Mac-mini-home.local codex/gpt-5.5 synced=2026-05-13T12:44:55.612Z
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:49Z)**_
+
+构建过了，smoke 也连到本机桥接服务正常。现在只剩 release 元数据改动，我检查一下再提交、打 tag、推送。
+
+_**Agent (gpt-5.5 2026-05-13 13:58:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff --check`</summary>
+```
+Chunk ID: 8d0598
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short --branch`</summary>
+```
+Chunk ID: a96b20
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 19
+Output:
+## main...origin/main
+ M CHANGELOG.md
+ M package-lock.json
+ M package.json
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff --stat`</summary>
+```
+Chunk ID: dba5b9
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 38
+Output:
+ CHANGELOG.md      | 20 ++++++++++++++++++++
+ package-lock.json |  4 ++--
+ package.json      |  2 +-
+ 3 files changed, 23 insertions(+), 3 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node -e "const p=require('./package.json'); const l=require('./package-lock.json'); console.log(JSON.stringify({pkg:p.version, lock:l.version, root:l.packages&&l.packages['']&&l.packages[''].version}, null, 2))"`</summary>
+```
+Chunk ID: e71f75
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 15
+Output:
+{
+  "pkg": "1.3.0",
+  "lock": "1.3.0",
+  "root": "1.3.0"
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:53Z)**_
+
+检查结果很干净：只有 `CHANGELOG.md`、`package.json`、`package-lock.json` 三个 release 文件，版本三处都已是 `1.3.0`。现在提交 release commit。
+
+_**Agent (gpt-5.5 2026-05-13 13:58:55Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git add CHANGELOG.md package.json package-lock.json && git commit -m "Release 1.3.0"`</summary>
+```
+Chunk ID: 3c6910
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 20
+Output:
+[main 3338459] Release 1.3.0
+ 3 files changed, 23 insertions(+), 3 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:58:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git tag v1.3.0 && git status --short --branch && git log --oneline --decorate --max-count=4`</summary>
+```
+Chunk ID: f72f47
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 72
+Output:
+## main...origin/main [ahead 1]
+3338459 (HEAD -> main, tag: v1.3.0) Release 1.3.0
+9357f0a (origin/main, origin/HEAD) Highlight add and delete lines in file diffs
+a9fb0c1 Improve CodexMobile workflows and polish UI behavior
+0de2b48 Restore composer styling and remove thinking placeholder
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:59:01Z)**_
+
+`Release 1.3.0` 提交和本地 tag 已完成，本地 `main` 领先 1 个提交。接下来推 main、推 tag，然后创建 GitHub Release。
+
+_**Agent (gpt-5.5 2026-05-13 13:59:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git push origin main && git push origin v1.3.0`</summary>
+```
+Chunk ID: b60590
+Wall time: 1.0005 seconds
+Process running with session ID 83913
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:59:06Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 4a3162
+Wall time: 1.0402 seconds
+Process exited with code 0
+Original token count: 40
+Output:
+To https://github.com/flyyangX/CodexMobile
+   9357f0a..3338459  main -> main
+To https://github.com/flyyangX/CodexMobile
+ * [new tag]         v1.3.0 -> v1.3.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:59:09Z)**_
+
+GitHub 上的 `main` 和 `v1.3.0` 都已经推上去了。我现在发布正式 release notes。
+
+_**Agent (gpt-5.5 2026-05-13 13:59:15Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `gh release create v1.3.0 --repo flyyangX/CodexMobile --title "CodexMobile 1.3.0" --notes $'## Highlights\n\n- Adds WebSocket-backed sync plumbing for mobile/desktop refresh events, including shared client sync reducers, server-side sync storage, and desktop cache invalidation broadcasts.\n- Improves desktop IPC and background app-server routing so existing desktop threads, mobile-created background threads, and session refreshes stay better aligned.\n- Adds runtime debug helpers for active run and bridge-state inspection.\n- Adds inline add/delete highlighting for file-diff activity summaries in chat.\n- Polishes activity rendering, top-bar status, drawer behavior, and composer styling after 1.2.\n\n## Fixes\n\n- Removes noisy placeholder thinking activity from the visible chat stream.\n- Fixes several stale runtime and live-polling cases where mobile UI state could lag behind desktop thread state.\n\n## Validation\n\n- `node --test client/src/**/*.test.mjs server/**/*.test.mjs server/**/*.test.js shared/**/*.test.mjs` passed: 328 tests.\n- `npm run build` passed.\n- `npm run smoke` passed.'`</summary>
+```
+Chunk ID: 0a63a0
+Wall time: 1.0019 seconds
+Process running with session ID 86362
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:59:18Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: eae69b
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 15
+Output:
+https://github.com/flyyangX/CodexMobile/releases/tag/v1.3.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:59:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short --branch && git log --oneline --decorate --max-count=5`</summary>
+```
+Chunk ID: f62c1b
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 84
+Output:
+## main...origin/main
+3338459 (HEAD -> main, tag: v1.3.0, origin/main, origin/HEAD) Release 1.3.0
+9357f0a Highlight add and delete lines in file diffs
+a9fb0c1 Improve CodexMobile workflows and polish UI behavior
+0de2b48 Restore composer styling and remove thinking placeholder
+5669ad8 Refactor mobile app routing and shared UI flows
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:59:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `gh release view v1.3.0 --repo flyyangX/CodexMobile --json tagName,name,url,isDraft,isPrerelease,publishedAt`</summary>
+```
+Chunk ID: 9c1e64
+Wall time: 1.0011 seconds
+Process running with session ID 50542
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:59:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git ls-remote --tags origin v1.3.0`</summary>
+```
+Chunk ID: 2f63a8
+Wall time: 0.6669 seconds
+Process exited with code 0
+Original token count: 15
+Output:
+3338459f2c3c4e45928420ed80107cd961f37b58	refs/tags/v1.3.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:59:31Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: f5f7a7
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 48
+Output:
+{"isDraft":false,"isPrerelease":false,"name":"CodexMobile 1.3.0","publishedAt":"2026-05-13T13:59:16Z","tagName":"v1.3.0","url":"https://github.com/flyyangX/CodexMobile/releases/tag/v1.3.0"}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-13 13:59:49Z)**_
+
+发布好了，已经是正式 release。
+
+`main` 已推到 GitHub，提交是 `3338459 Release 1.3.0`，tag `v1.3.0` 也已推上去。Release 链接：[`CodexMobile 1.3.0`](https://github.com/flyyangX/CodexMobile/releases/tag/v1.3.0)。
+
+这版主要包含：移动端/桌面端 WebSocket 同步链路、desktop IPC 和 background app-server 路由优化、runtime debug、文件 diff 增删行高亮、activity/topbar/drawer/composer 体验抛光，以及去掉多余 thinking 占位卡片。
+
+验证也跑完了：
+- `node --test ...`：328 个测试通过
+- `npm run build`：通过
+- `npm run smoke`：通过
+
+现在本地 `main` 和 `origin/main` 对齐，工作区干净。
+
+::git-stage{cwd="/Users/xiayanghui/编程项目/CodexMobile"}
+::git-commit{cwd="/Users/xiayanghui/编程项目/CodexMobile"}
+::git-push{cwd="/Users/xiayanghui/编程项目/CodexMobile" branch="main"}
+
+
+
+---
+
+_**User (2026-05-14 11:09:32Z)**_
+
+推送一个新的release版本到我们仓库了
+
+
+---
+
+_**Agent (gpt-5.5 2026-05-14 11:09:42Z)**_
+
+我来走一遍发布流程：先确认当前 `main`、本地改动、最新 tag/release 和版本号，再决定这次应该升到哪个版本，最后跑验证、打 tag、推 GitHub Release。
+
+_**Agent (gpt-5.5 2026-05-14 11:09:42Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "CodexMobile|release sequence|verification baseline|发布|release staging" /Users/xiayanghui/.codex/memories/MEMORY.md`</summary>
+```
+Chunk ID: a80456
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 8351
+Output:
+Total output lines: 100
+
+1:# Task Group: CodexMobile / composer 控件、线程同步、架构拆分与私网访问
+3:scope: `CodexMobile` 手机端 composer 控件、图片/文件预览、`/plan` 协作模式、repo-local skill 发现、自动标题、普通对话/发送链路排障、desktop IPC fallback、draft/new-thread send、abort / running 状态卡片、后端保守拆分、移动端 Git 面板、release 发布、macOS 自启动与 Tailscale/LAN 访问；适用于这个 repo 的 live 前后端联调、app-server 行为核验、私网访问解释和公开仓库卫生，不适用于泛化移动端产品设计。
+4:applies_to: cwd=/Users/xiayanghui/编程项目/CodexMobile; reuse_rule=适合复用到这个 `CodexMobile` 仓库里与 composer、`/plan`、`/api/status`、`thread/*` app-server 能力、本地 Node 服务、README 功能口径、Git HTTP API、launchd、Tailscale/LAN origin 行为有关的任务；具体端口、running process、模型列表和代码结构都要按当前 checkout/live server 重验
+10:- rollout_summaries/2026-05-05T00-12-41-rXsC-codexmobile_skill_picker_and_remove_voice_controls.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T08-12-41-019df57a-d854-73d1-8bec-a9d15f8453c2.jsonl, updated_at=2026-05-05T00:25:11+00:00, thread_id=019df57a-d854-73d1-8bec-a9d15f8453c2, added skill discovery and mobile picker, then proved the first disabled state came from an older live backend on port 3321)
+14:- CodexMobile, skill picker, composer, /api/status, localStorage, buildCodexTurnInput, type: skill, lsof, port 3321, port 3331, readCodexSkills
+20:- rollout_summaries/2026-05-05T00-12-41-rXsC-codexmobile_skill_picker_and_remove_voice_controls.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T08-12-41-019df57a-d854-73d1-8bec-a9d15f8453c2.jsonl, updated_at=2026-05-05T00:25:11+00:00, thread_id=019df57a-d854-73d1-8bec-a9d15f8453c2, removed the in-app voice/dialog entry points and updated docs to match the native-keyboard voice preference)
+24:- CodexMobile, voice-dialog, microphone button, dialog button, VoiceDialogPanel, native keyboard voice path, README.md, npm run build, restart 3321
+30:- rollout_summaries/2026-05-05T11-35-49-5GrC-codexmobile_auto_thread_title_hook_gpt_5_4_mini.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T19-35-49-019df7ec-42b4-7602-94d6-e06d2430e6c0.jsonl, updated_at=2026-05-05T12:01:30+00:00, thread_id=019df7ec-42b4-7602-94d6-e06d2430e6c0, traced `name`/`preview` fallback and added async auto-title writeback for new draft sessions)
+40:- rollout_summaries/2026-05-05T19-24-27-hq5w-codexmobile_mobile_thread_sync_and_hanging_turn_debug.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/06/rollout-2026-05-06T03-24-27-019df999-4f02-70f1-9d0f-895fb3098ee6.jsonl, updated_at=2026-05-07T05:33:58+00:00, thread_id=019df999-4f02-70f1-9d0f-895fb3098ee6, cleaned ordinary-thread history bleed-through, clarified hide-vs-archive behavior, cleared `/Users/xiayanghui/Documents/Codex/`, and fixed normal-chat turn hangs caused by leaked lark-cli env)
+50:- rollout_summaries/2026-05-05T19-18-01-iLno-codexmobile_macos_autostart_launchagent.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/06/rollout-2026-05-06T03-18-01-019df993-6bb9-7ff2-99b2-c34ddc737c76.jsonl, updated_at=2026-05-06T12:17:56+00:00, thread_id=019df993-6bb9-7ff2-99b2-c34ddc737c76, started with a reboot-pairing skill, then replaced it with a user-level LaunchAgent that keeps port 3321 alive after reboot and crash)
+54:- CodexMobile, LaunchAgent, launchctl, macOS autostart, run-server.mjs, start-server.mjs, /api/status, refreshCodexCache, port 3321, fileURLToPath, launchd, com.codexmobile.bridge
+60:- rollout_summaries/2026-05-07T04-46-49-TGny-codexmobile_architecture_git_security_cleanup.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/07/rollout-2026-05-07T12-46-49-019e00c2-88d5-78e1-bc14-ca1f0d1f1084.jsonl, updated_at=2026-05-07T17:54:56+00:00, thread_id=019e00c2-88d5-78e1-bc14-ca1f0d1f1084, explained the PWA + Node + Codex app-server chain, split backend helpers conservatively, replaced prompt-driven Git with real APIs/panel, and cleaned already-published local artifacts from `origin/main`)
+70:- rollout_summaries/2026-05-07T09-15-14-5HCm-codexmobile_tailscale_lan_pwa_origin.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/archived_sessions/rollout-2026-05-07T17-15-14-019e01b8-4577-7b30-8e0c-22916f0dd5ae.jsonl, updated_at=2026-05-07T09:40:01+00:00, thread_id=019e01b8-4577-7b30-8e0
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:09:42Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short --branch`</summary>
+```
+Chunk ID: e94ae4
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 6
+Output:
+## main...origin/main
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:09:42Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git log --oneline --decorate --max-count=12`</summary>
+```
+Chunk ID: a64832
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 173
+Output:
+7a86eb1 (HEAD -> main, origin/main, origin/HEAD) Rebrand codex-web as CodexPocket
+e9ce5ee Coalesce activity cards across live and loaded sessions
+9f5aeb8 Stabilize activity card reconciliation
+dbbc7a0 Fold tool groups and desktop handoff UI state
+f41f6eb Refine CodexMobile UI and workflow handling
+3338459 (tag: v1.3.0) Release 1.3.0
+9357f0a Highlight add and delete lines in file diffs
+a9fb0c1 Improve CodexMobile workflows and polish UI behavior
+0de2b48 Restore composer styling and remove thinking placeholder
+5669ad8 Refactor mobile app routing and shared UI flows
+92cf164 Refine CodexMobile architecture and sync handling
+2577e0b (tag: v1.2.0, sync-consistency-upgrade) Release 1.2.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:09:42Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node -e "const p=require('./package.json'); const l=require('./package-lock.json'); console.log(JSON.stringify({pkg:p.version, lock:l.version, root:l.packages&&l.packages['']&&l.packages[''].version}, null, 2))"`</summary>
+```
+Chunk ID: 26050c
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 15
+Output:
+{
+  "pkg": "1.3.0",
+  "lock": "1.3.0",
+  "root": "1.3.0"
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:09:52Z)**_
+
+现在本地是干净的，`main` 已和 `origin/main` 对齐；`v1.3.0` 后又有 5 个提交，包括 UI/工作流稳定和 CodexPocket 品牌调整，这次我按 `1.4.0` 发比较合适。先确认 GitHub release/tag 没冲突，再补版本和 changelog。
+
+_**Agent (gpt-5.5 2026-05-14 11:09:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `gh auth status && gh release list --repo flyyangX/CodexMobile --limit 10`</summary>
+```
+Chunk ID: 57b428
+Wall time: 1.0022 seconds
+Process running with session ID 24333
+Original token count: 57
+Output:
+github.com
+  ✓ Logged in to github.com account flyyangX (keyring)
+  - Active account: true
+  - Git operations protocol: https
+  - Token: gho_************************************
+  - Token scopes: 'gist', 'read:org', 'repo'
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:09:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git tag -l 'v1.4.0' && gh release view v1.4.0 --repo flyyangX/CodexMobile --json tagName,name,url,isDraft,isPrerelease`</summary>
+```
+Chunk ID: d9e895
+Wall time: 0.6865 seconds
+Process exited with code 1
+Original token count: 5
+Output:
+release not found
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:09:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,100p' CHANGELOG.md`</summary>
+```
+Chunk ID: 533d48
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1212
+Output:
+# Changelog
+
+All notable changes to CodexMobile are tracked here.
+
+## Unreleased
+
+## [1.3.0] - 2026-05-13
+
+### Added
+
+- Added WebSocket-backed sync plumbing for mobile/desktop refresh events, including shared sync reducers, server-side sync storage, and desktop cache invalidation broadcasts.
+- Added runtime debug helpers for inspecting active run state and bridge behavior from the mobile app.
+- Added inline add/delete highlighting for file-diff activity summaries in chat.
+
+### Changed
+
+- Refactored the mobile app into clearer app, chat, composer, panel, and sync flows while preserving the existing local Node bridge shape.
+- Improved desktop IPC and background app-server routing so existing desktop threads, background-created mobile threads, and session refreshes stay better aligned.
+- Polished activity rendering, top-bar status, drawer behavior, and composer styling after the 1.2 release.
+- Updated the package version to `1.3.0`.
+
+### Fixed
+
+- Removed noisy placeholder thinking activity from the visible chat stream.
+- Fixed several stale runtime and live-polling cases that could leave mobile UI state behind the desktop thread state.
+
+## [1.2.0] - 2026-05-09
+
+### Added
+
+- Added a system theme option so CodexMobile can follow the OS light/dark preference across the main app and file preview flow.
+- Added a model speed selector in the composer model menu, with Standard and Fast choices persisted locally.
+- Added end-to-end service tier routing so Fast model speed sends `fast` through chat requests, desktop IPC, and headless Codex runs.
+- Added compact memory citation cards for `<oai-mem-citation>` blocks in chat output.
+
+### Changed
+
+- Replaced the README screenshots with redacted dark/light demos that show the sidebar, running state, and desktop-style tool activity flow.
+- Synced PWA theme color updates with the resolved light/dark mode when following the system theme.
+
+## [1.0.0] - 2026-05-09
+
+### Added
+
+- Added a queue panel for running conversations: queued drafts can be viewed, restored, deleted, or sent immediately as steer input.
+- Added composer shortcuts with `/` commands for status, context compaction, code review, and sub-agent workflows.
+- Added `$skill` autocomplete backed by the existing skills list.
+- Added `@file` search backed by a project-local file search API that ignores generated and dependency directories.
+- Added file mention support for chat sends so selected local paths can be attached as context.
+- Added an expanded Git panel with status, diff preview, pull, sync, and commit+push actions.
+- Added foreground toast notifications for Git progress, task completion, failures, and user-input prompts.
+- Added Web Push support for installed HTTPS PWAs, including service worker handling and server-side subscription storage.
+- Added a compact connection recovery card for reconnecting, syncing, repairing pairing, and checking status.
+- Added desktop thread status badges so mobile can distinguish IPC online, thread pending confirmation, and background execution before sending.
+- Added unified sidebar run indicators for desktop-origin and mobile-origin sends.
+- Added clean dark and light mode project screenshots for the 1.0 README.
+
+### Changed
+
+- Kept completed task activity collapsed by default while preserving the full execution text when expanded.
+- Improved mobile activity rendering and reduced noisy lifecycle messages.
+- Unified desktop IPC and background fallback readback so both paths refresh from the same session stream.
+- Simplified transient background startup UI to avoid duplicate middle activity cards.
+- Matched mobile activity labels and icons more closely to Codex Desktop for commands, files, and skills.
+- Split the large server entrypoint into route and service modules for safer extension.
+- Rewrote README to describe CodexMobile as a local Codex mobile workbench rather than a thin upstream UI fork.
+- Updated package metadata to describe the current mobile workbench scope.
+
+### Fixed
+
+- Fixed mobile abort so it interrupts desktop-side runs instead of only clearing the mobile state.
+- Fixed desktop-origin sends not showing running and completed indicators in the mobile sidebar.
+- Fixed mobile-created background threads briefly losing their live session during startup.
+- Fixed refresh occasionally jumping to another conversation instead of restoring the selected project and session.
+- Fixed duplicate running cards during mobile-to-desktop background handoff.
+- Fixed a scroll jump that could move the conversation back to the top after a send.
+
+### Notes
+
+- `1.0.0` is the first stable local mobile Codex workbench release.
+- iOS background notifications require an HTTPS Home Screen PWA. Local HTTP access still works for chat, sync, and foreground toast.
+- `sync` is defined as `pull --ff-only` followed by `push` when the branch is ahead.
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:09:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git log --oneline --decorate v1.3.0..HEAD && git diff --stat v1.3.0..HEAD -- ':!.specstory/**'`</summary>
+```
+Chunk ID: 9771f0
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 877
+Output:
+7a86eb1 (HEAD -> main, origin/main, origin/HEAD) Rebrand codex-web as CodexPocket
+e9ce5ee Coalesce activity cards across live and loaded sessions
+9f5aeb8 Stabilize activity card reconciliation
+dbbc7a0 Fold tool groups and desktop handoff UI state
+f41f6eb Refine CodexMobile UI and workflow handling
+ client/public/codexmobile-sw.js             |  19 ++
+ client/src/activity-card-state.test.mjs     |  10 +-
+ client/src/activity-model.test.mjs          | 329 ++++++++++++++++++++++-
+ client/src/activity-timeline-model.test.mjs |  85 ++++++
+ client/src/app-state.test.mjs               |   8 -
+ client/src/app/App.jsx                      | 168 ++++++++++--
+ client/src/app/AppShell.jsx                 |   4 +-
+ client/src/app/pwa-update.js                | 228 ++++++++++++++++
+ client/src/app/session-utils.js             | 110 +-------
+ client/src/app/useTurnSubmission.js         |  39 ++-
+ client/src/chat-render-items.test.mjs       |  83 +++++-
+ client/src/chat/ActivityMessage.jsx         |  22 +-
+ client/src/chat/ActivityTimeline.jsx        |  63 +++--
+ client/src/chat/ChatMessage.jsx             |  17 +-
+ client/src/chat/ChatPane.jsx                |  30 +--
+ client/src/chat/activity-card-state.js      |  16 ++
+ client/src/chat/activity-model.js           | 396 ++++++++++++++++++++++++++--
+ client/src/chat/activity-timeline-model.js  |  75 +++++-
+ client/src/chat/chat-render-items.js        |  50 +++-
+ client/src/composer-shortcuts.js            |  18 +-
+ client/src/composer-shortcuts.test.mjs      |  14 +
+ client/src/composer/Composer.jsx            |  31 ++-
+ client/src/desktop-handoff-state.js         |  67 +++++
+ client/src/desktop-handoff-state.test.mjs   |  33 +++
+ client/src/panels/PwaUpdatePrompt.jsx       |  37 +++
+ client/src/panels/TopBar.jsx                |  28 +-
+ client/src/panels/index.js                  |   3 +-
+ client/src/panels/topbar-status.js          |  90 +++++--
+ client/src/pwa-update.test.mjs              |  70 +++++
+ client/src/session-live-refresh.js          |  15 +-
+ client/src/session-live-refresh.test.mjs    |  67 +++++
+ client/src/styles/activity.css              | 120 ++++++++-
+ client/src/styles/chat.css                  |  16 +-
+ client/src/styles/composer.css              | 156 -----------
+ client/src/styles/panels-git.css            |   6 +-
+ client/src/styles/panels-toast.css          |  83 ++++++
+ client/src/styles/panels-topbar.css         |  13 +
+ client/src/styles/theme.css                 |  47 ----
+ client/src/sync-socket.test.mjs             | 286 ++++++++++++++++++++
+ client/src/sync/useSyncSocket.js            | 149 ++++++++++-
+ client/src/topbar-status.test.mjs           |  37 ++-
+ server/chat-routes.js                       |  11 +
+ server/chat-service.js                      | 100 ++++++-
+ server/chat-service.test.mjs                |  81 ++++++
+ server/codex-data-desktop-activity.test.mjs | 135 +++++++++-
+ server/codex-runner-status.test.mjs         |  42 ++-
+ server/codex-runner.js                      |  54 +++-
+ server/desktop-activity-parser.js           |   9 +-
+ server/desktop-ipc-client.js                |  14 +-
+ server/desktop-ipc-client.test.mjs          |  43 +++
+ server/desktop-refresh.js                   |  66 ++++-
+ server/desktop-refresh.test.mjs             |  24 +-
+ server/desktop-thread-projector.js          |  28 +-
+ server/index.js                             |  23 ++
+ server/route-handlers.test.mjs              |  13 +-
+ 55 files changed, 3241 insertions(+), 540 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:09:56Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: d8e33d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 37
+Output:
+CodexMobile 1.3.0	Latest	v1.3.0	2026-05-13T13:59:16Z
+CodexMobile 1.2.0		v1.2.0	2026-05-09T14:33:16Z
+CodexMobile 1.1.0		v1.1.0	2026-05-09T07:00:53Z
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:00Z)**_
+
+`v1.4.0` 没被占用，GitHub 最新还是 `1.3.0`。这批变化是功能级：PWA 更新提示、activity 卡片合并/折叠、桌面接管状态、CodexPocket 品牌调整，所以我现在升 `1.4.0`。
+
+_**Agent (gpt-5.5 2026-05-14 11:10:01Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm version 1.4.0 --no-git-tag-version`</summary>
+```
+Chunk ID: ee2bf0
+Wall time: 0.1365 seconds
+Process exited with code 0
+Original token count: 2
+Output:
+v1.4.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:07Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/CHANGELOG.md`**
+
+```diff
+@@
+ ## Unreleased
+ 
++## [1.4.0] - 2026-05-14
++
++### Added
++
++- Added PWA update detection and an in-app update prompt so mobile clients can refresh onto newly deployed builds.
++- Added desktop handoff state helpers for clearer "back to desktop" UI behavior.
++- Added broader sync socket, activity card, and desktop runner status test coverage.
++
++### Changed
++
++- Rebranded the former codex-web-facing labels toward CodexPocket.
++- Coalesced live and loaded-session activity cards so duplicated execution cards collapse into one clearer thread view.
++- Folded noisy tool groups and desktop handoff state into cleaner activity and top-bar presentations.
++- Refined mobile workflow handling across composer sends, top-bar status, and desktop/background routing.
++- Updated the package version to `1.4.0`.
++
++### Fixed
++
++- Stabilized activity-card reconciliation when live runtime state and loaded session history arrive in different orders.
++- Improved service-worker cache handling for built assets during mobile/PWA updates.
++
+ ## [1.3.0] - 2026-05-13
+ 
+ ### Added
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:10Z)**_
+
+版本文件和 changelog 已经写到 `1.4.0`。接下来跑测试、构建和 smoke；这次仍然用覆盖嵌套目录的全量测试命令。
+
+_**Agent (gpt-5.5 2026-05-14 11:10:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node --test client/src/**/*.test.mjs server/**/*.test.mjs server/**/*.test.js shared/**/*.test.mjs`</summary>
+```
+Chunk ID: 8823b4
+Wall time: 1.0020 seconds
+Process running with session ID 97709
+Original token count: 13818
+Output:
+Total output lines: 1458
+
+TAP version 13
+# Subtest: activity card opens only while a visible process is running
+ok 1 - activity card opens only while a visible process is running
+  ---
+  duration_ms: 0.96875
+  type: 'test'
+  ...
+# Subtest: activity card folds process after completion even when edited files are summarized
+ok 2 - activity card folds process after completion even when edited files are summarized
+  ---
+  duration_ms: 0.140875
+  type: 'test'
+  ...
+# Subtest: activity card treats running child steps as an active desktop process
+ok 3 - activity card treats running child steps as an active desktop process
+  ---
+  duration_ms: 0.093709
+  type: 'test'
+  ...
+# Subtest: activity card can follow external runtime while desktop projection is stale completed
+ok 4 - activity card can follow external runtime while desktop projection is stale completed
+  ---
+  duration_ms: 0.066333
+  type: 'test'
+  ...
+# Subtest: activity card folds a forced-open process after runtime completion
+ok 5 - activity card folds a forced-open process after runtime completion
+  ---
+  duration_ms: 6.172833
+  type: 'test'
+  ...
+# Subtest: removes matching activity narration when the final answer is shown
+ok 6 - removes matching activity narration when the final answer is shown
+  ---
+  duration_ms: 0.829458
+  type: 'test'
+  ...
+# Subtest: keeps non-matching activity narration
+ok 7 - keeps non-matching activity narration
+  ---
+  duration_ms: 0.082125
+  type: 'test'
+  ...
+# Subtest: isThinkingActivityStep exposes running reasoning as a visible step
+ok 8 - isThinkingActivityStep exposes running reasoning as a visible step
+  ---
+  duration_ms: 1.534125
+  type: 'test'
+  ...
+# Subtest: isThinkingActivityStep does not keep completed reasoning live
+ok 9 - isThinkingActivityStep does not keep completed reasoning live
+  ---
+  duration_ms: 0.167583
+  type: 'test'
+  ...
+# Subtest: thinkingActivityText falls back to mobile thinking label
+ok 10 - thinkingActivityText falls back to mobile thinking label
+  ---
+  duration_ms: 0.0845
+  type: 'test'
+  ...
+# Subtest: parseUnifiedDiffLines classifies apply_patch hunks without line numbers
+ok 11 - parseUnifiedDiffLines classifies apply_patch hunks without line numbers
+  ---
+  duration_ms: 2.846625
+  type: 'test'
+  ...
+# Subtest: parseUnifiedDiffLines keeps standard unified diff line numbers
+ok 12 - parseUnifiedDiffLines keeps standard unified diff line numbers
+  ---
+  duration_ms: 1.600792
+  type: 'test'
+  ...
+# Subtest: mergeActivityStep collapses duplicate thinking labels for one turn
+ok 13 - mergeActivityStep collapses duplicate thinking labels for one turn
+  ---
+  duration_ms: 1.110917
+  type: 'test'
+  ...
+# Subtest: mergeActivityStep keeps distinct narrative commentary steps
+ok 14 - mergeActivityStep keeps distinct narrative commentary steps
+  ---
+  duration_ms: 0.2775
+  type: 'test'
+  ...
+# Subtest: mergeActivityStep updates the same narrative commentary step by id
+ok 15 - mergeActivityStep updates the same narrative commentary step by id
+  ---
+  duration_ms: 0.736
+  type: 'test'
+  ...
+# Subtest: upsertActivityMessage keeps concrete MCP tool calls with generic status labels
+ok 16 - upsertActivityMessage keeps concrete MCP tool calls with generic status labels
+  ---
+  duration_ms: 7.353125
+  type: 'test'
+  ...
+# Subtest: upsertStatusMessage keeps concrete dynamic tool calls with generic status labels
+ok 17 - upsertStatusMessage keeps concrete dynamic tool calls with generic status labels
+  ---
+  duration_ms: 1.399292
+  type: 'test'
+  ...
+# Subtest: upsertStatusMessage merges desktop turn updates back into the optimistic mobile card
+ok 18 - upsertStatusMessage merges desktop turn updates back into the optimistic mobile card
+  ---
+  duration_ms: 1.303792
+  type: 'test'
+  ...
+# Subtest: upsertActivityMessage also merges desktop activity updates by client turn id
+ok 19 - upsertActivityMessage also merges desktop activity updates by client turn id
+  ---
+  duration_ms: 1.285459
+  type: 'test'
+  ...
+# Subtest: upsertActivityMessage completes standalone context compaction cards
+ok 20 - upsertActivityMessage completes standalone context compaction cards
+  ---
+  duration_ms: 0.408042
+  type: 'test'
+  ...
+# Subtest: upsertActivityMessage does not lock turn card completion time from an intermediate tool
+ok 21 - upsertActivityMessage does not lock turn card completion time from an intermediate tool
+  ---
+  duration_ms: 0.546708
+  type: 'test'
+  ...
+# Subtest: completeActivityMessagesForTurn marks running activity steps completed
+ok 22 - completeActivityMessagesForTurn marks running activity steps completed
+  ---
+  duration_ms: 0.5875
+  type: 'test'
+  ...
+# Subtest: completeActivityMessagesForTurn uses full turn timing over stale short activity timing
+ok 23 - completeActivityMessagesForTurn uses full turn timing over stale short activity timing
+  ---
+  duration_ms: 0.097708
+  type: 'test'
+  ...
+# Subte
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:17Z)**_
+
+测试在跑，前半段已经覆盖到新的 activity 合并、PWA 更新、headless/desktop 路由和 compact 流程，暂时全绿。我等完整结果出来再继续构建。
+
+_**Agent (gpt-5.5 2026-05-14 11:10:17Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 5366e5
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 7730
+Output:
+# Subtest: resolveAppServerTransport is strict and unavailable without a desktop socket
+ok 232 - resolveAppServerTransport is strict and unavailable without a desktop socket
+  ---
+  duration_ms: 1.904917
+  type: 'test'
+  ...
+# Subtest: resolveAppServerTransport only allows isolated app-server behind an explicit dev flag
+ok 233 - resolveAppServerTransport only allows isolated app-server behind an explicit dev flag
+  ---
+  duration_ms: 0.372542
+  type: 'test'
+  ...
+# Subtest: resolveAppServerTransport can use a headless local fallback when explicitly allowed
+ok 234 - resolveAppServerTransport can use a headless local fallback when explicitly allowed
+  ---
+  duration_ms: 0.091458
+  type: 'test'
+  ...
+# Subtest: updateRootTomlAssignments replaces root model settings without touching project tables
+ok 235 - updateRootTomlAssignments replaces root model settings without touching project tables
+  ---
+  duration_ms: 1.244208
+  type: 'test'
+  ...
+# Subtest: updateRootTomlAssignments inserts missing settings before the first table
+ok 236 - updateRootTomlAssignments inserts missing settings before the first table
+  ---
+  duration_ms: 0.242875
+  type: 'test'
+  ...
+# Subtest: normalizeCodexThreadModelSettingsRow exposes desktop per-thread model settings
+ok 237 - normalizeCodexThreadModelSettingsRow exposes desktop per-thread model settings
+  ---
+  duration_ms: 2.59975
+  type: 'test'
+  ...
+# Subtest: modelSettingsKey scopes thread-specific settings by session id
+ok 238 - modelSettingsKey scopes thread-specific settings by session id
+  ---
+  duration_ms: 0.124041
+  type: 'test'
+  ...
+# Subtest: registerProjectlessThread preserves concurrent registrations in global state
+ok 239 - registerProjectlessThread preserves concurrent registrations in global state
+  ---
+  duration_ms: 67.07375
+  type: 'test'
+  ...
+# Subtest: messagesFromDesktopThread preserves running desktop file activity
+ok 240 - messagesFromDesktopThread preserves running desktop file activity
+  ---
+  duration_ms: 5.857125
+  type: 'test'
+  ...
+# Subtest: messagesFromDesktopThread keeps the activity container running between completed desktop steps
+ok 241 - messagesFromDesktopThread keeps the activity container running between completed desktop steps
+  ---
+  duration_ms: 0.350333
+  type: 'test'
+  ...
+# Subtest: messagesFromDesktopThread uses mobile labels for completed desktop command activity
+ok 242 - messagesFromDesktopThread uses mobile labels for completed desktop command activity
+  ---
+  duration_ms: 0.54
+  type: 'test'
+  ...
+# Subtest: messagesFromDesktopThread keeps desktop turn duration as activity summary time
+ok 243 - messagesFromDesktopThread keeps desktop turn duration as activity summary time
+  ---
+  duration_ms: 28.429375
+  type: 'test'
+  ...
+# Subtest: messagesFromDesktopThread derives activity duration from item timing when turn has none
+ok 244 - messagesFromDesktopThread derives activity duration from item timing when turn has none
+  ---
+  duration_ms: 9.450792
+  type: 'test'
+  ...
+# Subtest: messagesFromDesktopThread marks steered user messages inside the same turn
+ok 245 - messagesFromDesktopThread marks steered user messages inside the same turn
+  ---
+  duration_ms: 1.198708
+  type: 'test'
+  ...
+# Subtest: raw desktop activities are inserted next to their matching steered user segment
+ok 246 - raw desktop activities are inserted next to their matching steered user segment
+  ---
+  duration_ms: 0.7995
+  type: 'test'
+  ...
+# Subtest: completed raw desktop activities create terminal activity containers
+ok 247 - completed raw desktop activities create terminal activity containers
+  ---
+  duration_ms: 0.449959
+  type: 'test'
+  ...
+# Subtest: removeFallbackActivitiesCoveredByRaw removes empty fallback containers
+ok 248 - removeFallbackActivitiesCoveredByRaw removes empty fallback containers
+  ---
+  duration_ms: 0.768
+  type: 'test'
+  ...
+# Subtest: upsertDesktopActivity lets desktop completion replace running timing
+ok 249 - upsertDesktopActivity lets desktop completion replace running timing
+  ---
+  duration_ms: 1.127917
+  type: 'test'
+  ...
+# Subtest: messagesFromDesktopThread renders desktop plans and implementation requests as standalone messages
+ok 250 - messagesFromDesktopThread renders desktop plans and implementation requests as standalone messages
+  ---
+  duration_ms: 3.917792
+  type: 'test'
+  ...
+# Subtest: messagesFromDesktopThread synthesizes a plan request when desktop exposes only the plan item
+ok 251 - messagesFromDesktopThread synthesizes a plan request when desktop exposes only the plan item
+  ---
+  duration_ms: 1.205042
+  type: 'test'
+  ...
+# Subtest: messagesFromDesktopThread converts proposed plan final answers into plan UI messages
+ok 252 - messagesFromDesktopThread converts proposed plan final answers into plan UI messages
+  ---
+  duration_ms: 0.728
+  type: 'test'
+  ...
+# Subtest: messagesFromDesktopThread renders internal im
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:20Z)**_
+
+全量测试完成：374 个测试全绿。现在跑生产构建和 smoke，确认这次 release 的构建产物和本机桥接都没问题。
+
+_**Agent (gpt-5.5 2026-05-14 11:10:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run build`</summary>
+```
+Chunk ID: cf6d23
+Wall time: 1.0013 seconds
+Process running with session ID 65200
+Original token count: 37
+Output:
+
+> codexmobile@1.4.0 build
+> vite build --config client/vite.config.js
+
+vite v7.3.2 building client environment for production...
+transforming...
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:24Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: f73464
+Wall time: 5.0007 seconds
+Process running with session ID 65200
+Original token count: 19
+Output:
+✓ 4008 modules transformed.
+rendering chunks...
+computing gzip size...
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:32Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 2b8e58
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1304
+Output:
+dist/assets/manifest-DkwGc9r2.webmanifest                 0.66 kB
+dist/index.html                                           2.01 kB │ gzip:   0.89 kB
+dist/assets/pdf.worker-B1D2UnXD.mjs                   2,161.15 kB
+dist/assets/index-DujLFYV7.css                          111.94 kB │ gzip:  19.65 kB
+dist/assets/channel-CA0yLgda.js                           0.12 kB │ gzip:   0.13 kB
+dist/assets/init-Gi6I4Gst.js                              0.15 kB │ gzip:   0.13 kB
+dist/assets/chunk-QZHKN3VN-J0EtQSVT.js                    0.19 kB │ gzip:   0.16 kB
+dist/assets/chunk-4BX2VUAB-Bnq1CUNA.js                    0.23 kB │ gzip:   0.17 kB
+dist/assets/chunk-55IACEB6-DI8rnU8T.js                    0.24 kB │ gzip:   0.21 kB
+dist/assets/chunk-FMBD7UC4-BbUXShcg.js                    0.37 kB │ gzip:   0.27 kB
+dist/assets/stateDiagram-v2-BHNVJYJU-tL_tR9Z2.js          0.39 kB │ gzip:   0.29 kB
+dist/assets/classDiagram-4FO5ZUOK-BSFK6Kil.js             0.47 kB │ gzip:   0.32 kB
+dist/assets/classDiagram-v2-Q7XG4LA2-BSFK6Kil.js          0.47 kB │ gzip:   0.32 kB
+dist/assets/chunk-2J33WTMH-ZObbdBnp.js                    0.51 kB │ gzip:   0.36 kB
+dist/assets/infoDiagram-5YYISTIA-LIskhwnJ.js              0.59 kB │ gzip:   0.40 kB
+dist/assets/ordinal-Cboi1Yqb.js                           1.19 kB │ gzip:   0.57 kB
+dist/assets/chunk-ND2GUHAM-Bu6_olkj.js                    1.88 kB │ gzip:   0.83 kB
+dist/assets/diagram-5GNKFQAL-DW3FVtsf.js                  2.75 kB │ gzip:   1.36 kB
+dist/assets/arc-DPg9Y6rT.js                               3.44 kB │ gzip:   1.49 kB
+dist/assets/diagram-LMA3HP47-ByOigatT.js                  4.21 kB │ gzip:   1.83 kB
+dist/assets/defaultLocale-DX6XiGOO.js                     4.69 kB │ gzip:   2.18 kB
+dist/assets/pieDiagram-4H26LBE5-D9hgLA9O.js               5.27 kB │ gzip:   2.34 kB
+dist/assets/linear-CAujUxWi.js                            5.66 kB │ gzip:   2.31 kB
+dist/assets/diagram-2AECGRRQ-CV5YyhIx.js                  5.81 kB │ gzip:   2.46 kB
+dist/assets/stateDiagram-AJRCARHV-Dpx5nN34.js            10.36 kB │ gzip:   3.62 kB
+dist/assets/diagram-KO2AKTUF-DwnQo7TD.js                 10.72 kB │ gzip:   4.14 kB
+dist/assets/dagre-BM42HDAG-BZhZxbba.js                   11.14 kB │ gzip:   4.11 kB
+dist/assets/diagram-OG6HWLK6-DfkXDRdk.js                 15.81 kB │ gzip:   5.66 kB
+dist/assets/ishikawaDiagram-YF4QCWOH-C-zIF8lM.js         17.47 kB │ gzip:   6.65 kB
+dist/assets/kanban-definition-UN3LZRKU-BzK0Y_Yw.js       20.29 kB │ gzip:   7.20 kB
+dist/assets/mindmap-definition-RKZ34NQL-C-5PjOOE.js      23.18 kB │ gzip:   7.82 kB
+dist/assets/sankeyDiagram-5OEKKPKP-DU14XSsx.js           23.20 kB │ gzip:   8.56 kB
+dist/assets/journeyDiagram-JHISSGLW-C_sdGuLh.js          23.57 kB │ gzip:   8.35 kB
+dist/assets/graph--OzhPTMs.js                            23.92 kB │ gzip:   8.32 kB
+dist/assets/wardleyDiagram-YWT4CUSO-4JhgK8om.js          25.50 kB │ gzip:   6.79 kB
+dist/assets/erDiagram-TEJ5UH35-Dr-6gaWF.js               26.86 kB │ gzip:   9.34 kB
+dist/assets/gitGraphDiagram-PVQCEYII-Dd8XKlhM.js         29.42 kB │ gzip:   8.70 kB
+dist/assets/timeline-definition-PNZ67QCA-C_yt3AVc.js     30.83 kB │ gzip:  10.15 kB
+dist/assets/requirementDiagram-4Y6WPE33-DM2EEDTF.js      31.00 kB │ gzip:   9.74 kB
+dist/assets/quadrantDiagram-W4KKPZXB-CraUhHCi.js         34.02 kB │ gzip:   9.98 kB
+dist/assets/layout-SsrduOYp.js                           35.84 kB │ gzip:  12.87 kB
+dist/assets/chunk-AQP2D5EJ-D8-xj1v2.js                   37.11 kB │ gzip:  12.11 kB
+dist/assets/xychartDiagram-2RQKCTM6-C5rrsKly.js          40.39 kB │ gzip:  11.56 kB
+dist/assets/vennDiagram-CIIHVFJN-SBdKKYSh.js             41.43 kB │ gzip:  15.47 kB
+dist/assets/chunk-727SXJPM-aJIN5F4K.js                   48.94 kB │ gzip:  15.70 kB
+dist/assets/flowDiagram-I6XJVG4X-Cs_y8tu2.js             60.50 kB │ gzip:  19.37 kB
+dist/assets/ganttDiagram-6RSMTGT7-DglMb6Yr.js            69.57 kB │ gzip:  23.48 kB
+dist/assets/c4Diagram-AAUBKEIU-CBIe_hlY.js               69.94 kB │ gzip:  19.63 kB
+dist/assets/blockDiagram-GPEHLZMM-BeWP7r_q.js            73.53 kB │ gzip:  21.22 kB
+dist/assets/cose-bilkent-S5V4N54A-CfSW1ARh.js            81.70 kB │ gzip:  22.47 kB
+dist/assets/sequenceDiagram-3UESZ5HK-DuCgtR8E.js        116.87 kB │ gzip:  31.04 kB
+dist/assets/architectureDiagram-3BPJPVTR-BSk9sH4u.js    149.43 kB │ gzip:  42.18 kB
+dist/assets/katex-DHMw6HUq.js                           259.05 kB │ gzip:  76.99 kB
+dist/assets/cytoscape.esm-DH6-wILU.js                   441.80 kB │ gzip: 141.55 kB
+dist/assets/mermaid.core-BWucYY9z.js                    605.97 kB │ gzip: 144.59 kB
+dist/assets/wardley-L42UT6IY-CnOZrqN4.js                612.51 kB │ gzip: 147.50 kB
+dist/assets/index-TMNaXeze.js                           950.48 kB │ gzip: 292.20 kB
+
+(!) Some chunks are larger than 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run smoke`</summary>
+```
+Chunk ID: 74ce44
+Wall time: 0.2285 seconds
+Process exited with code 0
+Original token count: 33
+Output:
+
+> codexmobile@1.4.0 smoke
+> node scripts/smoke.mjs
+
+Smoke ok: Mac-mini-home.local codex/gpt-5.5 synced=2026-05-14T11:09:04.103Z
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:44Z)**_
+
+构建过了，smoke 也正常；Vite 还是只有大 chunk 提醒，不是失败。现在检查 release 文件范围，然后提交、打 tag、推送。
+
+_**Agent (gpt-5.5 2026-05-14 11:10:44Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff --check`</summary>
+```
+Chunk ID: 3559cd
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:44Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short --branch`</summary>
+```
+Chunk ID: 1e287b
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 19
+Output:
+## main...origin/main
+ M CHANGELOG.md
+ M package-lock.json
+ M package.json
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:44Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff --stat`</summary>
+```
+Chunk ID: 974a0f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 39
+Output:
+ CHANGELOG.md      | 21 +++++++++++++++++++++
+ package-lock.json |  4 ++--
+ package.json      |  2 +-
+ 3 files changed, 24 insertions(+), 3 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:44Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node -e "const p=require('./package.json'); const l=require('./package-lock.json'); console.log(JSON.stringify({pkg:p.version, lock:l.version, root:l.packages&&l.packages['']&&l.packages[''].version}, null, 2))"`</summary>
+```
+Chunk ID: 6a732e
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 15
+Output:
+{
+  "pkg": "1.4.0",
+  "lock": "1.4.0",
+  "root": "1.4.0"
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:48Z)**_
+
+提交前范围很干净：只有 changelog 和两个 package 版本文件，`1.4.0` 三处一致。现在提交 release commit 并创建 tag。
+
+_**Agent (gpt-5.5 2026-05-14 11:10:50Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git add CHANGELOG.md package.json package-lock.json && git commit -m "Release 1.4.0"`</summary>
+```
+Chunk ID: 2a6263
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 20
+Output:
+[main 55f7062] Release 1.4.0
+ 3 files changed, 24 insertions(+), 3 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:54Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git tag v1.4.0 && git status --short --branch && git log --oneline --decorate --max-count=5`</summary>
+```
+Chunk ID: a0e2a3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 79
+Output:
+## main...origin/main [ahead 1]
+55f7062 (HEAD -> main, tag: v1.4.0) Release 1.4.0
+7a86eb1 (origin/main, origin/HEAD) Rebrand codex-web as CodexPocket
+e9ce5ee Coalesce activity cards across live and loaded sessions
+9f5aeb8 Stabilize activity card reconciliation
+dbbc7a0 Fold tool groups and desktop handoff UI state
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:10:56Z)**_
+
+本地 release commit 和 `v1.4.0` tag 已完成。接下来推 `main` 和 tag 到 GitHub，然后创建正式 release。
+
+_**Agent (gpt-5.5 2026-05-14 11:10:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git push origin main && git push origin v1.4.0`</summary>
+```
+Chunk ID: de208e
+Wall time: 1.0013 seconds
+Process running with session ID 24470
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:11:01Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 8b06d9
+Wall time: 0.2676 seconds
+Process exited with code 0
+Original token count: 40
+Output:
+To https://github.com/flyyangX/CodexMobile
+   7a86eb1..55f7062  main -> main
+To https://github.com/flyyangX/CodexMobile
+ * [new tag]         v1.4.0 -> v1.4.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:11:04Z)**_
+
+`main` 和 `v1.4.0` 都已经推上去了。我来创建 GitHub Release，并把这版的重点和验证结果写进去。
+
+_**Agent (gpt-5.5 2026-05-14 11:11:09Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `gh release create v1.4.0 --repo flyyangX/CodexMobile --title "CodexMobile 1.4.0" --notes $'## Highlights\n\n- Adds PWA update detection and an in-app update prompt so mobile clients can refresh onto newly deployed builds.\n- Rebrands the former codex-web-facing labels toward CodexPocket.\n- Coalesces live and loaded-session activity cards so duplicated execution cards collapse into one clearer thread view.\n- Folds noisy tool groups and desktop handoff state into cleaner activity and top-bar presentations.\n- Refines mobile workflow handling across composer sends, top-bar status, and desktop/background routing.\n\n## Fixes\n\n- Stabilizes activity-card reconciliation when live runtime state and loaded session history arrive in different orders.\n- Improves service-worker cache handling for built assets during mobile/PWA updates.\n\n## Validation\n\n- `node --test client/src/**/*.test.mjs server/**/*.test.mjs server/**/*.test.js shared/**/*.test.mjs` passed: 374 tests.\n- `npm run build` passed.\n- `npm run smoke` passed.'`</summary>
+```
+Chunk ID: 970d39
+Wall time: 1.0019 seconds
+Process running with session ID 50209
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:11:13Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 42d498
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 15
+Output:
+https://github.com/flyyangX/CodexMobile/releases/tag/v1.4.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:11:19Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short --branch && git log --oneline --decorate --max-count=6`</summary>
+```
+Chunk ID: fec71a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 89
+Output:
+## main...origin/main
+55f7062 (HEAD -> main, tag: v1.4.0, origin/main, origin/HEAD) Release 1.4.0
+7a86eb1 Rebrand codex-web as CodexPocket
+e9ce5ee Coalesce activity cards across live and loaded sessions
+9f5aeb8 Stabilize activity card reconciliation
+dbbc7a0 Fold tool groups and desktop handoff UI state
+f41f6eb Refine CodexMobile UI and workflow handling
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:11:19Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `gh release view v1.4.0 --repo flyyangX/CodexMobile --json tagName,name,url,isDraft,isPrerelease,publishedAt`</summary>
+```
+Chunk ID: 170206
+Wall time: 0.7721 seconds
+Process exited with code 0
+Original token count: 48
+Output:
+{"isDraft":false,"isPrerelease":false,"name":"CodexMobile 1.4.0","publishedAt":"2026-05-14T11:11:11Z","tagName":"v1.4.0","url":"https://github.com/flyyangX/CodexMobile/releases/tag/v1.4.0"}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:11:19Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git ls-remote --tags origin v1.4.0`</summary>
+```
+Chunk ID: bd42bf
+Wall time: 0.6305 seconds
+Process exited with code 0
+Original token count: 15
+Output:
+55f70627ae219016d0123f02d4867425a3142e95	refs/tags/v1.4.0
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 11:11:30Z)**_
+
+发布好了，新的正式版本是 `v1.4.0`。
+
+`main` 已推到 GitHub，提交是 `55f7062 Release 1.4.0`，tag `v1.4.0` 也已推上去。Release 链接：[`CodexMobile 1.4.0`](https://github.com/flyyangX/CodexMobile/releases/tag/v1.4.0)。
+
+这版主要包含：PWA 更新提示、CodexPocket 品牌调整、activity 卡片合并与折叠、桌面接管状态优化、composer/topbar/desktop-background 路由体验抛光。
+
+验证已过：
+- `node --test ...`：374 个测试通过
+- `npm run build`：通过
+- `npm run smoke`：通过
+
+现在本地 `main` 和 `origin/main` 对齐，工作区干净。
+
+::git-stage{cwd="/Users/xiayanghui/编程项目/CodexMobile"}
+::git-commit{cwd="/Users/xiayanghui/编程项目/CodexMobile"}
+::git-push{cwd="/Users/xiayanghui/编程项目/CodexMobile" branch="main"}
+
+
+
+---
+
+_**User (2026-05-14 12:11:54Z)**_
+
+我们这次的版本都有哪些内容
+
+---
+
+_**Agent (gpt-5.5 2026-05-14 12:12:08Z)**_
+
+这次发布的是 `v1.4.0`，核心内容是这些：
+
+**1. PWA 更新机制**
+- 新增 PWA 版本更新检测。
+- 手机端有新构建时，会出现应用内更新提示。
+- 改进 service worker 缓存处理，减少手机端还停在旧版本的问题。
+
+**2. 品牌命名调整**
+- 把原来偏 `codex-web` 的命名和文案往 `CodexPocket` 方向调整。
+- 这是产品定位层面的调整，代码功能也同步适配了一部分展示口径。
+
+**3. Activity 执行卡片优化**
+- 合并 live runtime 和历史 loaded session 里的重复 activity 卡片。
+- 避免同一次执行在聊天里出现两张类似的“处理中 / 已处理”卡。
+- 改进 activity 卡片在不同状态到达顺序下的稳定性。
+
+**4. 工具组和执行过程展示优化**
+- 折叠一些噪音较多的 tool group。
+- 让执行过程、桌面接管状态、topbar 状态更清楚。
+- 减少 UI 上重复展示运行状态的情况。
+
+**5. 桌面接管 / 后台执行流程优化**
+- 优化 composer 发送、topbar 状态、desktop/background 路由之间的衔接。
+- 改进移动端任务和桌面端线程状态不同步时的表现。
+
+**6. 测试覆盖增加**
+- 新增/扩展了 activity card、sync socket、desktop runner status、PWA update 等相关测试。
+- 发布前验证结果：
+  - `374` 个测试通过
+  - `npm run build` 通过
+  - `npm run smoke` 通过
+
+一句话说：这版不是单个功能点，而是把 `CodexPocket/CodexMobile` 的移动端执行体验、PWA 更新、activity 展示和桌面同步状态做了一轮稳定性发布。
+
+---
+
+_**User (2026-05-14 12:13:02Z)**_
+
+你有没有搞错 codexmobile这个项目没有改名成什么pocket吧？
+
+---
+
+_**Agent (gpt-5.5 2026-05-14 12:13:14Z)**_
+
+我先核一下仓库里的实际命名和这次提交范围。这个点不能凭 commit 标题直接下结论。
+
+_**Agent (gpt-5.5 2026-05-14 12:13:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node -e "const p=require('./package.json'); console.log(JSON.stringify({name:p.name, version:p.version, description:p.description}, null, 2))"`</summary>
+```
+Chunk ID: b3a4ca
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 45
+Output:
+{
+  "name": "codexmobile",
+  "version": "1.4.0",
+  "description": "iPhone-first Codex PWA workbench for local sessions, queues, Git, skills, and private-network notifications."
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 12:13:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "CodexPocket|codexpocket|CodexMobile|codex-web" README.md package.json CHANGELOG.md client server shared scripts AGENTS.md --glob '!node_modules/**' --glob '!dist/**'`</summary>
+```
+Chunk ID: 2b3e4a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2689
+Output:
+scripts/start-all.ps1:52:Write-Step "Starting CodexMobile"
+scripts/start-all.ps1:55:  Write-Warning "CodexMobile start command returned a non-zero exit code."
+scripts/start-all.ps1:60:  Write-Host "CodexMobile URL: $env:CODEXMOBILE_PUBLIC_URL"
+scripts/start-all.ps1:62:  Write-Host "CodexMobile URL: https://<your-device>.<your-tailnet>.ts.net:3443/"
+CHANGELOG.md:3:All notable changes to CodexMobile are tracked here.
+CHANGELOG.md:17:- Rebranded the former codex-web-facing labels toward CodexPocket.
+CHANGELOG.md:52:- Added a system theme option so CodexMobile can follow the OS light/dark preference across the main app and file preview flow.
+CHANGELOG.md:87:- Rewrote README to describe CodexMobile as a local Codex mobile workbench rather than a thin upstream UI fork.
+AGENTS.md:1:# CodexMobile — Agent / 开发者约定
+scripts/start-server.mjs:128:  console.log(`CodexMobile is managed by launchd; restarted ${launchdLabel}.`);
+scripts/start-server.mjs:186:      console.log(`Stopped existing CodexMobile server on port ${port}: ${pids.join(', ')}`);
+scripts/start-server.mjs:196:  console.log(`Force-stopped existing CodexMobile server on port ${port}: ${pids.join(', ')}`);
+scripts/start-server.mjs:217:  console.log(`CodexMobile server started in background, pid=${child.pid}`);
+scripts/smoke.mjs:2: * 轻量健康检查：请求本机 CodexMobile /api/status，验证 connected 与 HTTP 成功。
+README.md:1:# CodexMobile
+README.md:3:CodexMobile 是一个面向个人私有化部署的移动端 Codex 工作台。电脑继续作为真正的执行环境，iPhone、Android 手机、平板、折叠屏、备用电脑或任何能打开现代浏览器的设备负责随时接管、追问、查看过程、处理确认、接收完成通知。
+README.md:7:相比只提供远程聊天入口的移动 Codex 工具，CodexMobile 的核心路线是：完全私有化部署、和桌面端无缝同步、保留完整执行过程，并通过 Tailscale 等私有网络实现外网可用。Codex 的对话、执行、确认和续聊可以随时随地接上，不受 App 平台限制，只要浏览器能打开就能使用。
+README.md:17:CodexMobile 要解决的是这些具体问题：
+README.md:30:CodexMobile 的核心形态是 Web/PWA，不绑定某个手机系统或应用商店：
+README.md:39:CodexMobile 和 Remodex 这类项目都在解决“移动端使用 Codex”的问题，但侧重点不同：
+README.md:44:- **外网私有访问**：配合 Tailscale 或 Tailscale Serve，可以在外网安全访问家里或办公室电脑上的 CodexMobile，同时保留本机文件和执行环境。
+README.md:55:| <img src="docs/images/codexmobile-demo-chat-dark.png" width="260" alt="CodexMobile 深色模式对话和工具执行过程" /> | <img src="docs/images/codexmobile-demo-sidebar-dark.png" width="260" alt="CodexMobile 深色模式侧边栏运行状态" /> |
+README.md:59:| <img src="docs/images/codexmobile-demo-chat-light.png" width="260" alt="CodexMobile 浅色模式对话和工具执行过程" /> | <img src="docs/images/codexmobile-demo-sidebar-light.png" width="260" alt="CodexMobile 浅色模式侧边栏运行状态" /> |
+README.md:144:CodexMobile Node.js bridge
+README.md:170:git clone https://github.com/flyyangX/CodexMobile.git
+README.md:171:cd CodexMobile
+README.md:193:CodexMobile 的核心功能通过浏览器即可使用；如果需要后台 Web Push 完成通知，通常需要 HTTPS 安全来源和 PWA 安装环境。iOS 的限制更严格，需要满足这些条件：
+README.md:249:- `CODEXMOBILE_HOME`：CodexMobile 本地状态目录，默认 `.codexmobile/state`
+README.md:336:2. 电脑启动 CodexMobile。
+README.md:341:7. 从主屏 PWA 打开 CodexMobile；如果平台支持 Web Push，再点击“开启完成通知”。
+README.md:343:不建议直接把 CodexMobile 暴露到公网。它默认按单用户、本机信任、私有网络场景设计。
+README.md:347:CodexMobile 参考过同类移动端 Codex 工具在移动 UI、轻量信息流和远程使用体验上的优点，但底层产品路线已经不同：
+scripts/install-macos-autostart.mjs:2: * 安装或卸载 macOS LaunchAgent，使 CodexMobile 在登录后由 run-server.mjs 拉起。
+scripts/install-macos-autostart.mjs:95:      console.log(`Stopped existing CodexMobile server pid=${pid}`);
+scripts/install-macos-autostart.mjs:110:        console.log(`Force-stopped existing CodexMobile server pid=${pid}`);
+scripts/run-server.mjs:51:console.log(`[launchd] CodexMobile run-server starting cwd=${process.cwd()} node=${process.execPath}`);
+server/auth.js:2: * CodexMobile 配对码、设备信任与 Bearer token 校验（HTTP/WebSocket）。
+server/feishu-skills.js:180:    'CodexMobile Feishu/Lark fast skills are enabled for this request.',
+server/index.js:2: * CodexMobile 服务端主入口：装配 HTTP/HTTPS、WebSocket、路由与 Codex 缓存同步。
+server/index.js:825:   
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 12:13:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git show --stat --oneline --no-renames 7a86eb1 -- ':!.specstory/**'`</summary>
+```
+Chunk ID: b6ad4a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 98
+Output:
+7a86eb1 Rebrand codex-web as CodexPocket
+ client/src/activity-model.test.mjs       |  1 +
+ client/src/chat-render-items.test.mjs    | 83 ++++++++++++++++++++++++++++++--
+ client/src/chat/activity-model.js        |  6 +--
+ client/src/chat/chat-render-items.js     | 50 +++++++++++++++++--
+ client/src/session-live-refresh.test.mjs |  1 +
+ 5 files changed, 131 insertions(+), 10 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 12:13:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git show --name-only --oneline 7a86eb1 -- ':!.specstory/**'`</summary>
+```
+Chunk ID: 811377
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 57
+Output:
+7a86eb1 Rebrand codex-web as CodexPocket
+client/src/activity-model.test.mjs
+client/src/chat-render-items.test.mjs
+client/src/chat/activity-model.js
+client/src/chat/chat-render-items.js
+client/src/session-live-refresh.test.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 12:13:24Z)**_
+
+核完了：你这个判断是对的。项目主体没有改名，包名、README、manifest、UI brand 都还是 `CodexMobile`。我之前把 commit 标题里的 “Rebrand codex-web as CodexPocket” 当成了产品改名，这是表述错误。
+
+_**Agent (gpt-5.5 2026-05-14 12:13:31Z)**_
+
+你说得对，我刚才说法不准确。
+
+实际情况是：
+
+- 项目没有改名成 `CodexPocket`
+- `package.json` 还是 `codexmobile`
+- `README.md` 标题还是 `CodexMobile`
+- PWA manifest 还是 `CodexMobile`
+- UI 里品牌名也还是 `CodexMobile`
+
+这次 `v1.4.0` 里所谓的 `CodexPocket`，只来自一个 commit 标题：`Rebrand codex-web as CodexPocket`。但从实际文件看，它没有把整个项目改名，只是调整了内部 chat/activity 渲染里某些 `codex-web` 相关标签或测试口径。我不应该把它总结成“品牌调整为 CodexPocket”。
+
+更准确的 `v1.4.0` 内容应该是：
+
+- PWA 更新检测和应用内更新提示
+- activity 执行卡片合并，减少 live session 和历史 session 重复展示
+- activity 卡片状态稳定性修复
+- 工具组折叠和执行过程展示优化
+- 桌面接管状态、topbar、composer 发送流程优化
+- service worker 缓存处理优化
+- 测试覆盖扩展，发布前 374 个测试通过
+
+我建议把 GitHub Release notes 和 `CHANGELOG.md` 里的这句删掉或改掉：
+
+原来：
+`Rebrands the former codex-web-facing labels toward CodexPocket.`
+
+改成：
+`Refined internal codex-web activity/rendering labels without changing the CodexMobile product name.`
+
+或者更干脆删掉这条，避免误导。

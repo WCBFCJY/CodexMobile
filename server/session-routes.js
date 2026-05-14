@@ -1,7 +1,7 @@
 /**
- * 会话与消息 REST API：列表、重命名、删除、读消息、刷新缓存等。
+ * 会话与消息 REST API：列表、归档箱、重命名、删除、读消息、刷新缓存等。
  *
- * Keywords: session-routes, rest-api, codex-data
+ * Keywords: session-routes, rest-api, archive-box, codex-data
  *
  * Exports:
  * - createSessionRouteHandler — 注入 codex-data 与 chatService 依赖。
@@ -21,6 +21,7 @@ export function createSessionRouteHandler({
   listProjectSessions,
   renameSession,
   deleteSession,
+  listArchivedSessions,
   hideSessionMessage,
   readSessionMessages,
   refreshCodexCache,
@@ -38,6 +39,20 @@ export function createSessionRouteHandler({
 
     if (method === 'GET' && pathname === '/api/projects') {
       sendJson(res, 200, { projects: listProjects() });
+      return true;
+    }
+
+    if (method === 'GET' && pathname === '/api/sessions/archived') {
+      try {
+        const limit = url.searchParams.get('limit');
+        const result = await (listArchivedSessions || (async () => ({ sessions: [], syncedAt: new Date().toISOString(), source: 'none' })))({
+          limit: limit ? Number(limit) : 200
+        });
+        sendJson(res, 200, result);
+      } catch (error) {
+        console.warn(`[sessions] archived list failed: ${error.message}`);
+        sendJson(res, 500, { error: 'Failed to list archived sessions' });
+      }
       return true;
     }
 

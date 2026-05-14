@@ -1,7 +1,7 @@
 /**
  * 主侧栏抽屉：项目 / 会话列表、配额与设置入口、归档与子代理等。
  *
- * Keywords: drawer, sidebar, sessions, projects, settings, desktop-refresh
+ * Keywords: drawer, sidebar, sessions, projects, settings, archive-box, desktop-refresh
  *
  * Exports:
  * - Drawer — 侧栏根组件。
@@ -11,56 +11,14 @@
  * Outward: App 根布局在菜单打开时渲染。
  */
 
-import { Archive, BarChart3, Check, ChevronDown, ChevronLeft, Folder, Loader2, MessageSquare, MoreHorizontal, Pencil, Plus, RefreshCw, Search, Settings, X } from 'lucide-react';
+import { Archive, BarChart3, Check, ChevronDown, Folder, Loader2, MessageSquare, MoreHorizontal, Pencil, Plus, RefreshCw, Search, Settings, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api.js';
 import { setClientRuntimeDebugEnabled } from '../app/runtime-debug-client.js';
 import { compactPath, formatTime, sessionRunBadgeState, subAgentSubtitle } from '../app/session-utils.js';
-
-function quotaPercent(value) {
-  const percent = Number(value);
-  if (!Number.isFinite(percent)) {
-    return null;
-  }
-  return Math.max(0, Math.min(100, percent));
-}
-
-function quotaRemainingPercent(quotaWindow) {
-  if (!quotaWindow || typeof quotaWindow !== 'object') {
-    return null;
-  }
-  const display = quotaPercent(quotaWindow.displayPercent ?? quotaWindow.display_percent);
-  if (display !== null) {
-    return display;
-  }
-  const explicit = quotaPercent(quotaWindow.remainingPercent ?? quotaWindow.remaining_percent);
-  if (explicit !== null) {
-    return explicit;
-  }
-  const used = quotaPercent(quotaWindow.usedPercent ?? quotaWindow.used_percent);
-  return used === null ? null : Math.max(0, Math.min(100, 100 - used));
-}
-
-function formatQuotaPercent(quotaWindow) {
-  const percent = quotaRemainingPercent(quotaWindow);
-  return percent === null ? '--' : `${Math.round(percent)}%`;
-}
-
-function quotaToneClass(percent) {
-  if (percent === null) {
-    return 'is-low';
-  }
-  if (percent >= 80) {
-    return 'is-healthy';
-  }
-  if (percent >= 60) {
-    return 'is-medium';
-  }
-  if (percent >= 40) {
-    return 'is-warning';
-  }
-  return 'is-low';
-}
+import { DrawerArchiveView } from './DrawerArchiveView.jsx';
+import { DrawerQuotaPanel } from './DrawerQuotaPanel.jsx';
+import { DrawerSettingsView } from './DrawerSettingsView.jsx';
 
 function formatRelativeShort(value) {
   if (!value) {
@@ -129,7 +87,14 @@ export function Drawer({
   const [runtimeDebugSaving, setRuntimeDebugSaving] = useState(false);
   const [desktopRefreshError, setDesktopRefreshError] = useState('');
   const [desktopRefreshSaving, setDesktopRefreshSaving] = useState(false);
+  const [archivedSessions, setArchivedSessions] = useState([]);
+  const [archiveLoading, setArchiveLoading] = useState(false);
+  const [archiveLoaded, setArchiveLoaded] = useState(false);
+  const [archiveError, setArchiveError] = useState('');
+  const [archiveSyncedAt, setArchiveSyncedAt] = useState('');
+  const [archiveSource, setArchiveSource] = useState('');
   const normalizedDrawerQuery = drawerQuery.trim().toLowerCase();
+  const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
   const runningCount = Object.values(sessionsByProject || {})
     .flatMap((sessions) => (Array.isArray(sessions) ? sessions : []))
     .filter((session) => sessionRunBadgeState(session, { runningById, threadRuntimeById, completedSessionIds }) === 'running')
@@ -300,101 +265,81 @@ export function Drawer({
     }
   }
 
+  async function loadArchivedSessions({ force = false } = {}) {
+    if (archiveLoading || (archiveLoaded && !force)) {
+      return;
+    }
+    setArchiveLoading(true);
+    setArchiveError('');
+    try {
+      const data = await apiFetch('/api/sessions/archived?limit=200');
+      setArchivedSessions(Array.isArray(data.sessions) ? data.sessions : []);
+      setArchiveSyncedAt(data.syncedAt || '');
+      setArchiveSource(data.source || '');
+      setArchiveLoaded(true);
+    } catch (error) {
+      setArchiveError(error.message || '归档箱同步失败');
+      setArchiveLoaded(true);
+    } finally {
+      setArchiveLoading(false);
+    }
+  }
+
+  function openArchiveBox() {
+    setDrawerView('archive');
+    loadArchivedSessions().catch(() => null);
+  }
+
+  function openArchivedSession(session) {
+    if (!session?.id) {
+      return;
+    }
+    setThreadActionMenu(null);
+    onSelectSession({
+      ...session,
+      archived: true,
+      draft: false,
+      projectId: session.projectId || `archived:${session.projectPath || 'unknown'}`
+    });
+  }
+
+  if (drawerView === 'archive') {
+    return (
+      <DrawerArchiveView
+        open={open}
+        onClose={onClose}
+        onBack={() => setDrawerView('settings')}
+        onRefresh={() => loadArchivedSessions({ force: true })}
+        archivedSessions={archivedSessions}
+        archiveLoading={archiveLoading}
+        archiveLoaded={archiveLoaded}
+        archiveError={archiveError}
+        archiveSyncedAt={archiveSyncedAt}
+        archiveSource={archiveSource}
+        onOpenSession={openArchivedSession}
+      />
+    );
+  }
+
   if (drawerView === 'settings') {
     return (
-      <>
-        <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
-        <aside className={`drawer ${open ? 'is-open' : ''}`}>
-          <div className="drawer-subheader">
-            <button className="icon-button" onClick={() => setDrawerView('main')} aria-label="返回">
-              <ChevronLeft size={22} />
-            </button>
-            <strong>设置</strong>
-            <button className="icon-button" onClick={onClose} aria-label="关闭菜单">
-              <X size={20} />
-            </button>
-          </div>
-          <div className="settings-view">
-            <section className="settings-group">
-              <div className="drawer-heading">外观</div>
-              <div className="theme-setting">
-                <div className="theme-setting-title">
-                  <span>主题选择</span>
-                </div>
-                <div className="theme-segment" role="group" aria-label="主题选择">
-                  <button
-                    type="button"
-                    className={theme === 'light' ? 'is-selected' : ''}
-                    onClick={() => setTheme('light')}
-                  >
-                    白色
-                  </button>
-                  <button
-                    type="button"
-                    className={theme === 'dark' ? 'is-selected' : ''}
-                    onClick={() => setTheme('dark')}
-                  >
-                    黑色
-                  </button>
-                  <button
-                    type="button"
-                    className={theme === 'system' ? 'is-selected' : ''}
-                    onClick={() => setTheme('system')}
-                  >
-                    跟随系统
-                  </button>
-                </div>
-              </div>
-            </section>
-            <section className="settings-group">
-              <div className="drawer-heading">开发与排查</div>
-              <div className="theme-setting">
-                <label className="setting-row">
-                  <span>运行态调试日志</span>
-                  <input
-                    type="checkbox"
-                    checked={Boolean(runtimeDebug?.uiEnabled)}
-                    disabled={runtimeDebugSaving}
-                    onChange={handleRuntimeDebugToggle}
-                  />
-                </label>
-                <div className="theme-setting-title">
-                  <small>
-                    开启后服务端把运行态事件写入项目下的 {runtimeDebug?.logRelativePath || '.codexmobile/logs/runtime-debug.jsonl'}
-                    （JSONL）；助手读取仓库时可直接打开该文件。浏览器控制台会同步输出 [runtime-debug][client]。
-                  </small>
-                  {runtimeDebug?.envEnabled ? (
-                    <small>已通过环境变量 CODEXMOBILE_RUNTIME_DEBUG 启用（与本开关可同时生效）。</small>
-                  ) : null}
-                  {runtimeDebugError ? <small className="runtime-debug-error">{runtimeDebugError}</small> : null}
-                </div>
-              </div>
-              <div className="theme-setting">
-                <label className="setting-row">
-                  <span>实验性桌面自动刷新</span>
-                  <input
-                    type="checkbox"
-                    checked={Boolean(desktopRefresh?.enabled)}
-                    disabled={desktopRefreshSaving || !desktopRefresh?.supported}
-                    onChange={handleDesktopRefreshToggle}
-                  />
-                </label>
-                <div className="theme-setting-title">
-                  <small>
-                    开启后，手机端 headless-local 任务完成时会尝试让 Codex.app 先打开设置页再回到目标线程，用 route bounce 强制重挂载当前线程。
-                  </small>
-                  <small>
-                    这是临时 workaround，可能抢桌面焦点或切换当前页面；默认关闭，只建议你想观察桌面自动跟随刷新时开启。
-                  </small>
-                  {!desktopRefresh?.supported ? <small>仅 macOS 上的 Codex.app 支持。</small> : null}
-                  {desktopRefresh?.lastError ? <small>上次触发失败：{desktopRefresh.lastError}</small> : null}
-                  {desktopRefreshError ? <small className="runtime-debug-error">{desktopRefreshError}</small> : null}
-                </div>
-              </div>
-            </section>
-          </div>
-        </aside>
-      </>
+      <DrawerSettingsView
+        open={open}
+        onClose={onClose}
+        onBack={() => setDrawerView('main')}
+        theme={theme}
+        setTheme={setTheme}
+        onOpenArchiveBox={openArchiveBox}
+        runtimeDebug={runtimeDebug}
+        runtimeDebugSaving={runtimeDebugSaving}
+        runtimeDebugError={runtimeDebugError}
+        onRuntimeDebugToggle={handleRuntimeDebugToggle}
+        desktopRefresh={desktopRefresh}
+        desktopRefreshSaving={desktopRefreshSaving}
+        desktopRefreshError={desktopRefreshError}
+        onDesktopRefreshToggle={handleDesktopRefreshToggle}
+        appVersion={appVersion}
+      />
     );
   }
 
@@ -640,81 +585,14 @@ export function Drawer({
         </div>
 
         {quotaExpanded ? (
-          <div className="quota-panel">
-            <div className="quota-panel-head">
-              <span>额度查询 · Codex</span>
-              <button
-                type="button"
-                className="quota-refresh"
-                onClick={refreshCodexQuota}
-                disabled={quotaLoading}
-              >
-                {quotaLoading ? <Loader2 className="spin" size={12} /> : null}
-                {quotaLoading ? '刷新中' : '刷新'}
-              </button>
-            </div>
-            {quotaError ? (
-              <button type="button" className="quota-error" onClick={refreshCodexQuota}>
-                {quotaError}
-              </button>
-            ) : null}
-            {!quotaError && quotaNotice ? (
-              <button type="button" className="quota-error" onClick={refreshCodexQuota}>
-                {quotaNotice}，点击刷新
-              </button>
-            ) : null}
-            {!quotaError && quotaAccounts.length ? (
-              quotaAccounts.map((account) => {
-                const windows = Array.isArray(account.windows) ? account.windows : [];
-                const accountStatus = account.status || 'ok';
-                const plan = account.plan || 'Codex';
-                return (
-                  <div key={account.id} className={`quota-account is-${accountStatus}`}>
-                    <div className="quota-account-head">
-                      <span>{account.label || 'Codex'}</span>
-                      <small>{plan}</small>
-                    </div>
-                    {accountStatus === 'ok' && windows.length ? (
-                      <div className="quota-window-list">
-                        {windows.map((quotaWindow) => {
-                          const percent = quotaRemainingPercent(quotaWindow);
-                          return (
-                            <div
-                              key={quotaWindow.id}
-                              className={`quota-window ${quotaToneClass(percent)}`}
-                              style={{ '--quota-percent': `${percent ?? 0}%` }}
-                            >
-                              <div className="quota-window-meta">
-                                <span>{quotaWindow.label}</span>
-                                <strong>{formatQuotaPercent(quotaWindow)}</strong>
-                              </div>
-                              <div className="quota-bar">
-                                <span />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        className="quota-account-message"
-                        onClick={accountStatus === 'failed' ? refreshCodexQuota : undefined}
-                      >
-                        {accountStatus === 'disabled' ? '已停用' : `${account.error || '查询失败'}，点击刷新重试`}
-                      </button>
-                    )}
-                  </div>
-                );
-              })
-            ) : null}
-            {!quotaLoading && !quotaError && quotaLoaded && !quotaAccounts.length ? (
-              <div className="quota-empty">暂无 Codex 凭证</div>
-            ) : null}
-            {!quotaLoading && !quotaError && !quotaLoaded ? (
-              <div className="quota-empty">点击右上角刷新查询额度</div>
-            ) : null}
-          </div>
+          <DrawerQuotaPanel
+            quotaLoading={quotaLoading}
+            quotaLoaded={quotaLoaded}
+            quotaError={quotaError}
+            quotaNotice={quotaNotice}
+            quotaAccounts={quotaAccounts}
+            onRefresh={refreshCodexQuota}
+          />
         ) : null}
 
         <footer className="drawer-footer">

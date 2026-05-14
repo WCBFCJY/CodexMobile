@@ -210,8 +210,9 @@ async function sessionFromDesktopThread({
   }
   const mobileSession = mobileSessionIndex.get(thread.id);
   const hasDesktopCwd = typeof thread.cwd === 'string' && thread.cwd.trim();
+  const mobileMarkedProjectless = Boolean(mobileSession?.projectless);
   const projectlessRegistered = projectlessThreadIds.has(thread.id);
-  const explicitProjectless = !hasDesktopCwd && (projectlessRegistered || Boolean(mobileSession?.projectless));
+  const explicitProjectless = !hasDesktopCwd && (projectlessRegistered || mobileMarkedProjectless);
   const cwd = thread.cwd || mobileSession?.projectPath || (explicitProjectless ? projectlessWorkdir : '');
   if (!cwd && !explicitProjectless) {
     return null;
@@ -220,6 +221,7 @@ async function sessionFromDesktopThread({
   const projectId = projectIdFor(resolvedCwd);
   const projectless =
     explicitProjectless ||
+    mobileMarkedProjectless ||
     (projectlessRegistered && isDocumentsCodexConversationPath(resolvedCwd, homeDir));
   const preview = sanitizeVisibleUserMessage(thread.preview || mobileSession?.summary || '');
   const mobileTitle = String(mobileSession?.title || '').trim();

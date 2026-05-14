@@ -6,7 +6,7 @@
  * Exports:
  * - ChatPane — 包裹 ChatMessage 列表与底部对齐逻辑。
  *
- * Inward: ../chat-scroll.js、ChatMessage.jsx、chat-render-items、activity-model。
+ * Inward: ../chat-scroll.js、ChatMessage.jsx、ActivityLiveProgress、chat-render-items。
  *
  * Outward: App.jsx
  */
@@ -15,8 +15,8 @@ import { AlertCircle, ArrowDown, Loader2, ShieldCheck } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { isNearChatBottom, shouldFollowChatOutput } from '../chat-scroll.js';
 import { ActivityFileSummary } from './ActivityFileSummary.jsx';
+import { ActivityLiveProgress } from './ActivityLiveProgress.jsx';
 import { ChatMessage } from './ChatMessage.jsx';
-import { latestActivityMessageIdForRuntime } from './activity-model.js';
 import { chatRenderItems } from './chat-render-items.js';
 
 export function ChatPane({
@@ -25,7 +25,6 @@ export function ChatPane({
   loading = false,
   loadError = '',
   running,
-  activeRunKeys = [],
   activeRuntimeStartedAt = null,
   now,
   onPreviewImage,
@@ -41,13 +40,7 @@ export function ChatPane({
   const hasMessages = messages.length > 0;
   const sessionId = selectedSession?.id || '';
   const pinnedBeforeRender = bottomPinnedRef.current;
-  const activeActivityMessageId = latestActivityMessageIdForRuntime(messages, {
-    running,
-    activeRunKeys,
-    runtimeStartedAt: activeRuntimeStartedAt
-  });
-  const forceOpenActivityMessageId = activeActivityMessageId;
-  const renderItems = chatRenderItems(messages, { activeActivityMessageId });
+  const renderItems = chatRenderItems(messages, { running });
 
   const scrollToBottom = useCallback((behavior = 'auto') => {
     const pane = paneRef.current;
@@ -164,13 +157,22 @@ export function ChatPane({
               </div>
             );
           }
+          if (item.type === 'liveActivity') {
+            return (
+              <ActivityLiveProgress
+                key={item.key}
+                message={item.message}
+                running={running}
+                startedAt={activeRuntimeStartedAt}
+                now={now}
+              />
+            );
+          }
           return (
             <ChatMessage
               key={item.key}
               message={item.message}
               now={now}
-              activeActivityMessageId={activeActivityMessageId}
-              forceOpenActivityMessageId={forceOpenActivityMessageId}
               afterContent={item.fileSummaries?.map((summary, index) => (
                 <ActivityFileSummary key={`${item.key}-file-summary-${index}`} summary={summary} />
               ))}

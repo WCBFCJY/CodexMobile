@@ -247,6 +247,50 @@ test('session index builder keeps unknown cwd and projectless subagents out of n
   assert.equal(index.sessionById.has('plain-child'), false);
 });
 
+test('session index builder trusts mobile projectless marker when desktop jsonl has a temporary cwd', async () => {
+  const projectA = '/tmp/codexmobile-project-a';
+  const projectlessCwd = '/tmp/home/Documents/Codex/2026-05-14/mobile-chat-test';
+
+  const index = await buildSessionIndex({
+    config: {
+      projects: [{ path: projectA, trustLevel: 'trusted' }]
+    },
+    workspaceState: {
+      projects: [{ path: projectA, label: 'Alpha' }],
+      projectlessThreadIds: [],
+      threadWorkspaceRootHints: {}
+    },
+    mobileSessionIndex: new Map([
+      ['mobile-projectless-1', {
+        projectPath: projectlessCwd,
+        projectless: true,
+        title: '移动端普通对话',
+        summary: '移动端创建的普通对话',
+        messages: [{ id: 'm1' }]
+      }]
+    ]),
+    desktopThreads: [
+      {
+        id: 'mobile-projectless-1',
+        cwd: projectlessCwd,
+        name: '',
+        preview: '移动端创建的普通对话',
+        updatedAt: 1_800_000_010,
+        path: '/tmp/mobile-projectless-1.jsonl',
+        source: 'vscode'
+      }
+    ],
+    pathExists: () => true,
+    homeDir: () => '/tmp/home'
+  });
+
+  const projectlessSessions = index.sessionsByProject.get(PROJECTLESS_PROJECT_ID) || [];
+
+  assert.deepEqual(projectlessSessions.map((session) => session.id), ['mobile-projectless-1']);
+  assert.equal(index.projectById.get(PROJECTLESS_PROJECT_ID).sessionCount, 1);
+  assert.equal(index.sessionById.get('mobile-projectless-1').projectId, PROJECTLESS_PROJECT_ID);
+});
+
 test('session index builder can include missing subagent threads behind the feature flag', async () => {
   const projectA = '/tmp/codexmobile-project-a';
   const projectAId = projectIdFor(projectA);

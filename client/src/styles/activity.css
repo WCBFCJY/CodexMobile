@@ -81,6 +81,59 @@
   backdrop-filter: none;
 }
 
+.activity-live-progress-bubble {
+  width: 100%;
+  max-width: min(100%, 760px);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--text);
+  background: transparent;
+  box-shadow: none;
+}
+
+.activity-live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  margin-bottom: 8px;
+  color: #256f61;
+}
+
+.activity-live-status-dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #10a37f;
+}
+
+.activity-live-status-dot.is-running {
+  animation: activityPulse 1.2s ease-in-out infinite;
+}
+
+.activity-live-status-title,
+.activity-live-status-duration {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.activity-live-status-title {
+  font-weight: 560;
+}
+
+.activity-live-status-duration {
+  color: #667085;
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-live-progress-bubble .activity-timeline {
+  margin-top: 0;
+}
+
 [data-theme="dark"] .activity-timeline {
   background: transparent;
   box-shadow: none;
@@ -203,6 +256,14 @@
 }
 
 [data-theme="dark"] .activity-summary-duration {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .activity-live-status {
+  color: #9be2c7;
+}
+
+[data-theme="dark"] .activity-live-status-duration {
   color: #a1a1aa;
 }
 

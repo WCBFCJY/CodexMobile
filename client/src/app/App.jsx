@@ -168,26 +168,6 @@ export default function App() {
     selectedRuntime?.status === 'queued';
   const selectedRunning = selectedSessionIsRunning({ running });
   const drawerRunningById = syncRunningById;
-  const selectedActiveRunKeys = useMemo(() => {
-    if (!selectedRunning) {
-      return [];
-    }
-    const keys = new Set();
-    if (selectedSession?.id) {
-      keys.add(selectedSession.id);
-    }
-    if (selectedSession?.turnId) {
-      keys.add(selectedSession.turnId);
-    }
-    if (selectedRuntime?.turnId) {
-      keys.add(selectedRuntime.turnId);
-    }
-    if (!keys.size && selectedSession?.id) {
-      keys.add(selectedSession.id);
-    }
-    return [...keys];
-  }, [selectedRunning, selectedRuntime?.turnId, selectedSession?.id, selectedSession?.turnId]);
-
   useEffect(() => {
     loadQueueDrafts(selectedSession).catch(() => null);
   }, [selectedSession?.id]);
@@ -843,7 +823,6 @@ export default function App() {
     loading: sessionLoading,
     loadError: sessionLoadError,
     running: selectedRunning,
-    activeRunKeys: selectedActiveRunKeys,
     activeRuntimeStartedAt: selectedRuntime?.startedAt || selectedRuntime?.updatedAt || null,
     now: activityClockNow,
     onPreviewImage: setPreviewImage,

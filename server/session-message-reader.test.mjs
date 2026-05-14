@@ -216,6 +216,67 @@ test('session message reader merges raw and collaboration activities only when r
   ]);
 });
 
+test('session message reader keeps raw activity container running while rollout runtime is active', async () => {
+  const reader = createSessionMessageReader({
+    readDeletedMessageIds: async () => new Set(),
+    readDesktopThread: async () => ({
+      thread: { id: 'session-1', path: '/tmp/running-rollout.jsonl', turns: [{ id: 'turn-1' }] }
+    }),
+    messagesFromDesktopThread: () => [
+      {
+        id: 'user-1',
+        role: 'user',
+        content: 'run something',
+        timestamp: '2026-05-08T01:00:00.000Z',
+        turnId: 'turn-1',
+        sessionId: 'session-1'
+      }
+    ],
+    readRawSessionActivities: async () => [
+      {
+        turnId: 'turn-1',
+        segmentIndex: 0,
+        activity: {
+          id: 'agent-1',
+          kind: 'agent_message',
+          status: 'completed',
+          label: 'I am checking first',
+          timestamp: '2026-05-08T01:00:01.000Z'
+        }
+      },
+      {
+        turnId: 'turn-1',
+        segmentIndex: 0,
+        activity: {
+          id: 'command-1',
+          kind: 'command_execution',
+          status: 'completed',
+          label: 'Command finished',
+          timestamp: '2026-05-08T01:00:02.000Z'
+        }
+      }
+    ],
+    readDesktopCollabActivities: async () => [],
+    readRolloutContextState: async () => ({
+      sessionId: 'session-1',
+      runtime: {
+        status: 'running',
+        source: 'desktop-thread',
+        sessionId: 'session-1',
+        turnId: 'turn-1'
+      }
+    })
+  });
+
+  const result = await reader.readSessionMessages('session-1', { includeActivity: true });
+  const activity = result.messages.find((message) => message.role === 'activity');
+
+  assert.equal(activity.status, 'running');
+  assert.equal(activity.sessionId, 'session-1');
+  assert.equal(activity.completedAt, null);
+  assert.deepEqual(activity.activities.map((item) => item.status), ['completed', 'completed']);
+});
+
 test('session message reader preserves raw activity segment indices', async () => {
   const upserts = [];
   const reader = createSessionMessageReader({

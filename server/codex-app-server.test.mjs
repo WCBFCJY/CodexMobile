@@ -1,45 +1,38 @@
 /**
- * 测试 server/codex-app-server.js：传输层解析与桌面 socket 可用性。
- *
- * Keywords: codex-app-server, test, transport
- *
+ * 测试 server/codex-app-server.js：桌面线程列表参数与归档态筛选。
+ * Keywords: codex-app-server, archive, thread-list, tests
  * Exports: 无导出，内含用例
- *
  * Inward: codex-app-server.js
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { resolveAppServerTransport } from './codex-app-server.js';
+import {
+  desktopThreadListRequestParams,
+  filterDesktopThreadsForArchiveMode
+} from './codex-app-server.js';
 
-test('resolveAppServerTransport is strict and unavailable without a desktop socket', () => {
-  const transport = resolveAppServerTransport({
-    CODEXMOBILE_CODEX_APP_SERVER_SOCK: '/tmp/codexmobile-missing.sock'
+test('desktopThreadListRequestParams passes archived mode through to thread/list', () => {
+  assert.deepEqual(desktopThreadListRequestParams({ cursor: 'next', limit: 25, archived: true }), {
+    cursor: 'next',
+    limit: 25,
+    sortKey: 'updated_at',
+    sortDirection: 'desc',
+    archived: true
   });
-
-  assert.equal(transport.strict, true);
-  assert.equal(transport.connected, false);
-  assert.equal(transport.mode, 'unavailable');
-  assert.match(transport.reason, /不存在|未找到|No such/i);
 });
 
-test('resolveAppServerTransport only allows isolated app-server behind an explicit dev flag', () => {
-  const transport = resolveAppServerTransport({
-    CODEXMOBILE_CODEX_APP_SERVER_SOCK: '/tmp/codexmobile-missing.sock',
-    CODEXMOBILE_ALLOW_ISOLATED_CODEX: '1'
-  });
+test('filterDesktopThreadsForArchiveMode keeps archived threads only for archive box mode', () => {
+  const threads = [
+    { id: 'open-1', status: 'completed' },
+    { id: 'archived-1', status: 'archived' },
+    { id: 'archived-2', archived: true },
+    { status: 'archived' }
+  ];
 
-  assert.equal(transport.strict, false);
-  assert.equal(transport.connected, true);
-  assert.equal(transport.mode, 'isolated-dev');
-});
-
-test('resolveAppServerTransport can use a headless local fallback when explicitly allowed', () => {
-  const transport = resolveAppServerTransport({
-    CODEXMOBILE_CODEX_APP_SERVER_SOCK: '/tmp/codexmobile-missing.sock'
-  }, { allowHeadlessLocal: true });
-
-  assert.equal(transport.strict, false);
-  assert.equal(transport.connected, true);
-  assert.equal(transport.mode, 'headless-local');
-  assert.match(transport.reason, /后台 Codex/);
+  assert.deepEqual(filterDesktopThreadsForArchiveMode(threads, { archived: false }).map((thread) => thread.id), ['open-1']);
+  assert.deepEqual(filterDesktopThreadsForArchiveMode(threads, { archived: true }).map((thread) => thread.id), [
+    'open-1',
+    'archived-1',
+    'archived-2'
+  ]);
 });

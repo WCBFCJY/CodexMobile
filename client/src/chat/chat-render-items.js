@@ -1,24 +1,21 @@
 /**
- * 聊天消息渲染队列：把运行中过程投影成单流，并把已完成文件变更挂到同轮助手结果下方。
+ * 聊天消息渲染队列：把运行中步骤投影为实时进度，并把完成后的执行记录归档成摘要。
  *
  * Keywords: chat render, activity files, process stream, message order
  *
  * Exports:
- * - chatRenderItems — 生成 ChatPane 可直接渲染的消息/文件卡片条目。
+ * - chatRenderItems — 生成 ChatPane 可直接渲染的消息、实时进度与文件卡片条目。
  * - fileSummaryForActivityMessage — 从单条 activity 消息提取完成后的文件汇总。
- * - projectMessagesForActiveProcess — 运行中只保留一个当前过程流。
  *
  * Inward: activity-card-state、activity-model、activity-timeline-projection。
  *
  * Outward: ChatPane.jsx、chat-render-items.test.mjs。
  */
 
-import { effectiveActivityMessageIsRunning } from './activity-card-state.js';
+import { activityMessageIsRunning, effectiveActivityMessageIsRunning } from './activity-card-state.js';
 import {
-  coalesceActivityMessages,
   isVisibleActivityStep,
   mergeActivityMessages,
-  shouldCoalesceActivityMessages,
   shouldRenderActivityMessageInChat
 } from './activity-model.js';
 import { projectActivityView } from './activity-timeline-projection.js';
@@ -36,49 +33,39 @@ export function fileSummaryForActivityMessage(message, { forceRunning = false } 
   return projectActivityView(visibleSteps, { running }).fileSummary;
 }
 
-export function projectMessagesForActiveProcess(messages = [], activeActivityMessageId = '') {
-  const coalesced = coalesceActivityMessages(Array.isArray(messages) ? messages : []);
-  if (!activeActivityMessageId) {
-    return coalesced;
-  }
-  const activeIndex = coalesced.findIndex((message) => message?.role === 'activity' && message.id === activeActivityMessageId);
-  const active = activeIndex >= 0 ? coalesced[activeIndex] : null;
-  if (!active) {
-    return coalesced;
-  }
-
-  let processMessage = active;
-  const swallowedIds = new Set();
-  coalesced.forEach((message) => {
-    if (message === active || message?.role !== 'activity') {
-      return;
+function latestUserIndex(messages = []) {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message?.role === 'user' && !message.guided && message.kind !== 'guided_user') {
+      return index;
     }
-    if (!shouldCoalesceActivityMessages(message, processMessage)) {
-      return;
-    }
-    processMessage = mergeActivityMessages(message, processMessage);
-    if (message.id) {
-      swallowedIds.add(message.id);
-    }
-  });
-
-  if (!swallowedIds.size) {
-    return coalesced;
   }
-  return coalesced
-    .filter((message) => !swallowedIds.has(message?.id))
-    .map((message) => (message === active ? processMessage : message));
+  return 0;
 }
 
-export function chatRenderItems(messages = [], { activeActivityMessageId = '' } = {}) {
-  const projectedMessages = projectMessagesForActiveProcess(messages, activeActivityMessageId);
+function latestAssistantIndex(messages = []) {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index]?.role === 'assistant') {
+      return index;
+    }
+  }
+  return -1;
+}
+
+export function chatRenderItems(messages = [], { running = false } = {}) {
+  const sourceMessages = Array.isArray(messages) ? messages : [];
+  const latestUser = latestUserIndex(sourceMessages);
+  const latestAssistant = latestAssistantIndex(sourceMessages);
+  const liveStartIndex = running
+    ? Math.max(latestAssistant, latestUser - 1)
+    : Number.POSITIVE_INFINITY;
   const items = [];
   const pendingByTurn = new Map();
+  let pendingActivityMessage = null;
+  let pendingLiveActivity = null;
 
   const queueFileSummary = (message) => {
-    const summary = fileSummaryForActivityMessage(message, {
-      forceRunning: Boolean(activeActivityMessageId && message.id === activeActivityMessageId)
-    });
+    const summary = fileSummaryForActivityMessage(message);
     if (!summary) {
       return;
     }
@@ -106,15 +93,66 @@ export function chatRenderItems(messages = [], { activeActivityMessageId = '' } 
     }
   };
 
-  for (const message of projectedMessages) {
+  const flushPendingActivity = () => {
+    if (!pendingActivityMessage) {
+      return;
+    }
+    const item = {
+      type: 'message',
+      key: pendingActivityMessage.id || `${items.length}`,
+      message: pendingActivityMessage
+    };
+    items.push(item);
+    queueFileSummary(pendingActivityMessage);
+    pendingActivityMessage = null;
+  };
+
+  const flushPendingLive = () => {
+    if (!pendingLiveActivity) {
+      return;
+    }
+    items.push({
+      type: 'liveActivity',
+      key: liveActivityItemKey(pendingLiveActivity, items.length),
+      message: pendingLiveActivity
+    });
+    pendingLiveActivity = null;
+  };
+
+  for (let index = 0; index < sourceMessages.length; index += 1) {
+    const message = sourceMessages[index];
+    const runningActivity = message?.role === 'activity' && activityMessageIsRunning(message);
+    const currentRuntimeActivity = message?.role === 'activity' && (runningActivity || (running && index > liveStartIndex));
+    if (currentRuntimeActivity) {
+      if (pendingActivityMessage) {
+        pendingLiveActivity = pendingLiveActivity
+          ? mergeActivityMessages(pendingLiveActivity, pendingActivityMessage)
+          : pendingActivityMessage;
+        pendingActivityMessage = null;
+      }
+      pendingLiveActivity = pendingLiveActivity
+        ? mergeActivityMessages(pendingLiveActivity, message)
+        : message;
+      continue;
+    }
+    if (message?.role === 'activity') {
+      pendingActivityMessage = pendingActivityMessage
+        ? mergeActivityMessages(pendingActivityMessage, message)
+        : message;
+      continue;
+    }
+    flushPendingActivity();
+    if (!running) {
+      flushPendingLive();
+    }
     const item = { type: 'message', key: message.id || `${items.length}`, message };
     items.push(item);
-    if (message?.role === 'activity') {
-      queueFileSummary(message);
-    } else if (message?.role === 'assistant') {
+    if (message?.role === 'assistant') {
       flushFileSummaries(message, item);
     }
   }
+  flushPendingActivity();
+  flushPendingLive();
 
   return items;
 }
@@ -125,6 +163,11 @@ function activityResultKey(message = {}) {
     return '';
   }
   return `${turnId}:${numericSegmentIndex(message.segmentIndex) ?? 0}`;
+}
+
+function liveActivityItemKey(message = {}, fallback = '') {
+  const key = message.turnId || message.clientTurnId || message.sessionId || message.id || fallback;
+  return `live-activity-${key}`;
 }
 
 function resultKeysForMessage(message = {}) {

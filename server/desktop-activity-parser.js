@@ -105,6 +105,26 @@ function rawFunctionStatus(outputRecord, missingOutputStatus = 'running') {
   return exitCode === 0 ? 'completed' : 'failed';
 }
 
+function durationMsBetween(startedAt, completedAt) {
+  const startMs = Date.parse(startedAt || '');
+  const endMs = Date.parse(completedAt || '');
+  return Number.isFinite(startMs) && Number.isFinite(endMs) && endMs > startMs
+    ? endMs - startMs
+    : null;
+}
+
+function rawFunctionTiming(payload = {}, outputRecord = null, status = 'running') {
+  const startedAt = payload.timestamp || outputRecord?.timestamp || null;
+  const terminal = ['completed', 'failed'].includes(String(status || ''));
+  const completedAt = terminal ? outputRecord?.timestamp || null : null;
+  return {
+    timestamp: startedAt || completedAt || new Date().toISOString(),
+    startedAt,
+    completedAt,
+    durationMs: terminal ? durationMsBetween(startedAt, completedAt) : null
+  };
+}
+
 function rawToolStatus(outputRecord, missingOutputStatus = 'running') {
   if (!outputRecord) {
     return missingOutputStatus;
@@ -254,12 +274,13 @@ function applyRawActivitySegments(items, messages, turns) {
 }
 
 function rawCommandActivityFromCall({ payload, outputRecord, turns, sequence, command, toolName }) {
-  const timestamp = payload.timestamp || outputRecord?.timestamp || new Date().toISOString();
+  const status = rawFunctionStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnIdForRawActivityTimestamp(turns, payload.timestamp)));
+  const timing = rawFunctionTiming(payload, outputRecord, status);
+  const timestamp = timing.timestamp;
   const turnId = turnIdForRawActivityTimestamp(turns, timestamp);
   if (!turnId || !command) {
     return null;
   }
-  const status = rawFunctionStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
   const exitCode = rawFunctionExitCode(outputRecord?.output);
   const idSuffix = payload.call_id || `${sequence}`;
   return {
@@ -275,6 +296,9 @@ function rawCommandActivityFromCall({ payload, outputRecord, turns, sequence, co
       exitCode,
       toolName,
       timestamp,
+      startedAt: timing.startedAt,
+      completedAt: timing.completedAt,
+      durationMs: timing.durationMs,
       sequence
     }
   };
@@ -334,7 +358,9 @@ function rawContextCompactionActivityFromEntry({ timestamp, turns, sequence }) {
 }
 
 function rawPlanActivityFromCall({ payload, outputRecord, turns, sequence }) {
-  const timestamp = payload.timestamp || outputRecord?.timestamp || new Date().toISOString();
+  const status = rawFunctionStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnIdForRawActivityTimestamp(turns, payload.timestamp)));
+  const timing = rawFunctionTiming(payload, outputRecord, status);
+  const timestamp = timing.timestamp;
   const turnId = turnIdForRawActivityTimestamp(turns, timestamp);
   if (!turnId) {
     return null;
@@ -345,7 +371,6 @@ function rawPlanActivityFromCall({ payload, outputRecord, turns, sequence }) {
     .map((item) => [item?.status, item?.step].filter(Boolean).join(' '))
     .filter(Boolean)
     .join('\n');
-  const status = rawFunctionStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
   const idSuffix = payload.call_id || `${sequence}`;
   return {
     turnId,
@@ -356,6 +381,9 @@ function rawPlanActivityFromCall({ payload, outputRecord, turns, sequence }) {
       status,
       detail,
       timestamp,
+      startedAt: timing.startedAt,
+      completedAt: timing.completedAt,
+      durationMs: timing.durationMs,
       sequence
     }
   };
@@ -366,12 +394,13 @@ function rawMcpActivityFromCall({ payload, outputRecord, turns, sequence }) {
   if (!namespace.startsWith('mcp__')) {
     return null;
   }
-  const timestamp = payload.timestamp || outputRecord?.timestamp || new Date().toISOString();
+  const status = rawToolStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnIdForRawActivityTimestamp(turns, payload.timestamp)));
+  const timing = rawFunctionTiming(payload, outputRecord, status);
+  const timestamp = timing.timestamp;
   const turnId = turnIdForRawActivityTimestamp(turns, timestamp);
   if (!turnId) {
     return null;
   }
-  const status = rawToolStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
   const server = namespace.replace(/^mcp__/, '').replace(/__+/g, '/');
   const tool = String(payload.name || '').trim();
   return {
@@ -385,6 +414,9 @@ function rawMcpActivityFromCall({ payload, outputRecord, turns, sequence }) {
       toolName: tool,
       error: status === 'failed' ? cleanRawFunctionOutput(outputRecord?.output) : '',
       timestamp,
+      startedAt: timing.startedAt,
+      completedAt: timing.completedAt,
+      durationMs: timing.durationMs,
       sequence
     }
   };
@@ -495,12 +527,13 @@ function rawFileChangeActivityFromCustomCall({ payload, outputRecord, turns, seq
   if (payload.name !== 'apply_patch') {
     return null;
   }
-  const timestamp = payload.timestamp || outputRecord?.timestamp || new Date().toISOString();
+  const status = rawToolStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnIdForRawActivityTimestamp(turns, payload.timestamp)));
+  const timing = rawFunctionTiming(payload, outputRecord, status);
+  const timestamp = timing.timestamp;
   const turnId = turnIdForRawActivityTimestamp(turns, timestamp);
   if (!turnId) {
     return null;
   }
-  const status = rawToolStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
   const fileChanges = fileChangesFromApplyPatchInput(applyPatchInputText(payload));
   return {
     turnId,
@@ -512,6 +545,9 @@ function rawFileChangeActivityFromCustomCall({ payload, outputRecord, turns, seq
       detail: fileChangeDetail(fileChanges),
       fileChanges,
       timestamp,
+      startedAt: timing.startedAt,
+      completedAt: timing.completedAt,
+      durationMs: timing.durationMs,
       sequence
     }
   };
@@ -565,12 +601,13 @@ function rawSessionActivitiesFromFunctionCall(payload, outputRecord, turns, sequ
     return [rawPlanActivityFromCall({ payload, outputRecord, turns, sequence })].filter(Boolean);
   }
   if (namespace === 'web') {
-    const timestamp = payload.timestamp || outputRecord?.timestamp || new Date().toISOString();
+    const status = rawFunctionStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnIdForRawActivityTimestamp(turns, payload.timestamp)));
+    const timing = rawFunctionTiming(payload, outputRecord, status);
+    const timestamp = timing.timestamp;
     const turnId = turnIdForRawActivityTimestamp(turns, timestamp);
     if (!turnId) {
       return [];
     }
-    const status = rawFunctionStatus(outputRecord, rawMissingOutputStatusForTurn(turns, turnId));
     return [{
       turnId,
       activity: {
@@ -580,6 +617,9 @@ function rawSessionActivitiesFromFunctionCall(payload, outputRecord, turns, sequ
         status,
         detail: JSON.stringify(args),
         timestamp,
+        startedAt: timing.startedAt,
+        completedAt: timing.completedAt,
+        durationMs: timing.durationMs,
         sequence
       }
     }];

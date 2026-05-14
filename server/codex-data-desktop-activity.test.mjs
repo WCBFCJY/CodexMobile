@@ -783,6 +783,9 @@ test('rawSessionActivitiesFromJsonl restores exec_command events omitted by desk
   assert.equal(activities[0].activity.status, 'completed');
   assert.equal(activities[0].activity.command, 'rg foo client/src');
   assert.equal(activities[0].activity.output, 'client/src/App.jsx:foo');
+  assert.equal(activities[0].activity.startedAt, '2026-02-02T00:00:01.000Z');
+  assert.equal(activities[0].activity.completedAt, '2026-02-02T00:00:01.500Z');
+  assert.equal(activities[0].activity.durationMs, 500);
 });
 
 test('rawSessionActivitiesFromJsonl extracts file changes from apply_patch calls', () => {

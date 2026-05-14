@@ -23,8 +23,6 @@ import { UserImageStrip } from './ImagePreview.jsx';
 export function ChatMessage({
   message,
   now,
-  activeActivityMessageId = '',
-  forceOpenActivityMessageId = '',
   onPreviewImage,
   onDeleteMessage,
   onImplementPlan,
@@ -45,8 +43,6 @@ export function ChatMessage({
       <ActivityMessage
         message={message}
         now={now}
-        forceRunning={Boolean(activeActivityMessageId && message.id === activeActivityMessageId)}
-        forceOpen={Boolean(forceOpenActivityMessageId && message.id === forceOpenActivityMessageId)}
       />
     );
   }

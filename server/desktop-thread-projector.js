@@ -399,7 +399,7 @@ function findDesktopActivityInsertIndex(messages, turnId, segmentIndex) {
   return lastTurnIndex >= 0 ? lastTurnIndex + 1 : messages.length;
 }
 
-export function upsertDesktopActivity(messages, turnId, activity, segmentIndex = 0, containerStatus = '') {
+export function upsertDesktopActivity(messages, turnId, activity, segmentIndex = 0, containerStatus = '', sessionId = '') {
   if (!activity) {
     return;
   }
@@ -430,6 +430,7 @@ export function upsertDesktopActivity(messages, turnId, activity, segmentIndex =
       existing.activities = [...current, activity];
     }
     existing.timestamp = activity.timestamp || existing.timestamp;
+    existing.sessionId = sessionId || existing.sessionId || null;
     applyDesktopActivityContainerStatus(existing, { containerStatus });
     return;
   }
@@ -437,6 +438,7 @@ export function upsertDesktopActivity(messages, turnId, activity, segmentIndex =
     id,
     role: 'activity',
     turnId,
+    sessionId: sessionId || null,
     segmentIndex,
     content: '正在处理',
     label: '正在处理',
@@ -569,8 +571,11 @@ function applyDesktopActivityContainerStatus(message, { containerStatus = '' } =
   }
   if (status !== 'running') {
     message.completedAt = latestIso(range.completedAt, message.completedAt, message.timestamp) || new Date().toISOString();
-    message.durationMs = positiveDurationMs(message.durationMs)
-      || durationMsBetween(message.startedAt, message.completedAt)
+    const existingDurationMs = positiveDurationMs(message.durationMs);
+    const rangeDurationMs = durationMsBetween(message.startedAt, message.completedAt);
+    message.durationMs = existingDurationMs
+      ? Math.max(existingDurationMs, rangeDurationMs || 0)
+      : rangeDurationMs
       || durationMsFromActivities(activities)
       || null;
   }
@@ -1125,7 +1130,8 @@ export function messagesFromDesktopThread(thread, { includeActivity = false } = 
           turnId,
           desktopActivityFromThreadItem(item, turnId, itemIndex, timestamp, segmentStatus),
           segmentIndex,
-          segmentStatus
+          segmentStatus,
+          thread.id
         );
       }
       if (item.type === 'agentMessage' && item.phase !== 'commentary') {

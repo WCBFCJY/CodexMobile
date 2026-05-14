@@ -91,6 +91,9 @@ export function useTurnRuntime({
     if (!keys.length) {
       return;
     }
+    const now = new Date().toISOString();
+    const status = String(payload.status || '').toLowerCase() === 'queued' ? 'queued' : 'running';
+    const updatedAt = payload.timestamp || payload.startedAt || now;
     setRunningById((current) => {
       const next = { ...current };
       for (const key of keys) {
@@ -102,13 +105,21 @@ export function useTurnRuntime({
     setThreadRuntimeById((current) => {
       const next = { ...current };
       for (const key of keys) {
+        const previous = next[key];
+        const startedAt = runtimeStartedAtForMark(previous, payload, status, updatedAt);
         next[key] = {
-          status: 'running',
+          ...previous,
+          status,
           steerable: payload.steerable !== false,
-          updatedAt: payload.timestamp || payload.startedAt || new Date().toISOString(),
-          source: payload.source || null,
-          sessionId: payload.sessionId || null,
-          turnId: payload.turnId || payload.clientTurnId || null
+          startedAt,
+          updatedAt,
+          source: payload.source || previous?.source || null,
+          sessionId: payload.sessionId || previous?.sessionId || null,
+          previousSessionId: payload.previousSessionId || previous?.previousSessionId || null,
+          turnId: payload.turnId || payload.clientTurnId || previous?.turnId || null,
+          clientTurnId: payload.clientTurnId || previous?.clientTurnId || null,
+          label: payload.label || previous?.label || null,
+          detail: payload.detail || previous?.detail || null
         };
       }
       return next;
@@ -137,7 +148,7 @@ export function useTurnRuntime({
     setThreadRuntimeById((current) => {
       const next = { ...current };
       for (const key of keys) {
-        if (next[key]?.status === 'running') {
+        if (next[key]?.status === 'running' || next[key]?.status === 'queued') {
           delete next[key];
         }
       }
@@ -297,4 +308,16 @@ export function useTurnRuntime({
     markTurnCompleted,
     scheduleTurnRefresh
   };
+}
+
+function runtimeStartedAtForMark(previous, payload, status, updatedAt) {
+  const incomingStartedAt = payload.startedAt || payload.timestamp || updatedAt;
+  const previousStatus = String(previous?.status || '').toLowerCase();
+  if (!previous || !['running', 'queued'].includes(previousStatus)) {
+    return incomingStartedAt;
+  }
+  if (previousStatus === 'queued' && status === 'running') {
+    return incomingStartedAt;
+  }
+  return previous.startedAt || incomingStartedAt;
 }
