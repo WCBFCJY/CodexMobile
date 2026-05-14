@@ -57,6 +57,7 @@ import {
 } from '../sync/sync-selectors.js';
 
 const MODEL_SPEED_KEY = 'codexmobile.modelSpeed';
+const DESKTOP_SHELL_MEDIA = '(min-width: 1024px)';
 
 export default function App() {
   const [status, setStatus] = useState(DEFAULT_STATUS);
@@ -141,6 +142,7 @@ export default function App() {
   const sessionLivePollRef = useRef(false);
   const bootstrapStartedRef = useRef(false);
   const drawerSyncAtRef = useRef(0);
+  const desktopDrawerSeededRef = useRef(false);
   const composerRef = useRef(null);
   const {
     queueDrafts,
@@ -160,8 +162,19 @@ export default function App() {
 
   useViewportSizing(composerRef);
 
+  useEffect(() => {
+    if (!authenticated || desktopDrawerSeededRef.current || typeof window === 'undefined' || !window.matchMedia) {
+      return;
+    }
+    desktopDrawerSeededRef.current = true;
+    if (window.matchMedia(DESKTOP_SHELL_MEDIA).matches) {
+      setDrawerOpen(true);
+    }
+  }, [authenticated, setDrawerOpen]);
+
   const syncRunningById = useMemo(() => syncRunningByIdFromRuntime(threadRuntimeById), [threadRuntimeById]);
   const selectedRuntime = selectRuntimeForSession(selectedSession, threadRuntimeById);
+  const selectedSessionArchived = Boolean(selectedSession?.archived);
   const running =
     hasRunningKey(syncRunningById, selectedRunKeys(selectedSession)) ||
     selectedRuntime?.status === 'running' ||
@@ -171,6 +184,16 @@ export default function App() {
   useEffect(() => {
     loadQueueDrafts(selectedSession).catch(() => null);
   }, [selectedSession?.id]);
+
+  useEffect(() => {
+    if (!selectedSessionArchived) {
+      return;
+    }
+    setInput('');
+    setAttachments([]);
+    setFileMentions([]);
+    setSelectedCollaborationMode(null);
+  }, [selectedSession?.id, selectedSessionArchived, setFileMentions]);
 
   useEffect(() => {
     setThreadRuntimeById((current) => {
@@ -589,14 +612,21 @@ export default function App() {
     syncing
   });
   const topBarRuntime = selectedRuntime || (selectedRunning ? { status: 'running' } : null);
+  const handleToggleDrawer = useCallback(() => {
+    const desktopShell = typeof window !== 'undefined' && window.matchMedia?.(DESKTOP_SHELL_MEDIA)?.matches;
+    setDrawerOpen((current) => (desktopShell ? !current : true));
+  }, [setDrawerOpen]);
 
   const handleComposerSubmit = useCallback(async (options = {}) => {
+    if ((selectedSessionRef.current || selectedSession)?.archived) {
+      return;
+    }
     const collaborationMode = options.collaborationMode || selectedCollaborationMode || null;
     const accepted = await handleSubmit({ ...options, collaborationMode });
     if (accepted && collaborationMode) {
       setSelectedCollaborationMode(null);
     }
-  }, [handleSubmit, selectedCollaborationMode]);
+  }, [handleSubmit, selectedCollaborationMode, selectedSession]);
 
   const handleCompactContext = useCallback(async () => {
     const project = selectedProjectRef.current || selectedProject;
@@ -741,7 +771,7 @@ export default function App() {
       connectionState,
       desktopBridge: status.desktopBridge,
       selectedRuntime: topBarRuntime,
-      onMenu: () => setDrawerOpen(true),
+      onMenu: handleToggleDrawer,
       onOpenDocs: () => setDocsOpen(true),
       onGitAction: handleGitAction,
       onDesktopHandoff: handleDesktopHandoff,
@@ -827,8 +857,8 @@ export default function App() {
     now: activityClockNow,
     onPreviewImage: setPreviewImage,
     onDeleteMessage: handleDeleteMessage,
-    onImplementPlan: handleImplementPlan,
-    onAdjustPlan: handleAdjustPlan
+    onImplementPlan: selectedSessionArchived ? null : handleImplementPlan,
+    onAdjustPlan: selectedSessionArchived ? null : handleAdjustPlan
   };
   const composerProps = {
     composerRef,
@@ -869,7 +899,9 @@ export default function App() {
     onRestoreQueueDraft: restoreQueueDraft,
     onRemoveQueueDraft: removeQueueDraft,
     onSteerQueueDraft: steerQueueDraft,
-    onCompactContext: handleCompactContext
+    onCompactContext: handleCompactContext,
+    readOnly: selectedSessionArchived,
+    readOnlyReason: '已归档线程只能查看，取消归档后才能继续对话'
   };
 
   return (

@@ -1,5 +1,5 @@
 /**
- * 归档箱抽屉子页：展示已归档线程并支持刷新与打开。
+ * 归档箱抽屉子页：以桌面端列表风格展示已归档线程，并提供只读查看与取消归档。
  *
  * Keywords: drawer, archive, sessions, settings, desktop-sync
  *
@@ -11,7 +11,7 @@
  * Outward: Drawer 在 archive 子视图中渲染。
  */
 
-import { AlertCircle, Archive, ChevronLeft, Clock3, Folder, Inbox, MessageSquare, RefreshCw, X } from 'lucide-react';
+import { AlertCircle, ChevronLeft, Clock3, Folder, Inbox, MessageSquare, RefreshCw } from 'lucide-react';
 import { compactPath, formatTime } from '../app/session-utils.js';
 
 export function DrawerArchiveView({
@@ -25,7 +25,9 @@ export function DrawerArchiveView({
   archiveError,
   archiveSyncedAt,
   archiveSource,
-  onOpenSession
+  onOpenSession,
+  onUnarchiveSession,
+  unarchivingSessionIds = {}
 }) {
   const archiveCount = archivedSessions.length;
   const archiveSyncLabel = archiveSyncedAt
@@ -34,44 +36,33 @@ export function DrawerArchiveView({
 
   return (
     <>
-      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+      <div className={`drawer-backdrop drawer-subpage-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
       <aside className={`drawer drawer-archive drawer-subpage ${open ? 'is-open' : ''}`}>
         <div className="drawer-subpage-header">
           <button className="icon-button" onClick={onBack} aria-label="返回设置">
             <ChevronLeft size={20} />
           </button>
-          <strong>归档箱</strong>
-          <button className="icon-button" onClick={onRefresh} disabled={archiveLoading} aria-label="刷新归档箱">
-            <RefreshCw size={16} className={archiveLoading ? 'spin' : ''} />
-          </button>
+          <strong>已归档对话</strong>
+          <span className="drawer-subpage-header-spacer" aria-hidden="true" />
         </div>
+
         <div className="drawer-subpage-content archive-page">
-          <section className="archive-overview" aria-label="归档概览">
+          <section className="archive-toolbar" aria-label="归档概览">
             <div>
-              <span className="subpage-eyebrow">Archive</span>
-              <h2>{archiveCount ? `${archiveCount} 个已归档线程` : '已归档线程'}</h2>
+              <h2>已归档对话</h2>
+              <p>{archiveCount ? `${archiveCount} 个对话` : '暂无对话'} · {archiveSyncLabel}</p>
             </div>
-            <button type="button" className="archive-refresh-cta" onClick={onRefresh} disabled={archiveLoading}>
+            <button type="button" className="archive-refresh-cta" onClick={onRefresh} disabled={archiveLoading} aria-label="刷新归档对话">
               <RefreshCw size={15} className={archiveLoading ? 'spin' : ''} />
               <span>刷新</span>
             </button>
-            <div className="archive-meta-strip">
-              <span>
-                <Clock3 size={13} />
-                {archiveSyncLabel}
-              </span>
-              <span>
-                <Archive size={13} />
-                只读
-              </span>
-            </div>
           </section>
 
           <section className="archive-list-panel" aria-label="归档线程列表">
             {archiveLoading && !archivedSessions.length ? (
               <div className="archive-empty-state">
                 <RefreshCw size={18} className="spin" />
-                <span>正在同步归档箱</span>
+                <span>正在同步归档对话</span>
               </div>
             ) : null}
             {archiveError ? (
@@ -83,44 +74,65 @@ export function DrawerArchiveView({
             {!archiveLoading && !archiveError && archiveLoaded && !archivedSessions.length ? (
               <div className="archive-empty-state">
                 <Inbox size={18} />
-                <span>暂无已归档线程</span>
+                <span>暂无已归档对话</span>
               </div>
             ) : null}
             {archivedSessions.length ? (
               <div className="archive-list">
-                {archivedSessions.map((session) => (
-                  <button
-                    key={session.id}
-                    type="button"
-                    className="archive-thread-row"
-                    onClick={() => onOpenSession(session)}
-                  >
-                    <span className="archive-thread-icon" aria-hidden="true">
-                      <MessageSquare size={15} />
-                    </span>
-                    <span className="archive-thread-main">
-                      <span className="archive-thread-title">{session.title || '对话'}</span>
-                      {session.summary ? <span className="archive-thread-summary">{session.summary}</span> : null}
-                      {session.projectPath ? (
-                        <span className="archive-thread-project">
-                          <Folder size={12} />
-                          {compactPath(session.projectPath)}
+                {archivedSessions.map((session) => {
+                  const unarchiving = Boolean(unarchivingSessionIds[session.id]);
+                  return (
+                    <div key={session.id} className="archive-thread-row">
+                      <button
+                        type="button"
+                        className="archive-thread-open"
+                        onClick={() => onOpenSession(session)}
+                      >
+                        <span className="archive-thread-main">
+                          <span className="archive-thread-title">
+                            <MessageSquare size={13} />
+                            <span>{session.title || '对话'}</span>
+                          </span>
+                          {session.summary ? <span className="archive-thread-summary">{session.summary}</span> : null}
+                          <span className="archive-thread-meta">
+                            <Clock3 size={12} />
+                            <span>{session.archivedAt ? formatTime(session.archivedAt) : '已归档'}</span>
+                            {session.projectPath ? (
+                              <>
+                                <span className="archive-meta-dot" aria-hidden="true" />
+                                <Folder size={12} />
+                                <span className="archive-thread-project">{compactPath(session.projectPath)}</span>
+                              </>
+                            ) : null}
+                          </span>
                         </span>
-                      ) : null}
-                    </span>
-                    <span className="archive-thread-time">
-                      <Clock3 size={12} />
-                      {session.archivedAt ? formatTime(session.archivedAt) : '已归档'}
-                    </span>
-                  </button>
-                ))}
+                        {session.projectPath ? (
+                          <span className="archive-thread-project-wide">
+                            <Folder size={12} />
+                            {compactPath(session.projectPath)}
+                          </span>
+                        ) : null}
+                        <span className="archive-thread-time">
+                          <Clock3 size={12} />
+                          {session.archivedAt ? formatTime(session.archivedAt) : '已归档'}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className="archive-unarchive-button"
+                        onClick={() => onUnarchiveSession?.(session)}
+                        disabled={unarchiving}
+                        aria-label={`取消归档 ${session.title || '对话'}`}
+                      >
+                        {unarchiving ? <RefreshCw size={14} className="spin" /> : null}
+                        <span>{unarchiving ? '恢复中' : '取消归档'}</span>
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             ) : null}
           </section>
-          <button type="button" className="archive-close-button" onClick={onClose}>
-            <X size={15} />
-            <span>关闭</span>
-          </button>
         </div>
       </aside>
     </>

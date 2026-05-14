@@ -15,7 +15,7 @@
 
 export const PWA_THEME_META = {
   light: {
-    themeColor: '#f7f7f4',
+    themeColor: '#ffffff',
     statusBarStyle: 'default'
   },
   dark: {

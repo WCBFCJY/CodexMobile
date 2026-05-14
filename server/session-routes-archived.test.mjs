@@ -75,3 +75,44 @@ test('GET /api/sessions/archived returns archived sessions from injected data so
     source: 'limit-1'
   });
 });
+
+test('POST /api/sessions/:id/unarchive restores archived session and broadcasts sync', async () => {
+  const calls = [];
+  const handler = createSessionRouteHandler({
+    listProjects: () => [],
+    getProject: () => null,
+    getSession: () => null,
+    listProjectSessions: () => [],
+    renameSession: async () => null,
+    deleteSession: async () => null,
+    unarchiveSession: async (sessionId) => {
+      calls.push(['unarchive', sessionId]);
+      return { sessionId, unarchivedDesktopThread: true, unhidden: false };
+    },
+    listArchivedSessions: async () => ({ sessions: [], syncedAt: '', source: 'desktop' }),
+    hideSessionMessage: async () => null,
+    readSessionMessages: async () => ({ messages: [] }),
+    refreshCodexCache: async () => {
+      calls.push(['refresh']);
+      return { syncedAt: 'sync-2', projects: [{ id: 'project-1' }] };
+    },
+    broadcast: (payload) => calls.push(['broadcast', payload]),
+    chatService: { sessionHasActiveWork: () => false }
+  });
+  const res = createResponse();
+  const handled = await handler({ method: 'POST' }, res, new URL('http://codexmobile.test/api/sessions/archived-1/unarchive'));
+
+  assert.equal(handled, true);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(JSON.parse(res.body), {
+    success: true,
+    sessionId: 'archived-1',
+    unarchivedDesktopThread: true,
+    unhidden: false
+  });
+  assert.deepEqual(calls, [
+    ['unarchive', 'archived-1'],
+    ['refresh'],
+    ['broadcast', { type: 'sync-complete', syncedAt: 'sync-2', projects: [{ id: 'project-1' }] }]
+  ]);
+});

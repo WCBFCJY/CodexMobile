@@ -4214,28 +4214,9716 @@ _**Agent (gpt-5.5 2026-05-14 14:48:06Z)**_
 
 <tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
 <summary>Tool use: **exec_command** `git show origin/pr/3:client/src/app/message-cache.js | nl -ba | sed -n '1,170p'`</summary>
-
-**Input:**
-
-- cmd: `git show origin/pr/3:client/src/app/message-cache.js | nl -ba | sed -n '1,170p'`
-- command: `git show origin/pr/3:client/src/app/message-cache.js | nl -ba | sed -n '1,170p'`
-- max_output_tokens: `14000`
-- workdir: `/Users/xiayanghui/编程项目/CodexMobile`
-- yield_time_ms: `1000`
-
+```
+Chunk ID: 62059a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1308
+Output:
+     1	const DB_NAME = 'codexmobile-message-cache-v2';
+     2	const DB_VERSION = 1;
+     3	const STORE_NAME = 'sessionMessages';
+     4	
+     5	let dbPromise = null;
+     6	
+     7	export function sessionMessageCacheKey(sessionId, { activity = true } = {}) {
+     8	  const id = String(sessionId || '');
+     9	  if (!id) {
+    10	    return '';
+    11	  }
+    12	  return `${id}:${activity ? 'activity' : 'plain'}`;
+    13	}
+    14	
+    15	function legacySessionMessageCacheKey(sessionId) {
+    16	  return String(sessionId || '');
+    17	}
+    18	
+    19	export function createSessionMessageCacheRecord(sessionId, payload, options = {}) {
+    20	  const activity = options.activity !== false;
+    21	  const key = sessionMessageCacheKey(sessionId, { activity });
+    22	  const revision = typeof payload?.revision === 'string' ? payload.revision : '';
+    23	  if (!key || !revision || !Array.isArray(payload?.messages)) {
+    24	    return null;
+    25	  }
+    26	  return {
+    27	    key,
+    28	    activity,
+    29	    revision,
+    30	    messages: payload.messages,
+    31	    context: payload.context || null,
+    32	    savedAt: Date.now()
+    33	  };
+    34	}
+    35	
+    36	export function normalizeSessionMessageCacheRecord(sessionId, record, options = {}) {
+    37	  const activity = options.activity !== false;
+    38	  const key = sessionMessageCacheKey(sessionId, { activity });
+    39	  const allowLegacyPlain = activity === false && record?.key === legacySessionMessageCacheKey(sessionId);
+    40	  if (!record || (record.key !== key && !allowLegacyPlain) || !record.revision || !Array.isArray(record.messages)) {
+    41	    return null;
+    42	  }
+    43	  return {
+    44	    key: record.key,
+    45	    activity: record.activity ?? activity,
+    46	    revision: record.revision,
+    47	    messages: record.messages,
+    48	    context: record.context || null,
+    49	    savedAt: Number(record.savedAt) || 0
+    50	  };
+    51	}
+    52	
+    53	function openDb(indexedDBImpl = globalThis.indexedDB) {
+    54	  if (!indexedDBImpl) {
+    55	    return Promise.resolve(null);
+    56	  }
+    57	  if (dbPromise) {
+    58	    return dbPromise;
+    59	  }
+    60	  dbPromise = new Promise((resolve) => {
+    61	    const request = indexedDBImpl.open(DB_NAME, DB_VERSION);
+    62	    request.onupgradeneeded = () => {
+    63	      const db = request.result;
+    64	      if (!db.objectStoreNames.contains(STORE_NAME)) {
+    65	        db.createObjectStore(STORE_NAME, { keyPath: 'key' });
+    66	      }
+    67	    };
+    68	    request.onsuccess = () => resolve(request.result);
+    69	    request.onerror = () => resolve(null);
+    70	    request.onblocked = () => resolve(null);
+    71	  });
+    72	  return dbPromise;
+    73	}
+    74	
+    75	function requestToPromise(request) {
+    76	  return new Promise((resolve, reject) => {
+    77	    request.onsuccess = () => resolve(request.result);
+    78	    request.onerror = () => reject(request.error || new Error('IndexedDB request failed'));
+    79	  });
+    80	}
+    81	
+    82	export async function readCachedSessionMessages(sessionId, options = {}) {
+    83	  try {
+    84	    const db = await openDb();
+    85	    if (!db) {
+    86	      return null;
+    87	    }
+    88	    const tx = db.transaction(STORE_NAME, 'readonly');
+    89	    const store = tx.objectStore(STORE_NAME);
+    90	    const record = await requestToPromise(store.get(sessionMessageCacheKey(sessionId, options)));
+    91	    const normalized = normalizeSessionMessageCacheRecord(sessionId, record, options);
+    92	    if (normalized || options.activity !== false) {
+    93	      return normalized;
+    94	    }
+    95	    const legacyRecord = await requestToPromise(store.get(legacySessionMessageCacheKey(sessionId)));
+    96	    return normalizeSessionMessageCacheRecord(sessionId, legacyRecord, options);
+    97	  } catch {
+    98	    return null;
+    99	  }
+   100	}
+   101	
+   102	export async function writeCachedSessionMessages(sessionId, payload, options = {}) {
+   103	  const record = createSessionMessageCacheRecord(sessionId, payload, options);
+   104	  if (!record) {
+   105	    return false;
+   106	  }
+   107	  try {
+   108	    const db = await openDb();
+   109	    if (!db) {
+   110	      return false;
+   111	    }
+   112	    const tx = db.transaction(STORE_NAME, 'readwrite');
+   113	    await requestToPromise(tx.objectStore(STORE_NAME).put(record));
+   114	    return true;
+   115	  } catch {
+   116	    return false;
+   117	  }
+   118	}
+   119	
+   120	export async function deleteCachedSessionMessages(sessionId) {
+   121	  try {
+   122	    const db = await openDb();
+   123	    if (!db) {
+   124	      return false;
+   125	    }
+   126	    const tx = db.transaction(STORE_NAME, 'readwrite');
+   127	    const store = tx.objectStore(STORE_NAME);
+   128	    await Promise.all([
+   129	      requestToPromise(store.delete(sessionMes
+... (truncated)
+```
 </details></tool-use>
 
 _**Agent (gpt-5.5 2026-05-14 14:48:07Z)**_
 
 <tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
 <summary>Tool use: **exec_command** `git diff origin/main...origin/pr/3 -- client/src/app/useAppBootstrap.js client/src/app/useSessionActions.js client/src/app/useSessionLivePolling.js client/src/app/session-utils.js | sed -n '1,360p'`</summary>
-
-**Input:**
-
-- cmd: `git diff origin/main...origin/pr/3 -- client/src/app/useAppBootstrap.js client/src/app/useSessionActions.js client/src/app/useSessionLivePolling.js client/src/app/session-utils.js | sed -n '1,360p'`
-- command: `git diff origin/main...origin/pr/3 -- client/src/app/useAppBootstrap.js client/src/app/useSessionActions.js client/src/app/useSessionLivePolling.js client/src/app/session-utils.js | sed -n '1,360p'`
-- max_output_tokens: `30000`
-- workdir: `/Users/xiayanghui/编程项目/CodexMobile`
-- yield_time_ms: `1000`
-
+```
+Chunk ID: fe861a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3266
+Output:
+diff --git a/client/src/app/session-utils.js b/client/src/app/session-utils.js
+index bc1a63f..82183ab 100644
+--- a/client/src/app/session-utils.js
++++ b/client/src/app/session-utils.js
+@@ -309,6 +309,12 @@ export function sessionMessagesApiPath(sessionId, { limit = 120, activity = true
+   return `/api/sessions/${encodeURIComponent(sessionId)}/messages?${params.toString()}`;
+ }
+ 
++export function sessionLivePollMessageOptions(pollCount, { fullEvery = 6 } = {}) {
++  const count = Math.max(0, Number(pollCount) || 0);
++  const interval = Math.max(1, Number(fullEvery) || 1);
++  return { activity: count % interval === 0 };
++}
++
+ export function titleFromFirstMessage(message) {
+   return provisionalSessionTitle(message);
+ }
+@@ -534,6 +540,15 @@ function isVisibleComposerActivityStep(step, messageStatus) {
+   return true;
+ }
+ 
++function composerActivityCommandLabel(step) {
++  const command = String(step?.command || step?.detail || '').replace(/\s+/g, ' ').trim();
++  if (command) {
++    return `正在运行 ${command}`;
++  }
++  const label = String(step?.label || '').trim();
++  return label && !isGenericComposerActivityLabel(label) ? label : '运行命令';
++}
++
+ function describeComposerActivityStep(step) {
+   const label = String(step?.label || '').trim();
+   const detail = String(step?.detail || step?.command || step?.toolName || '').trim();
+@@ -542,7 +557,7 @@ function describeComposerActivityStep(step) {
+     return { type: 'edit', label: compactComposerActivityText(label || '编辑文件') };
+   }
+   if (step?.kind === 'command_execution' || /命令|shell|执行|npm|node|git|rg|sed|cat/.test(source)) {
+-    return { type: 'command', label: compactComposerActivityText(label || '运行命令') };
++    return { type: 'command', label: compactComposerActivityText(composerActivityCommandLabel(step), 96) };
+   }
+   if (step?.kind === 'web_search' || /web_search|网页搜索|搜索网页/.test(source)) {
+     return { type: 'web_search', label: compactComposerActivityText(label || '网页搜索') };
+@@ -599,7 +614,7 @@ export function buildComposerRunStatus(messages, running, now = Date.now()) {
+   }
+ 
+   return {
+-    label: compactComposerActivityText(label) || '正在处理',
++    label: compactComposerActivityText(label, 96) || '正在处理',
+     duration,
+     running: true
+   };
+diff --git a/client/src/app/useAppBootstrap.js b/client/src/app/useAppBootstrap.js
+index 3c838e3..edac266 100644
+--- a/client/src/app/useAppBootstrap.js
++++ b/client/src/app/useAppBootstrap.js
+@@ -1,11 +1,14 @@
+ import { useCallback } from 'react';
+ import { apiFetch, clearToken } from '../api.js';
++import { messageStreamSignature } from '../chat/activity-model.js';
++import { mergeLiveSelectedThreadMessages } from '../session-live-refresh.js';
+ import {
+   emptyContextStatus,
+   isDraftSession,
+   sessionMessagesApiPath
+ } from './session-utils.js';
+ import { normalizeContextStatus } from './context-status.js';
++import { readCachedSessionMessages, writeCachedSessionMessages } from './message-cache.js';
+ import {
+   preferredProjectFromStoredSelection,
+   readStoredSelection,
+@@ -28,6 +31,17 @@ export function useAppBootstrap({
+   setSelectedProject,
+   setExpandedProjectIds
+ }) {
++  function mergeLoadedMessages(current, loaded, options = {}) {
++    const messages = Array.isArray(loaded) ? loaded : [];
++    if (!Array.isArray(current) || !current.length) {
++      return messages;
++    }
++    if (messageStreamSignature(current) === messageStreamSignature(messages)) {
++      return current;
++    }
++    return mergeLiveSelectedThreadMessages(current, messages, options);
++  }
++
+   const loadStatus = useCallback(async () => {
+     const data = await apiFetch('/api/status');
+     setStatus(data);
+@@ -88,10 +102,26 @@ export function useAppBootstrap({
+         }
+         setSelectedSession((current) => (current?.id === next.id ? { ...current, ...next } : next));
+         setContextStatus(normalizeContextStatus(next.context || defaultStatus.context, defaultStatus.context));
+-        const messageData = await apiFetch(sessionMessagesApiPath(next.id));
++        const plainMessagesPromise = apiFetch(sessionMessagesApiPath(next.id, { activity: false }));
++        const cachedMessageData = await readCachedSessionMessages(next.id, { activity: true });
++        if (cachedMessageData && selectedSessionRef.current?.id === next.id) {
++          setMessages((current) => mergeLoadedMessages(current, cachedMessageData.messages || [], { preserveActivityState: true }));
++          setContextStatus(normalizeContextStatus(cachedMessageData.context || next.context || defaultStatus.context, defaultStatus.context));
++        }
++        const messageData = await plainMessagesPromise;
+         if (selectedSessionRef.current?.id === next.id) {
+-          setMessages(messageData.messages || []);
++          setMessages((current) => mergeLoadedMessages(current, mess
+... (truncated)
+```
 </details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:49:08Z)**_
+
+这三个功能可以拆成一句话：
+
+**文件预览流式化：很适配，建议拿。消息缓存/轻量轮询：方向对，但要按我们现有链路重写。activity 排序/摘要补洞：只能拿一部分算法，不能照搬 UI 行为。**
+
+我参考的是 [PR #3](https://github.com/flyyangX/CodexMobile/pull/3) 和当前本地代码。
+
+**1. 本地文件预览流式化**
+
+它解决的是：现在手机打开本地大文件时，后端会一次性 `readFile`，前端也会一次性 `blob()` / `arrayBuffer()`。小 md/pdf 没事，大 PDF、视频、音频就会慢、占内存、甚至卡死。
+
+我们现在的代码是这样：
+
+- 后端 `/api/local-file` 直接 `fs.readFile(filePath)` 后整包返回：[server/static-service.js](/Users/xiayanghui/编程项目/CodexMobile/server/static-service.js:203)
+- 图片 `/api/local-image` 也是整包读：[server/static-service.js](/Users/xiayanghui/编程项目/CodexMobile/server/static-service.js:162)
+- 前端预览先 `fetch`，再 `response.blob()`，PDF 再 `blob.arrayBuffer()`：[FilePreviewApp.jsx](/Users/xiayanghui/编程项目/CodexMobile/client/src/app/FilePreviewApp.jsx:123)
+- `PdfPreview` 目前主要吃二进制 `data`，不是让 PDF.js 自己按 URL 拉：[PdfPreview.jsx](/Users/xiayanghui/编程项目/CodexMobile/client/src/app/PdfPreview.jsx:36)
+
+PR 的做法是：
+
+- 后端加 `Range` 支持，浏览器要 `bytes=...` 时返回 `206 Partial Content`
+- 用 `fs.createReadStream` 代替 `fs.readFile`
+- 增加 video/audio MIME
+- PDF 允许 `PdfPreview` 直接用 `fileUrl`
+- 图片、视频、音频用浏览器原生 `<img>` / `<video>` / `<audio>` 播放
+
+**适配判断：高度适配。**  
+这块和我们当前架构不冲突，因为我们已经有稳定的 `/preview/file` 和 `/api/local-file?path=...&token=...` 路径。要注意的是：不要把预览路由改掉，也不要破坏现有 Markdown 渲染、文本编辑、分享文件名逻辑。正确移植方式是只改 `static-service`、`FilePreviewApp`、`PdfPreview`、样式和测试。
+
+优先级我会排第一。这个是实打实的体验提升，风险也最低。
+
+**2. 消息读取缓存与轻量轮询**
+
+它解决的是：手机端切线程、刷新、运行中轮询时，每次都去重建完整消息流，尤其 `includeActivity=true` 时，会读桌面线程、rollout jsonl、raw activities、collab activities，再排序，成本偏高。
+
+我们现在后端读取消息是：
+
+- `readSessionMessages()` 每次都 `readThread(sessionId)`：[server/session-message-reader.js](/Users/xiayanghui/编程项目/CodexMobile/server/session-message-reader.js:567)
+- 如果 `includeActivity`，再读 raw/collab activity 并 `upsertDesktopActivity`：[server/session-message-reader.js](/Users/xiayanghui/编程项目/CodexMobile/server/session-message-reader.js:578)
+- 最后排序返回，但没有 `revision` / `cached` 字段：[server/session-message-reader.js](/Users/xiayanghui/编程项目/CodexMobile/server/session-message-reader.js:605)
+
+PR 的思路是两层缓存：
+
+- 后端内存缓存：按 `sessionId + activity/plain` 分开缓存，用 rollout 文件的 `path:size:mtime` 做 revision。
+- 前端 IndexedDB 缓存：切会话时先显示上次缓存的完整 activity 消息，再快速拉 plain 消息，最后异步补完整 activity。
+- 运行中轮询：不是每次都 `activity=true`，而是比如每 6 次全量一次，中间走轻量 plain 消息。
+
+**适配判断：中等适配，但不能直接贴。**  
+原因是我们现在的 activity/运行态已经比较敏感：`mergeLiveSelectedThreadMessages()` 会保留本地 optimistic activity、处理 stale running、合并 loaded 消息：[session-live-refresh.js](/Users/xiayanghui/编程项目/CodexMobile/client/src/session-live-refresh.js:113)。如果轻量轮询直接覆盖消息，很容易把“正在处理”卡片弄丢或又变成旧状态。
+
+正确做法应该是：
+
+- 后端先加 `revision` 和内存缓存，但必须继续按 deleted message 过滤。
+- 前端 IndexedDB 可以加，但缓存要区分 `plain` 和 `activity`。
+- 轻量轮询只能在“已有 activity 正在显示”时 preserve activity state，不能把 plain 结果当最终 UI。
+- 删除消息、删除/归档会话、切项目、后台线程完成后，都要主动失效缓存。
+- 这个功能需要较多测试，尤其是运行中轮询、完成后刷新、删除消息、切线程四类。
+
+所以它值得做，但应该作为第二步单独做。
+
+**3. activity 排序 / 摘要补洞**
+
+它解决的是两个 UI 问题：
+
+1. 刷新或轻量轮询后，activity 卡片可能跑到不该去的位置。
+2. 有些桌面/后台过程只有 `agent_message` activity，没有真正的 assistant final，于是手机刷新后像“没回答”。
+
+我们现在确实有这个风险点：
+
+- 当前 `activityInsertIndex()` 找得到 assistant 就插 assistant 前，找不到就放到末尾：[session-live-refresh.js](/Users/xiayanghui/编程项目/CodexMobile/client/src/session-live-refresh.js:107)
+- 后端 `readSessionMessages()` 现在只 upsert activity、排序，不额外生成可见 assistant 摘要：[server/session-message-reader.js](/Users/xiayanghui/编程项目/CodexMobile/server/session-message-reader.js:578)
+- 当前 activity card 打开逻辑是“有过程且正在运行才打开”：[activity-card-state.js](/Users/xiayanghui/编程项目/CodexMobile/client/src/chat/activity-card-state.js:104)
+- 完成后的文件摘要已经走独立 `fileSummary` 渲染：[chat-render-items.js](/Users/xiayanghui/编程项目/CodexMobile/client/src/chat/chat-render-items.js:23)
+
+PR 里面有三类东西：
+
+- 好的：activity 插入时找“前一个 user 作为锚点”，比找不到 assistant 就丢到末尾更合理。
+- 好的：`desktop-thread-projector` 给 activity 容器用更稳定的 timestamp，减少排序抖动。
+- 要谨慎：把最新 `agent_message` activity 自动补成 `role: assistant` 的可见消息。
+
+**适配判断：部分适配。**  
+排序锚点和 timestamp 可以拿。摘要补洞要非常克制，因为 `agent_message` 里可能是过程旁白，不一定是最终回答。直接把它变成 assistant 消息，容易让“我正在查看文件”这种过程话变成最终答复。
+
+另外，PR 里 `activityCardShouldOpen({ latestActivity })` 这个方向我不建议拿。我们刚把运行态 UI 收敛过，当前原则是：运行中展示 activity，完成后只在有文件结果时保留摘要，不要让每个已完成 activity 默认展开。否则会重新出现你之前说的“多层 UI、重复、乱”。
+
+**我建议的落地顺序**
+
+1. 先做 **文件预览流式化**：低风险、高收益。
+2. 再做 **后端 message revision + 轻量轮询**：先不加 IndexedDB，验证稳定后再加前端缓存。
+3. 最后做 **activity 排序锚点 + 缺 final 摘要兜底**：只补“完成 turn 且没有 assistant final”的场景，不改 completed card 默认展开规则。
+
+如果只问“这三个是否适配我们现在代码”，我的判断是：
+
+| 功能 | 适配度 | 是否建议做 | 方式 |
+|---|---:|---|---|
+| 本地文件预览流式化 | 高 | 立刻做 | 选择性移植 |
+| 消息缓存 + 轻量轮询 | 中高 | 做，但拆开 | 按现有 merge/runtime 重写 |
+| activity 排序/摘要补洞 | 中 | 只做核心算法 | 不照搬 UI 展开逻辑 |
+
+
+
+---
+
+_**User (2026-05-14 14:52:34Z)**_
+
+
+# In app browser:
+- The user has the in-app browser open.
+- Current URL: not currently navigated.
+
+## My request for Codex:
+文件预览流式化 你先来实现吧
+
+
+---
+
+_**Agent (gpt-5.5 2026-05-14 14:52:48Z)**_
+
+好，我先把它按“最小可落地”的方式做：不改预览路由、不碰消息/运行态，只把 `/api/local-file` 和预览页升级成流式/原生媒体预览。先看一下现有测试和样式边界，然后动手。
+
+_**Agent (gpt-5.5 2026-05-14 14:52:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short`</summary>
+```
+Chunk ID: 4d54f9
+Wall time: 0.0938 seconds
+Process exited with code 0
+Original token count: 59
+Output:
+ M .specstory/history/2026-05-14_14-35-49Z-ui.md
+ M .specstory/history/2026-05-14_14-41-46Z-https-github-com-flyyangx.md
+ M .specstory/statistics.json
+ M client/src/panels/DrawerSettingsView.jsx
+ M client/src/styles/panels-drawer.css
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:52:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' server/static-service.test.mjs`</summary>
+```
+Chunk ID: 2f3994
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1798
+Output:
+/**
+ * 测试 server/static-service.js：本地文件服务、可编辑扩展名与安全路径。
+ *
+ * Keywords: static-service, test, local-file
+ *
+ * Exports: 无导出，内含用例
+ *
+ * Inward: static-service.js
+ */
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import test from 'node:test';
+import { createStaticService } from './static-service.js';
+
+function req(headers = {}) {
+  return { headers };
+}
+
+function res() {
+  return {
+    statusCode: null,
+    headers: null,
+    body: Buffer.alloc(0),
+    writeHead(statusCode, headers = {}) {
+      this.statusCode = statusCode;
+      this.headers = headers;
+    },
+    end(body = '') {
+      this.body = Buffer.isBuffer(body) ? body : Buffer.from(String(body));
+    }
+  };
+}
+
+async function withTempService(fn) {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-static-'));
+  const clientDist = path.join(root, 'dist');
+  const generatedRoot = path.join(root, 'generated');
+  const certPath = path.join(root, 'tls', 'root.cer');
+  await fs.mkdir(clientDist, { recursive: true });
+  await fs.mkdir(generatedRoot, { recursive: true });
+  await fs.mkdir(path.dirname(certPath), { recursive: true });
+  await fs.writeFile(path.join(clientDist, 'index.html'), '<h1>CodexMobile</h1>');
+  await fs.writeFile(path.join(clientDist, 'worker.mjs'), 'export default null;');
+  await fs.writeFile(path.join(generatedRoot, 'image.png'), Buffer.from([137, 80, 78, 71]));
+  await fs.writeFile(path.join(root, 'report.md'), '# Report');
+  await fs.writeFile(path.join(root, 'brief.pdf'), Buffer.from('%PDF-1.7'));
+  await fs.writeFile(path.join(root, '甘肃临夏萌宠乐园丨政府汇报项目前置简介.md'), '# 中文文件名');
+  await fs.writeFile(path.join(root, 'secret.txt'), 'secret');
+  await fs.writeFile(certPath, 'cert');
+  try {
+    await fn(createStaticService({ clientDist, generatedRoot, httpsRootCaPath: certPath }), root);
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
+}
+
+test('serveStatic returns a normal PWA file', async () => {
+  await withTempService(async (service) => {
+    const response = res();
+    await service.serveStatic(req(), response, new URL('http://local/'));
+
+    assert.equal(response.statusCode, 200);
+    assert.match(response.headers['content-type'], /text\/html/);
+    assert.equal(response.body.toString('utf8'), '<h1>CodexMobile</h1>');
+  });
+});
+
+test('serveStatic returns mjs files as JavaScript for module workers', async () => {
+  await withTempService(async (service) => {
+    const response = res();
+    await service.serveStatic(req(), response, new URL('http://local/worker.mjs'));
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.headers['content-type'], 'text/javascript; charset=utf-8');
+  });
+});
+
+test('serveStatic blocks traversal outside the PWA root', async () => {
+  await withTempService(async (service) => {
+    const response = res();
+    await service.serveStatic(req(), response, new URL('http://local/..%2fsecret.txt'));
+
+    assert.equal(response.statusCode, 403);
+    assert.equal(response.body.toString('utf8'), 'Forbidden');
+  });
+});
+
+test('serveStatic returns generated files from the generated root', async () => {
+  await withTempService(async (service) => {
+    const response = res();
+    await service.serveStatic(req(), response, new URL('http://local/generated/image.png'));
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.headers['content-type'], 'image/png');
+    assert.deepEqual([...response.body], [137, 80, 78, 71]);
+  });
+});
+
+test('sendLocalFile serves markdown files inline from absolute paths', async () => {
+  await withTempService(async (service, root) => {
+    const filePath = path.join(root, 'report.md');
+    const response = res();
+    await service.sendLocalFile(req(), response, new URL(`http://local/api/local-file?path=${encodeURIComponent(filePath)}`));
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.headers['content-type'], 'text/markdown; charset=utf-8');
+    assert.match(response.headers['content-disposition'], /^inline;/);
+  });
+});
+
+test('sendLocalFile serves pdf files with pdf content type', async () => {
+  await withTempService(async (service, root) => {
+    const filePath = path.join(root, 'brief.pdf');
+    const response = res();
+    await service.sendLocalFile(req(), response, new URL(`http://local/api/local-file?path=${encodeURIComponent(filePath)}`));
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.headers['content-type'], 'application/pdf');
+    assert.match(response.headers['content-disposition'], /^inline;/);
+  });
+});
+
+test('sendLocalFile tolerates Codex style line suffixes on file links', async () => {
+  await withTempService(async (service, root) => {
+    const filePath = `${path.jo
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:52:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "file-preview-media|file-preview-body|file-preview-open|file-preview-page|PdfPreview" client/src/styles client/src/app`</summary>
+```
+Chunk ID: a5c547
+Wall time: 0.0607 seconds
+Process exited with code 0
+Original token count: 319
+Output:
+client/src/app/PdfPreview.jsx:7: * - `PdfPreview` — 以二进制 `data` 或 `fileUrl` 为源的预览组件。
+client/src/app/PdfPreview.jsx:23:export function PdfPreview({ data, fileUrl = '' }) {
+client/src/app/FilePreviewApp.jsx:9: * Inward: `api`；`MarkdownContent`、`PdfPreview`、`session-utils`（路径与本地文件 URL）、`pwa-theme`。
+client/src/app/FilePreviewApp.jsx:20:import { PdfPreview } from './PdfPreview.jsx';
+client/src/app/FilePreviewApp.jsx:284:    <main className="file-preview-page" style={{ '--preview-font-scale': fontScale }}>
+client/src/app/FilePreviewApp.jsx:373:      <section className="file-preview-body">
+client/src/app/FilePreviewApp.jsx:397:          <PdfPreview data={state.pdfData} fileUrl={rawFileUrl} />
+client/src/app/FilePreviewApp.jsx:400:          <a className="file-preview-open" href={state.objectUrl} target="_blank" rel="noreferrer noopener">
+client/src/styles/chat.css:1495:.file-preview-page {
+client/src/styles/chat.css:1613:.file-preview-body {
+client/src/styles/chat.css:1833:.file-preview-open {
+client/src/styles/chat.css:1844:[data-theme="dark"] .file-preview-page {
+client/src/styles/chat.css:1865:[data-theme="dark"] .file-preview-open {
+client/src/styles/chat.css:1871:[data-theme="dark"] .file-preview-body,
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:52:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' client/src/styles/file-preview.css 2>/dev/null || rg -n "file-preview" client/src/styles -g '*.css'`</summary>
+```
+Chunk ID: 288b67
+Wall time: 0.0594 seconds
+Process exited with code 0
+Original token count: 1129
+Output:
+client/src/styles/chat.css:1495:.file-preview-page {
+client/src/styles/chat.css:1505:.file-preview-header {
+client/src/styles/chat.css:1516:.file-preview-header-actions,
+client/src/styles/chat.css:1517:.file-preview-tool-buttons,
+client/src/styles/chat.css:1518:.file-preview-segmented {
+client/src/styles/chat.css:1524:.file-preview-icon-button,
+client/src/styles/chat.css:1525:.file-preview-tool-buttons button,
+client/src/styles/chat.css:1526:.file-preview-tool-buttons a,
+client/src/styles/chat.css:1527:.file-preview-segmented button {
+client/src/styles/chat.css:1541:.file-preview-icon-button:disabled,
+client/src/styles/chat.css:1542:.file-preview-tool-buttons button:disabled {
+client/src/styles/chat.css:1546:.file-preview-title {
+client/src/styles/chat.css:1553:.file-preview-title strong,
+client/src/styles/chat.css:1554:.file-preview-title span {
+client/src/styles/chat.css:1560:.file-preview-title strong {
+client/src/styles/chat.css:1565:.file-preview-title span {
+client/src/styles/chat.css:1570:.file-preview-toolbar {
+client/src/styles/chat.css:1580:.file-preview-segmented {
+client/src/styles/chat.css:1586:.file-preview-segmented button {
+client/src/styles/chat.css:1596:.file-preview-segmented button.is-active {
+client/src/styles/chat.css:1601:.file-preview-tool-buttons button,
+client/src/styles/chat.css:1602:.file-preview-tool-buttons a {
+client/src/styles/chat.css:1607:.file-preview-kind {
+client/src/styles/chat.css:1613:.file-preview-body {
+client/src/styles/chat.css:1623:.file-preview-markdown {
+client/src/styles/chat.css:1633:.file-preview-markdown h1,
+client/src/styles/chat.css:1634:.file-preview-markdown h2,
+client/src/styles/chat.css:1635:.file-preview-markdown h3 {
+client/src/styles/chat.css:1639:.file-preview-markdown p,
+client/src/styles/chat.css:1640:.file-preview-markdown li {
+client/src/styles/chat.css:1644:.file-preview-text {
+client/src/styles/chat.css:1656:.file-preview-editor {
+client/src/styles/chat.css:1671:.file-preview-frame {
+client/src/styles/chat.css:1678:.file-preview-notice {
+client/src/styles/chat.css:1693:.file-preview-notice.is-error {
+client/src/styles/chat.css:1697:.file-preview-notice.is-success {
+client/src/styles/chat.css:1802:.file-preview-status,
+client/src/styles/chat.css:1803:.file-preview-error {
+client/src/styles/chat.css:1817:.file-preview-error {
+client/src/styles/chat.css:1823:.file-preview-error strong {
+client/src/styles/chat.css:1827:.file-preview-error span {
+client/src/styles/chat.css:1833:.file-preview-open {
+client/src/styles/chat.css:1844:[data-theme="dark"] .file-preview-page {
+client/src/styles/chat.css:1849:[data-theme="dark"] .file-preview-header {
+client/src/styles/chat.css:1854:[data-theme="dark"] .file-preview-icon-button,
+client/src/styles/chat.css:1855:[data-theme="dark"] .file-preview-toolbar,
+client/src/styles/chat.css:1856:[data-theme="dark"] .file-preview-segmented,
+client/src/styles/chat.css:1857:[data-theme="dark"] .file-preview-tool-buttons button,
+client/src/styles/chat.css:1858:[data-theme="dark"] .file-preview-tool-buttons a,
+client/src/styles/chat.css:1859:[data-theme="dark"] .file-preview-segmented button,
+client/src/styles/chat.css:1860:[data-theme="dark"] .file-preview-markdown,
+client/src/styles/chat.css:1861:[data-theme="dark"] .file-preview-text,
+client/src/styles/chat.css:1862:[data-theme="dark"] .file-preview-frame,
+client/src/styles/chat.css:1863:[data-theme="dark"] .file-preview-status,
+client/src/styles/chat.css:1864:[data-theme="dark"] .file-preview-error,
+client/src/styles/chat.css:1865:[data-theme="dark"] .file-preview-open {
+client/src/styles/chat.css:1871:[data-theme="dark"] .file-preview-body,
+client/src/styles/chat.css:1872:[data-theme="dark"] .file-preview-markdown,
+client/src/styles/chat.css:1873:[data-theme="dark"] .file-preview-text,
+client/src/styles/chat.css:1874:[data-theme="dark"] .file-preview-editor {
+client/src/styles/chat.css:1879:[data-theme="dark"] .file-preview-toolbar {
+client/src/styles/chat.css:1883:[data-theme="dark"] .file-preview-title span,
+client/src/styles/chat.css:1884:[data-theme="dark"] .file-preview-kind,
+client/src/styles/chat.css:1885:[data-theme="dark"] .file-preview-segmented button {
+client/src/styles/chat.css:1889:[data-theme="dark"] .file-preview-segmented button.is-active {
+client/src/styles/chat.css:1894:[data-theme="dark"] .file-preview-markdown h1,
+client/src/styles/chat.css:1895:[data-theme="dark"] .file-preview-markdown h2,
+client/src/styles/chat.css:1896:[data-theme="dark"] .file-preview-markdown h3 {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:52:54Z)**_
+
+<tool-use data-tool-type="task" data-tool-name="update_plan"><details>
+<summary>Tool use: **update_plan**</summary>
+**Agent task list:**
+- [X] 审阅现有本地文件预览服务和测试
+- [⚡] 实现后端 Range/streaming 与媒体 MIME
+- [ ] 实现前端 PDF URL/图片视频音频原生预览
+- [ ] 补测试并跑验证
+
+```
+Plan updated
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:52:58Z)**_
+
+我准备改四类文件：`server/static-service.js` 做 Range/stream，`FilePreviewApp.jsx`/`PdfPreview.jsx` 做前端直连预览，`chat.css` 补媒体布局，再给 `static-service.test.mjs` 加 Range 与媒体 MIME 覆盖。当前工作区已有别的未提交改动，我会只碰这几块。
+
+_**Agent (gpt-5.5 2026-05-14 14:52:59Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1490,1905p' client/src/styles/chat.css`</summary>
+```
+Chunk ID: a1eb7f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2023
+Output:
+
+[data-theme="dark"] .composer-wrap {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.92) 28%);
+}
+
+.file-preview-page {
+  height: 100dvh;
+  background: #fff;
+  color: #111;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.file-preview-header {
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: max(12px, env(safe-area-inset-top)) 14px 10px;
+  border-bottom: 1px solid #e8e8e8;
+  background: #fff;
+}
+
+.file-preview-header-actions,
+.file-preview-tool-buttons,
+.file-preview-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.file-preview-icon-button,
+.file-preview-tool-buttons button,
+.file-preview-tool-buttons a,
+.file-preview-segmented button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dedede;
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.file-preview-icon-button:disabled,
+.file-preview-tool-buttons button:disabled {
+  opacity: 0.42;
+}
+
+.file-preview-title {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.file-preview-title strong,
+.file-preview-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-preview-title strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.file-preview-title span {
+  font-size: 12px;
+  color: #777;
+}
+
+.file-preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #eeeeee;
+  background: #fff;
+}
+
+.file-preview-segmented {
+  padding: 2px;
+  border: 1px solid #dedede;
+  border-radius: 8px;
+}
+
+.file-preview-segmented button {
+  width: auto;
+  min-width: 72px;
+  height: 32px;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: #555;
+}
+
+.file-preview-segmented button.is-active {
+  color: #111;
+  background: #f0f0f0;
+}
+
+.file-preview-tool-buttons button,
+.file-preview-tool-buttons a {
+  width: 32px;
+  height: 32px;
+}
+
+.file-preview-kind {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #777;
+}
+
+.file-preview-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 0;
+  background: #fff;
+}
+
+.file-preview-markdown {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 20px 18px 52px;
+  background: #fff;
+  color: #111;
+  font-size: calc(16px * var(--preview-font-scale, 1));
+  line-height: 1.78;
+}
+
+.file-preview-markdown h1,
+.file-preview-markdown h2,
+.file-preview-markdown h3 {
+  color: #111;
+}
+
+.file-preview-markdown p,
+.file-preview-markdown li {
+  line-height: 1.78;
+}
+
+.file-preview-text {
+  margin: 0;
+  min-height: 100%;
+  padding: 18px 16px 52px;
+  background: #fff;
+  color: #111;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: calc(13px * var(--preview-font-scale, 1));
+  line-height: 1.6;
+}
+
+.file-preview-editor {
+  width: 100%;
+  min-height: 100%;
+  resize: none;
+  border: 0;
+  outline: 0;
+  padding: 18px 16px 52px;
+  background: #fff;
+  color: #111;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: calc(14px * var(--preview-font-scale, 1));
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.file-preview-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+.file-preview-notice {
+  position: absolute;
+  left: 50%;
+  top: calc(env(safe-area-inset-top, 0px) + 104px);
+  z-index: 5;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  font-size: 13px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+}
+
+.file-preview-notice.is-error {
+  background: #b42318;
+}
+
+.file-preview-notice.is-success {
+  background: #111;
+}
+
+.pdf-preview {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: #f6f6f6;
+}
+
+.pdf-preview-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fff;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.pdf-preview-controls::-webkit-scrollbar {
+  display: none;
+}
+
+.pdf-preview-control-group {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid #dedede;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.pdf-preview-controls button,
+.pdf-preview-open-original {
+  min-width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #111;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 8px;
+  white-space: nowrap;
+  text-decoration: none;
+  -webkit-tap-highlight-col
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:53:03Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1905,1965p' client/src/styles/chat.css`</summary>
+```
+Chunk ID: 89a033
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 159
+Output:
+  background: #000;
+  border-bottom-color: #1f1f1f;
+}
+
+[data-theme="dark"] .pdf-preview-control-group {
+  background: #000;
+  border-color: #2a2a2a;
+}
+
+[data-theme="dark"] .pdf-preview-controls button,
+[data-theme="dark"] .pdf-preview-open-original {
+  background: #000;
+  color: #f4f4f5;
+}
+
+[data-theme="dark"] .pdf-preview-open-original {
+  border-color: #2a2a2a;
+}
+
+[data-theme="dark"] .pdf-preview-controls button.is-active {
+  background: #f4f4f5;
+  color: #000;
+  border-color: #f4f4f5;
+}
+
+[data-theme="dark"] .pdf-preview-page-count {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .pdf-preview-stage canvas {
+  box-shadow: none;
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:53:35Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/static-service.js`**
+
+```diff
+@@
+-import fs from 'node:fs/promises';
++import fsSync from 'node:fs';
++import fs from 'node:fs/promises';
+@@
+   ['.gif', 'image/gif'],
+   ['.ico', 'image/x-icon'],
+   ['.pdf', 'application/pdf'],
++  ['.mp4', 'video/mp4'],
++  ['.m4v', 'video/mp4'],
++  ['.mov', 'video/quicktime'],
++  ['.webm', 'video/webm'],
++  ['.ogv', 'video/ogg'],
++  ['.mp3', 'audio/mpeg'],
++  ['.m4a', 'audio/mp4'],
++  ['.aac', 'audio/aac'],
++  ['.wav', 'audio/wav'],
++  ['.ogg', 'audio/ogg'],
++  ['.flac', 'audio/flac'],
+   ['.md', 'text/markdown; charset=utf-8'],
+@@
+ function backupFileName(filePath) {
+   const now = new Date().toISOString().replace(/[:.]/g, '-');
+   const baseName = path.basename(filePath).replace(/[^\w.-]+/g, '_') || 'file';
+   return `${now}-${baseName}`;
+ }
+ 
++function parseRangeHeader(value, size) {
++  const match = String(value || '').match(/^bytes=(\d*)-(\d*)$/);
++  if (!match || !Number.isFinite(size) || size <= 0 || (match[1] === '' && match[2] === '')) {
++    return null;
++  }
++
++  let start;
++  let end;
++  if (match[1] === '') {
++    const suffixLength = Number(match[2]);
++    if (!Number.isFinite(suffixLength) || suffixLength <= 0) {
++      return null;
++    }
++    start = Math.max(0, size - suffixLength);
++    end = size - 1;
++  } else {
++    start = Number(match[1]);
++    end = match[2] === '' ? size - 1 : Number(match[2]);
++  }
++
++  if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || start >= size) {
++    return null;
++  }
++  return { start, end: Math.min(end, size - 1) };
++}
++
++function sendFileStream(req, res, filePath, stat, headers) {
++  const range = parseRangeHeader(req.headers?.range, stat.size);
++  const baseHeaders = {
++    ...headers,
++    'accept-ranges': 'bytes'
++  };
++  const streamOptions = range ? { start: range.start, end: range.end } : {};
++  const contentLength = range ? range.end - range.start + 1 : stat.size;
++  res.writeHead(range ? 206 : 200, {
++    ...baseHeaders,
++    ...(range ? { 'content-range': `bytes ${range.start}-${range.end}/${stat.size}` } : {}),
++    'content-length': contentLength
++  });
++
++  return new Promise((resolve, reject) => {
++    const stream = fsSync.createReadStream(filePath, streamOptions);
++    let settled = false;
++    const settle = (callback, value) => {
++      if (settled) {
++        return;
++      }
++      settled = true;
++      callback(value);
++    };
++    stream.on('data', (chunk) => {
++      res.write(chunk);
++    });
++    stream.once('error', (error) => {
++      if (typeof res.destroy === 'function') {
++        res.destroy(error);
++      }
++      settle(reject, error);
++    });
++    stream.once('end', () => {
++      res.end();
++      settle(resolve);
++    });
++  });
++}
++
+ export async function sendLocalImage(req, res, url, {
+   mimeTypes = DEFAULT_MIME_TYPES
+ } = {}) {
+@@
+     try {
+       const stat = await fs.stat(filePath);
+       if (!stat.isFile()) {
+         continue;
+       }
+-      const content = await fs.readFile(filePath);
+-      sendStaticContent(req, res, 200, content, {
++      await sendFileStream(req, res, filePath, stat, {
+         'content-type': contentType,
+         'cache-control': 'private, max-age=3600',
+         'x-content-type-options': 'nosniff'
+-      }, ext);
++      });
+       return;
+     } catch {
+       // Try the decoded candidate before reporting a miss.
+@@
+     const { filePath, stat } = await resolveExistingLocalFile(url);
+     const ext = path.extname(filePath).toLowerCase();
+     const contentType = mimeTypes.get(ext) || 'application/octet-stream';
+-    const content = await fs.readFile(filePath);
+-    sendStaticContent(req, res, 200, content, {
++    await sendFileStream(req, res, filePath, stat, {
+       'content-type': contentType,
+       'cache-control': 'private, max-age=60',
+       'content-disposition': inlineContentDisposition(filePath),
+@@
+       'x-local-file-size': String(stat.size),
+       'x-local-file-editable': EDITABLE_TEXT_EXTENSIONS.has(ext) ? '1' : '0',
+       'x-content-type-options': 'nosniff'
+-    }, ext);
++    });
+   } catch (error) {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:53:56Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/app/FilePreviewApp.jsx`**
+
+```diff
+@@
+ function previewKind(pathValue, contentType) {
+   const lowerType = String(contentType || '').toLowerCase();
+   const lowerPath = String(pathValue || '').toLowerCase();
++  if (lowerType.startsWith('image/') || /\.(?:png|jpe?g|webp|gif|svg|ico)(?:$|[:?#])/i.test(lowerPath)) {
++    return 'image';
++  }
++  if (lowerType.startsWith('video/') || /\.(?:mp4|m4v|mov|webm|ogv)(?:$|[:?#])/i.test(lowerPath)) {
++    return 'video';
++  }
++  if (lowerType.startsWith('audio/') || /\.(?:mp3|m4a|aac|wav|ogg|flac)(?:$|[:?#])/i.test(lowerPath)) {
++    return 'audio';
++  }
+   if (lowerType.includes('pdf') || /\.pdf(?:$|[:?#])/i.test(lowerPath)) {
+     return 'pdf';
+   }
+@@
+   return 'download';
+ }
+ 
++function isNativeMediaKind(kind) {
++  return kind === 'image' || kind === 'video' || kind === 'audio';
++}
++
+ function stripFrontmatter(value) {
+@@
+       }
+       setState({ loading: true, error: '', text: '', objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
+       try {
++        const pathKind = previewKind(filePath, '');
++        if (isNativeMediaKind(pathKind) || pathKind === 'pdf') {
++          setState({
++            loading: false,
++            error: '',
++            text: '',
++            objectUrl: '',
++            pdfData: null,
++            contentType: pathKind === 'pdf' ? 'application/pdf' : '',
++            mtimeMs: 0,
++            editable: false
++          });
++          return;
++        }
+         const response = await fetch(localFileApiPath(filePath, urlToken || getToken()), {
+           headers: getToken() ? { authorization: `Bearer ${getToken()}` } : {}
+         });
+@@
+-        {!state.loading && !state.error && kind === 'pdf' && state.pdfData ? (
++        {!state.loading && !state.error && kind === 'pdf' ? (
+           <PdfPreview data={state.pdfData} fileUrl={rawFileUrl} />
+         ) : null}
++        {!state.loading && !state.error && kind === 'image' ? (
++          <div className="file-preview-media-shell">
++            <img
++              className="file-preview-media"
++              src={rawFileUrl}
++              alt={title}
++              onError={() => setState((current) => ({ ...current, error: '图片加载失败' }))}
++            />
++          </div>
++        ) : null}
++        {!state.loading && !state.error && kind === 'video' ? (
++          <div className="file-preview-media-shell">
++            <video
++              className="file-preview-media"
++              src={rawFileUrl}
++              controls
++              playsInline
++              preload="metadata"
++              onError={() => setState((current) => ({ ...current, error: '视频加载失败' }))}
++            />
++          </div>
++        ) : null}
++        {!state.loading && !state.error && kind === 'audio' ? (
++          <div className="file-preview-media-shell is-audio">
++            <audio
++              className="file-preview-audio"
++              src={rawFileUrl}
++              controls
++              preload="metadata"
++              onError={() => setState((current) => ({ ...current, error: '音频加载失败' }))}
++            />
++          </div>
++        ) : null}
+         {!state.loading && !state.error && kind === 'download' && state.objectUrl ? (
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:54:02Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/app/PdfPreview.jsx`**
+
+```diff
+@@
+-  const source = useMemo(() => (data ? new Uint8Array(data.slice(0)) : null), [data]);
++  const source = useMemo(() => {
++    if (data) {
++      return { data: new Uint8Array(data.slice(0)) };
++    }
++    return fileUrl ? { url: fileUrl } : null;
++  }, [data, fileUrl]);
+@@
+-    const loadingTask = pdfjs.getDocument({ data: source });
++    const loadingTask = pdfjs.getDocument(source);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:54:06Z)**_
+
+后端和前端主逻辑已经改完：现在 PDF/媒体不会先整包读进 React state，浏览器/PDF.js 会直接用带 token 的 `/api/local-file` URL 去拉。下一步补样式和后端测试，尤其验证 `Range: bytes=...` 返回 `206`。
+
+_**Agent (gpt-5.5 2026-05-14 14:54:12Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/chat.css`**
+
+```diff
+@@
+ .file-preview-frame {
+   width: 100%;
+   height: 100%;
+   border: 0;
+   background: #fff;
+ }
+ 
++.file-preview-media-shell {
++  min-height: 100%;
++  padding: 14px;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  background: #f6f6f6;
++}
++
++.file-preview-media-shell.is-audio {
++  min-height: 240px;
++}
++
++.file-preview-media {
++  max-width: 100%;
++  max-height: calc(100dvh - 150px);
++  object-fit: contain;
++  border-radius: 8px;
++  background: #000;
++}
++
++.file-preview-audio {
++  width: min(100%, 560px);
++}
++
+ .file-preview-notice {
+   position: absolute;
+@@
+ [data-theme="dark"] .pdf-preview {
+   background: #000;
+ }
++
++[data-theme="dark"] .file-preview-media-shell {
++  background: #000;
++}
+ 
+ [data-theme="dark"] .pdf-preview-controls {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:54:32Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/static-service.test.mjs`**
+
+```diff
+@@
+     body: Buffer.alloc(0),
+     writeHead(statusCode, headers = {}) {
+       this.statusCode = statusCode;
+       this.headers = headers;
+     },
++    write(chunk = '') {
++      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
++      this.body = Buffer.concat([this.body, buffer]);
++    },
+     end(body = '') {
+-      this.body = Buffer.isBuffer(body) ? body : Buffer.from(String(body));
++      if (body) {
++        const buffer = Buffer.isBuffer(body) ? body : Buffer.from(String(body));
++        this.body = Buffer.concat([this.body, buffer]);
++      }
+     }
+   };
+ }
+@@
+   await fs.writeFile(path.join(root, 'report.md'), '# Report');
+   await fs.writeFile(path.join(root, 'brief.pdf'), Buffer.from('%PDF-1.7'));
++  await fs.writeFile(path.join(root, 'clip.mp3'), Buffer.from([0x49, 0x44, 0x33, 0x04]));
+   await fs.writeFile(path.join(root, '甘肃临夏萌宠乐园丨政府汇报项目前置简介.md'), '# 中文文件名');
+@@
+ test('sendLocalFile serves pdf files with pdf content type', async () => {
+   await withTempService(async (service, root) => {
+     const filePath = path.join(root, 'brief.pdf');
+@@
+   });
+ });
+ 
++test('sendLocalFile streams byte ranges for media-style preview requests', async () => {
++  await withTempService(async (service, root) => {
++    const filePath = path.join(root, 'brief.pdf');
++    const response = res();
++    await service.sendLocalFile(
++      req({ range: 'bytes=1-3' }),
++      response,
++      new URL(`http://local/api/local-file?path=${encodeURIComponent(filePath)}`)
++    );
++
++    assert.equal(response.statusCode, 206);
++    assert.equal(response.headers['accept-ranges'], 'bytes');
++    assert.equal(response.headers['content-range'], 'bytes 1-3/8');
++    assert.equal(response.headers['content-length'], 3);
++    assert.equal(response.body.toString('utf8'), 'PDF');
++  });
++});
++
++test('sendLocalFile exposes audio mime types for native preview controls', async () => {
++  await withTempService(async (service, root) => {
++    const filePath = path.join(root, 'clip.mp3');
++    const response = res();
++    await service.sendLocalFile(req(), response, new URL(`http://local/api/local-file?path=${encodeURIComponent(filePath)}`));
++
++    assert.equal(response.statusCode, 200);
++    assert.equal(response.headers['content-type'], 'audio/mpeg');
++    assert.equal(response.headers['accept-ranges'], 'bytes');
++    assert.equal(response.headers['content-length'], 4);
++    assert.deepEqual([...response.body], [0x49, 0x44, 0x33, 0x04]);
++  });
++});
++
+ test('sendLocalFile tolerates Codex style line suffixes on file links', async () => {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:54:40Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/server/static-service.js`**
+
+```diff
+@@
+- * 静态资源与本地图片/文本文件服务：MIME、缓存头、鉴权 local-image。
++ * 静态资源与本地文件服务：MIME、缓存头、鉴权 local-image 与 Range 流式传输。
+  *
+- * Keywords: static-service, local-files, gzip, spa-fallback
++ * Keywords: static-service, local-files, range, streaming, media, gzip
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:54:46Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/app/FilePreviewApp.jsx`**
+
+```diff
+@@
+- * 独立文件预览入口：拉取工作区文件、按类型渲染 PDF/ Markdown/文本或下载fallback，并提供主题化工具栏与外链分享。
++ * 独立文件预览入口：按类型渲染 PDF/ Markdown/文本/媒体或下载 fallback，并提供工具栏与外链分享。
+  *
+- * Keywords: file-preview, pdf, markdown, workspace-file
++ * Keywords: file-preview, pdf, markdown, media, workspace-file
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:54:53Z)**_
+
+样式和测试补上了，同时把文件头部职责说明也同步成“媒体/Range 流式传输”。我现在先跑静态服务测试，再跑相关构建检查；如果后端 mock 对 stream 行为有小偏差，我会顺手调掉。
+
+_**Agent (gpt-5.5 2026-05-14 14:54:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `node --test server/static-service.test.mjs`</summary>
+```
+Chunk ID: a0071e
+Wall time: 0.1997 seconds
+Process exited with code 0
+Original token count: 554
+Output:
+TAP version 13
+# Subtest: serveStatic returns a normal PWA file
+ok 1 - serveStatic returns a normal PWA file
+  ---
+  duration_ms: 20.98625
+  type: 'test'
+  ...
+# Subtest: serveStatic returns mjs files as JavaScript for module workers
+ok 2 - serveStatic returns mjs files as JavaScript for module workers
+  ---
+  duration_ms: 10.239916
+  type: 'test'
+  ...
+# Subtest: serveStatic blocks traversal outside the PWA root
+ok 3 - serveStatic blocks traversal outside the PWA root
+  ---
+  duration_ms: 7.858959
+  type: 'test'
+  ...
+# Subtest: serveStatic returns generated files from the generated root
+ok 4 - serveStatic returns generated files from the generated root
+  ---
+  duration_ms: 7.38425
+  type: 'test'
+  ...
+# Subtest: sendLocalFile serves markdown files inline from absolute paths
+ok 5 - sendLocalFile serves markdown files inline from absolute paths
+  ---
+  duration_ms: 8.566458
+  type: 'test'
+  ...
+# Subtest: sendLocalFile serves pdf files with pdf content type
+ok 6 - sendLocalFile serves pdf files with pdf content type
+  ---
+  duration_ms: 7.649709
+  type: 'test'
+  ...
+# Subtest: sendLocalFile streams byte ranges for media-style preview requests
+ok 7 - sendLocalFile streams byte ranges for media-style preview requests
+  ---
+  duration_ms: 3.6825
+  type: 'test'
+  ...
+# Subtest: sendLocalFile exposes audio mime types for native preview controls
+ok 8 - sendLocalFile exposes audio mime types for native preview controls
+  ---
+  duration_ms: 6.652
+  type: 'test'
+  ...
+# Subtest: sendLocalFile tolerates Codex style line suffixes on file links
+ok 9 - sendLocalFile tolerates Codex style line suffixes on file links
+  ---
+  duration_ms: 9.046125
+  type: 'test'
+  ...
+# Subtest: sendLocalFile encodes non-ascii filenames in content-disposition
+ok 10 - sendLocalFile encodes non-ascii filenames in content-disposition
+  ---
+  duration_ms: 5.683208
+  type: 'test'
+  ...
+# Subtest: writeLocalFile saves editable text files with conflict protection and backup
+ok 11 - writeLocalFile saves editable text files with conflict protection and backup
+  ---
+  duration_ms: 25.413542
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 256.150708
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:54:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run build`</summary>
+```
+Chunk ID: d68dae
+Wall time: 1.0021 seconds
+Process running with session ID 44172
+Original token count: 37
+Output:
+
+> codexmobile@1.4.0 build
+> vite build --config client/vite.config.js
+
+vite v7.3.2 building client environment for production...
+transforming...
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:54:57Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 6db73b
+Wall time: 5.0044 seconds
+Process running with session ID 44172
+Original token count: 13
+Output:
+✓ 4012 modules transformed.
+rendering chunks...
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:55:05Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 06f443
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1309
+Output:
+computing gzip size...
+dist/assets/manifest-DkwGc9r2.webmanifest                 0.66 kB
+dist/index.html                                           2.01 kB │ gzip:   0.88 kB
+dist/assets/pdf.worker-B1D2UnXD.mjs                   2,161.15 kB
+dist/assets/index-LKuzFj9Z.css                          119.31 kB │ gzip:  20.95 kB
+dist/assets/channel-BUzrCFCz.js                           0.12 kB │ gzip:   0.13 kB
+dist/assets/init-Gi6I4Gst.js                              0.15 kB │ gzip:   0.13 kB
+dist/assets/chunk-QZHKN3VN-CZsf_uqs.js                    0.19 kB │ gzip:   0.16 kB
+dist/assets/chunk-4BX2VUAB-CTUWlxgy.js                    0.23 kB │ gzip:   0.17 kB
+dist/assets/chunk-55IACEB6-CtKjh09_.js                    0.24 kB │ gzip:   0.21 kB
+dist/assets/chunk-FMBD7UC4-IslkmmTp.js                    0.37 kB │ gzip:   0.27 kB
+dist/assets/stateDiagram-v2-BHNVJYJU-DCIN9qhe.js          0.39 kB │ gzip:   0.29 kB
+dist/assets/classDiagram-4FO5ZUOK-CGgQJbZw.js             0.47 kB │ gzip:   0.32 kB
+dist/assets/classDiagram-v2-Q7XG4LA2-CGgQJbZw.js          0.47 kB │ gzip:   0.32 kB
+dist/assets/chunk-2J33WTMH-Cw-LVuZX.js                    0.51 kB │ gzip:   0.36 kB
+dist/assets/infoDiagram-5YYISTIA-CfHmPnCA.js              0.59 kB │ gzip:   0.41 kB
+dist/assets/ordinal-Cboi1Yqb.js                           1.19 kB │ gzip:   0.57 kB
+dist/assets/chunk-ND2GUHAM--xab26lh.js                    1.88 kB │ gzip:   0.83 kB
+dist/assets/diagram-5GNKFQAL-CnQlEpk1.js                  2.75 kB │ gzip:   1.36 kB
+dist/assets/arc-BVclnTqG.js                               3.44 kB │ gzip:   1.49 kB
+dist/assets/diagram-LMA3HP47-6xVF6AXV.js                  4.21 kB │ gzip:   1.83 kB
+dist/assets/defaultLocale-DX6XiGOO.js                     4.69 kB │ gzip:   2.18 kB
+dist/assets/pieDiagram-4H26LBE5-CAJB2Luj.js               5.27 kB │ gzip:   2.34 kB
+dist/assets/linear-BI902LoD.js                            5.66 kB │ gzip:   2.31 kB
+dist/assets/diagram-2AECGRRQ-C658o8Z_.js                  5.81 kB │ gzip:   2.46 kB
+dist/assets/stateDiagram-AJRCARHV-BSE2mdiX.js            10.36 kB │ gzip:   3.62 kB
+dist/assets/diagram-KO2AKTUF-B9gu4Ijd.js                 10.72 kB │ gzip:   4.13 kB
+dist/assets/dagre-BM42HDAG-CbSzKZQm.js                   11.14 kB │ gzip:   4.11 kB
+dist/assets/diagram-OG6HWLK6-bLbUkCN9.js                 15.81 kB │ gzip:   5.66 kB
+dist/assets/ishikawaDiagram-YF4QCWOH-Cn5s1sSa.js         17.47 kB │ gzip:   6.64 kB
+dist/assets/kanban-definition-UN3LZRKU-CvI3_ZZ0.js       20.29 kB │ gzip:   7.20 kB
+dist/assets/mindmap-definition-RKZ34NQL-CBqBzoy6.js      23.18 kB │ gzip:   7.83 kB
+dist/assets/sankeyDiagram-5OEKKPKP-Dutzdgeq.js           23.20 kB │ gzip:   8.56 kB
+dist/assets/journeyDiagram-JHISSGLW-Q90b27Uu.js          23.57 kB │ gzip:   8.35 kB
+dist/assets/graph--OzhPTMs.js                            23.92 kB │ gzip:   8.32 kB
+dist/assets/wardleyDiagram-YWT4CUSO-bj3QPdI-.js          25.50 kB │ gzip:   6.79 kB
+dist/assets/erDiagram-TEJ5UH35-C3hFVhyk.js               26.86 kB │ gzip:   9.34 kB
+dist/assets/gitGraphDiagram-PVQCEYII-DmXQb0Gd.js         29.42 kB │ gzip:   8.70 kB
+dist/assets/timeline-definition-PNZ67QCA-CO0PG6KU.js     30.83 kB │ gzip:  10.15 kB
+dist/assets/requirementDiagram-4Y6WPE33-D7FBP99m.js      31.00 kB │ gzip:   9.74 kB
+dist/assets/quadrantDiagram-W4KKPZXB-Cn2OgI1I.js         34.02 kB │ gzip:   9.98 kB
+dist/assets/layout-SsrduOYp.js                           35.84 kB │ gzip:  12.87 kB
+dist/assets/chunk-AQP2D5EJ-TUR26f8N.js                   37.11 kB │ gzip:  12.11 kB
+dist/assets/xychartDiagram-2RQKCTM6-9HBXHpaB.js          40.39 kB │ gzip:  11.56 kB
+dist/assets/vennDiagram-CIIHVFJN-BW44wAwn.js             41.43 kB │ gzip:  15.47 kB
+dist/assets/chunk-727SXJPM-CRWA37H1.js                   48.94 kB │ gzip:  15.70 kB
+dist/assets/flowDiagram-I6XJVG4X-aOGE8NJF.js             60.50 kB │ gzip:  19.37 kB
+dist/assets/ganttDiagram-6RSMTGT7-DdbVdEvx.js            69.57 kB │ gzip:  23.48 kB
+dist/assets/c4Diagram-AAUBKEIU-CQzNMKwz.js               69.94 kB │ gzip:  19.63 kB
+dist/assets/blockDiagram-GPEHLZMM-C96uneEK.js            73.53 kB │ gzip:  21.22 kB
+dist/assets/cose-bilkent-S5V4N54A-DgpQG0a5.js            81.70 kB │ gzip:  22.47 kB
+dist/assets/sequenceDiagram-3UESZ5HK-Qe3rlKfl.js        116.87 kB │ gzip:  31.04 kB
+dist/assets/architectureDiagram-3BPJPVTR-DgPobamS.js    149.43 kB │ gzip:  42.18 kB
+dist/assets/katex-DHMw6HUq.js                           259.05 kB │ gzip:  76.99 kB
+dist/assets/cytoscape.esm-DH6-wILU.js                   441.80 kB │ gzip: 141.55 kB
+dist/assets/mermaid.core-DcXhuh4p.js                    605.97 kB │ gzip: 144.61 kB
+dist/assets/wardley-L42UT6IY-ffD7NKus.js                612.51 kB │ gzip: 147.50 kB
+dist/assets/index-BAM8t8uS.js                           963.18 kB │ gzip: 295.33 kB
+
+(!) Some 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:55:18Z)**_
+
+构建也过了，只有既有的大 chunk warning。为了不只停在单元测试，我再做一层本地 HTTP 验证：确认服务能返回 `206 Partial Content`，并用内置浏览器打开预览路由看页面能正常挂载。
+
+_**Agent (gpt-5.5 2026-05-14 14:55:19Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `lsof -nP -iTCP:3321 -sTCP:LISTEN || true`</summary>
+```
+Chunk ID: 3be4e0
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 41
+Output:
+COMMAND   PID       USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    24082 xiayanghui   15u  IPv4 0x3a9a51229434deca      0t0  TCP *:3321 (LISTEN)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:55:19Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `printf 'stream-preview-check' > /tmp/codexmobile-stream-preview.txt && curl -sS -D - -H 'Range: bytes=7-13' 'http://127.0.0.1:3321/api/local-file?path=/tmp/codexmobile-stream-preview.txt' | sed -n '1,18p'`</summary>
+```
+Chunk ID: db0725
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 61
+Output:
+HTTP/1.1 401 Unauthorized
+content-type: application/json; charset=utf-8
+cache-control: no-store
+Date: Thu, 14 May 2026 14:55:19 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"error":"Pairing required"}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:55:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "Pairing required|authorization|Bearer|token" server client/src/api.js scripts -g '*.js' -g '*.mjs' | head -120`</summary>
+```
+Chunk ID: 0ff7b2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2618
+Output:
+client/src/api.js:4: * Keywords: fetch, api, bearer-token, localStorage, timeout
+client/src/api.js:21:export function setToken(token) {
+client/src/api.js:22:  localStorage.setItem(TOKEN_KEY, token);
+client/src/api.js:31:  const token = getToken();
+client/src/api.js:37:    ...(token ? { authorization: `Bearer ${token}` } : {}),
+client/src/api.js:77:  const token = getToken();
+client/src/api.js:80:    ...(token ? { authorization: `Bearer ${token}` } : {}),
+client/src/api.js:114:  const token = encodeURIComponent(getToken());
+client/src/api.js:116:  return `${protocol}//${window.location.host}/ws?token=${token}`;
+server/session-message-reader.js:282:      tokenLimit: autoCompactLimit,
+server/session-message-reader.js:306:function tokenUsageFromPayload(payload) {
+server/session-message-reader.js:308:  const last = info.last_token_usage && typeof info.last_token_usage === 'object' ? info.last_token_usage : {};
+server/session-message-reader.js:309:  const total = info.total_token_usage && typeof info.total_token_usage === 'object' ? info.total_token_usage : {};
+server/session-message-reader.js:311:    inputTokens: positiveNumber(last.input_tokens ?? total.input_tokens),
+server/session-message-reader.js:312:    totalTokens: positiveNumber(total.total_tokens ?? last.total_tokens),
+server/session-message-reader.js:414:  if (type !== 'token_count') {
+server/session-message-reader.js:418:  const usage = tokenUsageFromPayload(payload);
+server/index.js:22:  extractBearerToken,
+server/index.js:207:  return verifyToken(extractBearerToken(req, url), { remoteAddress: remoteAddress(req) });
+server/index.js:217:  sendJson(res, 401, { error: 'Pairing required' });
+server/index.js:798:    const token = url.searchParams.get('token') || '';
+server/index.js:799:    const ok = await verifyToken(token, { remoteAddress: remoteAddress(req) });
+scripts/lark-cli-guard.mjs:43:    .replace(/"access[_-]?token"\s*:\s*"[^"]+"/gi, '"accessToken":"****"')
+scripts/lark-cli-guard.mjs:44:    .replace(/"refresh[_-]?token"\s*:\s*"[^"]+"/gi, '"refreshToken":"****"')
+server/image-generator.js:49:  return message.replace(/Bearer\s+[A-Za-z0-9._~-]+/g, 'Bearer [hidden]');
+server/image-generator.js:167:    const headers = apiKey ? { authorization: `Bearer ${apiKey}` } : {};
+server/codex-runner.js:352:  const last = info.last_token_usage && typeof info.last_token_usage === 'object' ? info.last_token_usage : {};
+server/codex-runner.js:353:  const total = info.total_token_usage && typeof info.total_token_usage === 'object' ? info.total_token_usage : {};
+server/codex-runner.js:354:  const inputTokens = positiveNumber(last.input_tokens ?? total.input_tokens);
+server/codex-runner.js:355:  const totalTokens = positiveNumber(total.total_tokens ?? last.total_tokens);
+server/codex-runner.js:577:function tokenUsagePayload(tokenUsage = {}) {
+server/codex-runner.js:578:  const last = tokenUsage.last || {};
+server/codex-runner.js:579:  const total = tokenUsage.total || {};
+server/codex-runner.js:582:      last_token_usage: {
+server/codex-runner.js:583:        input_tokens: last.inputTokens,
+server/codex-runner.js:584:        cached_input_tokens: last.cachedInputTokens,
+server/codex-runner.js:585:        output_tokens: last.outputTokens,
+server/codex-runner.js:586:        reasoning_output_tokens: last.reasoningOutputTokens,
+server/codex-runner.js:587:        total_tokens: last.totalTokens
+server/codex-runner.js:589:      total_token_usage: {
+server/codex-runner.js:590:        input_tokens: total.inputTokens,
+server/codex-runner.js:591:        cached_input_tokens: total.cachedInputTokens,
+server/codex-runner.js:592:        output_tokens: total.outputTokens,
+server/codex-runner.js:593:        reasoning_output_tokens: total.reasoningOutputTokens,
+server/codex-runner.js:594:        total_tokens: total.totalTokens
+server/codex-runner.js:596:      model_context_window: tokenUsage.modelContextWindow
+server/codex-runner.js:696:  if (method === 'thread/tokenUsage/updated') {
+server/codex-runner.js:698:    applyTokenCountToContextState(state.context, tokenUsagePayload(params.tokenUsage), timestamp);
+server/session-message-reader.test.mjs:26:          type: 'token_count',
+server/session-message-reader.test.mjs:29:            last_token_usage: { input_tokens: 25000 },
+server/session-message-reader.test.mjs:30:            total_token_usage: { total_tokens: 30000 }
+server/session-message-reader.test.mjs:38:          type: 'token_count',
+server/session-message-reader.test.mjs:41:            last_token_usage: { input_tokens: 10000 },
+server/session-message-reader.test.mjs:42:            total_token_usage: { total_tokens: 13000 }
+server/auth.js:2: * CodexMobile 配对码、设备信任与 Bearer token 校验（HTTP/WebSocket）。
+server/auth.js:4: * Keywords: auth, pairing, bearer-token, trusted-devices
+server/auth.js:9: * - extractBearerToken / verifyToken / pairDevice。
+server/a
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:55:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `curl -sS http://127.0.0.1:3321/api/status | head -c 500`</summary>
+```
+Chunk ID: 7c6740
+Wall time: 0.0920 seconds
+Process exited with code 0
+Original token count: 125
+Output:
+{"connected":true,"desktopBridge":{"strict":true,"connected":true,"mode":"desktop-ipc","reason":null,"socketPath":"/var/folders/bx/grk73b6n1js274nxq2f5shsh0000gn/T/codex-ipc/ipc-501.sock","checkedAt":"2026-05-14T14:55:25.416Z","capabilities":{"read":true,"sendToOpenDesktopThread":true,"createThread":false,"createThreadReason":"当前 Codex Desktop IPC 只暴露已有线程接管入口，还没有开放外部新建桌面线程入口。","createThreadViaBackground":true,"backgroundCodex":true}},"h
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:55:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,180p' server/auth.js`</summary>
+```
+Chunk ID: b8cb9e
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1150
+Output:
+/**
+ * CodexMobile 配对码、设备信任与 Bearer token 校验（HTTP/WebSocket）。
+ *
+ * Keywords: auth, pairing, bearer-token, trusted-devices
+ *
+ * Exports:
+ * - DATA_DIR — state 根目录。
+ * - initializeAuth / getPairingCode / getTrustedDeviceCount。
+ * - extractBearerToken / verifyToken / pairDevice。
+ *
+ * Inward（本模块依赖/组装的关键符号）: Node crypto/fs、.codexmobile/state JSON。
+ *
+ * Outward（谁在用/调用场景）: server/index、各需鉴权路由。
+ *
+ * 不负责: 第三方 OAuth。
+ */
+import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+export const DATA_DIR = process.env.CODEXMOBILE_HOME || path.join(process.cwd(), '.codexmobile', 'state');
+const STATE_FILE = path.join(DATA_DIR, 'auth-state.json');
+const FIXED_PAIRING_CODE_FILE = path.join(DATA_DIR, 'pairing-code.txt');
+const PAIRING_CODE_PATTERN = /^\d{6}$/;
+
+let authState = null;
+let fixedPairingCode = false;
+let pairingCode = createPairingCode();
+
+function createPairingCode() {
+  return String(crypto.randomInt(100000, 999999));
+}
+
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+async function readState() {
+  try {
+    const raw = await fs.readFile(STATE_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    return {
+      devices: Array.isArray(parsed.devices) ? parsed.devices : []
+    };
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.warn('[auth] Failed to read auth state, starting fresh:', error.message);
+    }
+    return { devices: [] };
+  }
+}
+
+async function writeState() {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(STATE_FILE, JSON.stringify(authState, null, 2), 'utf8');
+}
+
+async function readFixedPairingCode() {
+  const envCode = String(process.env.CODEXMOBILE_PAIRING_CODE || '').trim();
+  if (envCode) {
+    if (PAIRING_CODE_PATTERN.test(envCode)) {
+      return envCode;
+    }
+    console.warn('[auth] Ignoring CODEXMOBILE_PAIRING_CODE because it is not a 6 digit code.');
+  }
+
+  try {
+    const fileCode = (await fs.readFile(FIXED_PAIRING_CODE_FILE, 'utf8')).trim();
+    if (PAIRING_CODE_PATTERN.test(fileCode)) {
+      return fileCode;
+    }
+    console.warn(`[auth] Ignoring ${FIXED_PAIRING_CODE_FILE} because it is not a 6 digit code.`);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.warn('[auth] Failed to read fixed pairing code:', error.message);
+    }
+  }
+
+  return null;
+}
+
+export async function initializeAuth() {
+  authState = await readState();
+  const configuredPairingCode = await readFixedPairingCode();
+  if (configuredPairingCode) {
+    pairingCode = configuredPairingCode;
+    fixedPairingCode = true;
+  }
+  await writeState();
+  return { pairingCode, fixedPairingCode, trustedDevices: authState.devices.length };
+}
+
+export function getPairingCode() {
+  return pairingCode;
+}
+
+export function getTrustedDeviceCount() {
+  return authState?.devices?.length || 0;
+}
+
+export function extractBearerToken(req, url = null) {
+  const header = req.headers.authorization || '';
+  if (header.toLowerCase().startsWith('bearer ')) {
+    return header.slice(7).trim();
+  }
+
+  const fallback = req.headers['x-codexmobile-token'];
+  if (typeof fallback === 'string' && fallback.trim()) {
+    return fallback.trim();
+  }
+  return url?.searchParams?.get('token')?.trim() || '';
+}
+
+export async function verifyToken(token, metadata = {}) {
+  if (!token || !authState) {
+    return false;
+  }
+
+  const tokenHash = hashToken(token);
+  const device = authState.devices.find((entry) => entry.tokenHash === tokenHash);
+  if (!device) {
+    return false;
+  }
+
+  device.lastSeenAt = new Date().toISOString();
+  device.lastRemoteAddress = metadata.remoteAddress || device.lastRemoteAddress || null;
+  await writeState();
+  return true;
+}
+
+export async function pairDevice({ code, deviceName, userAgent, remoteAddress }) {
+  if (!code || String(code).trim() !== pairingCode) {
+    return null;
+  }
+
+  const token = crypto.randomBytes(32).toString('base64url');
+  const now = new Date().toISOString();
+  const device = {
+    id: crypto.randomUUID(),
+    name: deviceName || 'iPhone',
+    tokenHash: hashToken(token),
+    createdAt: now,
+    lastSeenAt: now,
+    userAgent: userAgent || null,
+    lastRemoteAddress: remoteAddress || null
+  };
+
+  authState.devices.push(device);
+  if (!fixedPairingCode) {
+    pairingCode = createPairingCode();
+  }
+  await writeState();
+
+  return {
+    token,
+    device: {
+      id: device.id,
+      name: device.name,
+      createdAt: device.createdAt
+    }
+  };
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:55:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "authState|trusted|devices|pair" server scripts .codexmobile -g '*.js' -g '*.mjs' -g '*.json' 2>/dev/null | head -120`</summary>
+```
+Chunk ID: 6424f9
+Wall time: 0.0086 seconds
+Process exited with code 0
+Original token count: 231084
+Output:
+Total output lines: 51
+
+scripts/lark-cli-guard.mjs:84:      message: `This turn already ran slides +create for "${title}". Do not create another PPT. Reuse the previous xml_presentation_id and repair/append pages on the same presentation.`,
+server/codex-config-model-settings.test.mjs:43:    updateRootTomlAssignments('[projects."/repo"]\ntrust_level = "trusted"\n', {
+server/codex-config-model-settings.test.mjs:52:      'trust_level = "trusted"',
+server/index.js:26:  pairDevice,
+server/index.js:612:      trustedDevices: getTrustedDeviceCount()
+server/index.js:626:  if (method === 'POST' && pathname === '/api/pair') {
+server/index.js:628:    const paired = await pairDevice({
+server/index.js:634:    if (!paired) {
+server/index.js:635:      sendJson(res, 403, { error: 'Invalid pairing code' });
+server/index.js:638:    sendJson(res, 200, paired);
+server/index.js:828:    console.log(`Pairing code: ${getPairingCode()} (${auth.trustedDevices} trusted device(s)${auth.fixedPairingCode ? ', fixed' : ''})`);
+server/session-index-builder.js:305:    trusted: true,
+server/session-index-builder.js:322:      existing.trusted = trustLevel === 'trusted';
+server/session-index-builder.js:333:    trusted: trustLevel === 'trusted',
+server/session-index-builder.js:386:      )?.trustLevel || 'trusted',
+server/auth.js:4: * Keywords: auth, pairing, bearer-token, trusted-devices
+server/auth.js:9: * - extractBearerToken / verifyToken / pairDevice。
+server/auth.js:23:const FIXED_PAIRING_CODE_FILE = path.join(DATA_DIR, 'pairing-code.txt');
+server/auth.js:26:let authState = null;
+server/auth.js:28:let pairingCode = createPairingCode();
+server/auth.js:43:      devices: Array.isArray(parsed.devices) ? parsed.devices : []
+server/auth.js:49:    return { devices: [] };
+server/auth.js:55:  await fs.writeFile(STATE_FILE, JSON.stringify(authState, null, 2), 'utf8');
+server/auth.js:75:      console.warn('[auth] Failed to read fixed pairing code:', error.message);
+server/auth.js:83:  authState = await readState();
+server/auth.js:86:    pairingCode = configuredPairingCode;
+server/auth.js:90:  return { pairingCode, fixedPairingCode, trustedDevices: authState.devices.length };
+server/auth.js:94:  return pairingCode;
+server/auth.js:98:  return authState?.devices?.length || 0;
+server/auth.js:115:  if (!token || !authState) {
+server/auth.js:120:  const device = authState.devices.find((entry) => entry.tokenHash === tokenHash);
+server/auth.js:131:export async function pairDevice({ code, deviceName, userAgent, remoteAddress }) {
+server/auth.js:132:  if (!code || String(code).trim() !== pairingCode) {
+server/auth.js:148:  authState.devices.push(device);
+server/auth.js:150:    pairingCode = createPairingCode();
+server/session-index-builder.test.mjs:28:        { path: projectB, trustLevel: 'trusted' },
+server/session-index-builder.test.mjs:29:        { path: projectA, trustLevel: 'untrusted' }
+server/session-index-builder.test.mjs:156:  assert.equal(index.projectById.get(projectAId).trusted, false);
+server/session-index-builder.test.mjs:200:      projects: [{ path: projectA, trustLevel: 'trusted' }]
+server/session-index-builder.test.mjs:256:      projects: [{ path: projectA, trustLevel: 'trusted' }]
+server/session-index-builder.test.mjs:300:    config: { projects: [{ path: projectA, trustLevel: 'trusted' }], context: {} },
+server/session-index-builder.test.mjs:345:    config: { projects: [{ path: projectA, trustLevel: 'trusted' }], context: {} },
+.codexmobile/state/auth-state.json:2:  "devices": [
+server/feishu-skills.js:43:    '- In one user task, run `slides +create` at most once per title. If it partially fails, keep the returned `xml_presentation_id` and repair/append pages on that same PPT; do not create another PPT.',
+server/desktop-thread-projector.js:35:const IMAGE_EVIDENCE_RE = /^The next image is untrusted page evidence\b/im;
+server/desktop-thread-projector.js:37:const COMMENT_STOP_RE = /^(?:#{1,6}\s+|File:|Side:|Lines:|Node position:|Untrusted page evidence|Page URL:|Frame:|Target:|Target selector:|Target path:|Saved marker screenshot:)/;
+server/codex-config.js:675:    projectMap.set(cwd, { path: cwd, trustLevel: 'trusted' });
+server/codex-quota.js:34:const FIXED_PAIRING_CODE_FILE = path.join(process.cwd(), '.codexmobile', 'state', 'pairing-code.txt');
+server/codex-data.js:154:    trusted: entry.trusted,
+server/session-message-reader.test.mjs:808:            'The next image is untrusted page evidence from the browser page for Comment 1.'
+.codexmobile/state/session-cache.json:1:{"version":1,"syncedAt":"2026-05-14T14:55:27.478Z","config":{"provider":"codex","model":"gpt-5.5","modelShort":"5.5 中","reasoningEffort":"high","modelContextWindow":null,"modelAutoCompactTokenLimit":null,"baseUrl":null,"models":[{"value":"gpt-5.5","label":"GPT-5.5"},{"value":"gpt-5.4","label":"gpt-5.4"},{"value":"gpt-5.4-mini","label":"GPT-5.4-Mini"},{"value":"gpt-5.3-c
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:55:37Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `curl -sS http://127.0.0.1:3321/api/status | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const j=JSON.parse(s); console.log(JSON.stringify({pairingCode:j.pairingCode, trustedDevices:j.trustedDevices, connected:j.connected}, null, 2));})'`</summary>
+```
+Chunk ID: 413f78
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 6
+Output:
+{
+  "connected": true
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:55:44Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "PORT|3321|listen" server/index.js scripts/start-server.mjs`</summary>
+```
+Chunk ID: d5dea2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 377
+Output:
+scripts/start-server.mjs:21:const port = Number(process.env.PORT || 3321);
+scripts/start-server.mjs:133:function listenerPidsForPort(value) {
+scripts/start-server.mjs:170:  const pids = listenerPidsForPort(port).filter((pid) => {
+server/index.js:72:import { createDesktopIpcBroadcastListener } from './desktop-ipc-broadcast-listener.js';
+server/index.js:99:const PORT = Number(process.env.PORT || 3321);
+server/index.js:101:const HTTPS_PORT = Number(process.env.HTTPS_PORT || 3443);
+server/index.js:198:  const host = req.headers['x-forwarded-host'] || req.headers.host || `127.0.0.1:${PORT}`;
+server/index.js:591:    port: PORT,
+server/index.js:769:  const url = new URL(req.url || '/', `http://${req.headers.host || `127.0.0.1:${PORT}`}`);
+server/index.js:792:    const url = new URL(req.url || '/', `http://${req.headers.host || `127.0.0.1:${PORT}`}`);
+server/index.js:826:  server.listen(PORT, HOST, () => {
+server/index.js:827:    console.log(`CodexMobile listening on http://${HOST}:${PORT}`);
+server/index.js:829:    console.log('Use Tailscale and open http://<this-pc-tailscale-ip>:3321 on iPhone.');
+server/index.js:840:    httpsServer.listen(HTTPS_PORT, HOST, () => {
+server/index.js:841:      console.log(`CodexMobile HTTPS listening on https://${HOST}:${HTTPS_PORT}`);
+server/index.js:845:        console.log(`Use Tailscale HTTPS: https://<your-device>.<your-tailnet>.ts.net:${HTTPS_PORT}/`);
+server/index.js:852:      console.warn(`[server] Failed to start HTTPS listener: ${error.message}`);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:55:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `tmp_home=$(mktemp -d /tmp/codexmobile-auth-XXXXXX); CODEXMOBILE_HOME="$tmp_home" CODEXMOBILE_PAIRING_CODE=123456 PORT=3335 HOST=127.0.0.1 node server/index.js`</summary>
+```
+Chunk ID: e303db
+Wall time: 1.0011 seconds
+Process running with session ID 85339
+Original token count: 73
+Output:
+CodexMobile listening on http://127.0.0.1:3335
+Pairing code: 123456 (0 trusted device(s), fixed)
+Use Tailscale and open http://<this-pc-tailscale-ip>:3321 on iPhone.
+CodexMobile HTTPS disabled: certificate not found at /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/tls/server.pfx
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `token=$(curl -sS -X POST http://127.0.0.1:3335/api/pair -H 'content-type: application/json' --data '{"code":"123456","deviceName":"verification"}' | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).token||""))'); printf 'stream-preview-check' > /tmp/codexmobile-stream-preview.txt; curl -sS -D - -H "Authorization: Bearer $token" -H 'Range: bytes=7-13' 'http://127.0.0.1:3335/api/local-file?path=/tmp/codexmobile-stream-preview.txt' | sed -n '1,18p'`</summary>
+```
+Chunk ID: 760cc1
+Wall time: 0.0311 seconds
+Process exited with code 0
+Original token count: 128
+Output:
+HTTP/1.1 206 Partial Content
+content-type: text/plain; charset=utf-8
+cache-control: private, max-age=60
+content-disposition: inline; filename="codexmobile-stream-preview.txt"; filename*=UTF-8''codexmobile-stream-preview.txt
+x-local-file-mtime-ms: 1778770562356
+x-local-file-size: 20
+x-local-file-editable: 1
+x-content-type-options: nosniff
+accept-ranges: bytes
+content-range: bytes 7-13/20
+content-length: 7
+Date: Thu, 14 May 2026 14:56:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+preview
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `token=$(curl -sS -X POST http://127.0.0.1:3335/api/pair -H 'content-type: application/json' --data '{"code":"123456","deviceName":"verification-media"}' | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).token||""))'); printf 'ID3\004' > /tmp/codexmobile-audio.mp3; curl -sS -D - -H "Authorization: Bearer $token" 'http://127.0.0.1:3335/api/local-file?path=/tmp/codexmobile-audio.mp3' | sed -n '1,14p'`</summary>
+```
+Chunk ID: bf8446
+Wall time: 0.0205 seconds
+Process exited with code 0
+Original token count: 107
+Output:
+HTTP/1.1 200 OK
+content-type: audio/mpeg
+cache-control: private, max-age=60
+content-disposition: inline; filename="codexmobile-audio.mp3"; filename*=UTF-8''codexmobile-audio.mp3
+x-local-file-mtime-ms: 1778770562356
+x-local-file-size: 4
+x-local-file-editable: 0
+x-content-type-options: nosniff
+accept-ranges: bytes
+content-length: 4
+Date: Thu, 14 May 2026 14:56:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:13Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `curl -sS -X POST http://127.0.0.1:3335/api/pair -H 'content-type: application/json' --data '{"code":"123456","deviceName":"browser-preview"}' | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).token||""))'`</summary>
+```
+Chunk ID: 9fe6f6
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 11
+Output:
+tklC48i9voe5YvlPJOa8RHXatlLrYU5gDEy13fnLn8w
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:17Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_resize"><details>
+<summary>Tool use: **browser_resize**</summary>
+```
+Wall time: 5.1182 seconds
+Output:
+[{"type":"text","text":"### Error\nError: Browser is already in use for /Users/xiayanghui/Library/Caches/ms-playwright/mcp-chrome-548b6d1, use --isolated to run multiple instances of the same browser"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:26Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_navigate"><details>
+<summary>Tool use: **browser_navigate**</summary>
+```
+Wall time: 5.0254 seconds
+Output:
+[{"type":"text","text":"### Error\nError: Browser is already in use for /Users/xiayanghui/Library/Caches/ms-playwright/mcp-chrome-548b6d1, use --isolated to run multiple instances of the same browser"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:37Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+write_stdin failed: stdin is closed for this session; rerun exec_command with tty=true to keep stdin open
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `lsof -tiTCP:3335 -sTCP:LISTEN | xargs -r kill`</summary>
+```
+Chunk ID: 79c63c
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:46Z)**_
+
+<tool-use data-tool-type="task" data-tool-name="update_plan"><details>
+<summary>Tool use: **update_plan**</summary>
+**Agent task list:**
+- [X] 审阅现有本地文件预览服务和测试
+- [X] 实现后端 Range/streaming 与媒体 MIME
+- [X] 实现前端 PDF URL/图片视频音频原生预览
+- [⚡] 补测试并跑验证
+
+```
+Plan updated
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff -- client/src/app/FilePreviewApp.jsx client/src/app/PdfPreview.jsx client/src/styles/chat.css server/static-service.js server/static-service.test.mjs`</summary>
+```
+Chunk ID: 25b903
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3647
+Output:
+diff --git a/client/src/app/FilePreviewApp.jsx b/client/src/app/FilePreviewApp.jsx
+index 610a983..cf50503 100644
+--- a/client/src/app/FilePreviewApp.jsx
++++ b/client/src/app/FilePreviewApp.jsx
+@@ -1,7 +1,7 @@
+ /**
+- * 独立文件预览入口：拉取工作区文件、按类型渲染 PDF/ Markdown/文本或下载fallback，并提供主题化工具栏与外链分享。
++ * 独立文件预览入口：按类型渲染 PDF/ Markdown/文本/媒体或下载 fallback，并提供工具栏与外链分享。
+  *
+- * Keywords: file-preview, pdf, markdown, workspace-file
++ * Keywords: file-preview, pdf, markdown, media, workspace-file
+  *
+  * Exports:
+  * - default — `FilePreviewApp`（由 `main` 按需挂载的整页预览壳）。
+@@ -29,6 +29,15 @@ function fileNameFromPath(value) {
+ function previewKind(pathValue, contentType) {
+   const lowerType = String(contentType || '').toLowerCase();
+   const lowerPath = String(pathValue || '').toLowerCase();
++  if (lowerType.startsWith('image/') || /\.(?:png|jpe?g|webp|gif|svg|ico)(?:$|[:?#])/i.test(lowerPath)) {
++    return 'image';
++  }
++  if (lowerType.startsWith('video/') || /\.(?:mp4|m4v|mov|webm|ogv)(?:$|[:?#])/i.test(lowerPath)) {
++    return 'video';
++  }
++  if (lowerType.startsWith('audio/') || /\.(?:mp3|m4a|aac|wav|ogg|flac)(?:$|[:?#])/i.test(lowerPath)) {
++    return 'audio';
++  }
+   if (lowerType.includes('pdf') || /\.pdf(?:$|[:?#])/i.test(lowerPath)) {
+     return 'pdf';
+   }
+@@ -44,6 +53,10 @@ function previewKind(pathValue, contentType) {
+   return 'download';
+ }
+ 
++function isNativeMediaKind(kind) {
++  return kind === 'image' || kind === 'video' || kind === 'audio';
++}
++
+ function stripFrontmatter(value) {
+   const text = String(value || '');
+   if (!text.startsWith('---')) {
+@@ -120,6 +133,20 @@ export default function FilePreviewApp() {
+       }
+       setState({ loading: true, error: '', text: '', objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
+       try {
++        const pathKind = previewKind(filePath, '');
++        if (isNativeMediaKind(pathKind) || pathKind === 'pdf') {
++          setState({
++            loading: false,
++            error: '',
++            text: '',
++            objectUrl: '',
++            pdfData: null,
++            contentType: pathKind === 'pdf' ? 'application/pdf' : '',
++            mtimeMs: 0,
++            editable: false
++          });
++          return;
++        }
+         const response = await fetch(localFileApiPath(filePath, urlToken || getToken()), {
+           headers: getToken() ? { authorization: `Bearer ${getToken()}` } : {}
+         });
+@@ -393,9 +420,42 @@ export default function FilePreviewApp() {
+             spellCheck={false}
+           />
+         ) : null}
+-        {!state.loading && !state.error && kind === 'pdf' && state.pdfData ? (
++        {!state.loading && !state.error && kind === 'pdf' ? (
+           <PdfPreview data={state.pdfData} fileUrl={rawFileUrl} />
+         ) : null}
++        {!state.loading && !state.error && kind === 'image' ? (
++          <div className="file-preview-media-shell">
++            <img
++              className="file-preview-media"
++              src={rawFileUrl}
++              alt={title}
++              onError={() => setState((current) => ({ ...current, error: '图片加载失败' }))}
++            />
++          </div>
++        ) : null}
++        {!state.loading && !state.error && kind === 'video' ? (
++          <div className="file-preview-media-shell">
++            <video
++              className="file-preview-media"
++              src={rawFileUrl}
++              controls
++              playsInline
++              preload="metadata"
++              onError={() => setState((current) => ({ ...current, error: '视频加载失败' }))}
++            />
++          </div>
++        ) : null}
++        {!state.loading && !state.error && kind === 'audio' ? (
++          <div className="file-preview-media-shell is-audio">
++            <audio
++              className="file-preview-audio"
++              src={rawFileUrl}
++              controls
++              preload="metadata"
++              onError={() => setState((current) => ({ ...current, error: '音频加载失败' }))}
++            />
++          </div>
++        ) : null}
+         {!state.loading && !state.error && kind === 'download' && state.objectUrl ? (
+           <a className="file-preview-open" href={state.objectUrl} target="_blank" rel="noreferrer noopener">
+             <ExternalLink size={16} />
+diff --git a/client/src/app/PdfPreview.jsx b/client/src/app/PdfPreview.jsx
+index 2705120..4db2dc3 100644
+--- a/client/src/app/PdfPreview.jsx
++++ b/client/src/app/PdfPreview.jsx
+@@ -33,7 +33,12 @@ export function PdfPreview({ data, fileUrl = '' }) {
+   const [canFitPage, setCanFitPage] = useState(false);
+   const [error, setError] = useState('');
+ 
+-  const source = useMemo(() => (data ? new Uint8Array(data.
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short`</summary>
+```
+Chunk ID: f385d4
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 99
+Output:
+ M .specstory/history/2026-05-14_14-35-49Z-ui.md
+ M .specstory/history/2026-05-14_14-41-46Z-https-github-com-flyyangx.md
+ M .specstory/statistics.json
+ M client/src/app/FilePreviewApp.jsx
+ M client/src/app/PdfPreview.jsx
+ M client/src/panels/DrawerSettingsView.jsx
+ M client/src/styles/chat.css
+ M client/src/styles/panels-drawer.css
+ M server/static-service.js
+ M server/static-service.test.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `lsof -nP -iTCP:3335 -sTCP:LISTEN || true`</summary>
+```
+Chunk ID: 2a4079
+Wall time: 0.0002 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:56:59Z)**_
+
+<tool-use data-tool-type="task" data-tool-name="update_plan"><details>
+<summary>Tool use: **update_plan**</summary>
+**Agent task list:**
+- [X] 审阅现有本地文件预览服务和测试
+- [X] 实现后端 Range/streaming 与媒体 MIME
+- [X] 实现前端 PDF URL/图片视频音频原生预览
+- [X] 补测试并跑验证
+
+```
+Plan updated
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:57:12Z)**_
+
+代码和测试都完成了，我再把本机 3321 服务按项目脚本重启一下，让你手机端/PWA 直接吃到这版构建；不会碰你那些已有的 Drawer/SpecStory 改动。
+
+_**Agent (gpt-5.5 2026-05-14 14:57:13Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run start:bg`</summary>
+```
+Chunk ID: 73ff74
+Wall time: 1.0015 seconds
+Process running with session ID 57542
+Original token count: 16
+Output:
+
+> codexmobile@1.4.0 start:bg
+> node scripts/start-server.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:57:18Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 863ed5
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 57
+Output:
+Using macOS system proxy for background Codex requests: http://127.0.0.1:7897
+CodexMobile is managed by launchd; restarted com.codexmobile.bridge.
+Logs: /Users/xiayanghui/编程项目/CodexMobile/.codexmobile/launchd.out.log
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:57:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `curl -sS http://127.0.0.1:3321/api/status | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const j=JSON.parse(s); console.log(JSON.stringify({connected:j.connected, version:j.version || null, desktopBridge:j.desktopBridge?.mode || null}, null, 2));})'`</summary>
+```
+Chunk ID: 0ac39d
+Wall time: 1.0015 seconds
+Process running with session ID 12436
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:57:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `lsof -nP -iTCP:3321 -sTCP:LISTEN || true`</summary>
+```
+Chunk ID: b5c2ce
+Wall time: 0.0472 seconds
+Process exited with code 0
+Original token count: 41
+Output:
+COMMAND   PID       USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    32432 xiayanghui   15u  IPv4 0xfb7a0197eac96968      0t0  TCP *:3321 (LISTEN)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:57:31Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: f61452
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 20
+Output:
+{
+  "connected": true,
+  "version": null,
+  "desktopBridge": "desktop-ipc"
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 14:57:48Z)**_
+
+已实现“本地文件预览流式化”，并重启了本机 `3321` 服务。
+
+主要改动：
+
+- [server/static-service.js](/Users/xiayanghui/编程项目/CodexMobile/server/static-service.js)：`/api/local-file` 和 `/api/local-image` 从整包 `readFile` 改成 `createReadStream`，支持 `Range: bytes=...`，返回 `206 Partial Content`，并补了 audio/video MIME。
+- [client/src/app/FilePreviewApp.jsx](/Users/xiayanghui/编程项目/CodexMobile/client/src/app/FilePreviewApp.jsx)：图片/视频/音频走原生 `<img>` / `<video>` / `<audio>`，PDF 不再先整包塞进 React state。
+- [client/src/app/PdfPreview.jsx](/Users/xiayanghui/编程项目/CodexMobile/client/src/app/PdfPreview.jsx)：PDF.js 支持直接用带 token 的 `/api/local-file` URL 加载。
+- [client/src/styles/chat.css](/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/chat.css)：补了媒体预览布局。
+- [server/static-service.test.mjs](/Users/xiayanghui/编程项目/CodexMobile/server/static-service.test.mjs)：补了 Range 和 audio MIME 测试。
+
+验证结果：
+
+- `node --test server/static-service.test.mjs` 通过，11 个测试全绿。
+- `npm run build` 通过，只有既有的大 chunk warning。
+- 临时服务实测 authenticated `Range` 请求返回 `206 Partial Content`，`content-range: bytes 7-13/20`。
+- `npm run start:bg` 已重启 `com.codexmobile.bridge`，当前 `3321` 监听正常。
+
+内置浏览器自动化那一步没跑成，Playwright profile 被占用；我改用临时服务 + `curl` 做了实际 HTTP 验证。工作区里原本已有的 `.specstory`、`DrawerSettingsView.jsx`、`panels-drawer.css` 改动我没有碰。
+
+
+
+---
+
+_**User (2026-05-14 15:06:41Z)**_
+
+
+# In app browser:
+- The user has the in-app browser open.
+- Current URL: http://localhost:3321/
+
+## My request for Codex:
+https://github.com/flyyangX/CodexMobile/pull/1 参考这个pr，做一下大屏幕 / 桌面端 UI 适配
+
+
+---
+
+_**Agent (gpt-5.5 2026-05-14 15:06:58Z)**_
+
+我会把 PR #1 当参考，不会直接合：先看它具体改了哪些桌面布局思路，再按我们现在已经拆分过的组件结构做响应式适配。这里会用 GitHub triage + frontend-design 两个技能，前者看 PR，后者约束大屏 UI 不走回“堆卡片”的路子。
+
+_**Agent (gpt-5.5 2026-05-14 15:06:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,180p' /Users/xiayanghui/.codex/plugins/cache/openai-curated/github/08373044/skills/github/SKILL.md`</summary>
+```
+Chunk ID: 17de29
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1089
+Output:
+---
+name: github
+description: Triage and orient GitHub repository, pull request, and issue work through the connected GitHub app. Use when the user asks for general GitHub help, wants PR or issue summaries, or needs repository context before choosing a more specific GitHub workflow.
+---
+
+# GitHub
+
+## Overview
+
+Use this skill as the umbrella entrypoint for general GitHub work in this plugin. It should decide whether the task stays in repo and PR triage or should be handed off to a more specific review, CI, or publish workflow.
+
+This plugin is intentionally hybrid:
+
+- Prefer the GitHub app from this plugin for repository, issue, pull request, comment, label, reaction, and PR creation workflows.
+- Use local `git` and `gh` only when the connector does not cover the job well, especially for current-branch PR discovery, branch creation, commit and push, `gh auth status`, and GitHub Actions log inspection.
+- Keep connector state and local checkout context aligned. If the request is about the current branch, resolve the local repo and branch before acting.
+
+Once the intent is clear, route to the specialist skill immediately and do not keep broad GitHub triage in scope longer than needed.
+
+## Connector-First Responsibilities
+
+Handle these directly in this skill when the request does not need a narrower specialist workflow:
+
+- repository orientation once the repo, PR, issue, or local checkout is identified
+- recent PR or issue triage
+- PR metadata summaries
+- PR patch inspection
+- PR comments, labels, and reactions
+- issue lookup and summarization
+- PR creation after a branch is already pushed
+
+Prefer the GitHub app from this plugin for those flows because it provides structured PR, issue, and review-adjacent data without depending on a local checkout. If the repository is not already identifiable from the user request or local git context, ask for the repo instead of pretending there is a repo-search flow that may not exist.
+
+## Routing Rules
+
+1. Resolve the operating context first:
+   - If the user provides a repository, PR number, issue number, or URL, use that.
+   - If the request is about "this branch" or "the current PR", resolve local git context and use `gh` only as needed to discover the branch PR.
+   - If the repository is still ambiguous after local inspection, ask for the repo identifier.
+2. Classify the request before taking action:
+   - `repo or PR triage`: summarize PRs, issues, patches, comments, labels, reactions, or repository state
+   - `review follow-up`: unresolved review threads, requested changes, or inline review feedback
+   - `CI debugging`: failing checks, Actions logs, or CI root-cause analysis
+   - `publish changes`: create or switch branches, stage changes, commit, push, and open a draft PR
+3. Route to the specialist skill as soon as the category is clear:
+   - Review comments and requested changes: `../gh-address-comments/SKILL.md`
+   - Failing GitHub Actions checks: `../gh-fix-ci/SKILL.md`
+   - Commit, push, and open PR: `../yeet/SKILL.md`
+4. Keep the hybrid model consistent after routing:
+   - connector first for PR and issue data
+   - local `git` and `gh` only for the specific gaps the connector does not cover
+
+## Default Workflow
+
+1. Resolve repository and item scope.
+2. Gather structured PR or issue context through the GitHub app from this plugin.
+3. Decide whether the task stays in connector-backed triage or needs a specialist skill.
+4. Route immediately when the work becomes review follow-up, CI debugging, or publish workflow.
+5. End with a clear summary of what was inspected, what changed, and what remains.
+
+## Output Expectations
+
+- For triage requests, return a concise summary of the repository, PR, or issue state and the next likely action.
+- For mixed requests, tell the user which specialist path you are taking and why.
+- For connector-backed write actions, restate the exact PR, issue, label, or reaction target before applying the change.
+- Never imply that GitHub Actions logs are available through the connector alone. That remains a `gh` workflow.
+
+## Examples
+
+- "Use GitHub to summarize the open PRs in this repo and tell me what needs attention."
+- "Help with this PR."
+- "Review the latest comments on PR 482 and tell me what is actionable."
+- "Debug the failing checks on this branch."
+- "Commit these changes, push them, and open a draft PR."
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:06:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,220p' '/Users/xiayanghui/Library/Mobile Documents/com~apple~CloudDocs/agent-skills/skills/frontend-design/SKILL.md'`</summary>
+```
+Chunk ID: eae20d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1110
+Output:
+---
+name: frontend-design
+description: Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.
+license: Complete terms in LICENSE.txt
+---
+
+This skill guides creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
+
+The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
+
+## Design Thinking
+
+Before coding, understand the context and commit to a BOLD aesthetic direction:
+- **Purpose**: What problem does this interface solve? Who uses it?
+- **Tone**: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
+- **Constraints**: Technical requirements (framework, performance, accessibility).
+- **Differentiation**: What makes this UNFORGETTABLE? What's the one thing someone will remember?
+
+**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work - the key is intentionality, not intensity.
+
+Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
+- Production-grade and functional
+- Visually striking and memorable
+- Cohesive with a clear aesthetic point-of-view
+- Meticulously refined in every detail
+
+## Frontend Aesthetics Guidelines
+
+Focus on:
+- **Typography**: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
+- **Color & Theme**: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
+- **Motion**: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions. Use scroll-triggering and hover states that surprise.
+- **Spatial Composition**: Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space OR controlled density.
+- **Backgrounds & Visual Details**: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
+
+NEVER use generic AI-generated aesthetics like overused font families (Inter, Roboto, Arial, system fonts), cliched color schemes (particularly purple gradients on white backgrounds), predictable layouts and component patterns, and cookie-cutter design that lacks context-specific character.
+
+Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
+
+**IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
+
+Remember: Claude is capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:06:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "PR #1|大屏|desktop|CodexMobile|UI|responsive|App.jsx|monolithic" /Users/xiayanghui/.codex/memories/MEMORY.md`</summary>
+```
+Chunk ID: 45ccf7
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 15849
+Output:
+Total output lines: 215
+
+1:# Task Group: CodexMobile / composer 控件、线程同步、架构拆分与私网访问
+3:scope: `CodexMobile` 手机端 composer 控件、图片/文件预览、`/plan` 协作模式、repo-local skill 发现、自动标题、普通对话/发送链路排障、desktop IPC fallback、draft/new-thread send、abort / running 状态卡片、后端保守拆分、移动端 Git 面板、release 发布、macOS 自启动与 Tailscale/LAN 访问；适用于这个 repo 的 live 前后端联调、app-server 行为核验、私网访问解释和公开仓库卫生，不适用于泛化移动端产品设计。
+4:applies_to: cwd=/Users/xiayanghui/编程项目/CodexMobile; reuse_rule=适合复用到这个 `CodexMobile` 仓库里与 composer、`/plan`、`/api/status`、`thread/*` app-server 能力、本地 Node 服务、README 功能口径、Git HTTP API、launchd、Tailscale/LAN origin 行为有关的任务；具体端口、running process、模型列表和代码结构都要按当前 checkout/live server 重验
+10:- rollout_summaries/2026-05-05T00-12-41-rXsC-codexmobile_skill_picker_and_remove_voice_controls.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T08-12-41-019df57a-d854-73d1-8bec-a9d15f8453c2.jsonl, updated_at=2026-05-05T00:25:11+00:00, thread_id=019df57a-d854-73d1-8bec-a9d15f8453c2, added skill discovery and mobile picker, then proved the first disabled state came from an older live backend on port 3321)
+14:- CodexMobile, skill picker, composer, /api/status, localStorage, buildCodexTurnInput, type: skill, lsof, port 3321, port 3331, readCodexSkills
+20:- rollout_summaries/2026-05-05T00-12-41-rXsC-codexmobile_skill_picker_and_remove_voice_controls.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T08-12-41-019df57a-d854-73d1-8bec-a9d15f8453c2.jsonl, updated_at=2026-05-05T00:25:11+00:00, thread_id=019df57a-d854-73d1-8bec-a9d15f8453c2, removed the in-app voice/dialog entry points and updated docs to match the native-keyboard voice preference)
+24:- CodexMobile, voice-dialog, microphone button, dialog button, VoiceDialogPanel, native keyboard voice path, README.md, npm run build, restart 3321
+30:- rollout_summaries/2026-05-05T11-35-49-5GrC-codexmobile_auto_thread_title_hook_gpt_5_4_mini.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/05/rollout-2026-05-05T19-35-49-019df7ec-42b4-7602-94d6-e06d2430e6c0.jsonl, updated_at=2026-05-05T12:01:30+00:00, thread_id=019df7ec-42b4-7602-94d6-e06d2430e6c0, traced `name`/`preview` fallback and added async auto-title writeback for new draft sessions)
+36:## Task 4: 清理普通对话旧线程、解释 mobile/desktop 归档现状，并修复发送一直“处理中”
+40:- rollout_summaries/2026-05-05T19-24-27-hq5w-codexmobile_mobile_thread_sync_and_hanging_turn_debug.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/06/rollout-2026-05-06T03-24-27-019df999-4f02-70f1-9d0f-895fb3098ee6.jsonl, updated_at=2026-05-07T05:33:58+00:00, thread_id=019df999-4f02-70f1-9d0f-895fb3098ee6, cleaned ordinary-thread history bleed-through, clarified hide-vs-archive behavior, cleared `/Users/xiayanghui/Documents/Codex/`, and fixed normal-chat turn hangs caused by leaked lark-cli env)
+50:- rollout_summaries/2026-05-05T19-18-01-iLno-codexmobile_macos_autostart_launchagent.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/06/rollout-2026-05-06T03-18-01-019df993-6bb9-7ff2-99b2-c34ddc737c76.jsonl, updated_at=2026-05-06T12:17:56+00:00, thread_id=019df993-6bb9-7ff2-99b2-c34ddc737c76, started with a reboot-pairing skill, then replaced it with a user-level LaunchAgent that keeps port 3321 alive after reboot and crash)
+54:- CodexMobile, LaunchAgent, launchctl, macOS autostart, run-server.mjs, start-server.mjs, /api/status, refreshCodexCache, port 3321, fileURLToPath, launchd, com.codexmobile.bridge
+60:- rollout_summaries/2026-05-07T04-46-49-TGny-codexmobile_architecture_git_security_cleanup.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/sessions/2026/05/07/rollout-2026-05-07T12-46-49-019e00c2-88d5-78e1-bc14-ca1f0d1f1084.jsonl, updated_at=2026-05-07T17:54:56+00:00, thread_id=019e00c2-88d5-78e1-bc14-ca1f0d1f1084, explained the PWA + Node + Codex app-server chain, split backend helpers conservatively, replaced prompt-driven Git with real APIs/panel, and cleaned already-published local artifacts from `origin/main`)
+70:- rollout_summaries/2026-05-07T09-15-14-5HCm-codexmobile_tailscale_lan_pwa_origin.md (cwd=/Users/xiayanghui/编程项目/CodexMobile, rollout_path=/Users/xiayanghui/.codex/archived_sessions/rollout-2026-05-07T17-1
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:06:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short --branch`</summary>
+```
+Chunk ID: fdeec3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 222
+Output:
+## main...origin/main [ahead 2]
+ M .specstory/history/2026-05-14_14-35-49Z-ui.md
+ M .specstory/history/2026-05-14_14-41-46Z-https-github-com-flyyangx.md
+ M .specstory/statistics.json
+ M client/src/app/App.jsx
+ M client/src/app/FilePreviewApp.jsx
+ M client/src/app/PdfPreview.jsx
+ M client/src/app/useTurnSubmission.js
+ M client/src/composer/Composer.jsx
+ M client/src/panels/Drawer.jsx
+ M client/src/panels/DrawerArchiveView.jsx
+ M client/src/panels/DrawerSettingsView.jsx
+ M client/src/styles/chat.css
+ M client/src/styles/composer.css
+ M client/src/styles/panels-drawer.css
+ M server/codex-app-server.js
+ M server/codex-data.js
+ M server/desktop-ipc-client.js
+ M server/desktop-ipc-client.test.mjs
+ M server/index.js
+ M server/session-local-state.js
+ M server/session-routes-archived.test.mjs
+ M server/session-routes.js
+ M server/static-service.js
+ M server/static-service.test.mjs
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:07:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `gh pr view https://github.com/flyyangX/CodexMobile/pull/1 --json number,title,state,author,headRefName,baseRefName,mergeable,isDraft,createdAt,updatedAt,commits,files,additions,deletions,body,url`</summary>
+```
+Chunk ID: 2b04cc
+Wall time: 0.8886 seconds
+Process exited with code 0
+Original token count: 4429
+Output:
+{"additions":5953,"author":{"id":"MDQ6VXNlcjYxNTg2MjEw","is_bot":false,"login":"bingqldx","name":"邱禹麟"},"baseRefName":"main","body":"## 这次做了什么\n这次主要是把 CodexMobile 的输入区和 Codex 任务交互补齐：它现在有明确的计划模式入口，也有模型速度选择；同时桌面端和移动端的 composer 都重新整理过，不再只是把所有按钮挤在同一排。\n\n## 主要变化\n### 1. 桌面端 UI 适配\n- 桌面端 composer 的权限、Chat/计划、技能、模型、速度这些入口重新排布，控制区更接近 Codex 官方 app 的使用习惯。\n- 模型选择改成二级菜单：第一层先选“智能”，模型列表和速度选项放到二级菜单里，减少常用操作时的干扰。\n- 运行中继续发送消息时，提示文案调整为更明确的“发送到当前任务 / 加入队列 / 中止并发送”，避免用户不知道这条消息会怎样处理。\n\n### 2. 计划模式支持\n- composer 里增加了明确的计划模式入口，不再只能依赖 `/plan`。\n- 新任务会把计划模式对应的 collaboration payload 传给 Codex。\n- 计划模式里需要用户选择、确认或拒绝方案时，移动端也能显示对应的输入卡片并提交回复。\n\n### 3. 移动端 UI 适配\n- 窄屏底部把低频入口收进 `+` 菜单，比如 Chat/计划和技能，底部只保留更常用、更需要随时看到的控制。\n- 权限显示改成短标签，保留上下文状态点和模型/速度状态，避免底部控制区换行和拥挤。\n- 修复了权限按钮触控区域过大、浅色模式用户消息仍是深色、配对页没有居中等 UI 问题。\n\n### 4. 模型速度选择\n- 新增“标准 / 快速”速度选项，并持久化用户选择。\n- 快速模式会用闪电标识显示，并把选择传到 Codex 的 service tier，避免前端只是画了图标但后端没有生效。\n\n### 5. PWA 与主题\n- PWA manifest 优先使用 fullscreen，并保留浏览器不支持时的回退。\n- 设置里增加“跟随系统”主题模式，适配系统深色/浅色偏好。\n\n## 截图\n**桌面端模型菜单**\n![Desktop model menu](https://github.com/bingqldx/CodexMobile/blob/codex/plan-mode-v1/docs/pr-screenshots/desktop-model-menu.png?raw=true)\n\n**移动端添加菜单**\n![Mobile add menu](https://github.com/bingqldx/CodexMobile/blob/codex/plan-mode-v1/docs/pr-screenshots/mobile-attachment-menu.png?raw=true)\n\n## English Summary\nThis PR adds explicit plan mode support, model speed selection, and a cleaned-up composer UI for both desktop and mobile. The desktop composer now uses a Codex-like nested model menu, while the mobile composer moves lower-frequency controls into the add menu to reduce crowding. It also wires fast mode through to the Codex service tier, improves PWA fullscreen behavior, adds system theme support, and fixes several UI polish issues around pairing, touch targets, and light-mode message bubbles.","commits":[{"authoredDate":"2026-05-07T14:24:05Z","authors":[{"email":"61586210+bingqldx@users.noreply.github.com","id":"MDQ6VXNlcjYxNTg2MjEw","login":"bingqldx","name":"邱启麒"}],"committedDate":"2026-05-07T14:24:05Z","messageBody":"","messageHeadline":"docs: add adaptive shell design spec","oid":"4c9f139d7243a9520a58b6f780e2866f4593cc43"},{"authoredDate":"2026-05-07T14:29:27Z","authors":[{"email":"61586210+bingqldx@users.noreply.github.com","id":"MDQ6VXNlcjYxNTg2MjEw","login":"bingqldx","name":"邱启麒"}],"committedDate":"2026-05-07T14:29:27Z","messageBody":"","messageHeadline":"docs: add adaptive shell implementation plan","oid":"3f14593c2b0807f840f506e2de40e8fd704953d0"},{"authoredDate":"2026-05-07T14:32:18Z","authors":[{"email":"61586210+bingqldx@users.noreply.github.com","id":"MDQ6VXNlcjYxNTg2MjEw","login":"bingqldx","name":"邱启麒"}],"committedDate":"2026-05-07T14:32:18Z","messageBody":"","messageHeadline":"chore: ignore local worktrees","oid":"0d3fee15b7d7df34df5d7f3db89b12a281802580"},{"authoredDate":"2026-05-07T14:36:19Z","authors":[{"email":"61586210+bingqldx@users.noreply.github.com","id":"MDQ6VXNlcjYxNTg2MjEw","login":"bingqldx","name":"邱启麒"}],"committedDate":"2026-05-07T14:36:19Z","messageBody":"","messageHeadline":"feat: add upload input extraction helpers","oid":"c4bfa0bd05d7ff32d0468271e2807385e42bdc2d"},{"authoredDate":"2026-05-07T14:45:14Z","authors":[{"email":"61586210+bingqldx@users.noreply.github.com","id":"MDQ6VXNlcjYxNTg2MjEw","login":"bingqldx","name":"邱启麒"}],"committedDate":"2026-05-07T14:45:14Z","messageBody":"","messageHeadline":"feat: support composer paste and drop uploads","oid":"7218b76d61caa6273f06baf0cef53223e64392cd"},{"authoredDate":"2026-05-07T14:54:49Z","authors":[{"email":"61586210+bingqldx@users.noreply.github.com","id":"MDQ6VXNlcjYxNTg2MjEw","login":"bingqldx","name":"邱启麒"}],"committedDate":"2026-05-07T14:5
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:07:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git fetch origin pull/1/head:refs/remotes/origin/pr/1`</summary>
+```
+Chunk ID: 95e8fe
+Wall time: 0.7086 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:07:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `gh pr diff https://github.com/flyyangX/CodexMobile/pull/1 --name-only`</summary>
+```
+Chunk ID: 9cf09c
+Wall time: 0.8526 seconds
+Process exited with code 0
+Original token count: 383
+Output:
+.gitignore
+client/manifest.test.mjs
+client/manifest.webmanifest
+client/src/App.jsx
+client/src/composer-accessibility.test.mjs
+client/src/composer-running-send-menu.test.mjs
+client/src/composer-shortcuts.js
+client/src/composer-shortcuts.test.mjs
+client/src/mobile-composer-layout.test.mjs
+client/src/model-menu-layout.test.mjs
+client/src/model-preferences.js
+client/src/model-preferences.test.mjs
+client/src/notification-events.js
+client/src/notification-events.test.mjs
+client/src/permission-mode.js
+client/src/permission-mode.test.mjs
+client/src/plan-mode-client.js
+client/src/plan-mode-client.test.mjs
+client/src/send-state.js
+client/src/send-state.test.mjs
+client/src/styles.css
+client/src/theme-preference.js
+client/src/theme-preference.test.mjs
+client/src/ui-css.test.mjs
+client/src/upload-inputs.js
+client/src/upload-inputs.test.mjs
+docs/pr-screenshots/desktop-model-menu.png
+docs/pr-screenshots/mobile-attachment-menu.png
+docs/superpowers/plans/2026-05-07-codexmobile-adaptive-shell.md
+docs/superpowers/plans/2026-05-08-codexmobile-plan-mode-v1.md
+docs/superpowers/specs/2026-05-07-codexmobile-adaptive-shell-design.md
+docs/superpowers/specs/2026-05-08-codexmobile-plan-mode-v1-design.md
+server/chat-service.js
+server/chat-service.test.mjs
+server/codex-app-server.js
+server/codex-runner.js
+server/desktop-ipc-client.js
+server/desktop-ipc-client.test.mjs
+server/index.js
+server/user-input-requests.js
+server/user-input-requests.test.mjs
+shared/collaboration-mode.js
+shared/collaboration-mode.test.mjs
+shared/service-tier.js
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:07:22Z)**_
+
+PR #1 体量很大，而且基于旧的 `client/src/App.jsx` 单体结构；我只抽它的“大屏桌面布局”思路：桌面固定左侧栏、主聊天列居中、composer/overlay 跟主列对齐，移动端保持现在的底部体验。现在我看当前组件和 CSS 的真实结构，再下刀。
+
+_**Agent (gpt-5.5 2026-05-14 15:07:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,240p' client/src/app/AppShell.jsx && sed -n '1,260p' client/src/app/App.jsx`</summary>
+```
+Chunk ID: 2f4643
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3033
+Output:
+/**
+ * 主界面壳层：拼装顶栏、侧栏、文档/Git 面板、连接恢复、Toast、聊天区与 Composer 的 props 下发。
+ *
+ * Keywords: app-shell, layout, panels
+ *
+ * Exports:
+ * - `AppShell` — 接收 `shellClass` 与各子区 props 的纯布局组件。
+ *
+ * Inward: `Composer`、`ChatPane`、panels 汇总导出（`Drawer`、`TopBar` 等）。
+ *
+ * Outward: `App.jsx` 在通过配对后挂载主 UI。
+ */
+
+import { Composer } from '../composer/Composer.jsx';
+import { ChatPane } from '../chat/ChatPane.jsx';
+import { ImagePreviewModal } from '../chat/ImagePreview.jsx';
+import { ConnectionRecoveryCard, DocsPanel, Drawer, GitPanel, PwaUpdatePrompt, ToastStack, TopBar } from '../panels/index.js';
+
+export function AppShell({ shellClass, panelProps, drawerProps, chatProps, composerProps }) {
+  const {
+    topBarProps,
+    docsPanelProps,
+    gitPanelProps,
+    recoveryCardProps,
+    toastStackProps,
+    pwaUpdateProps,
+    imagePreviewProps
+  } = panelProps;
+
+  return (
+    <div className={shellClass}>
+      <TopBar {...topBarProps} />
+      <Drawer {...drawerProps} />
+      <DocsPanel {...docsPanelProps} />
+      <GitPanel {...gitPanelProps} />
+      <ConnectionRecoveryCard {...recoveryCardProps} />
+      <ToastStack {...toastStackProps} />
+      <PwaUpdatePrompt {...pwaUpdateProps} />
+      <ChatPane {...chatProps} />
+      <Composer {...composerProps} />
+      <ImagePreviewModal {...imagePreviewProps} />
+    </div>
+  );
+}
+/**
+ * CodexMobile Web：根级应用编排——认证门禁、服务端状态与 WS、会话域数据流、把 props 下发给 Shell。
+ *
+ * Keywords: pairing, websocket, bootstrap, session-orchestration, composer-props
+ *
+ * Exports:
+ * - default — `App`（入口挂载的根组件）。
+ *
+ * Inward（本模块组装）: `PairingScreen`, `AppShell`；多处 `use*` hooks（bootstrap / session / submit / runtime / uploads 等）；
+ *   `session-utils`、`api`、`AppState` reducer。
+ *
+ * Outward（谁消费）: 应用入口（如 `main`）仅挂载本 default；DOM 拼装见 `AppShell.jsx`。
+ *
+ * 不负责: 页面区域的具体布局与样式、`Composer`/`ChatPane` 内部交互实现。
+ */
+
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { apiFetch, getToken } from '../api.js';
+import { DEFAULT_PERMISSION_MODE } from '../composer/Composer.jsx';
+import { DEFAULT_MODEL_SPEED, normalizeModelSpeed } from '../composer/composer-options.js';
+import { useComposerSelections } from '../composer/useComposerSelections.js';
+import { useQueueDrafts } from '../composer/useQueueDrafts.js';
+import { connectionRecoveryState } from '../connection-recovery.js';
+import { mergeContextStatus, normalizeContextStatus } from './context-status.js';
+import { DEFAULT_REASONING_EFFORT, DEFAULT_STATUS, REASONING_DEFAULT_VERSION } from './defaults.js';
+import { appReducer, createInitialUiState, THEME_KEY } from './AppState.js';
+import { useNotifications } from '../panels/useNotifications.js';
+import { useAppBootstrap } from './useAppBootstrap.js';
+import { useConnectionActions } from './useConnectionActions.js';
+import { useDocsActions } from './useDocsActions.js';
+import { useFileUploads } from './useFileUploads.js';
+import { useAppWebSocket } from './useAppWebSocket.js';
+import { upsertActivityMessage } from '../chat/activity-model.js';
+import { useSessionLivePolling } from './useSessionLivePolling.js';
+import { useSessionActions } from './useSessionActions.js';
+import { useTurnSubmission } from './useTurnSubmission.js';
+import { useTurnRuntime } from './useTurnRuntime.js';
+import { useViewportSizing } from './useViewportSizing.js';
+import { usePwaUpdate } from './pwa-update.js';
+import { applyPwaTheme } from './pwa-theme.js';
+import { mergeModelSettingsIntoStatus, nextSyncedComposerSettings } from './model-sync.js';
+import { rememberSelectedSession } from './selection-persistence.js';
+import {
+  emptyContextStatus,
+  hasRunningKey,
+  isDraftSession,
+  reconcileThreadRuntimeWithSessions,
+  selectedRunKeys,
+  selectedSessionIsRunning,
+  upsertSessionInProject
+} from './session-utils.js';
+import { AppShell } from './AppShell.jsx';
+import PairingScreen from './PairingScreen.jsx';
+import {
+  selectRuntimeForSession,
+  syncRunningByIdFromRuntime
+} from '../sync/sync-selectors.js';
+
+const MODEL_SPEED_KEY = 'codexmobile.modelSpeed';
+
+export default function App() {
+  const [status, setStatus] = useState(DEFAULT_STATUS);
+  const [contextStatus, setContextStatus] = useState(() => normalizeContextStatus(DEFAULT_STATUS.context));
+  const [authenticated, setAuthenticated] = useState(Boolean(getToken()));
+  const [uiState, dispatchUi] = useReducer(appReducer, undefined, () => createInitialUiState());
+  const setDrawerOpen = useCallback((value) => dispatchUi({ type: 'ui/drawerOpen', value }), []);
+  const setPreviewImage = useCallback((value) => dispatchUi({ t
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:07:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' client/src/panels/Drawer.jsx && sed -n '1,240p' client/src/styles/panels-drawer.css`</summary>
+```
+Chunk ID: f6adb2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3124
+Output:
+/**
+ * 主侧栏抽屉：项目 / 会话列表、配额与设置入口、归档与子代理等。
+ *
+ * Keywords: drawer, sidebar, sessions, projects, settings, archive-box, desktop-refresh
+ *
+ * Exports:
+ * - Drawer — 侧栏根组件。
+ *
+ * Inward: apiFetch、runtime-debug-client、session-utils（路径展示与运行时摘要）；lucide-react。
+ *
+ * Outward: App 根布局在菜单打开时渲染。
+ */
+
+import { Archive, BarChart3, Check, ChevronDown, Folder, Loader2, MessageSquare, MoreHorizontal, Pencil, Plus, RefreshCw, Search, Settings, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { apiFetch } from '../api.js';
+import { setClientRuntimeDebugEnabled } from '../app/runtime-debug-client.js';
+import { compactPath, formatTime, sessionRunBadgeState, subAgentSubtitle } from '../app/session-utils.js';
+import { DrawerArchiveView } from './DrawerArchiveView.jsx';
+import { DrawerQuotaPanel } from './DrawerQuotaPanel.jsx';
+import { DrawerSettingsView } from './DrawerSettingsView.jsx';
+
+function formatRelativeShort(value) {
+  if (!value) {
+    return '';
+  }
+  const ts = new Date(value).getTime();
+  if (!Number.isFinite(ts)) {
+    return '';
+  }
+  const diff = Date.now() - ts;
+  if (diff < 60_000) {
+    return '刚刚';
+  }
+  if (diff < 3_600_000) {
+    return `${Math.floor(diff / 60_000)}m`;
+  }
+  if (diff < 86_400_000) {
+    return `${Math.floor(diff / 3_600_000)}h`;
+  }
+  if (diff < 7 * 86_400_000) {
+    return `${Math.floor(diff / 86_400_000)}d`;
+  }
+  return formatTime(value);
+}
+
+export function Drawer({
+  open,
+  onClose,
+  projects,
+  selectedProject,
+  selectedSession,
+  expandedProjectIds,
+  sessionsByProject,
+  loadingProjectId,
+  runningById,
+  threadRuntimeById,
+  completedSessionIds,
+  onToggleProject,
+  onSelectSession,
+  onRenameSession,
+  onDeleteSession,
+  onNewConversation,
+  onSync,
+  syncing,
+  theme,
+  setTheme,
+  runtimeDebug,
+  desktopRefresh,
+  refreshStatus
+}) {
+  const [drawerView, setDrawerView] = useState('main');
+  const [subagentExpandedById, setSubagentExpandedById] = useState({});
+  const [quotaExpanded, setQuotaExpanded] = useState(false);
+  const [quotaLoading, setQuotaLoading] = useState(false);
+  const [quotaLoaded, setQuotaLoaded] = useState(false);
+  const [quotaError, setQuotaError] = useState('');
+  const [quotaNotice, setQuotaNotice] = useState('');
+  const [quotaAccounts, setQuotaAccounts] = useState([]);
+  const [drawerQuery, setDrawerQuery] = useState('');
+  const [threadActionMenu, setThreadActionMenu] = useState(null);
+  const [renameDraft, setRenameDraft] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [renameSaving, setRenameSaving] = useState(false);
+  const [newConversationOpen, setNewConversationOpen] = useState(false);
+  const [runtimeDebugError, setRuntimeDebugError] = useState('');
+  const [runtimeDebugSaving, setRuntimeDebugSaving] = useState(false);
+  const [desktopRefreshError, setDesktopRefreshError] = useState('');
+  const [desktopRefreshSaving, setDesktopRefreshSaving] = useState(false);
+  const [archivedSessions, setArchivedSessions] = useState([]);
+  const [archiveLoading, setArchiveLoading] = useState(false);
+  const [archiveLoaded, setArchiveLoaded] = useState(false);
+  const [archiveError, setArchiveError] = useState('');
+  const [archiveSyncedAt, setArchiveSyncedAt] = useState('');
+  const [archiveSource, setArchiveSource] = useState('');
+  const [unarchivingSessionIds, setUnarchivingSessionIds] = useState({});
+  const normalizedDrawerQuery = drawerQuery.trim().toLowerCase();
+  const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
+  const runningCount = Object.values(sessionsByProject || {})
+    .flatMap((sessions) => (Array.isArray(sessions) ? sessions : []))
+    .filter((session) => sessionRunBadgeState(session, { runningById, threadRuntimeById, completedSessionIds }) === 'running')
+    .length;
+  const orderedProjects = [
+    ...projects.filter((project) => project.projectless),
+    ...projects.filter((project) => !project.projectless)
+  ];
+  const projectlessProject = orderedProjects.find((project) => project.projectless) || null;
+  const projectChoices = orderedProjects.filter((project) => !project.projectless);
+
+  useEffect(() => {
+    if (!open) {
+      setThreadActionMenu(null);
+      setRenameDraft(null);
+      setRenameValue('');
+      setRenameSaving(false);
+      setNewConversationOpen(false);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!renameDraft) {
+      return undefined;
+    }
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setRenameDraft(null);
+        setRenameValue('');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [renameDraft]);
+
+  function startNewConversation(project, event) {
+    event?.preventDefault();
+ 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:07:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' client/src/composer/Composer.jsx && sed -n '1,260p' client/src/styles/composer.css`</summary>
+```
+Chunk ID: 4cd3a0
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3231
+Output:
+/**
+ * 主聊天输入区：附件、模型/推理/权限/技能、剪贴板粘贴与发送流程。
+ *
+ * Keywords: composer, chat input, attachments, model, skills
+ *
+ * Exports:
+ * - DEFAULT_PERMISSION_MODE — re-export 默认权限模式常量。
+ * - Composer — 组合输入框与各下拉与状态控件的根组件。
+ *
+ * Inward: api、session-utils、composer-options、attachment-preview、paste-files、ContextStatus、Codex 快捷指令等。
+ *
+ * Outward: App.jsx 或上层布局挂载输入条处。
+ */
+
+import { ArrowUp, Bot, Check, ChevronDown, ClipboardList, FileText, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X, Zap } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { apiFetch, getToken } from '../api.js';
+import { detectComposerToken, exactSlashCommandForInput, filteredSlashCommands, replaceComposerToken } from '../composer-shortcuts.js';
+import { composerSendState } from '../send-state.js';
+import { isDraftSession } from '../app/session-utils.js';
+import { attachmentPreviewUrl, isImageAttachment } from './attachment-preview.js';
+import { filesFromClipboardData } from './paste-files.js';
+import { ContextStatusButton, ContextStatusDetails } from './ContextStatus.jsx';
+import { DEFAULT_PERMISSION_MODE, MODEL_SPEED_OPTIONS, PERMISSION_OPTIONS, REASONING_OPTIONS, formatBytes, modelSpeedLabel, normalizeModelSpeed, permissionLabel, reasoningLabel, selectedSkillSummary, shortModelName } from './composer-options.js';
+
+export { DEFAULT_PERMISSION_MODE } from './composer-options.js';
+
+export function Composer({
+  composerRef,
+  input,
+  setInput,
+  selectedProject,
+  selectedSession,
+  onSubmit,
+  running,
+  onAbort,
+  models,
+  selectedModel,
+  onSelectModel,
+  selectedModelSpeed,
+  onSelectModelSpeed,
+  selectedReasoningEffort,
+  onSelectReasoningEffort,
+  selectedCollaborationMode,
+  onSelectCollaborationMode,
+  skills,
+  selectedSkillPaths,
+  onToggleSkill,
+  onSelectSkill,
+  onClearSkills,
+  permissionMode,
+  onSelectPermission,
+  attachments,
+  onUploadFiles,
+  onRemoveAttachment,
+  fileMentions,
+  onAddFileMention,
+  onRemoveFileMention,
+  uploading,
+  contextStatus,
+  runSteerable = true,
+  desktopBridge,
+  queueDrafts,
+  onRestoreQueueDraft,
+  onRemoveQueueDraft,
+  onSteerQueueDraft,
+  onCompactContext,
+  readOnly = false,
+  readOnlyReason = ''
+}) {
+  const textareaRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [openMenu, setOpenMenu] = useState(null);
+  const [skillFilter, setSkillFilter] = useState('');
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const [fileSearch, setFileSearch] = useState({ query: '', loading: false, results: [] });
+  const selectedFileMentions = Array.isArray(fileMentions) ? fileMentions : [];
+  const deviceToken = getToken();
+  const composerReadOnly = Boolean(readOnly);
+  const hasInput = !composerReadOnly && (input.trim().length > 0 || attachments.length > 0 || selectedFileMentions.length > 0);
+  const modelList = models?.length ? models : [{ value: selectedModel || 'gpt-5.5', label: selectedModel || 'gpt-5.5' }];
+  const selectedModelLabel = modelList.find((model) => model.value === selectedModel)?.label || selectedModel || 'gpt-5.5';
+  const normalizedModelSpeed = normalizeModelSpeed(selectedModelSpeed);
+  const skillList = Array.isArray(skills) ? skills : [];
+  const selectedSkillSet = new Set(Array.isArray(selectedSkillPaths) ? selectedSkillPaths : []);
+  const selectedSkills = skillList.filter((skill) => selectedSkillSet.has(skill.path));
+  const composerToken = useMemo(
+    () => detectComposerToken(input, cursorPosition || input.length),
+    [input, cursorPosition]
+  );
+  const slashMatches = composerToken?.type === 'slash'
+    ? filteredSlashCommands(composerToken.query)
+    : [];
+  const tokenSkillMatches = composerToken?.type === 'skill'
+    ? skillList
+      .filter((skill) => {
+        const query = composerToken.query.trim().toLowerCase();
+        if (!query) {
+          return true;
+        }
+        return [skill.label, skill.name, skill.description, skill.path]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(query));
+      })
+      .slice(0, 12)
+    : [];
+  const sendState = composerReadOnly
+    ? {
+      disabled: true,
+      label: readOnlyReason || '当前线程只读',
+      mode: 'readonly',
+      showMenu: false,
+      canSteer: false,
+      canQueue: false,
+      canInterrupt: false
+    }
+    : composerSendState({
+      running,
+      hasInput,
+      uploading,
+      desktopBridge,
+      steerable: runSteerable,
+      sessionIsDraft: isDraftSession(selectedSession)
+    });
+  const stopMode = sendState.mode === 'abort';
+  const runningInputMode = running && hasInput;
+  const sendLabel = sendState.label;
+  const filteredSk
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:07:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,220p' client/src/styles/chat.css`</summary>
+```
+Chunk ID: aa0b32
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1009
+Output:
+.message-row {
+  display: flex;
+  justify-content: flex-start;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 10px;
+  overflow: visible;
+}
+
+.message-row.is-user {
+  justify-content: flex-end;
+}
+
+.message-row.is-assistant {
+  margin-bottom: 20px;
+}
+
+.message-row.is-file-summary {
+  margin-top: -8px;
+  margin-bottom: 18px;
+}
+
+.message-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  max-width: min(82%, 680px);
+}
+
+.message-row.is-user .message-stack {
+  align-items: flex-end;
+}
+
+.message-row.is-assistant .message-stack {
+  width: 100%;
+  max-width: 100%;
+}
+
+.message-guide-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  margin: 0 4px 5px 0;
+  color: #737b86;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.message-guide-label svg {
+  flex: 0 0 auto;
+}
+
+.message-bubble {
+  min-width: 0;
+  max-width: 100%;
+  padding: 11px 14px;
+  border-radius: 18px;
+  border-bottom-left-radius: 7px;
+  background: var(--glass-strong);
+  border: 1px solid var(--hairline);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.035);
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+
+.message-row.is-user .message-bubble {
+  color: var(--bubble-user-text);
+  background: var(--bubble-user);
+  border-color: transparent;
+  border-radius: 22px;
+  border-bottom-right-radius: 7px;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.13);
+}
+
+.message-row.is-assistant .message-bubble {
+  width: 100%;
+  padding: 1px 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.message-after-content {
+  width: 100%;
+  max-width: min(100%, 760px);
+  margin-top: 10px;
+}
+
+.message-after-content .activity-file-summary,
+.message-row.is-file-summary .activity-file-summary {
+  max-width: min(100%, 740px);
+  margin-top: 0;
+}
+
+.message-image-strip {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: min(100%, 260px);
+  margin: 0 0 6px;
+}
+
+.message-row.is-activity .message-bubble {
+  display: block;
+  max-width: 100%;
+  color: #667085;
+  background: transparent;
+}
+
+.message-row.is-activity .activity-bubble {
+  display: block;
+  min-width: 172px;
+  width: 100%;
+  max-width: min(100%, 760px);
+  padding: 0 0 2px;
+  border: 0;
+  border-radius: 0;
+  color: #69717c;
+  background: transparent;
+  box-shadow: none;
+}
+
+.message-row.is-plan,
+.message-row.is-plan-request {
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.plan-card,
+.plan-request-panel {
+  width: 100%;
+  max-width: min(100%, 736px);
+  min-width: 0;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.045);
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+
+.plan-card {
+  padding: 15px 16px 16px;
+  color: var(--text);
+}
+
+.plan-card.is-collapsed {
+  padding-bottom: 12px;
+}
+
+.plan-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  min-height: 28px;
+  margin-bottom: 4px;
+  color: #4b5563;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+}
+
+.plan-card.is-collapsed .plan-card-header {
+  margin-bottom: 0;
+}
+
+.plan-card-toggle {
+  display: inline-grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 30px;
+  padding: 0 6px 0 0;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.plan-card-toggle:hover,
+.plan-card-toggle:focus-visible {
+  color: #1f2937;
+}
+
+.plan-card-chevron {
+  flex: 0 0 auto;
+  color: #8b949e;
+  transform: rotate(-90deg);
+  transition: transform 160ms ease;
+}
+
+.plan-card-chevron.is-open {
+  transform: rotate(0deg);
+}
+
+.plan-card-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-card-actions {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.plan-icon-button {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:07:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "app-shell|top-bar|chat-pane|desktop|@media|drawer-backdrop|composer-wrap" client/src/styles client/src -g '*.css' -g '*.jsx'`</summary>
+```
+Chunk ID: 907a86
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1944
+Output:
+client/src/styles/panels-toast.css:196:.connection-recovery-card.is-desktop-unavailable .connection-recovery-dot,
+client/src/styles/layout.css:2:.app-shell {
+client/src/styles/layout.css:21:.app-shell::before {
+client/src/styles/layout.css:37:[data-theme="dark"] .app-shell {
+client/src/styles/layout.css:41:[data-theme="dark"] .app-shell::before {
+client/src/styles/activity.css:786:@media (max-width: 640px) {
+client/src/styles/panels-drawer.css:1:.drawer-backdrop {
+client/src/styles/panels-drawer.css:10:.drawer-backdrop.is-open {
+client/src/styles/panels-drawer.css:2056:@media (max-width: 560px) {
+client/src/styles/composer.css:1:.composer-wrap {
+client/src/styles/composer.css:16:[data-keyboard="open"] .composer-wrap {
+client/src/styles/composer.css:20:[data-keyboard="open"] .chat-pane {
+client/src/styles/panels-chat.css:43:.chat-pane {
+client/src/styles/panels-chat.css:58:.chat-pane::after {
+client/src/styles/chat.css:422:@media (hover: hover) {
+client/src/styles/chat.css:1491:[data-theme="dark"] .composer-wrap {
+client/src/composer/Composer.jsx:62:  desktopBridge,
+client/src/composer/Composer.jsx:122:      desktopBridge,
+client/src/composer/Composer.jsx:300:    <form className="composer-wrap" ref={composerRef} onSubmit={submit}>
+client/src/app/App.jsx:124:  const [desktopHandoffPending, setDesktopHandoffPending] = useState(false);
+client/src/app/App.jsx:372:      if (data.desktopSync?.attempted && !data.desktopSync?.synced) {
+client/src/app/App.jsx:586:  const shellClass = useMemo(() => (drawerOpen ? 'app-shell drawer-active' : 'app-shell'), [drawerOpen]);
+client/src/app/App.jsx:599:    desktopBridge: status.desktopBridge,
+client/src/app/App.jsx:723:      await apiFetch('/api/desktop-handoff', {
+client/src/app/App.jsx:756:      desktopBridge: status.desktopBridge,
+client/src/app/App.jsx:762:      desktopHandoffSupported: status.desktopRefresh?.supported !== false,
+client/src/app/App.jsx:763:      desktopHandoffPending,
+client/src/app/App.jsx:831:    desktopRefresh: status.desktopRefresh,
+client/src/app/App.jsx:881:    desktopBridge: status.desktopBridge,
+client/src/styles/theme.css:1:[data-theme="dark"] .composer-wrap {
+client/src/styles/theme.css:6:[data-theme="dark"] .chat-pane::after {
+client/src/styles/theme.css:286:@media (min-width: 820px) {
+client/src/styles/theme.css:301:  .app-shell {
+client/src/styles/theme.css:319:@media (max-width: 480px) {
+client/src/styles/theme.css:334:@media (max-width: 380px) {
+client/src/panels/Drawer.jsx:4: * Keywords: drawer, sidebar, sessions, projects, settings, archive-box, desktop-refresh
+client/src/panels/Drawer.jsx:69:  desktopRefresh,
+client/src/panels/Drawer.jsx:88:  const [desktopRefreshError, setDesktopRefreshError] = useState('');
+client/src/panels/Drawer.jsx:89:  const [desktopRefreshSaving, setDesktopRefreshSaving] = useState(false);
+client/src/panels/Drawer.jsx:259:      await apiFetch('/api/desktop-refresh', { method: 'POST', body: { enabled } });
+client/src/panels/Drawer.jsx:372:        desktopRefresh={desktopRefresh}
+client/src/panels/Drawer.jsx:373:        desktopRefreshSaving={desktopRefreshSaving}
+client/src/panels/Drawer.jsx:374:        desktopRefreshError={desktopRefreshError}
+client/src/panels/Drawer.jsx:547:      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+client/src/panels/DrawerSettingsView.jsx:27:  desktopRefresh,
+client/src/panels/DrawerSettingsView.jsx:28:  desktopRefreshSaving,
+client/src/panels/DrawerSettingsView.jsx:29:  desktopRefreshError,
+client/src/panels/DrawerSettingsView.jsx:38:  const desktopRefreshText = !desktopRefresh?.supported
+client/src/panels/DrawerSettingsView.jsx:40:    : desktopRefresh?.enabled
+client/src/panels/DrawerSettingsView.jsx:46:      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+client/src/panels/DrawerSettingsView.jsx:159:                    <small>{desktopRefreshText}</small>
+client/src/panels/DrawerSettingsView.jsx:166:                    checked={Boolean(desktopRefresh?.enabled)}
+client/src/panels/DrawerSettingsView.jsx:167:                    disabled={desktopRefreshSaving || !desktopRefresh?.supported}
+client/src/panels/DrawerSettingsView.jsx:173:              {desktopRefresh?.lastError || desktopRefreshError ? (
+client/src/panels/DrawerSettingsView.jsx:176:                  <span>{desktopRefreshError || desktopRefresh.lastError}</span>
+client/src/styles/panels-topbar.css:1:.top-bar {
+client/src/app/AppShell.jsx:4: * Keywords: app-shell, layout, panels
+client/src/styles/activity.css:786:@media (max-width: 640px) {
+client/src/styles/panels-drawer.css:1:.drawer-backdrop {
+client/src/styles/panels-drawer.css:10:.drawer-backdrop.is-open {
+client/src/styles/panels-drawer.css:2056:@media (max-width: 560px) {
+client/src/chat/ChatPane.jsx:108:      <section className="chat-pane chat-loading" ref={paneRef} aria-busy="true" aria-live="polite
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:07:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff origin/main...origin/pr/1 -- client/src/styles.css client/src/App.jsx | sed -n '1,620p'`</summary>
+```
+Chunk ID: 63e1fd
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 5695
+Output:
+diff --git a/client/src/App.jsx b/client/src/App.jsx
+index 395b02a..7e53408 100644
+--- a/client/src/App.jsx
++++ b/client/src/App.jsx
+@@ -14,6 +14,7 @@ import {
+   GitBranch,
+   GitCommitHorizontal,
+   Headphones,
++  HelpCircle,
+   Image,
+   Loader2,
+   Menu,
+@@ -36,7 +37,8 @@ import {
+   UploadCloud,
+   Volume2,
+   Wifi,
+-  X
++  X,
++  Zap
+ } from 'lucide-react';
+ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+ import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
+@@ -49,19 +51,53 @@ import { mergeActivityStep } from './activity-merge.js';
+ import { isPlaceholderTimelineItem } from './activity-timeline.js';
+ import { isNearChatBottom, shouldFollowChatOutput } from './chat-scroll.js';
+ import { composerSendState, desktopBridgeCanCreateThread } from './send-state.js';
++import { buildClientCollaborationMode } from './plan-mode-client.js';
++import {
++  dragEventHasFiles,
++  filesFromClipboardEvent,
++  filesFromDropEvent
++} from './upload-inputs.js';
+ import {
+   detectComposerToken,
+   filteredSlashCommands,
++  COMPOSER_MODE_OPTIONS,
++  composerModeLabel,
++  migrateComposerMode,
++  normalizeComposerMode,
++  selectedComposerModeForSession,
++  threadStartedComposerModeSourceIds,
+   replaceComposerToken
+ } from './composer-shortcuts.js';
++import {
++  THEME_OPTIONS,
++  applyThemeToDocument,
++  normalizeThemePreference,
++  resolveThemePreference
++} from './theme-preference.js';
++import {
++  DEFAULT_PERMISSION_MODE,
++  PERMISSION_OPTIONS,
++  permissionLabel,
++  permissionShortLabel
++} from './permission-mode.js';
++import {
++  DEFAULT_MODEL_SPEED,
++  MODEL_SPEED_OPTIONS,
++  normalizeModelSpeed,
++  serviceTierForModelSpeed
++} from './model-preferences.js';
+ import { connectionRecoveryState } from './connection-recovery.js';
+ import {
+   browserNotificationPermission,
+   isStandalonePwa,
++  markUserInputMessageResolved,
++  mergePendingUserInputMessages,
+   notificationFromPayload,
+   notificationPreferenceEnabled,
+   setNotificationPreferenceEnabled,
+-  shouldUseWebNotification
++  shouldUseWebNotification,
++  upsertUserInputMessage,
++  userInputKey
+ } from './notification-events.js';
+ import {
+   browserPushSupported,
+@@ -142,6 +178,8 @@ const DEFAULT_REASONING_EFFORT = 'xhigh';
+ const REASONING_DEFAULT_VERSION = 'xhigh-v1';
+ const THEME_KEY = 'codexmobile.theme';
+ const SELECTED_SKILLS_KEY = 'codexmobile.selectedSkills';
++const MODEL_SPEED_KEY = 'codexmobile.modelSpeed';
++const FOLLOW_UP_MODE_KEY = 'codexmobile.followUpMode';
+ const VOICE_MAX_RECORDING_MS = 90 * 1000;
+ const VOICE_MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+ const VOICE_MIME_CANDIDATES = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'];
+@@ -219,13 +257,6 @@ async function copyTextToClipboard(text) {
+   }
+ }
+ 
+-const PERMISSION_OPTIONS = [
+-  { value: 'default', label: '默认权限' },
+-  { value: 'acceptEdits', label: '自动接受编辑' },
+-  { value: 'bypassPermissions', label: '完全访问', danger: true }
+-];
+-const DEFAULT_PERMISSION_MODE = 'bypassPermissions';
+-
+ const REASONING_OPTIONS = [
+   { value: 'low', label: '低' },
+   { value: 'medium', label: '中' },
+@@ -233,6 +264,11 @@ const REASONING_OPTIONS = [
+   { value: 'xhigh', label: '超高' }
+ ];
+ 
++const FOLLOW_UP_OPTIONS = [
++  { value: 'queue', label: '排队', description: '当前任务结束后自动发送' },
++  { value: 'steer', label: '引导', description: '提交给当前运行，不中断模型' }
++];
++
+ function formatTime(value) {
+   if (!value) {
+     return '';
+@@ -425,14 +461,14 @@ function shortModelName(model) {
+     .replace(/-mini$/i, ' mini');
+ }
+ 
+-function permissionLabel(value) {
+-  return PERMISSION_OPTIONS.find((option) => option.value === value)?.label || '默认权限';
+-}
+-
+ function reasoningLabel(value) {
+   return REASONING_OPTIONS.find((option) => option.value === value)?.label || '超高';
+ }
+ 
++function normalizeFollowUpMode(value) {
++  return value === 'steer' ? 'steer' : 'queue';
++}
++
+ function safeStoredJsonArray(key) {
+   try {
+     const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+@@ -1452,8 +1488,8 @@ function Drawer({
+   onNewConversation,
+   onSync,
+   syncing,
+-  theme,
+-  setTheme,
++  themePreference,
++  setThemePreference,
+   canCreateThread = true,
+   createThreadUnavailableReason = ''
+ }) {
+@@ -1514,20 +1550,16 @@ function Drawer({
+                   <span>主题选择</span>
+                 </div>
+                 <div className="theme-segment" role="group" aria-label="主题选择">
+-                  <button
+-                    type="button"
+-                    className={theme === 'light' ? 'is-selected' : ''}
+-                    onClick={() => setTheme('light')}
+-                  >
+-                    白色
+-                  </button>
+-                  <button
+-                    type="button"
+-                    className={theme === 'dark' ? 'is-selected' : ''}
+-       
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:07:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git show origin/pr/1:docs/superpowers/specs/2026-05-07-codexmobile-adaptive-shell-design.md | sed -n '1,220p'`</summary>
+```
+Chunk ID: 4950e3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1904
+Output:
+# CodexMobile Adaptive Shell Design
+
+Date: 2026-05-07
+Status: Approved for implementation planning
+
+## Goal
+
+Build a v1 adaptive desktop shell for CodexMobile while preserving the existing iPhone-first PWA experience. The first release should remove the 430px desktop phone-frame constraint, make the left project/session drawer efficient on desktop, widen the chat/composer reading surface, and add desktop-friendly image/file input through paste and drag/drop.
+
+## Approved Direction
+
+The selected direction is "v1 adaptive shell" implemented with a CSS-first layout change plus small React interaction additions. This intentionally avoids a broad component split or a full three-pane desktop redesign in the first pass.
+
+## Scope
+
+In scope:
+
+- At desktop width `>=1024px`, use the full browser viewport instead of centering a `430px` mobile shell.
+- Dock the left drawer by default on desktop.
+- Keep the desktop drawer collapsible so the chat area can take the full width when needed.
+- Keep mobile and narrow tablet behavior as the current overlay drawer.
+- Increase desktop chat readability by widening the main content column and composer.
+- Support `Ctrl+V` / `Cmd+V` image paste in the composer.
+- Support dragging images and files into the chat/composer area.
+- Reuse the existing `/api/uploads` endpoint and `attachments` state.
+
+Out of scope for this first pass:
+
+- A full three-pane layout with a persistent right details panel.
+- A broad split of `App.jsx` into many files.
+- Reworking the visual brand, theme palette, or message rendering model.
+- New backend upload APIs.
+- Rich clipboard HTML import.
+
+## Architecture
+
+The existing front-end component model remains in place. `TopBar`, `Drawer`, `ChatPane`, and `Composer` continue to live in `client/src/App.jsx`; `client/src/styles.css` owns the responsive shell behavior.
+
+Desktop layout is controlled through media queries and a small amount of shell state:
+
+- Mobile/narrow layout remains `grid-template-rows: auto 1fr auto`.
+- Desktop layout becomes a two-column app shell when the drawer is docked: left drawer plus main chat stack.
+- The main chat stack contains top bar, chat pane, and composer.
+- Drawer collapse state changes the desktop grid columns without changing the mobile drawer behavior.
+
+Upload input normalization should be separated into a small pure helper so paste/drop extraction can be tested without rendering the full React app.
+
+## Component Design
+
+### App Shell
+
+`App` will keep the existing `drawerOpen` state for mobile overlay behavior and add a desktop-oriented drawer state such as `desktopDrawerCollapsed`. The shell class can expose the state through class names such as:
+
+- `app-shell`
+- `drawer-active`
+- `desktop-drawer-collapsed`
+
+CSS should decide which states matter at each viewport width. At mobile widths, `drawerOpen` continues to control the overlay drawer. At desktop widths, the drawer is docked unless collapsed.
+
+### TopBar
+
+On mobile, the menu button continues to open the drawer.
+
+On desktop, the same control becomes a drawer collapse/expand toggle. The rest of the top-bar actions remain in the existing menu model for v1.
+
+### Drawer
+
+On mobile, `Drawer` stays fixed, hidden by default, and opened over a backdrop.
+
+On desktop, `Drawer` is visually docked:
+
+- No backdrop.
+- No slide-in transform for the open state.
+- Width target: about `300px` to `340px`.
+- Height follows the app viewport.
+- Scrolling stays inside the drawer.
+
+When collapsed, the drawer should not block the chat. The collapse affordance must remain discoverable through the top-bar menu button or a narrow rail.
+
+### ChatPane
+
+Desktop `ChatPane` should use the available viewport and keep the reading column constrained for readability. The target desktop content max width is `960px` to `1100px`, wider than the current `820px` but not full-bleed text.
+
+Assistant messages remain a wide reading flow. User messages remain right-aligned bubbles.
+
+### Composer
+
+`Composer` gains paste and drag/drop handlers while reusing the current upload pathway.
+
+Paste behavior:
+
+- Inspect `clipboardData.items` / `clipboardData.files`.
+- Extract only file items with MIME type `image/*`.
+- If image files are found, prevent the browser's default image paste handling and call `onUploadFiles(files)`.
+- If no image file is found, do not prevent default so normal text paste works.
+
+Drag/drop behavior:
+
+- When the drag payload includes files, show a lightweight drop overlay.
+- Prevent the browser from navigating to dropped files.
+- On drop, call `onUploadFiles(files)` with all dropped files.
+- Hide the overlay on successful drop, cancel, or leaving the drop zone.
+
+## Data Flow
+
+The upload data flow stays unchanged:
+
+1. `Composer` receives pasted or dropped `File` objects.
+2. `Composer` calls `onUploadFiles(files)`.
+3. `App.handleUploadFiles` sets `uploading`.
+4. Each file is posted to `/api/uploads` a
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:11Z)**_
+
+我继续接着做。PR #1 里面真正值得拿的是“桌面端从手机壳变成双栏工作台”的结构思路，代码本身太老且冲突很大，所以我会按咱们现在已经拆开的组件体系落地，不硬搬它的旧 `App.jsx`。
+
+_**Agent (gpt-5.5 2026-05-14 15:09:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '560,910p' client/src/app/App.jsx`</summary>
+```
+Chunk ID: 0469fe
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2627
+Output:
+    clearRun,
+    loadQueueDrafts
+  });
+
+  async function handleGitAction(action) {
+    if (!selectedProject || selectedRunning) {
+      return;
+    }
+    setGitPanel({ open: true, action });
+  }
+
+  const {
+    handleConnectDocs,
+    handleDisconnectDocs,
+    handleRefreshDocs,
+    handleOpenDocsHome,
+    handleOpenDocsAuth
+  } = useDocsActions({
+    docsBusy,
+    status,
+    setStatus,
+    setDocsBusy,
+    setDocsError,
+    loadStatus
+  });
+
+  const shellClass = useMemo(() => (drawerOpen ? 'app-shell drawer-active' : 'app-shell'), [drawerOpen]);
+  const visibleContextStatus = useMemo(
+    () => {
+      if (!selectedSession || isDraftSession(selectedSession)) {
+        return emptyContextStatus();
+      }
+      return normalizeContextStatus(contextStatus || selectedSession.context || DEFAULT_STATUS.context, DEFAULT_STATUS.context);
+    },
+    [contextStatus, selectedSession]
+  );
+  const recoveryState = connectionRecoveryState({
+    authenticated,
+    connectionState,
+    desktopBridge: status.desktopBridge,
+    syncing
+  });
+  const topBarRuntime = selectedRuntime || (selectedRunning ? { status: 'running' } : null);
+
+  const handleComposerSubmit = useCallback(async (options = {}) => {
+    if ((selectedSessionRef.current || selectedSession)?.archived) {
+      return;
+    }
+    const collaborationMode = options.collaborationMode || selectedCollaborationMode || null;
+    const accepted = await handleSubmit({ ...options, collaborationMode });
+    if (accepted && collaborationMode) {
+      setSelectedCollaborationMode(null);
+    }
+  }, [handleSubmit, selectedCollaborationMode, selectedSession]);
+
+  const handleCompactContext = useCallback(async () => {
+    const project = selectedProjectRef.current || selectedProject;
+    const session = selectedSessionRef.current || selectedSession;
+    if (!project?.id || !session?.id || isDraftSession(session)) {
+      showToast({
+        level: 'warning',
+        title: '无法压缩上下文',
+        body: '请先打开一个已有线程。'
+      });
+      return false;
+    }
+    const actionId = globalThis.crypto?.randomUUID?.() || `manual-context-compaction-${Date.now()}`;
+    const startedAt = new Date().toISOString();
+    setMessages((current) => upsertActivityMessage(current, {
+      projectId: project.id,
+      sessionId: session.id,
+      messageId: actionId,
+      kind: 'context_compaction',
+      status: 'running',
+      label: '正在压缩上下文',
+      startedAt,
+      timestamp: startedAt
+    }));
+    showToast({
+      level: 'info',
+      title: '正在压缩上下文',
+      body: '移动端会同步显示压缩进度。'
+    });
+    try {
+      await apiFetch('/api/chat/compact', {
+        method: 'POST',
+        timeoutMs: 35_000,
+        body: {
+          projectId: project.id,
+          sessionId: session.id,
+          clientActionId: actionId
+        }
+      });
+      const timestamp = new Date().toISOString();
+      setMessages((current) => upsertActivityMessage(current, {
+        projectId: project.id,
+        sessionId: session.id,
+        messageId: actionId,
+        kind: 'context_compaction',
+        status: 'completed',
+        label: '上下文已压缩',
+        startedAt,
+        completedAt: timestamp,
+        timestamp
+      }));
+      setContextStatus((current) => mergeContextStatus(current, {
+        autoCompact: {
+          detected: true,
+          status: 'detected',
+          lastCompactedAt: timestamp,
+          reason: '手动压缩上下文'
+        },
+        updatedAt: timestamp
+      }, DEFAULT_STATUS.context));
+      showToast({
+        level: 'success',
+        title: '上下文已压缩',
+        body: '当前线程的压缩结果已同步。'
+      });
+      return true;
+    } catch (error) {
+      const failedAt = new Date().toISOString();
+      setMessages((current) => upsertActivityMessage(current, {
+        projectId: project.id,
+        sessionId: session.id,
+        messageId: actionId,
+        kind: 'context_compaction',
+        status: 'failed',
+        label: '上下文压缩失败',
+        detail: error.message || '桌面端没有完成上下文压缩。',
+        startedAt,
+        completedAt: failedAt,
+        timestamp: failedAt
+      }));
+      showToast({
+        level: 'error',
+        title: '压缩失败',
+        body: error.message || '桌面端没有完成上下文压缩。'
+      });
+      return false;
+    }
+  }, [selectedProject, selectedSession, showToast]);
+
+  const handleDesktopHandoff = useCallback(async () => {
+    const session = selectedSessionRef.current || selectedSession;
+    if (!session?.id || isDraftSession(session)) {
+      showToast({
+        level: 'warning',
+        title: '暂时不能回到桌面',
+        body: '请先打开一个已创建的对话。'
+      });
+      return false;
+    }
+    if (selectedRunning) {
+      showToast({
+        level: 'warning',
+        title: 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,180p' client/src/styles/layout.css`</summary>
+```
+Chunk ID: 4cdf31
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 324
+Output:
+
+.app-shell {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 100vw;
+  max-width: 100vw;
+  height: var(--app-height, 100dvh);
+  min-height: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(247, 247, 244, 0) 38%),
+    linear-gradient(135deg, rgba(230, 232, 226, 0.46), rgba(255, 255, 255, 0) 42%),
+    var(--surface);
+  color: var(--text);
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-y;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(env(safe-area-inset-top, 0px) + 72px);
+  z-index: 33;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(247, 247, 244, 0.9), rgba(247, 247, 244, 0.62) 62%, rgba(247, 247, 244, 0));
+  -webkit-backdrop-filter: blur(12px) saturate(1.04);
+  backdrop-filter: blur(12px) saturate(1.04);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.92) 58%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.92) 58%, transparent 100%);
+}
+
+[data-theme="dark"] .app-shell {
+  background: var(--surface);
+}
+
+[data-theme="dark"] .app-shell::before {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.86), rgba(0, 0, 0, 0.56) 62%, rgba(0, 0, 0, 0));
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,180p' client/src/styles/panels-chat.css`</summary>
+```
+Chunk ID: dacac0
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 907
+Output:
+.session-strip {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(222, 223, 220, 0.74);
+  background: rgba(247, 247, 244, 0.78);
+}
+
+.session-strip button {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  max-width: 148px;
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: #39404a;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.session-strip button.is-selected {
+  border-color: rgba(37, 99, 235, 0.38);
+  background: var(--accent-soft);
+}
+
+.session-strip span {
+  max-width: 124px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+.session-strip small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.chat-pane {
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100vw;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: calc(env(safe-area-inset-top, 0px) + 82px) 14px calc(var(--composer-height) + 14px);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 126, 136, 0.28) transparent;
+}
+
+.chat-pane::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 24;
+  height: calc(var(--composer-height) + 10px);
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(247, 247, 244, 0), rgba(247, 247, 244, 0.5) 48%, rgba(247, 247, 244, 0.86));
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.62) 34%, #000 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.62) 34%, #000 100%);
+}
+
+.chat-content {
+  min-width: 0;
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.empty-chat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty-orbit {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.empty-chat h2 {
+  margin: 8px 0 0;
+  color: var(--text);
+  font-size: 20px;
+}
+
+.empty-chat p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.chat-loading,
+.chat-load-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+}
+
+.chat-loading-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(100%, 420px);
+  margin: 0 auto;
+  padding: 14px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  color: var(--text);
+  background: var(--glass-strong);
+  box-shadow: var(--soft-shadow);
+  backdrop-filter: blur(18px) saturate(1.12);
+}
+
+.chat-loading-card svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.chat-loading-card div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.chat-loading-card strong,
+.chat-loading-card span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-loading-card strong {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.chat-loading-card span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.chat-loading-lines {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 420px);
+  margin: 0 auto;
+}
+
+.chat-loading-lines span {
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.28), rgba(148, 163, 184, 0.12));
+  background-size: 220% 100%;
+  animation: loadingSweep 1.15s ease-in-out infinite;
+}
+
+.chat-loading-lines span:nth-child(2) {
+  width: 84%;
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '260,340p' client/src/styles/theme.css`</summary>
+```
+Chunk ID: 74adf4
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 313
+Output:
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes activityPulse {
+  0%, 100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes scrollLatestIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (min-width: 820px) {
+  body {
+    display: grid;
+    place-items: center;
+    background: #e8e9e5;
+  }
+
+  #root {
+    width: min(430px, 100vw);
+    height: min(932px, var(--app-height, 100dvh));
+    border-left: 1px solid #d7d9d5;
+    border-right: 1px solid #d7d9d5;
+    box-shadow: 0 24px 80px rgba(20, 24, 31, 0.16);
+  }
+
+  .app-shell {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+  }
+
+  [data-theme="dark"] body {
+    background: #000000;
+  }
+
+  [data-theme="dark"] #root {
+    border-left-color: #202024;
+    border-right-color: #202024;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.62);
+  }
+}
+
+@media (max-width: 480px) {
+  .permission-pill {
+    max-width: 104px;
+  }
+
+  .model-select {
+    max-width: 104px;
+  }
+
+  .skill-select {
+    max-width: 86px;
+  }
+
+}
+
+@media (max-width: 380px) {
+  .permission-pill {
+    max-width: 92px;
+    overflow: hidden;
+  }
+
+  .model-select {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:20Z)**_
+
+代码现在确实还保留着 820px 以上的“手机预览壳”，这正是桌面端看起来窄的根因。我会把断点改成：820-1023 仍可保留预览壳，1024 以上切换为真正桌面双栏。
+
+_**Agent (gpt-5.5 2026-05-14 15:09:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' client/src/panels/TopBar.jsx`</summary>
+```
+Chunk ID: d9c4a8
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1911
+Output:
+/**
+ * 主顶栏：会话标题、连接状态、菜单、桌面回跳、文档 / Git 快捷入口与线程 ID 复制等。
+ *
+ * Keywords: topbar, header, desktop-handoff, git, docs, notifications
+ *
+ * Exports:
+ * - TopBar — 顶栏组件。
+ * - bridgeConnectionLabel — 自 topbar-status 再导出。
+ *
+ * Inward: clipboard、session-utils、DocsPanel、topbar-status；lucide-react。
+ *
+ * Outward: App 根布局顶部固定区域。
+ */
+
+import { Bell, Check, Copy, FileText, GitBranch, GitCommitHorizontal, Menu, MonitorUp, MoreHorizontal, RefreshCw, UploadCloud } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { copyTextToClipboard } from '../utils/clipboard.js';
+import { isDraftSession } from '../app/session-utils.js';
+import { desktopHandoffMenuState } from '../desktop-handoff-state.js';
+import { FeishuLogoIcon } from './DocsPanel.jsx';
+import { bridgeConnectionLabel } from './topbar-status.js';
+
+export { bridgeConnectionLabel } from './topbar-status.js';
+
+export function TopBar({
+  selectedProject,
+  selectedSession,
+  connectionState,
+  desktopBridge,
+  selectedRuntime,
+  onMenu,
+  onOpenDocs,
+  onGitAction,
+  onDesktopHandoff,
+  desktopHandoffSupported = true,
+  desktopHandoffPending = false,
+  notificationSupported,
+  notificationEnabled,
+  onEnableNotifications,
+  gitDisabled = false
+}) {
+  const status = bridgeConnectionLabel(connectionState, desktopBridge, { selectedSession, selectedRuntime });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [copiedThreadId, setCopiedThreadId] = useState(false);
+  const menuRef = useRef(null);
+  const copiedTimerRef = useRef(null);
+  const canCopyThreadId = Boolean(selectedSession?.id && !isDraftSession(selectedSession));
+  const desktopHandoffState = desktopHandoffMenuState({
+    selectedSession,
+    selectedRuntime,
+    supported: desktopHandoffSupported,
+    pending: desktopHandoffPending
+  });
+  const projectId = selectedProject?.id || '';
+  const title = selectedSession?.title || selectedProject?.name || 'CodexMobile';
+
+  useEffect(() => {
+    if (!menuOpen) {
+      return undefined;
+    }
+    function closeMenu(event) {
+      if (!menuRef.current?.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('pointerdown', closeMenu);
+    return () => document.removeEventListener('pointerdown', closeMenu);
+  }, [menuOpen]);
+
+  useEffect(() => () => {
+    if (copiedTimerRef.current) {
+      window.clearTimeout(copiedTimerRef.current);
+    }
+  }, []);
+
+  function handleGitAction(action) {
+    setMenuOpen(false);
+    onGitAction?.(action);
+  }
+
+  async function handleCopyThreadId() {
+    if (!canCopyThreadId) {
+      return;
+    }
+    const copied = await copyTextToClipboard(selectedSession.id);
+    if (!copied) {
+      window.alert('复制失败');
+      return;
+    }
+    setCopiedThreadId(true);
+    if (copiedTimerRef.current) {
+      window.clearTimeout(copiedTimerRef.current);
+    }
+    copiedTimerRef.current = window.setTimeout(() => setCopiedThreadId(false), 1400);
+  }
+
+  function handleOpenDocs() {
+    setMenuOpen(false);
+    onOpenDocs?.();
+  }
+
+  function handleDesktopHandoff() {
+    if (desktopHandoffState.disabled) {
+      return;
+    }
+    setMenuOpen(false);
+    onDesktopHandoff?.();
+  }
+
+  function handleEnableNotifications() {
+    setMenuOpen(false);
+    onEnableNotifications?.();
+  }
+
+  return (
+    <header className="top-bar">
+      <button className="icon-button" onClick={onMenu} aria-label="打开菜单">
+        <Menu size={22} />
+      </button>
+      <div className="top-title">
+        <strong>{title}</strong>
+        <span className={`connection-status ${status.className}`} title={status.description} aria-label={status.description || status.label}>
+          <span className="connection-dot" aria-hidden="true" />
+          {status.label}
+        </span>
+      </div>
+      <div className="top-actions">
+        <div className="top-menu-wrap" ref={menuRef}>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => setMenuOpen((value) => !value)}
+            aria-label="更多操作"
+            aria-expanded={menuOpen}
+          >
+            <MoreHorizontal size={22} />
+          </button>
+          {menuOpen ? (
+            <div className="top-menu-popover" role="menu" aria-label="更多操作">
+              <div className="top-menu-title">
+                <MoreHorizontal size={16} />
+                <span>更多</span>
+              </div>
+              <button type="button" role="menuitem" onClick={handleCopyThreadId} disabled={!canCopyThreadId}>
+                {copiedThreadId ? <Check size={16} /> : <Copy size={16} />}
+                <span>{copiedThreadId ? '已复制对话 ID' : '复制对话 ID'}</span>
+              </button>
+              <button type="button" role="menuitem" onClick={handleDeskt
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '500,700p' client/src/panels/Drawer.jsx`</summary>
+```
+Chunk ID: 66e715
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1965
+Output:
+          </button>
+          <button
+            type="button"
+            className="project-add-button"
+            onClick={(event) => startNewConversation(project, event)}
+            aria-label={`新建${project.projectless ? '普通' : project.name}对话`}
+            title="新建对话"
+          >
+            <Plus size={15} />
+          </button>
+        </div>
+        {sessionsOpen ? (
+          <div className="thread-list">
+            {loadingProjectId === project.id ? (
+              <div className="thread-empty">
+                <Loader2 className="spin" size={13} />
+                加载中
+              </div>
+            ) : visibleProjectSessions.length ? (
+              rootSessions.map((session) => {
+                const childSessions = childSessionsByParent.get(session.id) || [];
+                const childSessionsOpen = Boolean(subagentExpandedById[session.id]);
+                return (
+                  <div key={session.id} className="thread-stack">
+                    {renderThreadRow(project, session)}
+                    {childSessions.length && childSessionsOpen ? (
+                      <div className="thread-list is-subagents">
+                        {childSessions.map((childSession) => renderThreadRow(project, childSession, { isSubAgent: true }))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="thread-empty">暂无线程</div>
+            )}
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+  const renderedProjectGroups = orderedProjects.map(renderProjectGroup).filter(Boolean);
+
+  const statusText = runningCount ? `${runningCount} 个任务运行中` : '已连接';
+
+  return (
+    <>
+      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+      <aside className={`drawer ${open ? 'is-open' : ''}`}>
+        <div className="drawer-header">
+          <div className="drawer-brand">
+            <img className="drawer-app-icon" src="/codex-icon-180.png" alt="" aria-hidden="true" />
+            <span className="drawer-brand-name">CodexMobile</span>
+          </div>
+          <button className="drawer-header-action" onClick={onClose} aria-label="关闭菜单">
+            <X size={16} />
+          </button>
+        </div>
+
+        <label className="drawer-search">
+          <Search size={14} />
+          <input
+            type="search"
+            value={drawerQuery}
+            onChange={(event) => setDrawerQuery(event.target.value)}
+            placeholder="搜索对话"
+            aria-label="搜索对话或项目"
+          />
+        </label>
+
+        <div className="drawer-thread-browser">
+          <button
+            type="button"
+            className={`drawer-new-row ${newConversationOpen ? 'is-open' : ''}`}
+            onClick={() => setNewConversationOpen((current) => !current)}
+            aria-expanded={newConversationOpen}
+            title="选择新对话位置"
+          >
+            <Plus size={16} />
+            <span>新对话</span>
+            <ChevronDown size={14} />
+          </button>
+
+          {newConversationOpen ? (
+            <div className="new-conversation-panel" aria-label="选择新对话位置">
+              {projectlessProject ? (
+                <button type="button" className="new-conversation-option" onClick={(event) => startNewConversation(projectlessProject, event)}>
+                  <MessageSquare size={15} />
+                  <span>
+                    <strong>普通对话</strong>
+                    <small>不绑定项目</small>
+                  </span>
+                </button>
+              ) : null}
+              {projectChoices.map((project) => (
+                <button
+                  key={project.id}
+                  type="button"
+                  className="new-conversation-option"
+                  onClick={(event) => startNewConversation(project, event)}
+                >
+                  <Folder size={15} />
+                  <span>
+                    <strong>{project.name}</strong>
+                    <small>{project.pathLabel || compactPath(project.path)}</small>
+                  </span>
+                </button>
+              ))}
+              {!projectlessProject && !projectChoices.length ? (
+                <div className="new-conversation-empty">暂无可用位置</div>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="project-list">
+            {renderedProjectGroups}
+          </div>
+          {normalizedDrawerQuery && !renderedProjectGroups.length ? (
+            <div className="drawer-empty-state">没有匹配的对话或项目</div>
+          ) : null}
+        </div>
+
+        {quotaExpanded ? (
+          <DrawerQuotaPanel
+            quotaLoading={quotaLoading}
+            quotaLoaded={quotaLoaded
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' client/src/styles/panels-drawer.css`</summary>
+```
+Chunk ID: c4ac9a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1079
+Output:
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(19, 23, 30, 0);
+  pointer-events: none;
+  transition: background 180ms ease;
+  z-index: 40;
+}
+
+.drawer-backdrop.is-open {
+  background: rgba(19, 23, 30, 0.28);
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(84vw, 368px);
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 14px);
+  background: rgba(250, 251, 250, 0.97);
+  box-shadow: 16px 0 38px rgba(17, 24, 39, 0.16);
+  backdrop-filter: blur(18px);
+  overflow: hidden;
+  transform: translateX(-105%);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 50;
+}
+
+[data-theme="dark"] .drawer {
+  background: rgba(6, 6, 7, 0.98);
+}
+
+.drawer.is-open {
+  transform: translateX(0);
+}
+
+.drawer-grip {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 0 0 14px;
+}
+
+.drawer-header > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.drawer-brand {
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px !important;
+}
+
+.drawer-app-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.18);
+}
+
+.drawer-brand span {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.drawer-header strong {
+  color: #161b22;
+  font-size: 19px;
+  line-height: 23px;
+  letter-spacing: 0;
+}
+
+.drawer-header small {
+  color: #7b8490;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+[data-theme="dark"] .drawer-header strong {
+  color: var(--text);
+}
+
+.drawer-command {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+  margin-bottom: 16px;
+  padding: 3px;
+  border: 0;
+  border-radius: 8px;
+  background: #f0f2f0;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .drawer-command {
+  background: #222224;
+}
+
+.drawer-search {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 9px;
+  color: #8a929c;
+}
+
+.drawer-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  background: transparent;
+  font-size: 14px;
+}
+
+.drawer-search input::placeholder {
+  color: #a0a7b0;
+}
+
+.drawer-new-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 86px;
+  height: 36px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: #1e3f73;
+  font-size: 13px;
+  font-weight: 750;
+  box-shadow: none;
+}
+
+.drawer-new-button:active {
+  background: #102c56;
+}
+
+.drawer-new-button:disabled {
+  color: #707783;
+  background: #e4e7ec;
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] .drawer-new-button:disabled {
+  color: #9ca3af;
+  background: #333333;
+}
+
+.drawer-subheader {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 12px;
+}
+
+.drawer-subheader strong {
+  justify-self: center;
+  color: var(--text);
+  font-size: 17px;
+  line-height: 22px;
+}
+
+.settings-view {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding-top: 8px;
+}
+
+.drawer-action,
+.project-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  text-align: left;
+  color: var(--text);
+}
+
+.drawer-action {
+  min-height: 62px;
+  margin: 8px 0 18px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+[data-theme="dark"] .drawer-action {
+  background: #101012;
+}
+
+.drawer-action span,
+.project-row span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drawer-action strong,
+.project-row strong {
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.drawer-action small,
+.project-row small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawer-section {
+  min-height: 0;
+  margin-bottom: 12px;
+}
+
+.drawer-thread-browser {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: auto;
+  padding: 0 0 12px;
+}
+
+.conversation-section {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+}
+
+.project-section {
+  flex: 1 1 auto;
+  display: flex;
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,260p' client/src/styles/panels-topbar.css`</summary>
+```
+Chunk ID: 9b6431
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1160
+Output:
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px 8px;
+  background: transparent;
+  border-bottom: 0;
+  overflow: visible;
+  z-index: 34;
+}
+
+.icon-button,
+.ghost-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 999px;
+  color: #353a40;
+  background: transparent;
+}
+
+[data-theme="dark"] .icon-button,
+[data-theme="dark"] .ghost-icon {
+  color: #f4f4f5;
+}
+
+[data-theme="dark"] .icon-button:active,
+[data-theme="dark"] .ghost-icon:active {
+  background: #151518;
+}
+
+[data-theme="dark"] .icon-button:disabled {
+  color: #71717a;
+}
+
+.icon-button:active,
+.ghost-icon:active {
+  background: #ecedea;
+}
+
+.icon-button:disabled {
+  color: #aeb4bc;
+  cursor: default;
+  opacity: 0.58;
+}
+
+.top-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  min-width: 0;
+}
+
+.top-menu-wrap {
+  position: relative;
+}
+
+.top-menu-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 35;
+  width: 208px;
+  padding: 8px;
+  border: 1px solid rgba(222, 223, 220, 0.95);
+  border-radius: 12px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 16px 36px rgba(20, 24, 31, 0.16);
+}
+
+.top-menu-title,
+.top-menu-popover button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: left;
+}
+
+.top-menu-title {
+  color: #3f454d;
+  font-weight: 500;
+}
+
+.top-menu-popover button:active {
+  background: #f0f1ee;
+}
+
+.top-menu-popover button:disabled {
+  color: #aeb4bc;
+  cursor: default;
+}
+
+.top-menu-popover button:disabled:active {
+  background: transparent;
+}
+
+.top-menu-popover svg {
+  flex: 0 0 auto;
+  color: #3f454d;
+}
+
+.top-menu-popover button:disabled svg {
+  color: #aeb4bc;
+}
+
+.top-menu-divider {
+  height: 1px;
+  margin: 6px 2px;
+  background: rgba(222, 223, 220, 0.88);
+}
+
+.top-docs-logo {
+  display: block;
+  border-radius: 7px;
+  box-shadow: 0 0 0 1px rgba(24, 28, 33, 0.08);
+}
+
+[data-theme="dark"] .top-docs-logo {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+[data-theme="dark"] .top-menu-popover {
+  color: var(--text);
+  background: rgba(8, 8, 9, 0.98);
+  border-color: #242428;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.52);
+}
+
+[data-theme="dark"] .top-menu-title,
+[data-theme="dark"] .top-menu-popover svg {
+  color: #d4d4d8;
+}
+
+[data-theme="dark"] .top-menu-popover button:active {
+  background: #151518;
+}
+
+[data-theme="dark"] .top-menu-popover button:disabled,
+[data-theme="dark"] .top-menu-popover button:disabled svg {
+  color: #71717a;
+}
+
+[data-theme="dark"] .top-menu-divider {
+  background: #242428;
+}
+
+.top-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.top-title strong {
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.connection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 15px;
+  color: #6b7280;
+}
+
+.connection-status.is-connected {
+  color: #6b7280;
+}
+
+.connection-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.72;
+}
+
+.connection-status.is-running {
+  color: #1f2937;
+}
+
+.connection-status.is-running .connection-dot {
+  background: #10a37f;
+  opacity: 1;
+  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12);
+  animation: connectionPulse 1.6s ease-in-out infinite;
+}
+
+.connection-status.is-failed {
+  color: var(--danger);
+}
+
+.connection-status.is-failed .connection-dot {
+  background: currentColor;
+  opacity: 1;
+}
+
+.connection-status.is-headless,
+.connection-status.is-route-pending {
+  color: #4b5563;
+}
+
+.connection-status.is-ipc-ready .connection-dot {
+  background: #10a37f;
+}
+
+.connection-status.is-connecting {
+  color: #64748b;
+}
+
+.connection-status.is-disconnected {
+  color: var(--danger);
+}
+
+[data-theme="dark"] .connection-status,
+[data-theme="dark"] .connection-status.is-connected {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .connection-status.is-running {
+  color: #f4f4f5;
+}
+
+[data-theme="dark"] .connection-status.is-failed {
+  color: #fda4af;
+}
+
+[data-theme="dark"] .connection-status.is-headless,
+[data-theme="dark"] .connection-status.is-route-pending {
+  color: #d4d4d8;
+}
+
+@keyframes connectionPulse {
+  0%,
+  100% {
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,240p' client/src/styles/composer.css`</summary>
+```
+Chunk ID: 6b9678
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 982
+Output:
+.composer-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--keyboard-inset, 0px);
+  z-index: 30;
+  min-width: 0;
+  width: 100%;
+  max-width: 100vw;
+  padding: 7px 12px calc(env(safe-area-inset-bottom, 0px) + 8px);
+  background: transparent;
+  border-top: 0;
+  overflow: visible;
+}
+
+[data-keyboard="open"] .composer-wrap {
+  padding-bottom: 6px;
+}
+
+[data-keyboard="open"] .chat-pane {
+  padding-bottom: calc(var(--composer-height) + 8px);
+}
+
+.file-input {
+  display: none;
+}
+
+.composer-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 150px;
+  max-width: min(84vw, 300px);
+  max-height: 42svh;
+  padding: 7px;
+  overflow: auto;
+  border: 1px solid rgba(222, 223, 220, 0.9);
+  border-radius: 16px;
+  background: var(--glass-strong);
+  box-shadow: var(--soft-shadow);
+  backdrop-filter: blur(22px) saturate(1.18);
+}
+
+.attach-menu {
+  left: 14px;
+}
+
+.permission-menu {
+  left: 56px;
+}
+
+.skill-menu {
+  left: 96px;
+  min-width: 238px;
+}
+
+.model-menu {
+  right: 12px;
+  min-width: 176px;
+}
+
+.send-mode-menu {
+  right: 12px;
+  min-width: 242px;
+}
+
+.shortcut-menu {
+  left: 12px;
+  right: 12px;
+  max-width: none;
+  max-height: min(280px, 38svh);
+}
+
+.send-mode-menu button > span:last-child,
+.model-menu button > .menu-item-main {
+  display: block;
+}
+
+.send-mode-menu strong,
+.send-mode-menu small,
+.model-menu strong,
+.model-menu small,
+.shortcut-menu strong,
+.shortcut-menu small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.send-mode-menu strong,
+.model-menu strong,
+.shortcut-menu strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.send-mode-menu small,
+.model-menu small,
+.shortcut-menu small {
+  margin-top: 2px;
+  color: #7b838d;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.skill-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 9px;
+  border-radius: 8px;
+  color: #8a9097;
+  background: #f4f5f2;
+}
+
+.skill-search-wrap input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+}
+
+.skill-search-wrap input::placeholder {
+  color: #9ba1a8;
+}
+
+.menu-section-label {
+  padding: 4px 9px 2px;
+  color: #8a9097;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.menu-divider {
+  height: 1px;
+  margin: 5px 2px;
+  background: #eceeeb;
+}
+
+.composer-menu button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 8px;
+  color: #363c45;
+  background: transparent;
+  text-align: left;
+}
+
+.composer-menu button.is-selected {
+  color: #174eb8;
+  background: var(--accent-soft);
+}
+
+.composer-menu button.is-danger {
+  color: var(--danger);
+}
+
+.composer-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
+}
+
+.skill-menu-item > span:last-child {
+  display: block;
+}
+
+.skill-menu-item strong,
+.skill-menu-item small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skill-menu-item strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.skill-menu-item small {
+  margin-top: 2px;
+  color: #7b838d;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.skill-clear-button {
+  margin-top: 3px;
+}
+
+.menu-empty {
+  padding: 10px 9px;
+  color: #8a9097;
+  font-size: 13px;
+}
+
+.composer-menu button span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-spacer {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.composer {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 26px;
+  background: var(--glass-strong);
+  box-shadow: var(--soft-shadow);
+  backdrop-filter: blur(22px) saturate(1.18);
+  overflow: hidden;
+}
+
+.attachment-tray {
+  display: flex;
+  align-items: flex-start;
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '240,560p' client/src/styles/composer.css`</summary>
+```
+Chunk ID: 100eb9
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1512
+Output:
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.attachment-tray::-webkit-scrollbar {
+  display: none;
+}
+
+.plan-mode-chip {
+  color: #155e75;
+  background: rgba(6, 182, 212, 0.12);
+  border-color: rgba(8, 145, 178, 0.18);
+}
+
+[data-theme="dark"] .plan-mode-chip {
+  color: #67e8f9;
+  background: rgba(8, 145, 178, 0.18);
+  border-color: rgba(103, 232, 249, 0.16);
+}
+
+.attachment-preview-card {
+  position: relative;
+  flex: 0 0 112px;
+  display: block;
+  width: 112px;
+  height: 78px;
+  overflow: hidden;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  border-radius: 8px;
+  background: #e8ebe7;
+  box-shadow: 0 5px 16px rgba(20, 24, 31, 0.08);
+}
+
+.attachment-preview-card img,
+.attachment-preview-empty {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.attachment-preview-card img {
+  object-fit: cover;
+}
+
+.attachment-preview-empty {
+  display: grid;
+  place-items: center;
+  color: #7a828d;
+  background: linear-gradient(135deg, #f2f4f1, #dde2df);
+}
+
+.attachment-preview-meta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  padding: 16px 28px 6px 7px;
+  color: #fff;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.68));
+  pointer-events: none;
+}
+
+.attachment-preview-meta span,
+.attachment-preview-meta small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-preview-meta span {
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 13px;
+}
+
+.attachment-preview-meta small {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 9px;
+  line-height: 11px;
+}
+
+.attachment-preview-card button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(13, 17, 23, 0.64);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .attachment-preview-card {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: #22252a;
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.24);
+}
+
+.attachment-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 260px;
+  height: 30px;
+  padding: 0 5px 0 8px;
+  border-radius: 999px;
+  color: #4f5661;
+  background: rgba(238, 239, 235, 0.88);
+}
+
+.attachment-chip > span {
+  min-width: 0;
+  max-width: 138px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.attachment-chip small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.attachment-chip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  color: #737a83;
+  background: transparent;
+}
+
+.file-mention-chip {
+  background: rgba(235, 242, 255, 0.92);
+}
+
+.queued-drafts-panel {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 7px;
+  padding: 0;
+}
+
+.queued-draft-row {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 7px 8px;
+  border: 1px solid rgba(222, 223, 220, 0.9);
+  border-radius: 12px;
+  color: #4b5563;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 7px 20px rgba(20, 24, 31, 0.06);
+}
+
+.queued-draft-text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.queued-draft-text strong,
+.queued-draft-text small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queued-draft-text strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 590;
+}
+
+.queued-draft-text small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.queued-draft-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.queued-draft-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  border: 0;
+  border-radius: 50%;
+  color: #69717d;
+  background: transparent;
+}
+
+.composer textarea {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  max-height: 132px;
+  padding: 14px 16px 6px;
+  resize: none;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  background: transparent;
+  line-height: 1.45;
+  font-size: 16px;
+}
+
+.composer textarea::placeholder {
+  color: #b1b5ba;
+}
+
+.composer textarea:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.composer-readonly-note {
+  margin: 0 12px 4px;
+  padding: 8px 10px;
+  border: 1px solid rgba(103, 112, 125, 0.16);
+  border-radius: 8px;
+  color: #667085;
+  background: rgba(17, 24, 39, 0.04);
+  font-size: 12px;
+  font-weight: 620;
+  line-height: 16px;
+}
+
+[data-theme="dark"] .composer-readonly-note {
+  color: #a1a1aa;
+  backgr
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,120p' client/src/app/App.jsx`</summary>
+```
+Chunk ID: a12861
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1561
+Output:
+/**
+ * CodexMobile Web：根级应用编排——认证门禁、服务端状态与 WS、会话域数据流、把 props 下发给 Shell。
+ *
+ * Keywords: pairing, websocket, bootstrap, session-orchestration, composer-props
+ *
+ * Exports:
+ * - default — `App`（入口挂载的根组件）。
+ *
+ * Inward（本模块组装）: `PairingScreen`, `AppShell`；多处 `use*` hooks（bootstrap / session / submit / runtime / uploads 等）；
+ *   `session-utils`、`api`、`AppState` reducer。
+ *
+ * Outward（谁消费）: 应用入口（如 `main`）仅挂载本 default；DOM 拼装见 `AppShell.jsx`。
+ *
+ * 不负责: 页面区域的具体布局与样式、`Composer`/`ChatPane` 内部交互实现。
+ */
+
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { apiFetch, getToken } from '../api.js';
+import { DEFAULT_PERMISSION_MODE } from '../composer/Composer.jsx';
+import { DEFAULT_MODEL_SPEED, normalizeModelSpeed } from '../composer/composer-options.js';
+import { useComposerSelections } from '../composer/useComposerSelections.js';
+import { useQueueDrafts } from '../composer/useQueueDrafts.js';
+import { connectionRecoveryState } from '../connection-recovery.js';
+import { mergeContextStatus, normalizeContextStatus } from './context-status.js';
+import { DEFAULT_REASONING_EFFORT, DEFAULT_STATUS, REASONING_DEFAULT_VERSION } from './defaults.js';
+import { appReducer, createInitialUiState, THEME_KEY } from './AppState.js';
+import { useNotifications } from '../panels/useNotifications.js';
+import { useAppBootstrap } from './useAppBootstrap.js';
+import { useConnectionActions } from './useConnectionActions.js';
+import { useDocsActions } from './useDocsActions.js';
+import { useFileUploads } from './useFileUploads.js';
+import { useAppWebSocket } from './useAppWebSocket.js';
+import { upsertActivityMessage } from '../chat/activity-model.js';
+import { useSessionLivePolling } from './useSessionLivePolling.js';
+import { useSessionActions } from './useSessionActions.js';
+import { useTurnSubmission } from './useTurnSubmission.js';
+import { useTurnRuntime } from './useTurnRuntime.js';
+import { useViewportSizing } from './useViewportSizing.js';
+import { usePwaUpdate } from './pwa-update.js';
+import { applyPwaTheme } from './pwa-theme.js';
+import { mergeModelSettingsIntoStatus, nextSyncedComposerSettings } from './model-sync.js';
+import { rememberSelectedSession } from './selection-persistence.js';
+import {
+  emptyContextStatus,
+  hasRunningKey,
+  isDraftSession,
+  reconcileThreadRuntimeWithSessions,
+  selectedRunKeys,
+  selectedSessionIsRunning,
+  upsertSessionInProject
+} from './session-utils.js';
+import { AppShell } from './AppShell.jsx';
+import PairingScreen from './PairingScreen.jsx';
+import {
+  selectRuntimeForSession,
+  syncRunningByIdFromRuntime
+} from '../sync/sync-selectors.js';
+
+const MODEL_SPEED_KEY = 'codexmobile.modelSpeed';
+
+export default function App() {
+  const [status, setStatus] = useState(DEFAULT_STATUS);
+  const [contextStatus, setContextStatus] = useState(() => normalizeContextStatus(DEFAULT_STATUS.context));
+  const [authenticated, setAuthenticated] = useState(Boolean(getToken()));
+  const [uiState, dispatchUi] = useReducer(appReducer, undefined, () => createInitialUiState());
+  const setDrawerOpen = useCallback((value) => dispatchUi({ type: 'ui/drawerOpen', value }), []);
+  const setPreviewImage = useCallback((value) => dispatchUi({ type: 'ui/previewImage', value }), []);
+  const setDocsOpen = useCallback((value) => dispatchUi({ type: 'ui/docsOpen', value }), []);
+  const setDocsBusy = useCallback((value) => dispatchUi({ type: 'ui/docsBusy', value }), []);
+  const setDocsError = useCallback((value) => dispatchUi({ type: 'ui/docsError', value }), []);
+  const setGitPanel = useCallback((value) => dispatchUi({ type: 'ui/gitPanel', value }), []);
+  const setTheme = useCallback((value) => dispatchUi({ type: 'ui/theme', value }), []);
+  const { drawerOpen, previewImage, docsOpen, docsBusy, docsError, gitPanel, theme } = uiState;
+  const {
+    toasts,
+    notificationSupported,
+    notificationEnabled,
+    dismissToast,
+    showToast,
+    enableNotifications
+  } = useNotifications();
+  const pwaUpdate = usePwaUpdate();
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [expandedProjectIds, setExpandedProjectIds] = useState({});
+  const [sessionsByProject, setSessionsByProject] = useState({});
+  const [loadingProjectId, setLoadingProjectId] = useState(null);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [sessionLoadingId, setSessionLoadingId] = useState(null);
+  const [sessionLoadError, setSessionLoadError] = useState('');
+  const [activityClockNow, setActivityClockNow] = useState(() => Date.now());
+  const [completedSessionIds, setC
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,160p' client/src/app/AppShell.jsx`</summary>
+```
+Chunk ID: c16da8
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 365
+Output:
+/**
+ * 主界面壳层：拼装顶栏、侧栏、文档/Git 面板、连接恢复、Toast、聊天区与 Composer 的 props 下发。
+ *
+ * Keywords: app-shell, layout, panels
+ *
+ * Exports:
+ * - `AppShell` — 接收 `shellClass` 与各子区 props 的纯布局组件。
+ *
+ * Inward: `Composer`、`ChatPane`、panels 汇总导出（`Drawer`、`TopBar` 等）。
+ *
+ * Outward: `App.jsx` 在通过配对后挂载主 UI。
+ */
+
+import { Composer } from '../composer/Composer.jsx';
+import { ChatPane } from '../chat/ChatPane.jsx';
+import { ImagePreviewModal } from '../chat/ImagePreview.jsx';
+import { ConnectionRecoveryCard, DocsPanel, Drawer, GitPanel, PwaUpdatePrompt, ToastStack, TopBar } from '../panels/index.js';
+
+export function AppShell({ shellClass, panelProps, drawerProps, chatProps, composerProps }) {
+  const {
+    topBarProps,
+    docsPanelProps,
+    gitPanelProps,
+    recoveryCardProps,
+    toastStackProps,
+    pwaUpdateProps,
+    imagePreviewProps
+  } = panelProps;
+
+  return (
+    <div className={shellClass}>
+      <TopBar {...topBarProps} />
+      <Drawer {...drawerProps} />
+      <DocsPanel {...docsPanelProps} />
+      <GitPanel {...gitPanelProps} />
+      <ConnectionRecoveryCard {...recoveryCardProps} />
+      <ToastStack {...toastStackProps} />
+      <PwaUpdatePrompt {...pwaUpdateProps} />
+      <ChatPane {...chatProps} />
+      <Composer {...composerProps} />
+      <ImagePreviewModal {...imagePreviewProps} />
+    </div>
+  );
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "@media \(max-width|max-width|composer-wrap|app-shell|top-bar|drawer" client/src/styles -g '*.css'`</summary>
+```
+Chunk ID: 92feaf
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2739
+Output:
+client/src/styles/panels.css:5:@import './panels-drawer.css';
+client/src/styles/activity.css:6:  max-width: min(100%, 736px);
+client/src/styles/activity.css:75:  max-width: min(100%, 736px);
+client/src/styles/activity.css:86:  max-width: min(100%, 760px);
+client/src/styles/activity.css:228:  max-width: 100%;
+client/src/styles/activity.css:276:  max-width: 100%;
+client/src/styles/activity.css:334:  max-width: 100%;
+client/src/styles/activity.css:524:  max-width: 100%;
+client/src/styles/activity.css:640:  max-width: min(100%, 574px);
+client/src/styles/activity.css:729:  max-width: 100%;
+client/src/styles/activity.css:775:  max-width: 100%;
+client/src/styles/activity.css:786:@media (max-width: 640px) {
+client/src/styles/panels-drawer.css:1:.drawer-backdrop {
+client/src/styles/panels-drawer.css:10:.drawer-backdrop.is-open {
+client/src/styles/panels-drawer.css:15:.drawer {
+client/src/styles/panels-drawer.css:33:[data-theme="dark"] .drawer {
+client/src/styles/panels-drawer.css:37:.drawer.is-open {
+client/src/styles/panels-drawer.css:41:.drawer-grip {
+client/src/styles/panels-drawer.css:46:.drawer-header {
+client/src/styles/panels-drawer.css:55:.drawer-header > div {
+client/src/styles/panels-drawer.css:61:.drawer-brand {
+client/src/styles/panels-drawer.css:67:.drawer-app-icon {
+client/src/styles/panels-drawer.css:74:.drawer-brand span {
+client/src/styles/panels-drawer.css:80:.drawer-header strong {
+client/src/styles/panels-drawer.css:87:.drawer-header small {
+client/src/styles/panels-drawer.css:93:[data-theme="dark"] .drawer-header strong {
+client/src/styles/panels-drawer.css:97:.drawer-command {
+client/src/styles/panels-drawer.css:109:[data-theme="dark"] .drawer-command {
+client/src/styles/panels-drawer.css:113:.drawer-search {
+client/src/styles/panels-drawer.css:123:.drawer-search input {
+client/src/styles/panels-drawer.css:133:.drawer-search input::placeholder {
+client/src/styles/panels-drawer.css:137:.drawer-new-button {
+client/src/styles/panels-drawer.css:154:.drawer-new-button:active {
+client/src/styles/panels-drawer.css:158:.drawer-new-button:disabled {
+client/src/styles/panels-drawer.css:164:[data-theme="dark"] .drawer-new-button:disabled {
+client/src/styles/panels-drawer.css:169:.drawer-subheader {
+client/src/styles/panels-drawer.css:177:.drawer-subheader strong {
+client/src/styles/panels-drawer.css:191:.drawer-action,
+client/src/styles/panels-drawer.css:202:.drawer-action {
+client/src/styles/panels-drawer.css:210:[data-theme="dark"] .drawer-action {
+client/src/styles/panels-drawer.css:214:.drawer-action span,
+client/src/styles/panels-drawer.css:222:.drawer-action strong,
+client/src/styles/panels-drawer.css:228:.drawer-action small,
+client/src/styles/panels-drawer.css:238:.drawer-section {
+client/src/styles/panels-drawer.css:243:.drawer-thread-browser {
+client/src/styles/panels-drawer.css:266:.drawer-heading {
+client/src/styles/panels-drawer.css:532:  max-width: 92px;
+client/src/styles/panels-drawer.css:591:  max-width: 100%;
+client/src/styles/panels-drawer.css:610:  max-width: none;
+client/src/styles/panels-drawer.css:629:.drawer-empty-state {
+client/src/styles/panels-drawer.css:822:.drawer {
+client/src/styles/panels-drawer.css:830:[data-theme="dark"] .drawer {
+client/src/styles/panels-drawer.css:835:.drawer-header {
+client/src/styles/panels-drawer.css:845:.drawer-brand {
+client/src/styles/panels-drawer.css:852:.drawer-brand .drawer-app-icon {
+client/src/styles/panels-drawer.css:859:.drawer-brand-name {
+client/src/styles/panels-drawer.css:866:[data-theme="dark"] .drawer-brand-name {
+client/src/styles/panels-drawer.css:870:.drawer-header-action {
+client/src/styles/panels-drawer.css:882:.drawer-header-action:active {
+client/src/styles/panels-drawer.css:886:[data-theme="dark"] .drawer-header-action {
+client/src/styles/panels-drawer.css:891:[data-theme="dark"] .drawer-header-action:active {
+client/src/styles/panels-drawer.css:895:.drawer-search {
+client/src/styles/panels-drawer.css:909:[data-theme="dark"] .drawer-search {
+client/src/styles/panels-drawer.css:914:.drawer-search input {
+client/src/styles/panels-drawer.css:924:[data-theme="dark"] .drawer-search input {
+client/src/styles/panels-drawer.css:928:.drawer-search input::placeholder {
+client/src/styles/panels-drawer.css:932:[data-theme="dark"] .drawer-search input::placeholder {
+client/src/styles/panels-drawer.css:936:.drawer-thread-browser {
+client/src/styles/panels-drawer.css:946:.drawer-new-row,
+client/src/styles/panels-drawer.css:963:.drawer-new-row {
+client/src/styles/panels-drawer.css:967:.drawer-new-row > svg:last-child {
+client/src/styles/panels-drawer.css:973:.drawer-new-row.is-open > svg:last-child {
+client/src/styles/panels-drawer.css:977:[data-theme="dark"] .drawer-new-row,
+client/src/styles/panels-drawer.css:982:[data-theme="dark"] .drawer-new-row > svg:last-child {
+client/src/styles/panels-drawer.css:986:.drawer-new-row:active,
+client/s
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1450,1515p' client/src/styles/chat.css`</summary>
+```
+Chunk ID: e2606a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 363
+Output:
+  background: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .message-image-link {
+  background: #101012;
+}
+
+[data-theme="dark"] .message-image-link.is-failed {
+  color: #ffb4ae;
+  background: rgba(255, 107, 98, 0.1);
+  border-color: rgba(255, 107, 98, 0.28);
+}
+
+[data-theme="dark"] .image-error span {
+  color: var(--accent);
+}
+
+[data-theme="dark"] .lightbox-actions button {
+  color: #ffb4ae;
+  background: #101012;
+}
+
+[data-theme="dark"] .lightbox-zoom-controls {
+  background: rgba(10, 10, 11, 0.76);
+}
+
+[data-theme="dark"] .message-bubble time,
+[data-theme="dark"] .message-delivery {
+  color: rgba(212, 212, 216, 0.62);
+}
+
+[data-theme="dark"] .message-row.is-user .message-bubble time,
+[data-theme="dark"] .message-row.is-user .message-delivery {
+  color: rgba(212, 212, 216, 0.66);
+}
+
+[data-theme="dark"] .scroll-latest-button {
+  background: var(--glass-strong);
+  border-color: var(--hairline);
+}
+
+[data-theme="dark"] .composer-wrap {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.92) 28%);
+}
+
+.file-preview-page {
+  height: 100dvh;
+  background: #fff;
+  color: #111;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.file-preview-header {
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: max(12px, env(safe-area-inset-top)) 14px 10px;
+  border-bottom: 1px solid #e8e8e8;
+  background: #fff;
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '760,840p' client/src/styles/composer.css`</summary>
+```
+Chunk ID: 3bb5ec
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 399
+Output:
+  gap: 3px;
+  min-width: 30px;
+  height: 32px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 999px;
+  color: #69717c;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 650;
+  outline: 0;
+  white-space: nowrap;
+}
+
+.context-status-button[aria-expanded="true"],
+.context-status-button:focus-visible {
+  background: rgba(23, 78, 184, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(23, 78, 184, 0.14);
+}
+
+.context-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9aa2ad;
+}
+
+.context-status-button.has-window {
+  color: #4d5967;
+}
+
+.context-status-button.has-window .context-status-dot {
+  background: #15a46b;
+}
+
+.context-status-button.is-compacted {
+  color: #0f7a50;
+}
+
+.context-popover {
+  position: absolute;
+  left: 50%;
+  right: auto;
+  bottom: calc(100% + 10px);
+  z-index: 38;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 24px));
+  padding: 10px 12px;
+  border: 1px solid rgba(222, 223, 220, 0.9);
+  border-radius: 12px;
+  color: #2f363f;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 10px 32px rgba(20, 24, 31, 0.14);
+  font-size: 12px;
+  line-height: 20px;
+  text-align: left;
+  transform: translateX(-50%);
+}
+
+[data-theme="dark"] .context-popover {
+  border-color: #383838;
+  color: var(--text);
+  background: rgba(31, 31, 31, 0.98);
+}
+
+.context-popover-title {
+  color: #717985;
+}
+
+.send-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--bubble-user-text);
+  background: var(--bubble-user);
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '800,940p' client/src/styles/panels-drawer.css`</summary>
+```
+Chunk ID: 7ab01d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 662
+Output:
+
+[data-theme="dark"] .thread-rename-backdrop {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="dark"] .thread-rename-dialog {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(14, 14, 16, 0.98);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.58);
+}
+
+[data-theme="dark"] .thread-rename-dialog input {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: #08080a;
+}
+
+[data-theme="dark"] .thread-rename-secondary {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* ===== Drawer redesign 2026 (Remodex-flavor) ===== */
+
+.drawer {
+  width: min(86vw, 380px);
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 14px calc(env(safe-area-inset-bottom, 0px) + 10px);
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.04), 12px 0 32px rgba(17, 24, 39, 0.08);
+  backdrop-filter: none;
+}
+
+[data-theme="dark"] .drawer {
+  background: #050506;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 12px 0 32px rgba(0, 0, 0, 0.4);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+
+.drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.drawer-brand .drawer-app-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  box-shadow: none;
+}
+
+.drawer-brand-name {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+[data-theme="dark"] .drawer-brand-name {
+  color: #f4f4f5;
+}
+
+.drawer-header-action {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  color: #6b7280;
+  background: #f4f4f5;
+  cursor: pointer;
+}
+
+.drawer-header-action:active {
+  background: #e5e7eb;
+}
+
+[data-theme="dark"] .drawer-header-action {
+  color: #a1a1aa;
+  background: #121214;
+}
+
+[data-theme="dark"] .drawer-header-action:active {
+  background: #1b1b1f;
+}
+
+.drawer-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  margin: 0 0 4px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  color: #9ca3af;
+  background: #f4f4f5;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .drawer-search {
+  color: #71717a;
+  background: #101012;
+}
+
+.drawer-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #111827;
+  background: transparent;
+  font-size: 14px;
+}
+
+[data-theme="dark"] .drawer-search input {
+  color: #e4e4e7;
+}
+
+.drawer-search input::placeholder {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .drawer-search input::placeholder {
+  color: #71717a;
+}
+
+.drawer-thread-browser {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1380,1515p' client/src/styles/panels-drawer.css`</summary>
+```
+Chunk ID: 0afe67
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 657
+Output:
+  color: #71717a;
+}
+
+.thread-more-button:active {
+  background: #e5e7eb;
+}
+
+[data-theme="dark"] .thread-more-button:active {
+  background: #1b1b1f;
+}
+
+.drawer-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 10px 2px 0;
+  border: 0;
+  border-top: 1px solid #f3f4f6;
+}
+
+[data-theme="dark"] .drawer-footer {
+  border-top-color: #171719;
+}
+
+.drawer-footer-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  color: #6b7280;
+  background: #f4f4f5;
+  cursor: pointer;
+}
+
+.footer-icon-button:active,
+.footer-icon-button.is-active {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.footer-icon-button.is-busy {
+  color: #3b82f6;
+}
+
+.footer-icon-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] .footer-icon-button {
+  color: #a1a1aa;
+  background: #121214;
+}
+
+[data-theme="dark"] .footer-icon-button:active,
+[data-theme="dark"] .footer-icon-button.is-active {
+  background: #1b1b1f;
+  color: #f4f4f5;
+}
+
+[data-theme="dark"] .footer-icon-button.is-busy {
+  color: #60a5fa;
+}
+
+.drawer-footer-status {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #9ca3af;
+  font-size: 11px;
+  text-align: right;
+}
+
+[data-theme="dark"] .drawer-footer-status {
+  color: #71717a;
+}
+
+.drawer-empty-state {
+  padding: 24px 8px;
+  color: #9ca3af;
+  text-align: center;
+  font-size: 13px;
+}
+
+[data-theme="dark"] .drawer-empty-state {
+  color: #71717a;
+}
+
+.thread-empty {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 8px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+[data-theme="dark"] .thread-empty {
+  color: #71717a;
+}
+
+/* ===== Settings and archive drawer refresh ===== */
+.drawer.drawer-subpage {
+  --subpage-bg: rgba(250, 251, 250, 0.98);
+  --subpage-card: rgba(255, 255, 255, 0.82);
+  --subpage-card-strong: #ffffff;
+  --subpage-line: rgba(222, 223, 220, 0.92);
+  --subpage-text: #161b22;
+  --subpage-muted: #747b85;
+  --subpage-soft: #f0f2f0;
+  --subpage-accent: #1e3f73;
+  --subpage-accent-soft: rgba(37, 99, 235, 0.1);
+  --subpage-good: #10a37f;
+  width: min(100vw, 520px);
+  max-width: 520px;
+  padding: 0;
+  color: var(--subpage-text);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(247, 247, 244, 0) 42%),
+    var(--subpage-bg);
+  border-right: 1px solid var(--subpage-line);
+  box-shadow: 16px 0 38px rgba(17, 24, 39, 0.16);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,80p' client/src/styles/index.css`</summary>
+```
+Chunk ID: e579cd
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 42
+Output:
+@import './base.css';
+@import './layout.css';
+@import './panels.css';
+@import './chat.css';
+@import './activity.css';
+@import './composer.css';
+@import './theme.css';
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,80p' client/src/styles.css 2>/dev/null || true`</summary>
+```
+Chunk ID: bc3dbc
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 8
+Output:
+@import './styles/index.css';
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "styles/index|styles.css|import './styles" client/src -g '*.js' -g '*.jsx'`</summary>
+```
+Chunk ID: 3ea4f3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 13
+Output:
+client/src/main.jsx:18:import './styles/index.css';
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:43Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,200p' client/src/app/AppState.js`</summary>
+```
+Chunk ID: 4324e5
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 540
+Output:
+/**
+ * 轻量 UI 状态机：侧栏、预览、文档面板、Git 面板、Toast、主题等纯客户端 reducer 与初始状态。
+ *
+ * Keywords: ui-state, reducer, theme-preference
+ *
+ * Exports:
+ * - `THEME_KEY` — localStorage 中主题偏好键名。
+ * - `createInitialUiState` — 从 storage 读取主题等字段构造初始 state。
+ * - `appReducer` — `ui/*` action 分发的 reducer。
+ *
+ * Inward: `localStorage`（可注入）。
+ *
+ * Outward: `App.jsx` 与依赖 `THEME_KEY` 的面板/预览组件。
+ */
+
+export const THEME_KEY = 'codexmobile.theme';
+const THEME_VALUES = new Set(['light', 'dark', 'system']);
+
+function normalizeThemePreference(value) {
+  return THEME_VALUES.has(value) ? value : 'light';
+}
+
+export function createInitialUiState({ storage = globalThis.localStorage } = {}) {
+  return {
+    drawerOpen: false,
+    previewImage: null,
+    docsOpen: false,
+    docsBusy: false,
+    docsError: '',
+    gitPanel: { open: false, action: 'commit' },
+    toasts: [],
+    theme: normalizeThemePreference(storage?.getItem?.(THEME_KEY))
+  };
+}
+
+function resolveValue(value, current) {
+  return typeof value === 'function' ? value(current) : value;
+}
+
+export function appReducer(state, action) {
+  switch (action.type) {
+    case 'ui/drawerOpen':
+      return { ...state, drawerOpen: resolveValue(action.value, state.drawerOpen) };
+    case 'ui/previewImage':
+      return { ...state, previewImage: resolveValue(action.value, state.previewImage) };
+    case 'ui/docsOpen':
+      return { ...state, docsOpen: resolveValue(action.value, state.docsOpen) };
+    case 'ui/docsBusy':
+      return { ...state, docsBusy: resolveValue(action.value, state.docsBusy) };
+    case 'ui/docsError':
+      return { ...state, docsError: resolveValue(action.value, state.docsError) };
+    case 'ui/gitPanel':
+      return { ...state, gitPanel: resolveValue(action.value, state.gitPanel) };
+    case 'ui/toasts':
+      return { ...state, toasts: resolveValue(action.value, state.toasts) };
+    case 'ui/theme':
+      return { ...state, theme: normalizeThemePreference(resolveValue(action.value, state.theme)) };
+    default:
+      return state;
+  }
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:09:43Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff -- client/src/app/App.jsx client/src/styles/layout.css client/src/styles/theme.css client/src/styles/panels-drawer.css client/src/styles/panels-topbar.css client/src/styles/panels-chat.css client/src/styles/composer.css`</summary>
+```
+Chunk ID: 91adcc
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 2053
+Output:
+diff --git a/client/src/app/App.jsx b/client/src/app/App.jsx
+index 91b5f5c..5505d7b 100644
+--- a/client/src/app/App.jsx
++++ b/client/src/app/App.jsx
+@@ -162,6 +162,7 @@ export default function App() {
+ 
+   const syncRunningById = useMemo(() => syncRunningByIdFromRuntime(threadRuntimeById), [threadRuntimeById]);
+   const selectedRuntime = selectRuntimeForSession(selectedSession, threadRuntimeById);
++  const selectedSessionArchived = Boolean(selectedSession?.archived);
+   const running =
+     hasRunningKey(syncRunningById, selectedRunKeys(selectedSession)) ||
+     selectedRuntime?.status === 'running' ||
+@@ -172,6 +173,16 @@ export default function App() {
+     loadQueueDrafts(selectedSession).catch(() => null);
+   }, [selectedSession?.id]);
+ 
++  useEffect(() => {
++    if (!selectedSessionArchived) {
++      return;
++    }
++    setInput('');
++    setAttachments([]);
++    setFileMentions([]);
++    setSelectedCollaborationMode(null);
++  }, [selectedSession?.id, selectedSessionArchived, setFileMentions]);
++
+   useEffect(() => {
+     setThreadRuntimeById((current) => {
+       const next = reconcileThreadRuntimeWithSessions(current, sessionsByProject);
+@@ -591,12 +602,15 @@ export default function App() {
+   const topBarRuntime = selectedRuntime || (selectedRunning ? { status: 'running' } : null);
+ 
+   const handleComposerSubmit = useCallback(async (options = {}) => {
++    if ((selectedSessionRef.current || selectedSession)?.archived) {
++      return;
++    }
+     const collaborationMode = options.collaborationMode || selectedCollaborationMode || null;
+     const accepted = await handleSubmit({ ...options, collaborationMode });
+     if (accepted && collaborationMode) {
+       setSelectedCollaborationMode(null);
+     }
+-  }, [handleSubmit, selectedCollaborationMode]);
++  }, [handleSubmit, selectedCollaborationMode, selectedSession]);
+ 
+   const handleCompactContext = useCallback(async () => {
+     const project = selectedProjectRef.current || selectedProject;
+@@ -827,8 +841,8 @@ export default function App() {
+     now: activityClockNow,
+     onPreviewImage: setPreviewImage,
+     onDeleteMessage: handleDeleteMessage,
+-    onImplementPlan: handleImplementPlan,
+-    onAdjustPlan: handleAdjustPlan
++    onImplementPlan: selectedSessionArchived ? null : handleImplementPlan,
++    onAdjustPlan: selectedSessionArchived ? null : handleAdjustPlan
+   };
+   const composerProps = {
+     composerRef,
+@@ -869,7 +883,9 @@ export default function App() {
+     onRestoreQueueDraft: restoreQueueDraft,
+     onRemoveQueueDraft: removeQueueDraft,
+     onSteerQueueDraft: steerQueueDraft,
+-    onCompactContext: handleCompactContext
++    onCompactContext: handleCompactContext,
++    readOnly: selectedSessionArchived,
++    readOnlyReason: '已归档线程只能查看，取消归档后才能继续对话'
+   };
+ 
+   return (
+diff --git a/client/src/styles/composer.css b/client/src/styles/composer.css
+index 6654cdf..61c4bd5 100644
+--- a/client/src/styles/composer.css
++++ b/client/src/styles/composer.css
+@@ -481,6 +481,29 @@
+   color: #b1b5ba;
+ }
+ 
++.composer textarea:disabled {
++  opacity: 1;
++  cursor: default;
++}
++
++.composer-readonly-note {
++  margin: 0 12px 4px;
++  padding: 8px 10px;
++  border: 1px solid rgba(103, 112, 125, 0.16);
++  border-radius: 8px;
++  color: #667085;
++  background: rgba(17, 24, 39, 0.04);
++  font-size: 12px;
++  font-weight: 620;
++  line-height: 16px;
++}
++
++[data-theme="dark"] .composer-readonly-note {
++  color: #a1a1aa;
++  background: rgba(255, 255, 255, 0.06);
++  border-color: rgba(255, 255, 255, 0.08);
++}
++
+ .composer-controls {
+   display: grid;
+   grid-template-columns: auto minmax(0, 1fr) auto;
+diff --git a/client/src/styles/panels-drawer.css b/client/src/styles/panels-drawer.css
+index 61dce33..73c0909 100644
+--- a/client/src/styles/panels-drawer.css
++++ b/client/src/styles/panels-drawer.css
+@@ -1539,7 +1539,7 @@
+ .drawer-subpage-header {
+   flex: 0 0 auto;
+   display: grid;
+-  grid-template-columns: 42px minmax(0, 1fr) 42px;
++  grid-template-columns: 42px minmax(0, 1fr) auto;
+   align-items: center;
+   gap: 6px;
+   min-height: calc(env(safe-area-inset-top, 0px) + 58px);
+@@ -1564,6 +1564,27 @@
+   text-align: center;
+ }
+ 
++.drawer-subpage-actions {
++  min-width: 0;
++  display: inline-flex;
++  align-items: center;
++  justify-content: flex-end;
++  gap: 4px;
++}
++
++.drawer-subpage-header-spacer {
++  width: 38px;
++  height: 38px;
++}
++
++.settings-version-text {
++  color: var(--subpage-muted);
++  font-size: 12px;
++  font-weight: 640;
++  line-height: 16px;
++  white-space: nowrap;
++}
++
+ .drawer-subpage-header .icon-button {
+   width: 38px;
+   height: 38px;
+@@ -1575,7 +1596,7 @@
+   flex: 1 1 auto;
+   min-height: 0;
+   overflow-y: auto;
+-  padding: 16px 14px calc(env(safe-area-inset-bottom, 0px) + 22px);
++  padding: 14px 14px calc(env(safe-area-inset-bottom, 0px) + 22px);
+   background: transparent;
+ }
+ 
+@@ -1585,7 +1606,6 @@
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:10:06Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `tail -n 100 client/src/panels/Drawer.jsx`</summary>
+```
+Chunk ID: 48a750
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 972
+Output:
+
+        {quotaExpanded ? (
+          <DrawerQuotaPanel
+            quotaLoading={quotaLoading}
+            quotaLoaded={quotaLoaded}
+            quotaError={quotaError}
+            quotaNotice={quotaNotice}
+            quotaAccounts={quotaAccounts}
+            onRefresh={refreshCodexQuota}
+          />
+        ) : null}
+
+        <footer className="drawer-footer">
+          <div className="drawer-footer-actions">
+            <button
+              type="button"
+              className="footer-icon-button"
+              onClick={() => setDrawerView('settings')}
+              aria-label="设置"
+            >
+              <Settings size={16} />
+            </button>
+            <button
+              type="button"
+              className={`footer-icon-button ${syncing ? 'is-busy' : ''}`}
+              onClick={onSync}
+              disabled={syncing}
+              aria-label="同步对话"
+            >
+              {syncing ? <Loader2 className="spin" size={16} /> : <RefreshCw size={16} />}
+            </button>
+            <button
+              type="button"
+              className={`footer-icon-button ${quotaExpanded ? 'is-active' : ''}`}
+              onClick={toggleQuotaPanel}
+              aria-label="额度查询"
+              aria-expanded={quotaExpanded}
+            >
+              <BarChart3 size={16} />
+            </button>
+          </div>
+          <span className="drawer-footer-status">{statusText}</span>
+        </footer>
+
+        {threadActionMenu ? (
+          <div className="thread-action-backdrop" onClick={() => setThreadActionMenu(null)}>
+            <div
+              className="thread-action-menu"
+              role="menu"
+              aria-label="线程操作"
+              style={{
+                '--thread-menu-x': `${threadActionMenu.x}px`,
+                '--thread-menu-y': `${threadActionMenu.y}px`
+              }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button type="button" role="menuitem" onClick={handleThreadRename}>
+                <Pencil size={16} />
+                <span>重命名</span>
+              </button>
+              <button type="button" role="menuitem" className="is-danger" onClick={handleThreadArchive}>
+                <Archive size={16} />
+                <span>归档</span>
+              </button>
+            </div>
+          </div>
+        ) : null}
+        {renameDraft ? (
+          <div className="thread-rename-backdrop" onClick={closeRenameDialog}>
+            <form className="thread-rename-dialog" onSubmit={submitRenameDialog} onClick={(event) => event.stopPropagation()}>
+              <div className="thread-rename-head">
+                <strong>重命名线程</strong>
+                <button type="button" className="thread-rename-icon" onClick={closeRenameDialog} aria-label="取消重命名">
+                  <X size={16} />
+                </button>
+              </div>
+              <input
+                autoFocus
+                value={renameValue}
+                onChange={(event) => setRenameValue(event.target.value.slice(0, 52))}
+                placeholder="输入线程名称"
+                aria-label="线程名称"
+                maxLength={52}
+              />
+              <div className="thread-rename-actions">
+                <button type="button" className="thread-rename-secondary" onClick={closeRenameDialog} disabled={renameSaving}>
+                  取消
+                </button>
+                <button type="submit" className="thread-rename-primary" disabled={renameSaving || !renameValue.trim()}>
+                  {renameSaving ? <Loader2 className="spin" size={15} /> : <Check size={15} />}
+                  <span>{renameSaving ? '保存中' : '保存'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : null}
+      </aside>
+    </>
+  );
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:10:06Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,80p' client/src/panels/DrawerSettingsView.jsx`</summary>
+```
+Chunk ID: a4a97d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 732
+Output:
+/**
+ * 设置抽屉子页：主题、归档入口、诊断开关与版本号展示。
+ *
+ * Keywords: drawer, settings, theme, diagnostics, archive-box
+ *
+ * Exports:
+ * - DrawerSettingsView — 设置页视图组件。
+ *
+ * Inward: lucide-react；父级 Drawer 注入状态与事件。
+ *
+ * Outward: Drawer 在 settings 子视图中渲染。
+ */
+
+import { Archive, Bug, ChevronLeft, ChevronRight, Info, MonitorCog, Moon, Sun, X } from 'lucide-react';
+
+export function DrawerSettingsView({
+  open,
+  onClose,
+  onBack,
+  theme,
+  setTheme,
+  onOpenArchiveBox,
+  runtimeDebug,
+  runtimeDebugSaving,
+  runtimeDebugError,
+  onRuntimeDebugToggle,
+  desktopRefresh,
+  desktopRefreshSaving,
+  desktopRefreshError,
+  onDesktopRefreshToggle,
+  appVersion
+}) {
+  const runtimeDebugText = runtimeDebug?.envEnabled
+    ? '环境变量已启用'
+    : runtimeDebug?.uiEnabled
+      ? '已开启'
+      : '未开启';
+  const desktopRefreshText = !desktopRefresh?.supported
+    ? '当前不可用'
+    : desktopRefresh?.enabled
+      ? '已开启'
+      : '未开启';
+
+  return (
+    <>
+      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+      <aside className={`drawer drawer-settings drawer-subpage ${open ? 'is-open' : ''}`}>
+        <div className="drawer-subpage-header">
+          <button className="icon-button" onClick={onBack} aria-label="返回">
+            <ChevronLeft size={20} />
+          </button>
+          <strong>设置</strong>
+          <div className="drawer-subpage-actions">
+            <span className="settings-version-text">v{appVersion}</span>
+            <button className="icon-button" onClick={onClose} aria-label="关闭菜单">
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+        <div className="drawer-subpage-content settings-view">
+          <section className="settings-section-card" aria-labelledby="appearance-title">
+            <h3 id="appearance-title" className="drawer-section-title">外观</h3>
+            <div className="settings-list">
+              <div className="settings-row is-stacked">
+                <div className="settings-row-main">
+                  <span className="settings-row-icon" aria-hidden="true">
+                    {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+                  </span>
+                  <div>
+                    <span className="settings-row-title">主题</span>
+                    <small>{theme === 'system' ? '跟随系统' : theme === 'dark' ? '深色' : '浅色'}</small>
+                  </div>
+                </div>
+                <div className="settings-segmented-control" role="group" aria-label="主题选择">
+                  <button
+                    type="button"
+                    className={theme === 'light' ? 'is-selected' : ''}
+                    onClick={() => setTheme('light')}
+                  >
+                    浅色
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:10:06Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,80p' client/src/panels/DrawerArchiveView.jsx`</summary>
+```
+Chunk ID: b87831
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 786
+Output:
+/**
+ * 归档箱抽屉子页：以桌面端列表风格展示已归档线程，并提供只读查看与取消归档。
+ *
+ * Keywords: drawer, archive, sessions, settings, desktop-sync
+ *
+ * Exports:
+ * - DrawerArchiveView — 归档箱视图组件。
+ *
+ * Inward: session-utils（时间与路径展示）；lucide-react。
+ *
+ * Outward: Drawer 在 archive 子视图中渲染。
+ */
+
+import { AlertCircle, ArchiveRestore, ChevronLeft, Clock3, Folder, Inbox, MessageSquare, RefreshCw } from 'lucide-react';
+import { compactPath, formatTime } from '../app/session-utils.js';
+
+export function DrawerArchiveView({
+  open,
+  onClose,
+  onBack,
+  onRefresh,
+  archivedSessions,
+  archiveLoading,
+  archiveLoaded,
+  archiveError,
+  archiveSyncedAt,
+  archiveSource,
+  onOpenSession,
+  onUnarchiveSession,
+  unarchivingSessionIds = {}
+}) {
+  const archiveCount = archivedSessions.length;
+  const archiveSyncLabel = archiveSyncedAt
+    ? `${archiveSource === 'local' ? '本地兜底' : '桌面同步'} · ${formatTime(archiveSyncedAt)}`
+    : '等待同步';
+
+  return (
+    <>
+      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+      <aside className={`drawer drawer-archive drawer-subpage ${open ? 'is-open' : ''}`}>
+        <div className="drawer-subpage-header">
+          <button className="icon-button" onClick={onBack} aria-label="返回设置">
+            <ChevronLeft size={20} />
+          </button>
+          <strong>已归档对话</strong>
+          <span className="drawer-subpage-header-spacer" aria-hidden="true" />
+        </div>
+
+        <div className="drawer-subpage-content archive-page">
+          <section className="archive-toolbar" aria-label="归档概览">
+            <div>
+              <h2>已归档对话</h2>
+              <p>{archiveCount ? `${archiveCount} 个对话` : '暂无对话'} · {archiveSyncLabel}</p>
+            </div>
+            <button type="button" className="archive-refresh-cta" onClick={onRefresh} disabled={archiveLoading} aria-label="刷新归档对话">
+              <RefreshCw size={15} className={archiveLoading ? 'spin' : ''} />
+              <span>刷新</span>
+            </button>
+          </section>
+
+          <section className="archive-list-panel" aria-label="归档线程列表">
+            {archiveLoading && !archivedSessions.length ? (
+              <div className="archive-empty-state">
+                <RefreshCw size={18} className="spin" />
+                <span>正在同步归档对话</span>
+              </div>
+            ) : null}
+            {archiveError ? (
+              <button type="button" className="archive-empty-state archive-error" onClick={onRefresh}>
+                <AlertCircle size={18} />
+                <span>同步失败，点击重试</span>
+              </button>
+            ) : null}
+            {!archiveLoading && !archiveError && archiveLoaded && !archivedSessions.length ? (
+              <div className="archive-empty-state">
+                <Inbox size={18} />
+                <span>暂无已归档对话</span>
+              </div>
+            ) : null}
+            {archivedSessions.length ? (
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:10:09Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "DrawerSettingsView|DrawerArchiveView|drawerView" client/src/panels/Drawer.jsx`</summary>
+```
+Chunk ID: 97971e
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 82
+Output:
+19:import { DrawerArchiveView } from './DrawerArchiveView.jsx';
+21:import { DrawerSettingsView } from './DrawerSettingsView.jsx';
+72:  const [drawerView, setDrawerView] = useState('main');
+339:  if (drawerView === 'archive') {
+341:      <DrawerArchiveView
+359:  if (drawerView === 'settings') {
+361:      <DrawerSettingsView
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:10:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '320,385p' client/src/panels/Drawer.jsx`</summary>
+```
+Chunk ID: 8bf6a5
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 556
+Output:
+        onSelectSession({
+          ...session,
+          archived: false,
+          draft: false,
+          projectId: session.projectId || matchedProject?.id || `archived:${session.projectPath || 'unknown'}`
+        });
+      }
+      onSync?.();
+    } catch (error) {
+      setArchiveError(error.message || '取消归档失败，点击刷新重试');
+    } finally {
+      setUnarchivingSessionIds((current) => {
+        const next = { ...current };
+        delete next[session.id];
+        return next;
+      });
+    }
+  }
+
+  if (drawerView === 'archive') {
+    return (
+      <DrawerArchiveView
+        open={open}
+        onClose={onClose}
+        onBack={() => setDrawerView('settings')}
+        onRefresh={() => loadArchivedSessions({ force: true })}
+        archivedSessions={archivedSessions}
+        archiveLoading={archiveLoading}
+        archiveLoaded={archiveLoaded}
+        archiveError={archiveError}
+        archiveSyncedAt={archiveSyncedAt}
+        archiveSource={archiveSource}
+        onOpenSession={openArchivedSession}
+        onUnarchiveSession={unarchiveArchivedSession}
+        unarchivingSessionIds={unarchivingSessionIds}
+      />
+    );
+  }
+
+  if (drawerView === 'settings') {
+    return (
+      <DrawerSettingsView
+        open={open}
+        onClose={onClose}
+        onBack={() => setDrawerView('main')}
+        theme={theme}
+        setTheme={setTheme}
+        onOpenArchiveBox={openArchiveBox}
+        runtimeDebug={runtimeDebug}
+        runtimeDebugSaving={runtimeDebugSaving}
+        runtimeDebugError={runtimeDebugError}
+        onRuntimeDebugToggle={handleRuntimeDebugToggle}
+        desktopRefresh={desktopRefresh}
+        desktopRefreshSaving={desktopRefreshSaving}
+        desktopRefreshError={desktopRefreshError}
+        onDesktopRefreshToggle={handleDesktopRefreshToggle}
+        appVersion={appVersion}
+      />
+    );
+  }
+
+  const renderThreadRow = (project, session, { isSubAgent = false } = {}) => {
+    const badgeState = sessionRunBadgeState(session, { runningById, threadRuntimeById, completedSessionIds });
+    const sessionRunning = badgeState === 'running';
+    const sessionCompleted = badgeState === 'complete';
+    const childCount = Number(session.childCount) || 0;
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:10:15Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "useViewportSizing|selectedSessionRef|const .*Ref" client/src/app/App.jsx`</summary>
+```
+Chunk ID: a4c516
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 423
+Output:
+38:import { useViewportSizing } from './useViewportSizing.js';
+126:  const wsRef = useRef(null);
+127:  const selectedProjectRef = useRef(null);
+128:  const selectedSessionRef = useRef(null);
+129:  const messagesRef = useRef([]);
+130:  const autoTitleSyncRef = useRef(new Set());
+131:  const runningByIdRef = useRef({});
+132:  const turnRefreshTimersRef = useRef(new Map());
+133:  const lastStatusSettingsRef = useRef({
+137:  const selectedModelRef = useRef(selectedModel);
+138:  const selectedReasoningEffortRef = useRef(selectedReasoningEffort);
+139:  const modelSettingsRequestRef = useRef(0);
+140:  const modelSettingsSyncQueueRef = useRef(Promise.resolve());
+141:  const sessionLivePollRef = useRef(false);
+142:  const bootstrapStartedRef = useRef(false);
+143:  const drawerSyncAtRef = useRef(0);
+144:  const composerRef = useRef(null);
+152:    selectedSessionRef,
+161:  useViewportSizing(composerRef);
+212:    selectedSessionRef,
+226:    selectedSessionRef.current = selectedSession;
+247:    selectedSessionRef,
+293:    const previous = lastStatusSettingsRef.current;
+340:    selectedSessionRef,
+358:    const requestId = modelSettingsRequestRef.current + 1;
+361:    const task = modelSettingsSyncQueueRef.current.catch(() => null).then(async () => {
+366:          sessionId: selectedSessionRef.current?.id || null
+450:    selectedSessionRef,
+480:    selectedSessionRef,
+538:    selectedSessionRef,
+605:    if ((selectedSessionRef.current || selectedSession)?.archived) {
+616:    const project = selectedProjectRef.current || selectedProject;
+617:    const session = selectedSessionRef.current || selectedSession;
+704:    const session = selectedSessionRef.current || selectedSession;
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:10:18Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '120,190p' client/src/app/App.jsx`</summary>
+```
+Chunk ID: e1b4ad
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 667
+Output:
+  } = useComposerSelections(status);
+  const [runningById, setRunningById] = useState({});
+  const [threadRuntimeById, setThreadRuntimeById] = useState({});
+  const [syncing, setSyncing] = useState(false);
+  const [desktopHandoffPending, setDesktopHandoffPending] = useState(false);
+  const [connectionState, setConnectionState] = useState(() => (getToken() ? 'connecting' : 'disconnected'));
+  const wsRef = useRef(null);
+  const selectedProjectRef = useRef(null);
+  const selectedSessionRef = useRef(null);
+  const messagesRef = useRef([]);
+  const autoTitleSyncRef = useRef(new Set());
+  const runningByIdRef = useRef({});
+  const turnRefreshTimersRef = useRef(new Map());
+  const lastStatusSettingsRef = useRef({
+    model: DEFAULT_STATUS.model,
+    reasoningEffort: DEFAULT_STATUS.reasoningEffort || DEFAULT_REASONING_EFFORT
+  });
+  const selectedModelRef = useRef(selectedModel);
+  const selectedReasoningEffortRef = useRef(selectedReasoningEffort);
+  const modelSettingsRequestRef = useRef(0);
+  const modelSettingsSyncQueueRef = useRef(Promise.resolve());
+  const sessionLivePollRef = useRef(false);
+  const bootstrapStartedRef = useRef(false);
+  const drawerSyncAtRef = useRef(0);
+  const composerRef = useRef(null);
+  const {
+    queueDrafts,
+    loadQueueDrafts,
+    removeQueueDraft,
+    restoreQueueDraft,
+    steerQueueDraft
+  } = useQueueDrafts({
+    selectedSessionRef,
+    selectedProjectRef,
+    selectedProject,
+    setInput,
+    setAttachments,
+    setFileMentions,
+    setSelectedSkillPaths
+  });
+
+  useViewportSizing(composerRef);
+
+  const syncRunningById = useMemo(() => syncRunningByIdFromRuntime(threadRuntimeById), [threadRuntimeById]);
+  const selectedRuntime = selectRuntimeForSession(selectedSession, threadRuntimeById);
+  const selectedSessionArchived = Boolean(selectedSession?.archived);
+  const running =
+    hasRunningKey(syncRunningById, selectedRunKeys(selectedSession)) ||
+    selectedRuntime?.status === 'running' ||
+    selectedRuntime?.status === 'queued';
+  const selectedRunning = selectedSessionIsRunning({ running });
+  const drawerRunningById = syncRunningById;
+  useEffect(() => {
+    loadQueueDrafts(selectedSession).catch(() => null);
+  }, [selectedSession?.id]);
+
+  useEffect(() => {
+    if (!selectedSessionArchived) {
+      return;
+    }
+    setInput('');
+    setAttachments([]);
+    setFileMentions([]);
+    setSelectedCollaborationMode(null);
+  }, [selectedSession?.id, selectedSessionArchived, setFileMentions]);
+
+  useEffect(() => {
+    setThreadRuntimeById((current) => {
+      const next = reconcileThreadRuntimeWithSessions(current, sessionsByProject);
+      return next === current ? current : next;
+    });
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:10:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,80p' client/src/styles/theme.css`</summary>
+```
+Chunk ID: 67382a
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 437
+Output:
+[data-theme="dark"] .composer-wrap {
+  background: transparent;
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .chat-pane::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.56) 48%, rgba(0, 0, 0, 0.9));
+}
+
+[data-theme="dark"] .composer-menu {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(8, 8, 9, 0.98);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .menu-section-label {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .menu-divider {
+  background: #202024;
+}
+
+[data-theme="dark"] .composer-menu button {
+  color: #e4e4e7;
+}
+
+[data-theme="dark"] .composer-menu button.is-selected {
+  color: var(--text);
+  background: #171719;
+}
+
+[data-theme="dark"] .skill-search-wrap {
+  color: #a1a1aa;
+  background: #101012;
+}
+
+[data-theme="dark"] .skill-menu-item small,
+[data-theme="dark"] .send-mode-menu small,
+[data-theme="dark"] .shortcut-menu small,
+[data-theme="dark"] .menu-empty {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .composer {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(8, 8, 9, 0.78);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
+}
+
+[data-theme="dark"] .attachment-chip {
+  color: #e4e4e7;
+  background: #171719;
+}
+
+[data-theme="dark"] .file-mention-chip {
+  background: #263044;
+}
+
+[data-theme="dark"] .attachment-chip button {
+  color: #d4d4d8;
+}
+
+[data-theme="dark"] .queued-draft-row {
+  color: #d4d4d8;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(8, 8, 9, 0.9);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .queued-draft-actions button {
+  color: #d4d4d8;
+}
+
+[data-theme="dark"] .composer textarea::placeholder {
+  color: #85858e;
+}
+
+[data-theme="dark"] .permission-pill,
+[data-theme="dark"] .model-select,
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:10:59Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,160p' client/src/styles/base.css`</summary>
+```
+Chunk ID: 8f1b08
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 447
+Output:
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #1f2328;
+  background: #f7f7f4;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  --surface: #f7f7f4;
+  --panel: #ffffff;
+  --panel-2: #f0f1ee;
+  --text: #1f2328;
+  --muted: #6f747a;
+  --line: #dedfdc;
+  --accent: #2563eb;
+  --accent-soft: #e7efff;
+  --green: #15a46b;
+  --danger: #c2413a;
+  --shadow: 0 18px 48px rgba(20, 24, 31, 0.16);
+  --glass: rgba(255, 255, 255, 0.78);
+  --glass-strong: rgba(255, 255, 255, 0.94);
+  --hairline: rgba(23, 24, 27, 0.1);
+  --soft-shadow: 0 10px 32px rgba(17, 24, 39, 0.09);
+  --bubble-user: #18181b;
+  --bubble-user-text: #ffffff;
+  --composer-height: calc(env(safe-area-inset-bottom, 0px) + 118px);
+  --keyboard-inset: 0px;
+}
+
+[data-theme="dark"] {
+  color: #f4f4f5;
+  background: #000000;
+  --surface: #000000;
+  --panel: #0a0a0b;
+  --panel-2: #121214;
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --line: #202024;
+  --accent: #9fb7ff;
+  --accent-soft: rgba(159, 183, 255, 0.16);
+  --green: #37c58a;
+  --danger: #ff6b62;
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.56);
+  --glass: rgba(8, 8, 9, 0.78);
+  --glass-strong: rgba(12, 12, 13, 0.92);
+  --hairline: rgba(255, 255, 255, 0.09);
+  --soft-shadow: 0 12px 34px rgba(0, 0, 0, 0.46);
+  --bubble-user: #f4f4f5;
+  --bubble-user-text: #111113;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:11:03Z)**_
+
+接下来会改两层：一层是状态逻辑，让桌面首次打开默认停靠侧栏、菜单键在桌面变成折叠/展开；另一层是 CSS 断点，让 1024px 以上进入双栏布局，聊天区和输入区不再被手机宽度限制。
+
+_**Agent (gpt-5.5 2026-05-14 15:11:11Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/app/App.jsx`**
+
+```diff
+@@
+ const MODEL_SPEED_KEY = 'codexmobile.modelSpeed';
++const DESKTOP_SHELL_MEDIA = '(min-width: 1024px)';
+@@
+   const sessionLivePollRef = useRef(false);
+   const bootstrapStartedRef = useRef(false);
+   const drawerSyncAtRef = useRef(0);
++  const desktopDrawerSeededRef = useRef(false);
+   const composerRef = useRef(null);
+@@
+   useViewportSizing(composerRef);
++
++  useEffect(() => {
++    if (!authenticated || desktopDrawerSeededRef.current || !window.matchMedia) {
++      return;
++    }
++    desktopDrawerSeededRef.current = true;
++    if (window.matchMedia(DESKTOP_SHELL_MEDIA).matches) {
++      setDrawerOpen(true);
++    }
++  }, [authenticated, setDrawerOpen]);
+@@
+   const recoveryState = connectionRecoveryState({
+     authenticated,
+     connectionState,
+     desktopBridge: status.desktopBridge,
+     syncing
+   });
+   const topBarRuntime = selectedRuntime || (selectedRunning ? { status: 'running' } : null);
++  const handleToggleDrawer = useCallback(() => {
++    const desktopShell = window.matchMedia?.(DESKTOP_SHELL_MEDIA)?.matches;
++    setDrawerOpen((current) => (desktopShell ? !current : true));
++  }, [setDrawerOpen]);
+@@
+       selectedSession,
+       connectionState,
+       desktopBridge: status.desktopBridge,
+       selectedRuntime: topBarRuntime,
+-      onMenu: () => setDrawerOpen(true),
++      onMenu: handleToggleDrawer,
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:11:18Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/panels/Drawer.jsx`**
+
+```diff
+@@
+-      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
++      <div className={`drawer-backdrop drawer-main-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:11:21Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/panels/DrawerSettingsView.jsx`**
+
+```diff
+@@
+-      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
++      <div className={`drawer-backdrop drawer-subpage-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:11:24Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/panels/DrawerArchiveView.jsx`**
+
+```diff
+@@
+-      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
++      <div className={`drawer-backdrop drawer-subpage-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:11:33Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/layout.css`**
+
+```diff
+@@
+ .app-shell {
+   position: fixed;
+   inset: 0;
++  --desktop-drawer-width: 320px;
++  --desktop-main-max: 1040px;
++  --desktop-main-gutter: 14px;
+   display: grid;
+   grid-template-rows: auto 1fr auto;
+@@
+ [data-theme="dark"] .app-shell::before {
+   background: linear-gradient(180deg, rgba(0, 0, 0, 0.86), rgba(0, 0, 0, 0.56) 62%, rgba(0, 0, 0, 0));
+ }
++
++@media (min-width: 1024px) {
++  .app-shell {
++    --desktop-main-gutter: max(28px, calc((100% - var(--desktop-main-max)) / 2));
++    grid-template-columns: 0 minmax(0, 1fr);
++    grid-template-rows: auto minmax(0, 1fr) auto;
++    grid-template-areas:
++      "drawer topbar"
++      "drawer chat"
++      "drawer composer";
++    transition: grid-template-columns 180ms ease;
++    touch-action: auto;
++  }
++
++  .app-shell.drawer-active {
++    grid-template-columns: var(--desktop-drawer-width) minmax(0, 1fr);
++  }
++
++  .app-shell::before {
++    display: none;
++  }
++}
++
++@media (min-width: 1280px) {
++  .app-shell {
++    --desktop-drawer-width: 340px;
++    --desktop-main-max: 1080px;
++  }
++}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:11:43Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/panels-topbar.css`**
+
+```diff
+@@
+ @keyframes connectionPulse {
+   0%,
+   100% {
+     opacity: 0.68;
+     transform: scale(1);
+@@
+     opacity: 1;
+     transform: scale(1.18);
+   }
+ }
++
++@media (min-width: 1024px) {
++  .top-bar {
++    grid-area: topbar;
++    position: relative;
++    top: auto;
++    left: auto;
++    right: auto;
++    z-index: 20;
++    min-height: 64px;
++    padding: 12px var(--desktop-main-gutter) 10px;
++    border-bottom: 1px solid rgba(222, 223, 220, 0.82);
++    background: rgba(247, 247, 244, 0.78);
++    -webkit-backdrop-filter: blur(18px) saturate(1.08);
++    backdrop-filter: blur(18px) saturate(1.08);
++  }
++
++  [data-theme="dark"] .top-bar {
++    border-bottom-color: #171719;
++    background: rgba(0, 0, 0, 0.72);
++  }
++
++  .top-title {
++    flex-direction: row;
++    align-items: center;
++    gap: 12px;
++  }
++
++  .top-title strong {
++    font-size: 15px;
++    line-height: 20px;
++  }
++
++  .connection-status {
++    min-width: 0;
++    padding-top: 1px;
++  }
++}
+```
+
+
+```
+apply_patch verification failed: Failed to find expected lines in /Users/xiayanghui/编程项目/CodexMobile/client/src/styles/panels-topbar.css:
+@keyframes connectionPulse {
+  0%,
+  100% {
+    opacity: 0.68;
+    transform: scale(1);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:11:46Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `tail -n 60 client/src/styles/panels-topbar.css`</summary>
+```
+Chunk ID: 67b591
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 276
+Output:
+  opacity: 1;
+  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12);
+  animation: connectionPulse 1.6s ease-in-out infinite;
+}
+
+.connection-status.is-failed {
+  color: var(--danger);
+}
+
+.connection-status.is-failed .connection-dot {
+  background: currentColor;
+  opacity: 1;
+}
+
+.connection-status.is-headless,
+.connection-status.is-route-pending {
+  color: #4b5563;
+}
+
+.connection-status.is-ipc-ready .connection-dot {
+  background: #10a37f;
+}
+
+.connection-status.is-connecting {
+  color: #64748b;
+}
+
+.connection-status.is-disconnected {
+  color: var(--danger);
+}
+
+[data-theme="dark"] .connection-status,
+[data-theme="dark"] .connection-status.is-connected {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .connection-status.is-running {
+  color: #f4f4f5;
+}
+
+[data-theme="dark"] .connection-status.is-failed {
+  color: #fda4af;
+}
+
+[data-theme="dark"] .connection-status.is-headless,
+[data-theme="dark"] .connection-status.is-route-pending {
+  color: #d4d4d8;
+}
+
+@keyframes connectionPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.88;
+  }
+  50% {
+    transform: scale(1.22);
+    opacity: 1;
+  }
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:11:54Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/panels-topbar.css`**
+
+```diff
+@@
+ @keyframes connectionPulse {
+   0%,
+   100% {
+     transform: scale(1);
+     opacity: 0.88;
+@@
+     opacity: 1;
+   }
+ }
++
++@media (min-width: 1024px) {
++  .top-bar {
++    grid-area: topbar;
++    position: relative;
++    top: auto;
++    left: auto;
++    right: auto;
++    z-index: 20;
++    min-height: 64px;
++    padding: 12px var(--desktop-main-gutter) 10px;
++    border-bottom: 1px solid rgba(222, 223, 220, 0.82);
++    background: rgba(247, 247, 244, 0.78);
++    -webkit-backdrop-filter: blur(18px) saturate(1.08);
++    backdrop-filter: blur(18px) saturate(1.08);
++  }
++
++  [data-theme="dark"] .top-bar {
++    border-bottom-color: #171719;
++    background: rgba(0, 0, 0, 0.72);
++  }
++
++  .top-title {
++    flex-direction: row;
++    align-items: center;
++    gap: 12px;
++  }
++
++  .top-title strong {
++    font-size: 15px;
++    line-height: 20px;
++  }
++
++  .connection-status {
++    min-width: 0;
++    padding-top: 1px;
++  }
++}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:12:03Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/panels-drawer.css`**
+
+```diff
+@@
+ @media (max-width: 560px) {
+   .drawer.drawer-subpage {
+     width: 100vw;
+     max-width: none;
+@@
+     grid-template-columns: 32px minmax(0, 1fr);
+   }
+ }
++
++@media (min-width: 1024px) {
++  .drawer-main-backdrop {
++    display: none;
++  }
++
++  .app-shell > .drawer:not(.drawer-subpage) {
++    grid-area: drawer;
++    position: relative;
++    top: auto;
++    bottom: auto;
++    left: auto;
++    z-index: 2;
++    width: var(--desktop-drawer-width);
++    max-width: none;
++    height: 100%;
++    min-height: 0;
++    padding: 16px 14px;
++    border-right: 1px solid #e5e7eb;
++    background: #ffffff;
++    box-shadow: none;
++    transform: none;
++    transition: opacity 160ms ease;
++  }
++
++  .app-shell:not(.drawer-active) > .drawer:not(.drawer-subpage) {
++    width: 0;
++    padding: 0;
++    border-right: 0;
++    opacity: 0;
++    pointer-events: none;
++  }
++
++  .app-shell.drawer-active > .drawer:not(.drawer-subpage) {
++    opacity: 1;
++    pointer-events: auto;
++  }
++
++  [data-theme="dark"] .app-shell > .drawer:not(.drawer-subpage) {
++    border-right-color: #171719;
++    background: #050506;
++    box-shadow: none;
++  }
++}
+```
+
+
+```
+apply_patch verification failed: Failed to find expected lines in /Users/xiayanghui/编程项目/CodexMobile/client/src/styles/panels-drawer.css:
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:12:05Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `tail -n 80 client/src/styles/panels-drawer.css`</summary>
+```
+Chunk ID: a5e9c0
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 350
+Output:
+  border-radius: 8px;
+  color: var(--subpage-text);
+  background: var(--subpage-soft);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.archive-unarchive-button:hover {
+  border-color: var(--subpage-line);
+  background: var(--subpage-card-strong);
+}
+
+.archive-unarchive-button:disabled {
+  opacity: 0.62;
+}
+
+.archive-empty-state {
+  width: 100%;
+  min-height: 96px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 18px;
+  border: 1px dashed var(--subpage-line);
+  border-radius: 8px;
+  color: var(--subpage-muted);
+  background: var(--subpage-card);
+  font-size: 13px;
+  text-align: center;
+}
+
+button.archive-empty-state {
+  border-style: solid;
+  color: var(--danger);
+}
+
+@media (max-width: 560px) {
+  .drawer.drawer-subpage {
+    width: 100vw;
+    max-width: none;
+  }
+
+  .drawer-subpage-content {
+    padding-inline: 12px;
+  }
+
+  .archive-toolbar {
+    align-items: flex-start;
+  }
+
+  .archive-toolbar h2 {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .archive-thread-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 66px;
+    padding: 0 10px 0 12px;
+  }
+
+  .archive-thread-open {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .archive-thread-project-wide,
+  .archive-thread-time {
+    display: none;
+  }
+
+  .archive-unarchive-button {
+    min-width: 42px;
+    width: 42px;
+    padding: 0;
+  }
+
+  .archive-unarchive-button span {
+    display: none;
+  }
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:12:14Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/panels-drawer.css`**
+
+```diff
+@@
+   .archive-unarchive-button span {
+     display: none;
+   }
+ }
++
++@media (min-width: 1024px) {
++  .drawer-main-backdrop {
++    display: none;
++  }
++
++  .app-shell > .drawer:not(.drawer-subpage) {
++    grid-area: drawer;
++    position: relative;
++    top: auto;
++    bottom: auto;
++    left: auto;
++    z-index: 2;
++    width: var(--desktop-drawer-width);
++    max-width: none;
++    height: 100%;
++    min-height: 0;
++    padding: 16px 14px;
++    border-right: 1px solid #e5e7eb;
++    background: #ffffff;
++    box-shadow: none;
++    transform: none;
++    transition: opacity 160ms ease;
++  }
++
++  .app-shell:not(.drawer-active) > .drawer:not(.drawer-subpage) {
++    width: 0;
++    padding: 0;
++    border-right: 0;
++    opacity: 0;
++    pointer-events: none;
++  }
++
++  .app-shell.drawer-active > .drawer:not(.drawer-subpage) {
++    opacity: 1;
++    pointer-events: auto;
++  }
++
++  [data-theme="dark"] .app-shell > .drawer:not(.drawer-subpage) {
++    border-right-color: #171719;
++    background: #050506;
++    box-shadow: none;
++  }
++}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:12:18Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/panels-chat.css`**
+
+```diff
+@@
+ .chat-loading-lines span:nth-child(2) {
+   width: 84%;
+ }
++
++@media (min-width: 1024px) {
++  .chat-pane {
++    grid-area: chat;
++    max-width: none;
++    padding: 22px var(--desktop-main-gutter) 18px;
++  }
++
++  .chat-pane::after {
++    display: none;
++  }
++
++  .chat-content {
++    max-width: var(--desktop-main-max);
++  }
++
++  .empty-chat {
++    min-height: min(420px, 56vh);
++  }
++}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:12:30Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/composer.css`**
+
+```diff
+@@
+ .send-button {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   width: 36px;
+@@
+   color: var(--bubble-user-text);
+   background: var(--bubble-user);
+ }
++
++@media (min-width: 1024px) {
++  .composer-wrap {
++    grid-area: composer;
++    position: relative;
++    left: auto;
++    right: auto;
++    bottom: auto;
++    z-index: 22;
++    width: 100%;
++    max-width: none;
++    padding: 10px var(--desktop-main-gutter) 18px;
++    border-top: 1px solid rgba(222, 223, 220, 0.82);
++    background: rgba(247, 247, 244, 0.78);
++    -webkit-backdrop-filter: blur(18px) saturate(1.08);
++    backdrop-filter: blur(18px) saturate(1.08);
++  }
++
++  .composer {
++    max-width: var(--desktop-main-max);
++    margin: 0 auto;
++    border-radius: 18px;
++  }
++
++  .composer textarea {
++    max-height: 220px;
++  }
++
++  .composer-tool-strip {
++    flex-wrap: wrap;
++    overflow: visible;
++    mask-image: none;
++  }
++
++  .composer-menu {
++    max-height: min(420px, 52vh);
++  }
++
++  .attach-menu,
++  .shortcut-menu {
++    left: var(--desktop-main-gutter);
++  }
++
++  .permission-menu {
++    left: calc(var(--desktop-main-gutter) + 42px);
++  }
++
++  .skill-menu {
++    left: calc(var(--desktop-main-gutter) + 84px);
++  }
++
++  .model-menu,
++  .send-mode-menu,
++  .shortcut-menu {
++    right: var(--desktop-main-gutter);
++  }
++
++  .context-popover {
++    max-width: 360px;
++  }
++}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:12:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `tail -n 100 client/src/styles/composer.css`</summary>
+```
+Chunk ID: 195810
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 447
+Output:
+  line-height: 20px;
+  text-align: left;
+  transform: translateX(-50%);
+}
+
+[data-theme="dark"] .context-popover {
+  border-color: #383838;
+  color: var(--text);
+  background: rgba(31, 31, 31, 0.98);
+}
+
+.context-popover-title {
+  color: #717985;
+}
+
+.send-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--bubble-user-text);
+  background: var(--bubble-user);
+}
+
+@media (min-width: 1024px) {
+  .composer-wrap {
+    grid-area: composer;
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    z-index: 22;
+    width: 100%;
+    max-width: none;
+    padding: 10px var(--desktop-main-gutter) 18px;
+    border-top: 1px solid rgba(222, 223, 220, 0.82);
+    background: rgba(247, 247, 244, 0.78);
+    -webkit-backdrop-filter: blur(18px) saturate(1.08);
+    backdrop-filter: blur(18px) saturate(1.08);
+  }
+
+  .composer {
+    max-width: var(--desktop-main-max);
+    margin: 0 auto;
+    border-radius: 18px;
+  }
+
+  .composer textarea {
+    max-height: 220px;
+  }
+
+  .composer-tool-strip {
+    flex-wrap: wrap;
+    overflow: visible;
+    mask-image: none;
+  }
+
+  .composer-menu {
+    max-height: min(420px, 52vh);
+  }
+
+  .attach-menu,
+  .shortcut-menu {
+    left: var(--desktop-main-gutter);
+  }
+
+  .permission-menu {
+    left: calc(var(--desktop-main-gutter) + 42px);
+  }
+
+  .skill-menu {
+    left: calc(var(--desktop-main-gutter) + 84px);
+  }
+
+  .model-menu,
+  .send-mode-menu,
+  .shortcut-menu {
+    right: var(--desktop-main-gutter);
+  }
+
+  .context-popover {
+    max-width: 360px;
+  }
+}
+
+.send-button:disabled {
+  opacity: 0.38;
+}
+
+.send-button.is-running {
+  background: var(--danger);
+}
+
+.send-button.is-queueing {
+  background: #174eb8;
+}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:12:42Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/theme.css`**
+
+```diff
+@@
+-@media (min-width: 820px) {
++@media (min-width: 820px) and (max-width: 1023px) {
+   body {
+     display: grid;
+     place-items: center;
+@@
+   }
+ }
++
++@media (min-width: 1024px) {
++  body {
++    display: block;
++    background: var(--surface);
++  }
++
++  #root {
++    width: 100vw;
++    height: var(--app-height, 100dvh);
++    border: 0;
++    box-shadow: none;
++  }
++
++  .app-shell {
++    position: fixed;
++    width: 100vw;
++    max-width: none;
++    height: var(--app-height, 100dvh);
++  }
++
++  [data-theme="dark"] body {
++    background: #000000;
++  }
++
++  [data-theme="dark"] #root {
++    border: 0;
++    box-shadow: none;
++  }
++
++  [data-theme="dark"] .composer-wrap {
++    border-top-color: #171719;
++    background: rgba(0, 0, 0, 0.72);
++  }
++}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:12:48Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="apply_patch"><details>
+<summary>Tool use: **apply_patch**</summary>
+**Update: `/Users/xiayanghui/编程项目/CodexMobile/client/src/app/App.jsx`**
+
+```diff
+@@
+   useViewportSizing(composerRef);
+ 
+   useEffect(() => {
+-    if (!authenticated || desktopDrawerSeededRef.current || !window.matchMedia) {
++    if (!authenticated || desktopDrawerSeededRef.current || typeof window === 'undefined' || !window.matchMedia) {
+       return;
+     }
+@@
+   });
+   const topBarRuntime = selectedRuntime || (selectedRunning ? { status: 'running' } : null);
+   const handleToggleDrawer = useCallback(() => {
+-    const desktopShell = window.matchMedia?.(DESKTOP_SHELL_MEDIA)?.matches;
++    const desktopShell = typeof window !== 'undefined' && window.matchMedia?.(DESKTOP_SHELL_MEDIA)?.matches;
+     setDrawerOpen((current) => (desktopShell ? !current : true));
+   }, [setDrawerOpen]);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:12:58Z)**_
+
+主体改完了。现在我先跑构建看有没有 JSX/CSS 引入层面的断点问题；如果构建过，我再尽量用本地浏览器验证一下 1024+ 的实际布局。
+
+_**Agent (gpt-5.5 2026-05-14 15:12:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `npm run build`</summary>
+```
+Chunk ID: 3fa1d3
+Wall time: 1.0017 seconds
+Process running with session ID 4524
+Original token count: 37
+Output:
+
+> codexmobile@1.4.0 build
+> vite build --config client/vite.config.js
+
+vite v7.3.2 building client environment for production...
+transforming...
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:01Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 519cd8
+Wall time: 5.0026 seconds
+Process running with session ID 4524
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:08Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: a012a5
+Wall time: 1.9189 seconds
+Process exited with code 0
+Original token count: 1322
+Output:
+✓ 4012 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/assets/manifest-DkwGc9r2.webmanifest                 0.66 kB
+dist/index.html                                           2.01 kB │ gzip:   0.88 kB
+dist/assets/pdf.worker-B1D2UnXD.mjs                   2,161.15 kB
+dist/assets/index-DOVBrX1a.css                          123.92 kB │ gzip:  21.87 kB
+dist/assets/channel-loDEfVEP.js                           0.12 kB │ gzip:   0.13 kB
+dist/assets/init-Gi6I4Gst.js                              0.15 kB │ gzip:   0.13 kB
+dist/assets/chunk-QZHKN3VN-Bhjqbljf.js                    0.19 kB │ gzip:   0.16 kB
+dist/assets/chunk-4BX2VUAB-fu7-NiZW.js                    0.23 kB │ gzip:   0.17 kB
+dist/assets/chunk-55IACEB6-CjWIZgE2.js                    0.24 kB │ gzip:   0.21 kB
+dist/assets/chunk-FMBD7UC4-CeGme2F9.js                    0.37 kB │ gzip:   0.27 kB
+dist/assets/stateDiagram-v2-BHNVJYJU-CEtgiAKB.js          0.39 kB │ gzip:   0.28 kB
+dist/assets/classDiagram-4FO5ZUOK-Dv8cKcQk.js             0.47 kB │ gzip:   0.32 kB
+dist/assets/classDiagram-v2-Q7XG4LA2-Dv8cKcQk.js          0.47 kB │ gzip:   0.32 kB
+dist/assets/chunk-2J33WTMH-DgDuN_l8.js                    0.51 kB │ gzip:   0.36 kB
+dist/assets/infoDiagram-5YYISTIA-Cl61AmBI.js              0.59 kB │ gzip:   0.40 kB
+dist/assets/ordinal-Cboi1Yqb.js                           1.19 kB │ gzip:   0.57 kB
+dist/assets/chunk-ND2GUHAM-ByhWixx_.js                    1.88 kB │ gzip:   0.83 kB
+dist/assets/diagram-5GNKFQAL-XxWx49wN.js                  2.75 kB │ gzip:   1.36 kB
+dist/assets/arc-DEy2WTUR.js                               3.44 kB │ gzip:   1.49 kB
+dist/assets/diagram-LMA3HP47-GZsVuqhF.js                  4.21 kB │ gzip:   1.83 kB
+dist/assets/defaultLocale-DX6XiGOO.js                     4.69 kB │ gzip:   2.18 kB
+dist/assets/pieDiagram-4H26LBE5-C5YHPtB8.js               5.27 kB │ gzip:   2.34 kB
+dist/assets/linear-BABBfCOL.js                            5.66 kB │ gzip:   2.31 kB
+dist/assets/diagram-2AECGRRQ-DTJwaiki.js                  5.81 kB │ gzip:   2.46 kB
+dist/assets/stateDiagram-AJRCARHV-C0T5k8Qb.js            10.36 kB │ gzip:   3.62 kB
+dist/assets/diagram-KO2AKTUF-asa4bAdz.js                 10.72 kB │ gzip:   4.13 kB
+dist/assets/dagre-BM42HDAG-B5glg_5E.js                   11.14 kB │ gzip:   4.11 kB
+dist/assets/diagram-OG6HWLK6-BS66Zot_.js                 15.81 kB │ gzip:   5.66 kB
+dist/assets/ishikawaDiagram-YF4QCWOH-B_PJ2jYv.js         17.47 kB │ gzip:   6.64 kB
+dist/assets/kanban-definition-UN3LZRKU-BsuF6m6U.js       20.29 kB │ gzip:   7.20 kB
+dist/assets/mindmap-definition-RKZ34NQL-BSzmiSxJ.js      23.18 kB │ gzip:   7.83 kB
+dist/assets/sankeyDiagram-5OEKKPKP-DYfeqKia.js           23.20 kB │ gzip:   8.56 kB
+dist/assets/journeyDiagram-JHISSGLW-CIzydSey.js          23.57 kB │ gzip:   8.35 kB
+dist/assets/graph--OzhPTMs.js                            23.92 kB │ gzip:   8.32 kB
+dist/assets/wardleyDiagram-YWT4CUSO-ieeXOb0W.js          25.50 kB │ gzip:   6.79 kB
+dist/assets/erDiagram-TEJ5UH35-1X1UGAl2.js               26.86 kB │ gzip:   9.34 kB
+dist/assets/gitGraphDiagram-PVQCEYII-DPZR-iSr.js         29.42 kB │ gzip:   8.70 kB
+dist/assets/timeline-definition-PNZ67QCA-DKEMUY3z.js     30.83 kB │ gzip:  10.15 kB
+dist/assets/requirementDiagram-4Y6WPE33-EHUiNmp3.js      31.00 kB │ gzip:   9.74 kB
+dist/assets/quadrantDiagram-W4KKPZXB-iE5yi3sa.js         34.02 kB │ gzip:   9.98 kB
+dist/assets/layout-SsrduOYp.js                           35.84 kB │ gzip:  12.87 kB
+dist/assets/chunk-AQP2D5EJ-Dpq0Udw5.js                   37.11 kB │ gzip:  12.11 kB
+dist/assets/xychartDiagram-2RQKCTM6-CHd0dOoN.js          40.39 kB │ gzip:  11.56 kB
+dist/assets/vennDiagram-CIIHVFJN-D3nG4anq.js             41.43 kB │ gzip:  15.47 kB
+dist/assets/chunk-727SXJPM-CWwLDR9I.js                   48.94 kB │ gzip:  15.70 kB
+dist/assets/flowDiagram-I6XJVG4X-BKlIi5hl.js             60.50 kB │ gzip:  19.37 kB
+dist/assets/ganttDiagram-6RSMTGT7-BbXR_GaI.js            69.57 kB │ gzip:  23.48 kB
+dist/assets/c4Diagram-AAUBKEIU-DDX90Yc-.js               69.94 kB │ gzip:  19.63 kB
+dist/assets/blockDiagram-GPEHLZMM-ixEBL9iM.js            73.53 kB │ gzip:  21.22 kB
+dist/assets/cose-bilkent-S5V4N54A-7KTGtJYj.js            81.70 kB │ gzip:  22.47 kB
+dist/assets/sequenceDiagram-3UESZ5HK-2637Pt7C.js        116.87 kB │ gzip:  31.04 kB
+dist/assets/architectureDiagram-3BPJPVTR-IvyROGF8.js    149.43 kB │ gzip:  42.18 kB
+dist/assets/katex-DHMw6HUq.js                           259.05 kB │ gzip:  76.99 kB
+dist/assets/cytoscape.esm-DH6-wILU.js                   441.80 kB │ gzip: 141.55 kB
+dist/assets/mermaid.core-CtzHajxA.js                    605.97 kB │ gzip: 144.60 kB
+dist/assets/wardley-L42UT6IY-B4zW3rSy.js                612.51 kB │ gzip: 147.50 kB
+dist/assets/index-DJku3ct0.js                 
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:14Z)**_
+
+构建已经过了，只有原来那类大 chunk 提醒。现在我尝试接管 in-app browser 看一眼桌面宽度下的真实画面，重点看侧栏是否停靠、聊天/输入区是否对齐。
+
+_**Agent (gpt-5.5 2026-05-14 15:13:18Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_resize"><details>
+<summary>Tool use: **browser_resize**</summary>
+```
+Wall time: 2.2238 seconds
+Output:
+[{"type":"text","text":"### Ran Playwright code\n```js\nawait page.setViewportSize({ width: 1280, height: 900 });\n```\n### Page\n- Page URL: about:blank"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:23Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_navigate"><details>
+<summary>Tool use: **browser_navigate**</summary>
+```
+Wall time: 0.2678 seconds
+Output:
+[{"type":"text","text":"### Ran Playwright code\n```js\nawait page.goto('http://localhost:3321/');\n```\n### Page\n- Page URL: http://localhost:3321/\n- Page Title: CodexMobile\n### Snapshot\n- [Snapshot](.playwright-mcp/page-2026-05-14T15-13-24-100Z.yml)"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:26Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_snapshot"><details>
+<summary>Tool use: **browser_snapshot**</summary>
+```
+Wall time: 0.2015 seconds
+Output:
+[{"type":"text","text":"### Page\n- Page URL: http://localhost:3321/\n- Page Title: CodexMobile\n### Snapshot\n- [Snapshot](./desktop-layout-after.yml)"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:29Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_take_screenshot"><details>
+<summary>Tool use: **browser_take_screenshot**</summary>
+```
+Wall time: 0.2359 seconds
+Output:
+[{"type":"text","text":"### Result\n- [Screenshot of viewport](./desktop-layout-after.png)\n### Ran Playwright code\n```js\n// Screenshot viewport and save it as ./desktop-layout-after.png\nawait page.screenshot({\n  fullPage: false,\n  path: './desktop-layout-after.png',\n  scale: 'css',\n  type: 'png'\n});\n```"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `find /Users/xiayanghui/编程项目/CodexMobile -name 'desktop-layout-after.yml' -o -name 'desktop-layout-after.png'`</summary>
+```
+Chunk ID: 3a990d
+Wall time: 0.6460 seconds
+Process exited with code 0
+Original token count: 34
+Output:
+/Users/xiayanghui/编程项目/CodexMobile/desktop-layout-after.yml
+/Users/xiayanghui/编程项目/CodexMobile/desktop-layout-after.png
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `find /Users/xiayanghui -path '*desktop-layout-after.yml' -o -path '*desktop-layout-after.png' 2>/dev/null | head -20`</summary>
+```
+Chunk ID: 32610e
+Wall time: 1.0014 seconds
+Process running with session ID 26567
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:38Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 3f3958
+Wall time: 5.0012 seconds
+Process running with session ID 26567
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:46Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+write_stdin failed: stdin is closed for this session; rerun exec_command with tty=true to keep stdin open
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:49Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 088801
+Wall time: 5.0072 seconds
+Process running with session ID 26567
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:13:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `pkill -f "find /Users/xiayanghui -path .*desktop-layout-after" || true`</summary>
+```
+Chunk ID: 47597f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:03Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="write_stdin"><details>
+<summary>Tool use: **write_stdin**</summary>
+```
+Chunk ID: 3a6631
+Wall time: 0.0000 seconds
+Process exited with code -1
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:05Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,220p' desktop-layout-after.yml`</summary>
+```
+Chunk ID: 998aba
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3826
+Output:
+- generic [ref=e3] [box=0,0,1280,900]:
+  - banner [ref=e4] [box=340,0,940,64]:
+    - button "打开菜单" [ref=e5] [box=368,14,38,38]:
+      - img [ref=e6] [box=376,22,22,22]
+    - generic [ref=e7] [box=418,23,784,20]:
+      - strong [ref=e8] [box=418,23,60,20]: 产品整理
+      - generic "桌面 IPC 总线在线，用于 live mirror、线程刷新、重命名和模型观察；移动端发送固定走后台 Codex。" [ref=e94] [box=490,25,45,16]: 已同步
+    - button "更多操作" [ref=e13] [box=1214,14,38,38]:
+      - img [ref=e14] [box=1222,22,22,22]
+  - complementary [ref=e18] [box=0,0,340,900]:
+    - generic [ref=e19] [box=14,16,311,36]:
+      - generic [ref=e20] [box=16,21,144,26]:
+        - img [ref=e21] [box=16,21,26,26]
+        - generic [ref=e22] [box=60,25,100,18]: CodexMobile
+      - button "关闭菜单" [ref=e23] [cursor=pointer] [box=291,18,32,32]:
+        - img [ref=e24] [box=299,26,16,16]
+    - generic [ref=e27] [box=14,62,311,19]:
+      - img [ref=e28] [box=26,65,14,14]
+      - searchbox "搜索对话或项目" [ref=e31] [box=48,62,265,19]
+    - generic [ref=e32] [box=14,85,311,750]:
+      - button "新对话" [ref=e33] [cursor=pointer] [box=14,91,296,44]:
+        - img [ref=e34] [box=20,105,16,16]
+        - generic [ref=e35] [box=48,103,230,20]: 新对话
+        - img [ref=e36] [box=290,106,14,14]
+      - generic [ref=e95] [box=14,135,296,2648]:
+        - generic [ref=e97] [box=14,135,296,44]:
+          - button "普通对话 11" [ref=e98] [cursor=pointer] [box=14,135,260,44]
+          - button "新建普通对话" [ref=e105] [box=276,142,30,30]
+        - generic [ref=e108] [box=14,179,296,44]:
+          - button "青甜CRM 7" [ref=e109] [cursor=pointer] [box=14,179,260,44]
+          - button "新建青甜CRM对话" [ref=e116] [box=276,186,30,30]
+        - generic [ref=e119] [box=14,223,296,44]:
+          - button "LifeOS 4" [ref=e120] [cursor=pointer] [box=14,223,260,44]
+          - button "新建LifeOS对话" [ref=e127] [box=276,230,30,30]
+        - generic [ref=e129] [box=14,267,296,1116]:
+          - generic [ref=e130] [box=14,267,296,44]
+          - generic [ref=e140] [box=42,313,268,1064]
+        - generic [ref=e345] [box=14,1383,296,1268]:
+          - generic [ref=e346] [box=14,1383,296,44]
+          - generic [ref=e356] [box=42,1429,268,1216]
+        - generic [ref=e582] [box=14,2651,296,44]:
+          - button "HealthVault 2" [ref=e583] [cursor=pointer] [box=14,2651,260,44]
+          - button "新建HealthVault对话" [ref=e590] [box=276,2658,30,30]
+        - generic [ref=e593] [box=14,2695,296,44]:
+          - button "banana-slides 20" [ref=e594] [cursor=pointer] [box=14,2695,260,44]
+          - button "新建banana-slides对话" [ref=e601] [box=276,2702,30,30]
+        - generic [ref=e604] [box=14,2739,296,44]:
+          - button "Vaults 150" [ref=e605] [cursor=pointer] [box=14,2739,260,44]
+          - button "新建Vaults对话" [ref=e612] [box=276,2746,30,30]
+    - generic [ref=e38] [box=14,839,311,45]:
+      - generic [ref=e39] [box=16,850,114,34]:
+        - button "设置" [ref=e40] [cursor=pointer] [box=16,850,34,34]:
+          - img [ref=e41] [box=25,859,16,16]
+        - button "同步对话" [ref=e44] [cursor=pointer] [box=56,850,34,34]:
+          - img [ref=e45] [box=65,859,16,16]
+        - button "额度查询" [ref=e50] [cursor=pointer] [box=96,850,34,34]:
+          - img [ref=e51] [box=105,859,16,16]
+      - generic [ref=e53] [box=290,859,33,16]: 已连接
+  - generic [ref=e61] [box=368,-13301,873,14033]:
+    - generic [ref=e615] [box=561,-13301,680,182]:
+      - generic [ref=e616] [box=561,-13301,680,150]:
+        - paragraph [ref=e618] [box=576,-13289,650,108]: "@共享仓库/03-青甜乡创学院｜乡创培训/05-管理端｜团队运营体系/02-内部会议归档/02-会议纪要/2026年5月/20260510-青甜乡创人员职责梳理-整理版.md @共享仓库/03-青甜乡创学院｜乡创培训/05-管理端｜团队运营体系/02-内部会议归档/01-会议原文/2026年5月/20260512-青甜每周营销例会-会议原文.md 你看看这两个会议内容，然后看看@共享仓库/03-青甜乡创学院｜乡创培训/04-交付端｜服务履约体系/01-产品中心/01-线下深度交流/01-产品本身/03-报价与成交口径.md 这里面要不要调整"
+        - generic [ref=e619] [box=576,-13175,650,12]: 05/13 12:29
+      - generic "消息操作" [ref=e620] [box=1139,-13147,102,28]:
+        - button "复制" [ref=e621] [box=1142,-13147,41,28]:
+          - img [ref=e622] [box=1142,-13139,13,13]
+          - generic [ref=e625] [box=1159,-13141,24,16]: 复制
+        - button "删除" [ref=e626] [box=1197,-13147,41,28]:
+          - img [ref=e627] [box=1197,-13139,13,13]
+          - generic [ref=e630] [box=1214,-13141,24,16]: 删除
+    - button "已完成 · 26 个步骤 3m 2s" [ref=e633] [cursor=pointer] [box=368,-13109,736,35]:
+      - generic [ref=
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:10Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rg -n "textbox|发送|textarea|composer|button \"发送|中止|停止|运行|计划|模型|权限|上下文" desktop-layout-after.yml | head -80`</summary>
+```
+Chunk ID: e5e016
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 152
+Output:
+7:      - generic "桌面 IPC 总线在线，用于 live mirror、线程刷新、重命名和模型观察；移动端发送固定走后台 Codex。" [ref=e94] [box=490,25,45,16]: 已同步
+764:    - textbox "给 Codex 发送消息" [ref=e69] [box=369,782,882,44]
+768:      - toolbar "发送选项" [ref=e73] [box=421,832,778,40]:
+769:        - button "权限：完全访问" [ref=e74] [cursor=pointer] [box=421,834,36,36]:
+773:        - button "上下文已用 19%，查看详情" [ref=e1949] [cursor=pointer] [box=503,838,28,28]:
+778:      - button "发送消息" [disabled] [ref=e91] [box=1207,834,36,36]:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:13Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '740,790p' desktop-layout-after.yml`</summary>
+```
+Chunk ID: d29da3
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 596
+Output:
+          - paragraph [ref=e1902] [box=370,287,869,22]
+          - paragraph [ref=e1904] [box=370,318,869,22]: 同时调整了两个入口：
+          - paragraph [ref=e1905] [box=370,350,869,22]
+          - paragraph [ref=e1907] [box=370,382,869,22]
+          - paragraph [ref=e1909] [box=370,414,869,22]: 现在逻辑是：
+          - list [ref=e1910] [box=370,445,869,70]
+        - time [ref=e1916] [box=370,521,869,12]: 05/13 23:09
+      - generic [ref=e1918] [box=368,544,740,156]:
+        - generic [ref=e1919] [box=369,545,738,38]:
+          - generic [ref=e1920] [box=379,554,96,18]: 3 个文件已更改
+          - strong [ref=e1921] [box=480,554,33,18]: "+104"
+          - strong [ref=e1922] [box=519,554,15,18]: "-3"
+        - generic [ref=e1923] [box=369,583,738,116]:
+          - group [ref=e1924] [box=369,583,783,38]
+          - group [ref=e1928] [box=369,621,783,39]
+          - group [ref=e1933] [box=369,660,783,39]
+      - generic "消息操作" [ref=e1938] [box=368,704,102,28]:
+        - button "复制" [ref=e1939] [box=371,704,41,28]:
+          - img [ref=e1940] [box=371,711,13,13]
+          - generic [ref=e1943] [box=388,710,24,16]: 复制
+        - button "删除" [ref=e1944] [box=426,704,41,28]:
+          - img [ref=e1945] [box=426,711,13,13]
+          - generic [ref=e1948] [box=443,710,24,16]: 删除
+  - generic [ref=e68] [box=368,781,884,101]:
+    - textbox "给 Codex 发送消息" [ref=e69] [box=369,782,882,44]
+    - generic [ref=e70] [box=369,826,882,55]:
+      - button "添加附件" [ref=e71] [cursor=pointer] [box=377,834,36,36]:
+        - img [ref=e72] [box=386,843,18,18]
+      - toolbar "发送选项" [ref=e73] [box=421,832,778,40]:
+        - button "权限：完全访问" [ref=e74] [cursor=pointer] [box=421,834,36,36]:
+          - img [ref=e75] [box=431,844,17,17]
+        - button "技能：技能" [ref=e77] [cursor=pointer] [box=462,834,36,36]:
+          - img [ref=e78] [box=472,844,17,17]
+        - button "上下文已用 19%，查看详情" [ref=e1949] [cursor=pointer] [box=503,838,28,28]:
+          - img [ref=e82] [box=506,841,22,22]
+        - button "5.5 高" [ref=e84] [cursor=pointer] [box=536,836,79,32]:
+          - generic [ref=e85] [box=546,844,44,17]
+          - img [ref=e89] [box=594,846,13,13]
+      - button "发送消息" [disabled] [ref=e91] [box=1207,834,36,36]:
+        - img [ref=e92] [box=1217,844,17,17]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:17Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_resize"><details>
+<summary>Tool use: **browser_resize**</summary>
+```
+Wall time: 0.3212 seconds
+Output:
+[{"type":"text","text":"### Ran Playwright code\n```js\nawait page.setViewportSize({ width: 390, height: 844 });\n```"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:19Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_snapshot"><details>
+<summary>Tool use: **browser_snapshot**</summary>
+```
+Wall time: 0.2040 seconds
+Output:
+[{"type":"text","text":"### Page\n- Page URL: http://localhost:3321/\n- Page Title: CodexMobile\n### Snapshot\n- [Snapshot](./mobile-layout-after.yml)"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,120p' mobile-layout-after.yml && rg -n "complementary|banner|textbox" mobile-layout-after.yml | head -40`</summary>
+```
+Chunk ID: 7dbdcb
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 1821
+Output:
+- generic [ref=e3] [box=0,0,390,844]:
+  - banner [ref=e4] [box=0,0,390,56]:
+    - button "打开菜单" [ref=e5] [box=14,10,38,38]:
+      - img [ref=e6] [box=22,18,22,22]
+    - generic [ref=e7] [box=64,12,262,35]:
+      - strong [ref=e8] [box=64,12,262,20]: 产品整理
+      - generic "桌面 IPC 总线在线，用于 live mirror、线程刷新、重命名和模型观察；移动端发送固定走后台 Codex。" [ref=e94] [box=64,32,262,15]: 已同步
+    - button "更多操作" [ref=e13] [box=338,10,38,38]:
+      - img [ref=e14] [box=346,18,22,22]
+  - complementary [ref=e18] [box=0,0,335,844]:
+    - generic [ref=e19] [box=14,12,307,36]:
+      - generic [ref=e20] [box=16,17,144,26]
+      - button "关闭菜单" [ref=e23] [cursor=pointer] [box=287,14,32,32]
+    - generic [ref=e27] [box=14,58,307,19]:
+      - img [ref=e28] [box=26,61,14,14]
+      - searchbox "搜索对话或项目" [ref=e31] [box=48,58,261,19]
+    - generic [ref=e32] [box=14,81,307,704]:
+      - button "新对话" [ref=e33] [cursor=pointer] [box=14,87,292,44]
+      - generic [ref=e95] [box=14,131,292,2648]
+    - generic [ref=e38] [box=14,789,307,45]:
+      - generic [ref=e39] [box=16,800,114,34]
+      - generic [ref=e53] [box=286,809,33,16]: 已连接
+  - generic [ref=e61] [box=14,-13305,351,17353]:
+    - generic [ref=e615] [box=77,-13305,288,356]:
+      - generic [ref=e616] [box=77,-13305,288,324]
+      - generic "消息操作" [ref=e620] [box=263,-12977,102,28]
+    - button "已完成 · 26 个步骤 3m 2s" [ref=e633] [cursor=pointer] [box=14,-12939,351,35]:
+      - generic [ref=e635] [box=27,-12934,101,16]: 已完成 · 26 个步骤
+      - generic [ref=e636] [box=136,-12934,35,16]: 3m 2s
+      - img [ref=e637] [box=179,-12933,15,15]
+    - generic [ref=e640] [box=14,-12892,351,581]:
+      - generic [ref=e641] [box=14,-12892,351,461]
+      - generic [ref=e659] [box=14,-12421,351,78]
+      - generic "消息操作" [ref=e670] [box=14,-12339,102,28]
+    - generic [ref=e682] [box=77,-12291,288,161]:
+      - generic [ref=e683] [box=77,-12291,288,129]
+      - generic "消息操作" [ref=e687] [box=263,-12158,102,28]
+    - button "已完成 · 9 个步骤 1m 16s" [ref=e700] [cursor=pointer] [box=14,-12120,351,35]:
+      - generic [ref=e702] [box=27,-12115,93,16]: 已完成 · 9 个步骤
+      - generic [ref=e703] [box=128,-12115,43,16]: 1m 16s
+      - img [ref=e704] [box=179,-12114,15,15]
+    - generic [ref=e707] [box=14,-12073,351,280]:
+      - generic [ref=e708] [box=14,-12073,351,160]
+      - generic [ref=e715] [box=14,-11903,351,78]
+      - generic "消息操作" [ref=e726] [box=14,-11821,102,28]
+    - generic [ref=e738] [box=77,-11773,288,248]:
+      - generic [ref=e739] [box=77,-11773,288,216]
+      - generic "消息操作" [ref=e744] [box=263,-11554,102,28]
+    - button "已完成 · 13 个步骤 49s" [ref=e757] [cursor=pointer] [box=14,-11516,351,35]:
+      - generic [ref=e759] [box=27,-11510,99,16]: 已完成 · 13 个步骤
+      - generic [ref=e760] [box=134,-11510,21,16]: 49s
+      - img [ref=e761] [box=164,-11510,15,15]
+    - generic [ref=e764] [box=14,-11469,351,1635]:
+      - generic [ref=e765] [box=14,-11469,351,1603]
+      - generic "消息操作" [ref=e832] [box=14,-9862,102,28]
+    - generic [ref=e844] [box=191,-9814,174,96]:
+      - generic [ref=e845] [box=191,-9814,174,64]
+      - generic "消息操作" [ref=e849] [box=263,-9746,102,28]
+    - button "已完成 · 22 个步骤 4m 10s" [ref=e862] [cursor=pointer] [box=14,-9708,351,35]:
+      - generic [ref=e864] [box=27,-9702,100,16]: 已完成 · 22 个步骤
+      - generic [ref=e865] [box=135,-9702,43,16]: 4m 10s
+      - img [ref=e866] [box=186,-9702,15,15]
+    - generic [ref=e869] [box=14,-9661,351,963]:
+      - generic [ref=e870] [box=14,-9661,351,492]
+      - generic [ref=e890] [box=14,-9159,351,429]
+      - generic "消息操作" [ref=e933] [box=14,-8726,102,28]
+    - generic [ref=e945] [box=77,-8678,288,117]:
+      - generic [ref=e946] [box=77,-8678,288,85]
+      - generic "消息操作" [ref=e950] [box=263,-8588,102,28]
+    - button "已完成 · 10 个步骤 5m 5s" [ref=e963] [cursor=pointer] [box=14,-8550,351,35]:
+      - generic [ref=e965] [box=27,-8545,99,16]: 已完成 · 10 个步骤
+      - generic [ref=e966] [box=134,-8545,35,16]: 5m 5s
+      - img [ref=e967] [box=177,-8544,15,15]
+    - generic [ref=e970] [box=14,-8503,351,573]:
+      - generic [ref=e971] [box=14,-8503,351,453]
+      - generic [ref=e991] [box=14,-8041,351,78]
+      - generic "消息操作" [ref=e1000] [box=14,-7959,102,28]
+    - generic [ref=e1012] [box=77,-7911,288,421]:
+      - generic [ref=e1013] [box=77,-7911,288,389]
+      - generic "消息操作" [ref=e1019] [box=263,-7518,102,28]
+    - button "已完成 · 22 个步骤 3m 59s" [ref=e1032] [cursor=pointer] [box=14,-7480,351,35]:
+      - generic [ref=e1034] [box=27,-7474,100,16]: 已完成 · 22 个步骤
+      - generic [ref=e1035] [
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:28Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_resize"><details>
+<summary>Tool use: **browser_resize**</summary>
+```
+Wall time: 0.2288 seconds
+Output:
+[{"type":"text","text":"### Ran Playwright code\n```js\nawait page.setViewportSize({ width: 1280, height: 900 });\n```"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:34Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_snapshot"><details>
+<summary>Tool use: **browser_snapshot**</summary>
+```
+Wall time: 0.1854 seconds
+Output:
+[{"type":"text","text":"### Page\n- Page URL: http://localhost:3321/\n- Page Title: CodexMobile\n### Snapshot\n- [Snapshot](./desktop-layout-restored.yml)"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:39Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_click"><details>
+<summary>Tool use: **browser_click**</summary>
+```
+Wall time: 2.2846 seconds
+Output:
+[{"type":"text","text":"### Ran Playwright code\n```js\nawait page.locator('button[aria-label=\"打开菜单\"]').click();\n```\n### Page\n- Page URL: http://localhost:3321/\n- Page Title: CodexMobile\n### Snapshot\n- [Snapshot](.playwright-mcp/page-2026-05-14T15-14-41-495Z.yml)"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:45Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_snapshot"><details>
+<summary>Tool use: **browser_snapshot**</summary>
+```
+Wall time: 0.1744 seconds
+Output:
+[{"type":"text","text":"### Page\n- Page URL: http://localhost:3321/\n- Page Title: CodexMobile\n### Snapshot\n- [Snapshot](./desktop-layout-collapsed.yml)"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `sed -n '1,60p' desktop-layout-collapsed.yml`</summary>
+```
+Chunk ID: 0f24bc
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 910
+Output:
+- generic [ref=e3] [box=0,0,1280,900]:
+  - banner [ref=e4] [box=0,0,1280,64]:
+    - button "打开菜单" [active] [ref=e5] [box=100,14,38,38]
+    - generic [ref=e7] [box=150,23,980,20]
+    - button "更多操作" [ref=e13] [box=1142,14,38,38]
+  - complementary [box=0,0,0,900]:
+    - generic [box=0,0,4,36]
+    - generic [box=0,46,24,19]
+    - generic [box=0,69,0,782]
+    - generic [box=0,855,4,45]
+  - status [ref=e2334] [box=12,708,1256,52]:
+    - generic [ref=e2336] [box=42,717,1108,34]
+    - button "刷新" [ref=e2339] [box=1159,720,63,28]
+    - button "暂不刷新" [ref=e2346] [box=1231,720,28,28]
+  - generic [ref=e61] [box=100,-13062,1069,13794]:
+    - generic [ref=e615] [box=489,-13062,680,182]
+    - button "已完成 · 26 个步骤 3m 2s" [ref=e633] [cursor=pointer] [box=100,-12870,736,35]
+    - generic [ref=e640] [box=100,-12823,1069,407]
+    - generic [ref=e682] [box=489,-12395,680,117]
+    - button "已完成 · 9 个步骤 1m 16s" [ref=e700] [cursor=pointer] [box=100,-12268,736,35]
+    - generic [ref=e707] [box=100,-12221,1069,215]
+    - generic [ref=e738] [box=489,-11986,680,139]
+    - button "已完成 · 13 个步骤 49s" [ref=e757] [cursor=pointer] [box=100,-11837,736,35]
+    - generic [ref=e764] [box=100,-11790,1069,1114]
+    - generic [ref=e844] [box=995,-10655,174,96]
+    - button "已完成 · 22 个步骤 4m 10s" [ref=e862] [cursor=pointer] [box=100,-10550,736,35]
+    - generic [ref=e869] [box=100,-10503,1069,703]
+    - generic [ref=e945] [box=719,-9780,450,96]
+    - button "已完成 · 10 个步骤 5m 5s" [ref=e963] [cursor=pointer] [box=100,-9674,736,35]
+    - generic [ref=e970] [box=100,-9627,1069,486]
+    - generic [ref=e1012] [box=489,-9121,680,226]
+    - button "已完成 · 22 个步骤 3m 59s" [ref=e1032] [cursor=pointer] [box=100,-8886,736,35]
+    - generic [ref=e1039] [box=100,-8839,1069,501]
+    - generic [ref=e1087] [box=489,-8318,680,139]
+    - button "已完成 · 14 个步骤 41s" [ref=e1106] [cursor=pointer] [box=100,-8169,736,35]
+    - generic [ref=e1113] [box=100,-8122,1069,1795]
+    - generic [ref=e1205] [box=489,-6307,680,182]
+    - button "已完成 · 13 个步骤 1m 39s" [ref=e1224] [cursor=pointer] [box=100,-6114,736,35]
+    - generic [ref=e1231] [box=100,-6067,1069,412]
+    - generic [ref=e1277] [box=489,-5635,680,252]
+    - button "已完成 · 9 个步骤 1m 19s" [ref=e1301] [cursor=pointer] [box=100,-5373,736,35]
+    - generic [ref=e1308] [box=100,-5326,1069,527]
+    - generic [ref=e1365] [box=489,-4779,680,182]
+    - button "已完成 · 1 个步骤 2m 44s" [ref=e1385] [cursor=pointer] [box=100,-4587,736,35]
+    - generic [ref=e1392] [box=100,-4540,1069,438]
+    - generic [ref=e1440] [box=705,-4082,464,96]
+    - button "已完成 · 12 个步骤 1m 29s" [ref=e1458] [cursor=pointer] [box=100,-3976,736,35]
+    - generic [ref=e1465] [box=100,-3929,1069,540]
+    - generic [ref=e1518] [box=915,-3369,254,96]
+    - button "已完成 · 7 个步骤 12s" [ref=e1536] [cursor=pointer] [box=100,-3263,736,35]
+    - generic [ref=e1543] [box=100,-3216,1069,819]
+    - generic [ref=e1599] [box=489,-2377,680,193]
+    - button "已完成 · 6 个步骤 55s" [ref=e1619] [cursor=pointer] [box=100,-2174,736,35]
+    - generic [ref=e1626] [box=100,-2127,1069,560]
+    - generic [ref=e1690] [box=489,-1547,680,193]
+    - button "已完成 · 6 个步骤 56s" [ref=e1711] [cursor=pointer] [box=100,-1343,736,35]
+    - generic [ref=e1718] [box=100,-1296,1069,452]
+    - generic [ref=e1759] [box=873,-824,296,182]
+    - button "已完成 · 4 个步骤 23s" [ref=e1777] [cursor=pointer] [box=100,-632,736,35]
+    - generic [ref=e1784] [box=100,-585,1069,225]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:51Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="browser_click"><details>
+<summary>Tool use: **browser_click**</summary>
+```
+Wall time: 2.6380 seconds
+Output:
+[{"type":"text","text":"### Ran Playwright code\n```js\nawait page.locator('button[aria-label=\"打开菜单\"]').click();\n```\n### Page\n- Page URL: http://localhost:3321/\n- Page Title: CodexMobile\n### Snapshot\n- [Snapshot](.playwright-mcp/page-2026-05-14T15-14-54-048Z.yml)"}]
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:14:57Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `rm -f desktop-layout-after.yml desktop-layout-after.png mobile-layout-after.yml desktop-layout-restored.yml desktop-layout-collapsed.yml`</summary>
+```
+Chunk ID: 32df3f
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git diff -- client/src/app/App.jsx client/src/panels/Drawer.jsx client/src/panels/DrawerSettingsView.jsx client/src/panels/DrawerArchiveView.jsx client/src/styles/layout.css client/src/styles/panels-topbar.css client/src/styles/panels-drawer.css client/src/styles/panels-chat.css client/src/styles/composer.css client/src/styles/theme.css`</summary>
+```
+Chunk ID: 03295b
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 9138
+Output:
+diff --git a/client/src/app/App.jsx b/client/src/app/App.jsx
+index 91b5f5c..cff8bad 100644
+--- a/client/src/app/App.jsx
++++ b/client/src/app/App.jsx
+@@ -57,6 +57,7 @@ import {
+ } from '../sync/sync-selectors.js';
+ 
+ const MODEL_SPEED_KEY = 'codexmobile.modelSpeed';
++const DESKTOP_SHELL_MEDIA = '(min-width: 1024px)';
+ 
+ export default function App() {
+   const [status, setStatus] = useState(DEFAULT_STATUS);
+@@ -141,6 +142,7 @@ export default function App() {
+   const sessionLivePollRef = useRef(false);
+   const bootstrapStartedRef = useRef(false);
+   const drawerSyncAtRef = useRef(0);
++  const desktopDrawerSeededRef = useRef(false);
+   const composerRef = useRef(null);
+   const {
+     queueDrafts,
+@@ -160,8 +162,19 @@ export default function App() {
+ 
+   useViewportSizing(composerRef);
+ 
++  useEffect(() => {
++    if (!authenticated || desktopDrawerSeededRef.current || typeof window === 'undefined' || !window.matchMedia) {
++      return;
++    }
++    desktopDrawerSeededRef.current = true;
++    if (window.matchMedia(DESKTOP_SHELL_MEDIA).matches) {
++      setDrawerOpen(true);
++    }
++  }, [authenticated, setDrawerOpen]);
++
+   const syncRunningById = useMemo(() => syncRunningByIdFromRuntime(threadRuntimeById), [threadRuntimeById]);
+   const selectedRuntime = selectRuntimeForSession(selectedSession, threadRuntimeById);
++  const selectedSessionArchived = Boolean(selectedSession?.archived);
+   const running =
+     hasRunningKey(syncRunningById, selectedRunKeys(selectedSession)) ||
+     selectedRuntime?.status === 'running' ||
+@@ -172,6 +185,16 @@ export default function App() {
+     loadQueueDrafts(selectedSession).catch(() => null);
+   }, [selectedSession?.id]);
+ 
++  useEffect(() => {
++    if (!selectedSessionArchived) {
++      return;
++    }
++    setInput('');
++    setAttachments([]);
++    setFileMentions([]);
++    setSelectedCollaborationMode(null);
++  }, [selectedSession?.id, selectedSessionArchived, setFileMentions]);
++
+   useEffect(() => {
+     setThreadRuntimeById((current) => {
+       const next = reconcileThreadRuntimeWithSessions(current, sessionsByProject);
+@@ -589,14 +612,21 @@ export default function App() {
+     syncing
+   });
+   const topBarRuntime = selectedRuntime || (selectedRunning ? { status: 'running' } : null);
++  const handleToggleDrawer = useCallback(() => {
++    const desktopShell = typeof window !== 'undefined' && window.matchMedia?.(DESKTOP_SHELL_MEDIA)?.matches;
++    setDrawerOpen((current) => (desktopShell ? !current : true));
++  }, [setDrawerOpen]);
+ 
+   const handleComposerSubmit = useCallback(async (options = {}) => {
++    if ((selectedSessionRef.current || selectedSession)?.archived) {
++      return;
++    }
+     const collaborationMode = options.collaborationMode || selectedCollaborationMode || null;
+     const accepted = await handleSubmit({ ...options, collaborationMode });
+     if (accepted && collaborationMode) {
+       setSelectedCollaborationMode(null);
+     }
+-  }, [handleSubmit, selectedCollaborationMode]);
++  }, [handleSubmit, selectedCollaborationMode, selectedSession]);
+ 
+   const handleCompactContext = useCallback(async () => {
+     const project = selectedProjectRef.current || selectedProject;
+@@ -741,7 +771,7 @@ export default function App() {
+       connectionState,
+       desktopBridge: status.desktopBridge,
+       selectedRuntime: topBarRuntime,
+-      onMenu: () => setDrawerOpen(true),
++      onMenu: handleToggleDrawer,
+       onOpenDocs: () => setDocsOpen(true),
+       onGitAction: handleGitAction,
+       onDesktopHandoff: handleDesktopHandoff,
+@@ -827,8 +857,8 @@ export default function App() {
+     now: activityClockNow,
+     onPreviewImage: setPreviewImage,
+     onDeleteMessage: handleDeleteMessage,
+-    onImplementPlan: handleImplementPlan,
+-    onAdjustPlan: handleAdjustPlan
++    onImplementPlan: selectedSessionArchived ? null : handleImplementPlan,
++    onAdjustPlan: selectedSessionArchived ? null : handleAdjustPlan
+   };
+   const composerProps = {
+     composerRef,
+@@ -869,7 +899,9 @@ export default function App() {
+     onRestoreQueueDraft: restoreQueueDraft,
+     onRemoveQueueDraft: removeQueueDraft,
+     onSteerQueueDraft: steerQueueDraft,
+-    onCompactContext: handleCompactContext
++    onCompactContext: handleCompactContext,
++    readOnly: selectedSessionArchived,
++    readOnlyReason: '已归档线程只能查看，取消归档后才能继续对话'
+   };
+ 
+   return (
+diff --git a/client/src/panels/Drawer.jsx b/client/src/panels/Drawer.jsx
+index 4eafef0..1806584 100644
+--- a/client/src/panels/Drawer.jsx
++++ b/client/src/panels/Drawer.jsx
+@@ -93,6 +93,7 @@ export function Drawer({
+   const [archiveError, setArchiveError] = useState('');
+   const [archiveSyncedAt, setArchiveSyncedAt] = useState('');
+   const [archiveSource, setArchiveSource] = useState('');
++  const [unarchivingSessionIds, setUnarchivingSessionIds] = useState({});
+   const normalizedD
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `git status --short`</summary>
+```
+Chunk ID: 980dfe
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 263
+Output:
+ M .specstory/history/2026-05-14_14-35-49Z-ui.md
+ M .specstory/history/2026-05-14_14-41-46Z-https-github-com-flyyangx.md
+ M .specstory/statistics.json
+ M client/src/app/App.jsx
+ M client/src/app/FilePreviewApp.jsx
+ M client/src/app/PdfPreview.jsx
+ M client/src/app/useTurnSubmission.js
+ M client/src/composer/Composer.jsx
+ M client/src/panels/Drawer.jsx
+ M client/src/panels/DrawerArchiveView.jsx
+ M client/src/panels/DrawerSettingsView.jsx
+ M client/src/styles/chat.css
+ M client/src/styles/composer.css
+ M client/src/styles/layout.css
+ M client/src/styles/panels-chat.css
+ M client/src/styles/panels-drawer.css
+ M client/src/styles/panels-topbar.css
+ M client/src/styles/theme.css
+ M server/codex-app-server.js
+ M server/codex-data.js
+ M server/desktop-ipc-client.js
+ M server/desktop-ipc-client.test.mjs
+ M server/index.js
+ M server/session-local-state.js
+ M server/session-routes-archived.test.mjs
+ M server/session-routes.js
+ M server/static-service.js
+ M server/static-service.test.mjs
+?? .specstory/history/2026-05-14_15-12-28Z-composer-ui.md
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:16Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `ls desktop-layout-after.yml desktop-layout-after.png mobile-layout-after.yml desktop-layout-restored.yml desktop-layout-collapsed.yml 2>/dev/null || true`</summary>
+```
+Chunk ID: 57f802
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 0
+Output:
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:24Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/app/App.jsx | sed -n '55,180p;608,780p'`</summary>
+```
+Chunk ID: 2112d6
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 3422
+Output:
+    55	  selectRuntimeForSession,
+    56	  syncRunningByIdFromRuntime
+    57	} from '../sync/sync-selectors.js';
+    58	
+    59	const MODEL_SPEED_KEY = 'codexmobile.modelSpeed';
+    60	const DESKTOP_SHELL_MEDIA = '(min-width: 1024px)';
+    61	
+    62	export default function App() {
+    63	  const [status, setStatus] = useState(DEFAULT_STATUS);
+    64	  const [contextStatus, setContextStatus] = useState(() => normalizeContextStatus(DEFAULT_STATUS.context));
+    65	  const [authenticated, setAuthenticated] = useState(Boolean(getToken()));
+    66	  const [uiState, dispatchUi] = useReducer(appReducer, undefined, () => createInitialUiState());
+    67	  const setDrawerOpen = useCallback((value) => dispatchUi({ type: 'ui/drawerOpen', value }), []);
+    68	  const setPreviewImage = useCallback((value) => dispatchUi({ type: 'ui/previewImage', value }), []);
+    69	  const setDocsOpen = useCallback((value) => dispatchUi({ type: 'ui/docsOpen', value }), []);
+    70	  const setDocsBusy = useCallback((value) => dispatchUi({ type: 'ui/docsBusy', value }), []);
+    71	  const setDocsError = useCallback((value) => dispatchUi({ type: 'ui/docsError', value }), []);
+    72	  const setGitPanel = useCallback((value) => dispatchUi({ type: 'ui/gitPanel', value }), []);
+    73	  const setTheme = useCallback((value) => dispatchUi({ type: 'ui/theme', value }), []);
+    74	  const { drawerOpen, previewImage, docsOpen, docsBusy, docsError, gitPanel, theme } = uiState;
+    75	  const {
+    76	    toasts,
+    77	    notificationSupported,
+    78	    notificationEnabled,
+    79	    dismissToast,
+    80	    showToast,
+    81	    enableNotifications
+    82	  } = useNotifications();
+    83	  const pwaUpdate = usePwaUpdate();
+    84	  const [projects, setProjects] = useState([]);
+    85	  const [selectedProject, setSelectedProject] = useState(null);
+    86	  const [expandedProjectIds, setExpandedProjectIds] = useState({});
+    87	  const [sessionsByProject, setSessionsByProject] = useState({});
+    88	  const [loadingProjectId, setLoadingProjectId] = useState(null);
+    89	  const [selectedSession, setSelectedSession] = useState(null);
+    90	  const [messages, setMessages] = useState([]);
+    91	  const [sessionLoadingId, setSessionLoadingId] = useState(null);
+    92	  const [sessionLoadError, setSessionLoadError] = useState('');
+    93	  const [activityClockNow, setActivityClockNow] = useState(() => Date.now());
+    94	  const [completedSessionIds, setCompletedSessionIds] = useState({});
+    95	  const [input, setInput] = useState('');
+    96	  const [attachments, setAttachments] = useState([]);
+    97	  const [uploading, setUploading] = useState(false);
+    98	  const [permissionMode, setPermissionMode] = useState(DEFAULT_PERMISSION_MODE);
+    99	  const [selectedModel, setSelectedModel] = useState(DEFAULT_STATUS.model);
+   100	  const [selectedModelSpeed, setSelectedModelSpeed] = useState(() => normalizeModelSpeed(localStorage.getItem(MODEL_SPEED_KEY)));
+   101	  const [selectedCollaborationMode, setSelectedCollaborationMode] = useState(null);
+   102	  const [selectedReasoningEffort, setSelectedReasoningEffort] = useState(() => {
+   103	    const defaultVersion = localStorage.getItem('codexmobile.reasoningDefaultVersion');
+   104	    if (defaultVersion !== REASONING_DEFAULT_VERSION) {
+   105	      localStorage.setItem('codexmobile.reasoningDefaultVersion', REASONING_DEFAULT_VERSION);
+   106	      localStorage.setItem('codexmobile.reasoningEffort', DEFAULT_REASONING_EFFORT);
+   107	      return DEFAULT_REASONING_EFFORT;
+   108	    }
+   109	    return localStorage.getItem('codexmobile.reasoningEffort') || DEFAULT_REASONING_EFFORT;
+   110	  });
+   111	  const {
+   112	    fileMentions,
+   113	    setFileMentions,
+   114	    selectedSkillPaths,
+   115	    setSelectedSkillPaths,
+   116	    toggleSelectedSkill,
+   117	    selectSkill,
+   118	    clearSelectedSkills,
+   119	    addFileMention,
+   120	    removeFileMention
+   121	  } = useComposerSelections(status);
+   122	  const [runningById, setRunningById] = useState({});
+   123	  const [threadRuntimeById, setThreadRuntimeById] = useState({});
+   124	  const [syncing, setSyncing] = useState(false);
+   125	  const [desktopHandoffPending, setDesktopHandoffPending] = useState(false);
+   126	  const [connectionState, setConnectionState] = useState(() => (getToken() ? 'connecting' : 'disconnected'));
+   127	  const wsRef = useRef(null);
+   128	  const selectedProjectRef = useRef(null);
+   129	  const selectedSessionRef = useRef(null);
+   130	  const messagesRef = useRef([]);
+   131	  const autoTitleSyncRef = useRef(new Set());
+   132	  const runningByIdRef = useRef({});
+   133	  const turnRefreshTimersRef = useRef(new Map());
+   134	  const lastStatusSettingsRef = useRef({
+   135	    model: DEFAULT_STATUS.model,
+   136	    reasoningEffort: DEFAULT_STATUS.reasoningEffort || DEFAULT_REASONING_EF
+... (truncated)
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:24Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/styles/layout.css | sed -n '1,90p'`</summary>
+```
+Chunk ID: 04092c
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 645
+Output:
+     1	
+     2	.app-shell {
+     3	  position: fixed;
+     4	  inset: 0;
+     5	  --desktop-drawer-width: 320px;
+     6	  --desktop-main-max: 1040px;
+     7	  --desktop-main-gutter: 14px;
+     8	  display: grid;
+     9	  grid-template-rows: auto 1fr auto;
+    10	  width: 100vw;
+    11	  max-width: 100vw;
+    12	  height: var(--app-height, 100dvh);
+    13	  min-height: 0;
+    14	  background:
+    15	    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(247, 247, 244, 0) 38%),
+    16	    linear-gradient(135deg, rgba(230, 232, 226, 0.46), rgba(255, 255, 255, 0) 42%),
+    17	    var(--surface);
+    18	  color: var(--text);
+    19	  overflow: hidden;
+    20	  overscroll-behavior: none;
+    21	  touch-action: pan-y;
+    22	}
+    23	
+    24	.app-shell::before {
+    25	  content: "";
+    26	  position: fixed;
+    27	  top: 0;
+    28	  left: 0;
+    29	  right: 0;
+    30	  height: calc(env(safe-area-inset-top, 0px) + 72px);
+    31	  z-index: 33;
+    32	  pointer-events: none;
+    33	  background: linear-gradient(180deg, rgba(247, 247, 244, 0.9), rgba(247, 247, 244, 0.62) 62%, rgba(247, 247, 244, 0));
+    34	  -webkit-backdrop-filter: blur(12px) saturate(1.04);
+    35	  backdrop-filter: blur(12px) saturate(1.04);
+    36	  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.92) 58%, transparent 100%);
+    37	  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.92) 58%, transparent 100%);
+    38	}
+    39	
+    40	[data-theme="dark"] .app-shell {
+    41	  background: var(--surface);
+    42	}
+    43	
+    44	[data-theme="dark"] .app-shell::before {
+    45	  background: linear-gradient(180deg, rgba(0, 0, 0, 0.86), rgba(0, 0, 0, 0.56) 62%, rgba(0, 0, 0, 0));
+    46	}
+    47	
+    48	@media (min-width: 1024px) {
+    49	  .app-shell {
+    50	    --desktop-main-gutter: max(28px, calc((100% - var(--desktop-main-max)) / 2));
+    51	    grid-template-columns: 0 minmax(0, 1fr);
+    52	    grid-template-rows: auto minmax(0, 1fr) auto;
+    53	    grid-template-areas:
+    54	      "drawer topbar"
+    55	      "drawer chat"
+    56	      "drawer composer";
+    57	    transition: grid-template-columns 180ms ease;
+    58	    touch-action: auto;
+    59	  }
+    60	
+    61	  .app-shell.drawer-active {
+    62	    grid-template-columns: var(--desktop-drawer-width) minmax(0, 1fr);
+    63	  }
+    64	
+    65	  .app-shell::before {
+    66	    display: none;
+    67	  }
+    68	}
+    69	
+    70	@media (min-width: 1280px) {
+    71	  .app-shell {
+    72	    --desktop-drawer-width: 340px;
+    73	    --desktop-main-max: 1080px;
+    74	  }
+    75	}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:24Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/styles/theme.css | sed -n '280,350p'`</summary>
+```
+Chunk ID: eeb07d
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 449
+Output:
+   280	  to {
+   281	    opacity: 1;
+   282	    transform: translateY(0) scale(1);
+   283	  }
+   284	}
+   285	
+   286	@media (min-width: 820px) and (max-width: 1023px) {
+   287	  body {
+   288	    display: grid;
+   289	    place-items: center;
+   290	    background: #e8e9e5;
+   291	  }
+   292	
+   293	  #root {
+   294	    width: min(430px, 100vw);
+   295	    height: min(932px, var(--app-height, 100dvh));
+   296	    border-left: 1px solid #d7d9d5;
+   297	    border-right: 1px solid #d7d9d5;
+   298	    box-shadow: 0 24px 80px rgba(20, 24, 31, 0.16);
+   299	  }
+   300	
+   301	  .app-shell {
+   302	    position: relative;
+   303	    width: 100%;
+   304	    max-width: 100%;
+   305	    height: 100%;
+   306	  }
+   307	
+   308	  [data-theme="dark"] body {
+   309	    background: #000000;
+   310	  }
+   311	
+   312	  [data-theme="dark"] #root {
+   313	    border-left-color: #202024;
+   314	    border-right-color: #202024;
+   315	    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.62);
+   316	  }
+   317	}
+   318	
+   319	@media (min-width: 1024px) {
+   320	  body {
+   321	    display: block;
+   322	    background: var(--surface);
+   323	  }
+   324	
+   325	  #root {
+   326	    width: 100vw;
+   327	    height: var(--app-height, 100dvh);
+   328	    border: 0;
+   329	    box-shadow: none;
+   330	  }
+   331	
+   332	  .app-shell {
+   333	    position: fixed;
+   334	    width: 100vw;
+   335	    max-width: none;
+   336	    height: var(--app-height, 100dvh);
+   337	  }
+   338	
+   339	  [data-theme="dark"] body {
+   340	    background: #000000;
+   341	  }
+   342	
+   343	  [data-theme="dark"] #root {
+   344	    border: 0;
+   345	    box-shadow: none;
+   346	  }
+   347	
+   348	  [data-theme="dark"] .composer-wrap {
+   349	    border-top-color: #171719;
+   350	    background: rgba(0, 0, 0, 0.72);
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:24Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/styles/composer.css | sed -n '830,895p'`</summary>
+```
+Chunk ID: 181e99
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 436
+Output:
+   830	  border-radius: 50%;
+   831	  color: var(--bubble-user-text);
+   832	  background: var(--bubble-user);
+   833	}
+   834	
+   835	@media (min-width: 1024px) {
+   836	  .composer-wrap {
+   837	    grid-area: composer;
+   838	    position: relative;
+   839	    left: auto;
+   840	    right: auto;
+   841	    bottom: auto;
+   842	    z-index: 22;
+   843	    width: 100%;
+   844	    max-width: none;
+   845	    padding: 10px var(--desktop-main-gutter) 18px;
+   846	    border-top: 1px solid rgba(222, 223, 220, 0.82);
+   847	    background: rgba(247, 247, 244, 0.78);
+   848	    -webkit-backdrop-filter: blur(18px) saturate(1.08);
+   849	    backdrop-filter: blur(18px) saturate(1.08);
+   850	  }
+   851	
+   852	  .composer {
+   853	    max-width: var(--desktop-main-max);
+   854	    margin: 0 auto;
+   855	    border-radius: 18px;
+   856	  }
+   857	
+   858	  .composer textarea {
+   859	    max-height: 220px;
+   860	  }
+   861	
+   862	  .composer-tool-strip {
+   863	    flex-wrap: wrap;
+   864	    overflow: visible;
+   865	    mask-image: none;
+   866	  }
+   867	
+   868	  .composer-menu {
+   869	    max-height: min(420px, 52vh);
+   870	  }
+   871	
+   872	  .attach-menu,
+   873	  .shortcut-menu {
+   874	    left: var(--desktop-main-gutter);
+   875	  }
+   876	
+   877	  .permission-menu {
+   878	    right: calc(var(--desktop-main-gutter) + 164px);
+   879	    left: auto;
+   880	  }
+   881	
+   882	  .skill-menu {
+   883	    right: calc(var(--desktop-main-gutter) + 118px);
+   884	    left: auto;
+   885	  }
+   886	
+   887	  .model-menu {
+   888	    right: calc(var(--desktop-main-gutter) + 44px);
+   889	  }
+   890	
+   891	  .send-mode-menu,
+   892	  .shortcut-menu {
+   893	    right: var(--desktop-main-gutter);
+   894	  }
+   895
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:32Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/styles/panels-drawer.css | sed -n '2110,2165p'`</summary>
+```
+Chunk ID: 9efc4c
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 334
+Output:
+  2110	
+  2111	  .archive-unarchive-button span {
+  2112	    display: none;
+  2113	  }
+  2114	}
+  2115	
+  2116	@media (min-width: 1024px) {
+  2117	  .drawer-main-backdrop {
+  2118	    display: none;
+  2119	  }
+  2120	
+  2121	  .app-shell > .drawer:not(.drawer-subpage) {
+  2122	    grid-area: drawer;
+  2123	    position: relative;
+  2124	    top: auto;
+  2125	    bottom: auto;
+  2126	    left: auto;
+  2127	    z-index: 2;
+  2128	    width: var(--desktop-drawer-width);
+  2129	    max-width: none;
+  2130	    height: 100%;
+  2131	    min-height: 0;
+  2132	    padding: 16px 14px;
+  2133	    border-right: 1px solid #e5e7eb;
+  2134	    background: #ffffff;
+  2135	    box-shadow: none;
+  2136	    transform: none;
+  2137	    transition: opacity 160ms ease;
+  2138	  }
+  2139	
+  2140	  .app-shell:not(.drawer-active) > .drawer:not(.drawer-subpage) {
+  2141	    width: 0;
+  2142	    padding: 0;
+  2143	    border-right: 0;
+  2144	    opacity: 0;
+  2145	    pointer-events: none;
+  2146	  }
+  2147	
+  2148	  .app-shell.drawer-active > .drawer:not(.drawer-subpage) {
+  2149	    opacity: 1;
+  2150	    pointer-events: auto;
+  2151	  }
+  2152	
+  2153	  [data-theme="dark"] .app-shell > .drawer:not(.drawer-subpage) {
+  2154	    border-right-color: #171719;
+  2155	    background: #050506;
+  2156	    box-shadow: none;
+  2157	  }
+  2158	}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:32Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/styles/panels-topbar.css | sed -n '266,310p'`</summary>
+```
+Chunk ID: 8c83ad
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 270
+Output:
+   266	    opacity: 1;
+   267	  }
+   268	}
+   269	
+   270	@media (min-width: 1024px) {
+   271	  .top-bar {
+   272	    grid-area: topbar;
+   273	    position: relative;
+   274	    top: auto;
+   275	    left: auto;
+   276	    right: auto;
+   277	    z-index: 20;
+   278	    min-height: 64px;
+   279	    padding: 12px var(--desktop-main-gutter) 10px;
+   280	    border-bottom: 1px solid rgba(222, 223, 220, 0.82);
+   281	    background: rgba(247, 247, 244, 0.78);
+   282	    -webkit-backdrop-filter: blur(18px) saturate(1.08);
+   283	    backdrop-filter: blur(18px) saturate(1.08);
+   284	  }
+   285	
+   286	  [data-theme="dark"] .top-bar {
+   287	    border-bottom-color: #171719;
+   288	    background: rgba(0, 0, 0, 0.72);
+   289	  }
+   290	
+   291	  .top-title {
+   292	    flex-direction: row;
+   293	    align-items: center;
+   294	    gap: 12px;
+   295	  }
+   296	
+   297	  .top-title strong {
+   298	    font-size: 15px;
+   299	    line-height: 20px;
+   300	  }
+   301	
+   302	  .connection-status {
+   303	    min-width: 0;
+   304	    padding-top: 1px;
+   305	  }
+   306	}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:32Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/styles/panels-chat.css | sed -n '178,205p'`</summary>
+```
+Chunk ID: 45e6a2
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 155
+Output:
+   178	
+   179	.chat-loading-lines span:nth-child(2) {
+   180	  width: 84%;
+   181	}
+   182	
+   183	@media (min-width: 1024px) {
+   184	  .chat-pane {
+   185	    grid-area: chat;
+   186	    max-width: none;
+   187	    padding: 22px var(--desktop-main-gutter) 18px;
+   188	  }
+   189	
+   190	  .chat-pane::after {
+   191	    display: none;
+   192	  }
+   193	
+   194	  .chat-content {
+   195	    max-width: var(--desktop-main-max);
+   196	  }
+   197	
+   198	  .empty-chat {
+   199	    min-height: min(420px, 56vh);
+   200	  }
+   201	}
+   202	
+   203	.chat-loading-lines span:nth-child(3) {
+   204	  width: 62%;
+   205	}
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:32Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="exec_command"><details>
+<summary>Tool use: **exec_command** `nl -ba client/src/panels/Drawer.jsx | sed -n '540,550p'; nl -ba client/src/panels/DrawerArchiveView.jsx | sed -n '36,42p'; nl -ba client/src/panels/DrawerSettingsView.jsx | sed -n '42,48p'`</summary>
+```
+Chunk ID: 7d28fd
+Wall time: 0.0000 seconds
+Process exited with code 0
+Original token count: 318
+Output:
+   540	  };
+   541	  const renderedProjectGroups = orderedProjects.map(renderProjectGroup).filter(Boolean);
+   542	
+   543	  const statusText = runningCount ? `${runningCount} 个任务运行中` : '已连接';
+   544	
+   545	  return (
+   546	    <>
+   547	      <div className={`drawer-backdrop drawer-main-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+   548	      <aside className={`drawer ${open ? 'is-open' : ''}`}>
+   549	        <div className="drawer-header">
+   550	          <div className="drawer-brand">
+    36	
+    37	  return (
+    38	    <>
+    39	      <div className={`drawer-backdrop drawer-subpage-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+    40	      <aside className={`drawer drawer-archive drawer-subpage ${open ? 'is-open' : ''}`}>
+    41	        <div className="drawer-subpage-header">
+    42	          <button className="icon-button" onClick={onBack} aria-label="返回设置">
+    42	      : '未开启';
+    43	
+    44	  return (
+    45	    <>
+    46	      <div className={`drawer-backdrop drawer-subpage-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+    47	      <aside className={`drawer drawer-settings drawer-subpage ${open ? 'is-open' : ''}`}>
+    48	        <div className="drawer-subpage-header">
+```
+</details></tool-use>
+
+_**Agent (gpt-5.5 2026-05-14 15:15:58Z)**_
+
+已参考 [PR #1](https://github.com/flyyangX/CodexMobile/pull/1) 做完桌面 / 大屏适配，但没有硬搬它那套旧的单文件实现。
+
+这次落地的是现在代码更适配的版本：`1024px+` 进入桌面双栏，左侧 Drawer 默认停靠，顶部菜单按钮在桌面端可折叠 / 展开侧栏；聊天区和 Composer 改为跟主内容列对齐并放宽到桌面宽度；`820-1023px` 仍保留原来的手机预览壳，手机端布局不动。核心在 [App.jsx](/Users/xiayanghui/编程项目/CodexMobile/client/src/app/App.jsx:60)、[layout.css](/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/layout.css:48)、[theme.css](/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/theme.css:286)、[panels-drawer.css](/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/panels-drawer.css:2116)、[composer.css](/Users/xiayanghui/编程项目/CodexMobile/client/src/styles/composer.css:835)。
+
+我也区分了主 Drawer 和设置/归档子页的 backdrop，桌面端只隐藏主侧栏遮罩，子页遮罩保留，避免设置页这种覆盖层被误伤。
+
+验证过：
+`npm run build` 通过，只有原本的大 chunk warning。  
+Browser 里用 `1280x900` 看过：侧栏停靠、聊天区/输入框变宽；点顶部菜单后能折叠成全宽，再点能恢复。也用 `390x844` 看了移动宽度，仍是移动端尺寸。

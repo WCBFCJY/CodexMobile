@@ -8,7 +8,7 @@
  * - refreshCodexCache / getCacheSnapshot — 缓存生命周期。
  * - listProjects / getProject / listProjectSessions / getSession / rememberLiveSession。
  * - projectlessMobileSessionRegistrations — 找出需补登记到 Codex 全局 state 的移动端普通对话。
- * - renameSession / deleteSession / hideSessionMessage / readSessionMessages / getHostName。
+ * - renameSession / deleteSession / unarchiveSession / hideSessionMessage / readSessionMessages / getHostName。
  *
  * Inward（本模块依赖/组装的关键符号）: session-index-builder、session-message-reader、mobile-session-index、codex-app-server、session-local-state。
  *
@@ -22,7 +22,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
-import { archiveDesktopThread, listDesktopThreads, readDesktopThread } from './codex-app-server.js';
+import { archiveDesktopThread, listDesktopThreads, readDesktopThread, unarchiveDesktopThread } from './codex-app-server.js';
 import {
   CODEX_SESSION_INDEX,
   CODEX_SESSIONS_DIR,
@@ -49,7 +49,8 @@ import {
 import {
   hideSessionInMobile,
   hideSessionMessageInLocalState,
-  readHiddenSessionIds
+  readHiddenSessionIds,
+  unhideSessionInMobile
 } from './session-local-state.js';
 
 export { rawSessionActivitiesFromJsonl } from './desktop-activity-parser.js';
@@ -860,6 +861,24 @@ export async function deleteSession(sessionId, projectId) {
     deletedFile: false,
     deletedIndexRows: false,
     deletedMobileRecord: false
+  };
+}
+
+export async function unarchiveSession(sessionId) {
+  const id = String(sessionId || '').trim();
+  if (!id) {
+    const error = new Error('Session id is required');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  await unarchiveDesktopThread(id);
+  const local = await unhideSessionInMobile(id);
+
+  return {
+    sessionId: id,
+    unarchivedDesktopThread: true,
+    unhidden: local.unhidden
   };
 }
 

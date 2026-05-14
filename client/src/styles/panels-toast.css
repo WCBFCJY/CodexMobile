@@ -233,7 +233,7 @@
   padding: 0 9px;
   border: 0;
   border-radius: 999px;
-  color: #174eb8;
+  color: var(--accent);
   background: var(--accent-soft);
   font-size: 12px;
   white-space: nowrap;
@@ -241,12 +241,12 @@
 
 [data-theme="dark"] .toast-item,
 [data-theme="dark"] .connection-recovery-card {
-  border-color: #242428;
-  background: rgba(8, 8, 9, 0.96);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.52);
+  border-color: var(--line);
+  background: var(--glass-strong);
+  box-shadow: var(--soft-shadow);
 }
 
 [data-theme="dark"] .connection-recovery-card button {
-  color: #dbeafe;
-  background: rgba(96, 165, 250, 0.15);
+  color: var(--accent);
+  background: var(--accent-soft);
 }

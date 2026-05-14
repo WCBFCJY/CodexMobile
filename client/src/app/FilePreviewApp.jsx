@@ -1,7 +1,7 @@
 /**
- * 独立文件预览入口：拉取工作区文件、按类型渲染 PDF/ Markdown/文本或下载fallback，并提供主题化工具栏与外链分享。
+ * 独立文件预览入口：按类型渲染 PDF/ Markdown/文本/媒体或下载 fallback，并提供工具栏与外链分享。
  *
- * Keywords: file-preview, pdf, markdown, workspace-file
+ * Keywords: file-preview, pdf, markdown, media, workspace-file
  *
  * Exports:
  * - default — `FilePreviewApp`（由 `main` 按需挂载的整页预览壳）。
@@ -29,6 +29,15 @@ function fileNameFromPath(value) {
 function previewKind(pathValue, contentType) {
   const lowerType = String(contentType || '').toLowerCase();
   const lowerPath = String(pathValue || '').toLowerCase();
+  if (lowerType.startsWith('image/') || /\.(?:png|jpe?g|webp|gif|svg|ico)(?:$|[:?#])/i.test(lowerPath)) {
+    return 'image';
+  }
+  if (lowerType.startsWith('video/') || /\.(?:mp4|m4v|mov|webm|ogv)(?:$|[:?#])/i.test(lowerPath)) {
+    return 'video';
+  }
+  if (lowerType.startsWith('audio/') || /\.(?:mp3|m4a|aac|wav|ogg|flac)(?:$|[:?#])/i.test(lowerPath)) {
+    return 'audio';
+  }
   if (lowerType.includes('pdf') || /\.pdf(?:$|[:?#])/i.test(lowerPath)) {
     return 'pdf';
   }
@@ -42,6 +51,10 @@ function previewKind(pathValue, contentType) {
     return 'text';
   }
   return 'download';
+}
+
+function isNativeMediaKind(kind) {
+  return kind === 'image' || kind === 'video' || kind === 'audio';
 }
 
 function stripFrontmatter(value) {
@@ -120,6 +133,20 @@ export default function FilePreviewApp() {
       }
       setState({ loading: true, error: '', text: '', objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
       try {
+        const pathKind = previewKind(filePath, '');
+        if (isNativeMediaKind(pathKind) || pathKind === 'pdf') {
+          setState({
+            loading: false,
+            error: '',
+            text: '',
+            objectUrl: '',
+            pdfData: null,
+            contentType: pathKind === 'pdf' ? 'application/pdf' : '',
+            mtimeMs: 0,
+            editable: false
+          });
+          return;
+        }
         const response = await fetch(localFileApiPath(filePath, urlToken || getToken()), {
           headers: getToken() ? { authorization: `Bearer ${getToken()}` } : {}
         });
@@ -393,8 +420,41 @@ export default function FilePreviewApp() {
             spellCheck={false}
           />
         ) : null}
-        {!state.loading && !state.error && kind === 'pdf' && state.pdfData ? (
+        {!state.loading && !state.error && kind === 'pdf' ? (
           <PdfPreview data={state.pdfData} fileUrl={rawFileUrl} />
+        ) : null}
+        {!state.loading && !state.error && kind === 'image' ? (
+          <div className="file-preview-media-shell">
+            <img
+              className="file-preview-media"
+              src={rawFileUrl}
+              alt={title}
+              onError={() => setState((current) => ({ ...current, error: '图片加载失败' }))}
+            />
+          </div>
+        ) : null}
+        {!state.loading && !state.error && kind === 'video' ? (
+          <div className="file-preview-media-shell">
+            <video
+              className="file-preview-media"
+              src={rawFileUrl}
+              controls
+              playsInline
+              preload="metadata"
+              onError={() => setState((current) => ({ ...current, error: '视频加载失败' }))}
+            />
+          </div>
+        ) : null}
+        {!state.loading && !state.error && kind === 'audio' ? (
+          <div className="file-preview-media-shell is-audio">
+            <audio
+              className="file-preview-audio"
+              src={rawFileUrl}
+              controls
+              preload="metadata"
+              onError={() => setState((current) => ({ ...current, error: '音频加载失败' }))}
+            />
+          </div>
         ) : null}
         {!state.loading && !state.error && kind === 'download' && state.objectUrl ? (
           <a className="file-preview-open" href={state.objectUrl} target="_blank" rel="noreferrer noopener">

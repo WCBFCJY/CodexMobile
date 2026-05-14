@@ -6,7 +6,7 @@
  * Exports:
  * - filterDeletedMessages — 过滤已删 message id。
  * - createSessionLocalState — 工厂。
- * - hideSessionInMobile / hideSessionMessageInLocalState 等 — 默认实例便捷方法。
+ * - hideSessionInMobile / unhideSessionInMobile / hideSessionMessageInLocalState 等 — 默认实例便捷方法。
  *
  * Inward（本模块依赖/组装的关键符号）: Node fs/promises、.codexmobile/state 路径约定。
  *
@@ -119,6 +119,23 @@ export function createSessionLocalState({
     return { sessionId: id, hiddenAt: state.sessions[id].hiddenAt };
   }
 
+  async function unhideSessionInMobile(sessionId) {
+    const id = String(sessionId || '').trim();
+    if (!id) {
+      const error = new Error('Session id is required');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const state = await readHiddenSessionsState();
+    const existing = state.sessions[id] || null;
+    if (existing) {
+      delete state.sessions[id];
+      await writeHiddenSessionsState(state);
+    }
+    return { sessionId: id, unhidden: Boolean(existing) };
+  }
+
   async function readDeletedMessageIds(sessionId) {
     const id = String(sessionId || '').trim();
     if (!id) {
@@ -150,6 +167,7 @@ export function createSessionLocalState({
 
   return {
     hideSessionInMobile,
+    unhideSessionInMobile,
     hideSessionMessage,
     readDeletedMessageIds,
     readHiddenSessionIds
@@ -159,6 +177,7 @@ export function createSessionLocalState({
 const defaultSessionLocalState = createSessionLocalState();
 
 export const hideSessionInMobile = (...args) => defaultSessionLocalState.hideSessionInMobile(...args);
+export const unhideSessionInMobile = (...args) => defaultSessionLocalState.unhideSessionInMobile(...args);
 export const hideSessionMessageInLocalState = (...args) => defaultSessionLocalState.hideSessionMessage(...args);
 export const readDeletedMessageIds = (...args) => defaultSessionLocalState.readDeletedMessageIds(...args);
 export const readHiddenSessionIds = (...args) => defaultSessionLocalState.readHiddenSessionIds(...args);

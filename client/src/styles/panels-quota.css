@@ -65,8 +65,8 @@
   min-width: 70px;
   padding: 0 9px;
   border-radius: 8px;
-  color: #20252b;
-  background: #eef0ed;
+  color: var(--text);
+  background: var(--panel-2);
   font-size: 12px;
   font-weight: 650;
   white-space: nowrap;
@@ -74,7 +74,7 @@
 
 [data-theme="dark"] .quota-refresh {
   color: var(--text);
-  background: #171719;
+  background: var(--panel-2);
 }
 
 .quota-refresh:disabled {
@@ -150,15 +150,15 @@
   height: 22px;
   padding: 0 8px;
   border-radius: 999px;
-  color: #2f363f;
-  background: #edf0ed;
+  color: var(--text);
+  background: var(--panel-2);
   font-size: 11px;
   font-weight: 700;
 }
 
 [data-theme="dark"] .quota-account-head small {
   color: var(--text);
-  background: #171719;
+  background: var(--panel-2);
 }
 
 .quota-window-list {
@@ -194,11 +194,11 @@
   height: 4px;
   overflow: hidden;
   border-radius: 999px;
-  background: #e5e9e4;
+  background: var(--panel-2);
 }
 
 [data-theme="dark"] .quota-bar {
-  background: #171719;
+  background: var(--panel-2);
 }
 
 .quota-bar span {
@@ -255,14 +255,14 @@
 
 [data-theme="dark"] .quota-error,
 [data-theme="dark"] .quota-account-message {
-  color: #ffb4ae;
-  background: rgba(255, 107, 98, 0.12);
+  color: var(--danger);
+  background: rgba(250, 66, 62, 0.14);
 }
 
 [data-theme="dark"] .quota-empty,
 [data-theme="dark"] .quota-account.is-disabled .quota-account-message {
   color: var(--muted);
-  background: #101012;
+  background: var(--panel-2);
 }
 
 /* Quota panel: inline above footer, lighter chrome */
@@ -274,12 +274,12 @@
   margin: 0 0 8px;
   padding: 12px;
   border-radius: 12px;
-  background: #f9fafb;
+  background: var(--panel-2);
   overflow: auto;
 }
 
 [data-theme="dark"] .quota-panel {
-  background: #080809;
+  background: var(--panel-2);
 }
 
 .quota-panel-head {
@@ -287,13 +287,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  color: #374151;
+  color: var(--text);
   font-size: 13px;
   font-weight: 650;
 }
 
 [data-theme="dark"] .quota-panel-head {
-  color: #e4e4e7;
+  color: var(--text);
 }
 
 .quota-panel-head .quota-refresh {
@@ -305,23 +305,23 @@
   height: 26px;
   padding: 0 10px;
   border-radius: 999px;
-  color: #6b7280;
-  background: #ffffff;
+  color: var(--muted);
+  background: var(--panel);
   font-size: 11px;
   font-weight: 600;
 }
 
 [data-theme="dark"] .quota-panel-head .quota-refresh {
-  color: #a1a1aa;
-  background: #121214;
+  color: var(--muted);
+  background: var(--panel);
 }
 
 .quota-panel .quota-account {
-  background: #ffffff;
-  border-color: #f3f4f6;
+  background: var(--panel);
+  border-color: var(--line);
 }
 
 [data-theme="dark"] .quota-panel .quota-account {
-  background: #050506;
-  border-color: #202024;
+  background: var(--panel);
+  border-color: var(--line);
 }

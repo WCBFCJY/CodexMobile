@@ -9,6 +9,7 @@
  * - probeDesktopIpc — 探测桌面端 IPC 是否可连。
  * - compactDesktopFollowerThread — 请求桌面端压缩指定线程上下文。
  * - setDesktopFollowerModelAndReasoning — 同步桌面端当前线程模型设置。
+ * - broadcastDesktopThreadArchived / broadcastDesktopThreadUnarchived — 同步线程归档态。
  * - broadcastDesktopThreadListRefresh — 通知 Codex Desktop 刷新线程列表相关查询。
  *
  * Inward（本模块依赖/组装的关键符号）: node:net、平台相关 socket 路径约定。
@@ -306,11 +307,37 @@ export async function setDesktopFollowerModelAndReasoning(conversationId, model,
   }, options);
 }
 
-export async function broadcastDesktopThreadArchived(conversationId, { hostId = 'local', cwd = null, timeoutMs = 1500 } = {}) {
-  const client = new DesktopIpcClient({ clientType: 'codexmobile-archive-sync' });
+export async function broadcastDesktopThreadArchived(conversationId, { hostId = 'local', cwd = null, socketPath = null, timeoutMs = 1500 } = {}) {
+  const client = new DesktopIpcClient({
+    clientType: 'codexmobile-archive-sync',
+    ...(socketPath ? { socketPath } : {})
+  });
   try {
     await client.connect({ timeoutMs });
     client.sendBroadcast('thread-archived', {
+      hostId,
+      conversationId,
+      cwd
+    });
+    return { sent: true };
+  } catch (error) {
+    return {
+      sent: false,
+      reason: error.message || '桌面端 Codex IPC 广播失败'
+    };
+  } finally {
+    client.close();
+  }
+}
+
+export async function broadcastDesktopThreadUnarchived(conversationId, { hostId = 'local', cwd = null, socketPath = null, timeoutMs = 1500 } = {}) {
+  const client = new DesktopIpcClient({
+    clientType: 'codexmobile-archive-sync',
+    ...(socketPath ? { socketPath } : {})
+  });
+  try {
+    await client.connect({ timeoutMs });
+    client.sendBroadcast('thread-unarchived', {
       hostId,
       conversationId,
       cwd

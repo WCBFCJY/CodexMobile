@@ -93,6 +93,7 @@ export function Drawer({
   const [archiveError, setArchiveError] = useState('');
   const [archiveSyncedAt, setArchiveSyncedAt] = useState('');
   const [archiveSource, setArchiveSource] = useState('');
+  const [unarchivingSessionIds, setUnarchivingSessionIds] = useState({});
   const normalizedDrawerQuery = drawerQuery.trim().toLowerCase();
   const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
   const runningCount = Object.values(sessionsByProject || {})
@@ -294,13 +295,45 @@ export function Drawer({
     if (!session?.id) {
       return;
     }
+    const matchedProject = projects.find((project) => project.path && project.path === session.projectPath);
     setThreadActionMenu(null);
     onSelectSession({
       ...session,
       archived: true,
       draft: false,
-      projectId: session.projectId || `archived:${session.projectPath || 'unknown'}`
+      projectId: session.projectId || matchedProject?.id || `archived:${session.projectPath || 'unknown'}`
     });
+  }
+
+  async function unarchiveArchivedSession(session) {
+    if (!session?.id || unarchivingSessionIds[session.id]) {
+      return;
+    }
+    setArchiveError('');
+    setUnarchivingSessionIds((current) => ({ ...current, [session.id]: true }));
+    try {
+      await apiFetch(`/api/sessions/${encodeURIComponent(session.id)}/unarchive`, { method: 'POST' });
+      setArchivedSessions((current) => current.filter((item) => item.id !== session.id));
+      setArchiveSyncedAt(new Date().toISOString());
+      if (selectedSession?.id === session.id) {
+        const matchedProject = projects.find((project) => project.path && project.path === session.projectPath);
+        onSelectSession({
+          ...session,
+          archived: false,
+          draft: false,
+          projectId: session.projectId || matchedProject?.id || `archived:${session.projectPath || 'unknown'}`
+        });
+      }
+      onSync?.();
+    } catch (error) {
+      setArchiveError(error.message || '取消归档失败，点击刷新重试');
+    } finally {
+      setUnarchivingSessionIds((current) => {
+        const next = { ...current };
+        delete next[session.id];
+        return next;
+      });
+    }
   }
 
   if (drawerView === 'archive') {
@@ -317,6 +350,8 @@ export function Drawer({
         archiveSyncedAt={archiveSyncedAt}
         archiveSource={archiveSource}
         onOpenSession={openArchivedSession}
+        onUnarchiveSession={unarchiveArchivedSession}
+        unarchivingSessionIds={unarchivingSessionIds}
       />
     );
   }
@@ -509,7 +544,7 @@ export function Drawer({
 
   return (
     <>
-      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+      <div className={`drawer-backdrop drawer-main-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
       <aside className={`drawer ${open ? 'is-open' : ''}`}>
         <div className="drawer-header">
           <div className="drawer-brand">

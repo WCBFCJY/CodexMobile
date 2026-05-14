@@ -20,6 +20,7 @@ const { DesktopIpcClient, desktopIpcMethodVersion } = desktopIpc;
 test('desktop mirror IPC methods use the current desktop protocol version', () => {
   assert.equal(desktopIpcMethodVersion('initialize'), 0);
   assert.equal(desktopIpcMethodVersion('thread-archived'), 2);
+  assert.equal(desktopIpcMethodVersion('thread-unarchived'), 1);
   assert.equal(desktopIpcMethodVersion('thread-follower-compact-thread'), 1);
   assert.equal(desktopIpcMethodVersion('thread-follower-set-model-and-reasoning'), 1);
   assert.equal(desktopIpcMethodVersion('thread-stream-state-changed'), 6);
@@ -169,6 +170,48 @@ test('sendBroadcast writes desktop IPC broadcast frames', async () => {
   });
 
   client.close();
+  server.close();
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+test('broadcastDesktopThreadUnarchived writes desktop unarchive broadcast frames', async () => {
+  assert.equal(typeof desktopIpc.broadcastDesktopThreadUnarchived, 'function');
+
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-ipc-test-'));
+  const socketPath = path.join(dir, 'ipc.sock');
+  const server = net.createServer();
+  await new Promise((resolve) => server.listen(socketPath, resolve));
+
+  const accepted = new Promise((resolve) => server.once('connection', resolve));
+  const sent = desktopIpc.broadcastDesktopThreadUnarchived('thread-1', {
+    hostId: 'local',
+    cwd: '/repo',
+    socketPath,
+    timeoutMs: 1000
+  });
+  const socket = await accepted;
+  const init = await readFrame(socket);
+  socket.write(frameFor({
+    type: 'response',
+    requestId: init.requestId,
+    resultType: 'success',
+    method: 'initialize',
+    result: { clientId: 'client-1' }
+  }));
+  const broadcast = await readFrame(socket);
+  const result = await sent;
+
+  assert.deepEqual(result, { sent: true });
+  assert.equal(broadcast.type, 'broadcast');
+  assert.equal(broadcast.method, 'thread-unarchived');
+  assert.equal(broadcast.sourceClientId, 'client-1');
+  assert.equal(broadcast.version, 1);
+  assert.deepEqual(broadcast.params, {
+    hostId: 'local',
+    conversationId: 'thread-1',
+    cwd: '/repo'
+  });
+
   server.close();
   await fs.rm(dir, { recursive: true, force: true });
 });

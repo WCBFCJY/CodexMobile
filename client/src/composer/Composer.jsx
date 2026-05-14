@@ -12,7 +12,7 @@
  * Outward: App.jsx 或上层布局挂载输入条处。
  */
 
-import { ArrowUp, Bot, Check, ChevronDown, ClipboardList, FileText, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X, Zap } from 'lucide-react';
+import { ArrowUp, Bot, Check, ChevronDown, ChevronRight, ClipboardList, FileText, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X, Zap } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiFetch, getToken } from '../api.js';
 import { detectComposerToken, exactSlashCommandForInput, filteredSlashCommands, replaceComposerToken } from '../composer-shortcuts.js';
@@ -64,18 +64,22 @@ export function Composer({
   onRestoreQueueDraft,
   onRemoveQueueDraft,
   onSteerQueueDraft,
-  onCompactContext
+  onCompactContext,
+  readOnly = false,
+  readOnlyReason = ''
 }) {
   const textareaRef = useRef(null);
   const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const [openMenu, setOpenMenu] = useState(null);
+  const [modelSubmenu, setModelSubmenu] = useState(null);
   const [skillFilter, setSkillFilter] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   const [fileSearch, setFileSearch] = useState({ query: '', loading: false, results: [] });
   const selectedFileMentions = Array.isArray(fileMentions) ? fileMentions : [];
   const deviceToken = getToken();
-  const hasInput = input.trim().length > 0 || attachments.length > 0 || selectedFileMentions.length > 0;
+  const composerReadOnly = Boolean(readOnly);
+  const hasInput = !composerReadOnly && (input.trim().length > 0 || attachments.length > 0 || selectedFileMentions.length > 0);
   const modelList = models?.length ? models : [{ value: selectedModel || 'gpt-5.5', label: selectedModel || 'gpt-5.5' }];
   const selectedModelLabel = modelList.find((model) => model.value === selectedModel)?.label || selectedModel || 'gpt-5.5';
   const normalizedModelSpeed = normalizeModelSpeed(selectedModelSpeed);
@@ -102,14 +106,24 @@ export function Composer({
       })
       .slice(0, 12)
     : [];
-  const sendState = composerSendState({
-    running,
-    hasInput,
-    uploading,
-    desktopBridge,
-    steerable: runSteerable,
-    sessionIsDraft: isDraftSession(selectedSession)
-  });
+  const sendState = composerReadOnly
+    ? {
+      disabled: true,
+      label: readOnlyReason || '当前线程只读',
+      mode: 'readonly',
+      showMenu: false,
+      canSteer: false,
+      canQueue: false,
+      canInterrupt: false
+    }
+    : composerSendState({
+      running,
+      hasInput,
+      uploading,
+      desktopBridge,
+      steerable: runSteerable,
+      sessionIsDraft: isDraftSession(selectedSession)
+    });
   const stopMode = sendState.mode === 'abort';
   const runningInputMode = running && hasInput;
   const sendLabel = sendState.label;
@@ -214,6 +228,9 @@ export function Composer({
 
   function submit(event) {
     event.preventDefault();
+    if (composerReadOnly) {
+      return;
+    }
     if (stopMode) {
       onAbort();
       return;
@@ -236,13 +253,31 @@ export function Composer({
   }
 
   function toggleMenu(name) {
-    setOpenMenu((current) => (current === name ? null : name));
+    if (composerReadOnly) {
+      return;
+    }
+    setOpenMenu((current) => {
+      const next = current === name ? null : name;
+      if (next !== 'model' || current !== 'model') {
+        setModelSubmenu(null);
+      }
+      return next;
+    });
     if (name !== 'skill') {
       setSkillFilter('');
     }
   }
 
+  function closeModelMenu() {
+    setModelSubmenu(null);
+    setOpenMenu(null);
+  }
+
   function handleFiles(event, kind) {
+    if (composerReadOnly) {
+      event.target.value = '';
+      return;
+    }
     const files = Array.from(event.target.files || []);
     if (files.length) {
       onUploadFiles(files, kind);
@@ -252,6 +287,9 @@ export function Composer({
   }
 
   function handlePaste(event) {
+    if (composerReadOnly) {
+      return;
+    }
     const files = filesFromClipboardData(event.clipboardData);
     if (!files.length) {
       return;
@@ -376,59 +414,92 @@ export function Composer({
         </div>
       ) : null}
       {openMenu === 'model' ? (
-        <div className="composer-menu model-menu">
-          <div className="menu-section-label">模型</div>
-          {modelList.map((model) => (
+        <>
+          <div className={`composer-menu model-menu ${modelSubmenu ? 'has-submenu' : ''}`}>
+            <div className="menu-section-label">智能</div>
+            {REASONING_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={selectedReasoningEffort === option.value ? 'is-selected' : ''}
+                onClick={() => {
+                  onSelectReasoningEffort(option.value);
+                  closeModelMenu();
+                }}
+              >
+                {selectedReasoningEffort === option.value ? <Check size={16} /> : <span className="menu-spacer" />}
+                <span>{option.label}</span>
+              </button>
+            ))}
+            <div className="menu-divider" />
             <button
-              key={model.value}
               type="button"
-              className={selectedModel === model.value ? 'is-selected' : ''}
-              onClick={() => {
-                onSelectModel(model.value);
-                setOpenMenu(null);
-              }}
+              className={`model-menu-parent ${modelSubmenu === 'model' ? 'is-selected' : ''}`}
+              onClick={() => setModelSubmenu((current) => (current === 'model' ? null : 'model'))}
             >
-              {selectedModel === model.value ? <Check size={16} /> : <span className="menu-spacer" />}
-              <span>{model.label}</span>
-            </button>
-          ))}
-          <div className="menu-divider" />
-          <div className="menu-section-label">智能</div>
-          {REASONING_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={selectedReasoningEffort === option.value ? 'is-selected' : ''}
-              onClick={() => {
-                onSelectReasoningEffort(option.value);
-                setOpenMenu(null);
-              }}
-            >
-              {selectedReasoningEffort === option.value ? <Check size={16} /> : <span className="menu-spacer" />}
-              <span>{option.label}</span>
-            </button>
-          ))}
-          <div className="menu-divider" />
-          <div className="menu-section-label">速度</div>
-          {MODEL_SPEED_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={normalizedModelSpeed === option.value ? 'is-selected' : ''}
-              onClick={() => {
-                onSelectModelSpeed?.(option.value);
-                setOpenMenu(null);
-              }}
-            >
-              {normalizedModelSpeed === option.value ? <Check size={16} /> : <span className="menu-spacer" />}
-              {option.value === 'fast' ? <Zap size={15} /> : null}
+              <span className="menu-spacer" />
               <span className="menu-item-main">
-                <strong>{option.label}</strong>
-                <small>{option.description}</small>
+                <strong>{selectedModelLabel}</strong>
+                <small>模型</small>
               </span>
+              <ChevronRight className="submenu-chevron" size={15} />
             </button>
-          ))}
-        </div>
+            <button
+              type="button"
+              className={`model-menu-parent ${modelSubmenu === 'speed' ? 'is-selected' : ''}`}
+              onClick={() => setModelSubmenu((current) => (current === 'speed' ? null : 'speed'))}
+            >
+              <span className="menu-spacer" />
+              <span className="menu-item-main">
+                <strong>速度</strong>
+                <small>{modelSpeedLabel(normalizedModelSpeed)}</small>
+              </span>
+              <ChevronRight className="submenu-chevron" size={15} />
+            </button>
+          </div>
+          {modelSubmenu === 'model' ? (
+            <div className="composer-menu model-submenu">
+              <div className="menu-section-label">模型</div>
+              {modelList.map((model) => (
+                <button
+                  key={model.value}
+                  type="button"
+                  className={selectedModel === model.value ? 'is-selected' : ''}
+                  onClick={() => {
+                    onSelectModel(model.value);
+                    closeModelMenu();
+                  }}
+                >
+                  {selectedModel === model.value ? <Check size={16} /> : <span className="menu-spacer" />}
+                  <span>{model.label}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {modelSubmenu === 'speed' ? (
+            <div className="composer-menu model-submenu">
+              <div className="menu-section-label">速度</div>
+              {MODEL_SPEED_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={normalizedModelSpeed === option.value ? 'is-selected' : ''}
+                  onClick={() => {
+                    onSelectModelSpeed?.(option.value);
+                    closeModelMenu();
+                  }}
+                >
+                  {normalizedModelSpeed === option.value ? <Check size={16} /> : <span className="menu-spacer" />}
+                  {option.value === 'fast' ? <Zap size={15} /> : null}
+                  <span className="menu-item-main">
+                    <strong>{option.label}</strong>
+                    <small>{option.description}</small>
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </>
       ) : null}
       {openMenu === 'context' ? (
         <div className="context-popover" role="status">
@@ -609,7 +680,9 @@ export function Composer({
           onKeyUp={updateCursorFromTextarea}
           onFocus={() => setOpenMenu(null)}
           onPaste={handlePaste}
-          placeholder="给 Codex 发送消息"
+          placeholder={composerReadOnly ? (readOnlyReason || '当前线程只读') : '给 Codex 发送消息'}
+          readOnly={composerReadOnly}
+          disabled={composerReadOnly}
         />
         <div className="composer-controls">
           <button
@@ -617,7 +690,7 @@ export function Composer({
             className="composer-attach"
             aria-label="添加附件"
             onClick={() => toggleMenu('attach')}
-            disabled={uploading}
+            disabled={uploading || composerReadOnly}
           >
             <Plus size={18} />
           </button>
@@ -626,6 +699,7 @@ export function Composer({
               type="button"
               className={`composer-tool-icon ${permissionMode === 'bypassPermissions' ? 'is-permission-bypass' : ''}`}
               onClick={() => toggleMenu('permission')}
+              disabled={composerReadOnly}
               title={permissionLabel(permissionMode)}
               aria-label={`权限：${permissionLabel(permissionMode)}`}
             >
@@ -636,6 +710,7 @@ export function Composer({
               className="composer-tool-icon composer-tool-skills"
               data-count={selectedSkills.length > 0 ? String(selectedSkills.length) : undefined}
               onClick={() => toggleMenu('skill')}
+              disabled={composerReadOnly}
               title={selectedSkillSummary(selectedSkills)}
               aria-label={`技能：${selectedSkillSummary(selectedSkills)}`}
             >
@@ -647,7 +722,7 @@ export function Composer({
               open={openMenu === 'context'}
               onToggle={() => toggleMenu('context')}
             />
-            <button type="button" className="model-chip" onClick={() => toggleMenu('model')} title={`${selectedModelLabel} · ${reasoningLabel(selectedReasoningEffort)}`}>
+            <button type="button" className="model-chip" onClick={() => toggleMenu('model')} disabled={composerReadOnly} title={`${selectedModelLabel} · ${reasoningLabel(selectedReasoningEffort)}`}>
               <span className="model-chip-text">
                 <span className="model-chip-name">{shortModelName(selectedModelLabel)}</span>
                 <span className="model-chip-dot" aria-hidden="true" />

@@ -27,8 +27,15 @@ function res() {
       this.statusCode = statusCode;
       this.headers = headers;
     },
+    write(chunk = '') {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
+      this.body = Buffer.concat([this.body, buffer]);
+    },
     end(body = '') {
-      this.body = Buffer.isBuffer(body) ? body : Buffer.from(String(body));
+      if (body) {
+        const buffer = Buffer.isBuffer(body) ? body : Buffer.from(String(body));
+        this.body = Buffer.concat([this.body, buffer]);
+      }
     }
   };
 }
@@ -46,6 +53,7 @@ async function withTempService(fn) {
   await fs.writeFile(path.join(generatedRoot, 'image.png'), Buffer.from([137, 80, 78, 71]));
   await fs.writeFile(path.join(root, 'report.md'), '# Report');
   await fs.writeFile(path.join(root, 'brief.pdf'), Buffer.from('%PDF-1.7'));
+  await fs.writeFile(path.join(root, 'clip.mp3'), Buffer.from([0x49, 0x44, 0x33, 0x04]));
   await fs.writeFile(path.join(root, '甘肃临夏萌宠乐园丨政府汇报项目前置简介.md'), '# 中文文件名');
   await fs.writeFile(path.join(root, 'secret.txt'), 'secret');
   await fs.writeFile(certPath, 'cert');
@@ -119,6 +127,38 @@ test('sendLocalFile serves pdf files with pdf content type', async () => {
     assert.equal(response.statusCode, 200);
     assert.equal(response.headers['content-type'], 'application/pdf');
     assert.match(response.headers['content-disposition'], /^inline;/);
+  });
+});
+
+test('sendLocalFile streams byte ranges for media-style preview requests', async () => {
+  await withTempService(async (service, root) => {
+    const filePath = path.join(root, 'brief.pdf');
+    const response = res();
+    await service.sendLocalFile(
+      req({ range: 'bytes=1-3' }),
+      response,
+      new URL(`http://local/api/local-file?path=${encodeURIComponent(filePath)}`)
+    );
+
+    assert.equal(response.statusCode, 206);
+    assert.equal(response.headers['accept-ranges'], 'bytes');
+    assert.equal(response.headers['content-range'], 'bytes 1-3/8');
+    assert.equal(response.headers['content-length'], 3);
+    assert.equal(response.body.toString('utf8'), 'PDF');
+  });
+});
+
+test('sendLocalFile exposes audio mime types for native preview controls', async () => {
+  await withTempService(async (service, root) => {
+    const filePath = path.join(root, 'clip.mp3');
+    const response = res();
+    await service.sendLocalFile(req(), response, new URL(`http://local/api/local-file?path=${encodeURIComponent(filePath)}`));
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.headers['content-type'], 'audio/mpeg');
+    assert.equal(response.headers['accept-ranges'], 'bytes');
+    assert.equal(response.headers['content-length'], 4);
+    assert.deepEqual([...response.body], [0x49, 0x44, 0x33, 0x04]);
   });
 });
 

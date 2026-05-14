@@ -83,6 +83,9 @@ export function useTurnSubmission({
     codexMessageOverride = null,
     planImplementation = null
   }) {
+    if ((selectedSessionRef.current || selectedSession)?.archived) {
+      throw new Error('Archived sessions are read-only');
+    }
     const project = projectForTurnSelection(selectedProject, selectedProjectRef, selectedSession, selectedSessionRef, projects);
     const selectedAttachments = Array.isArray(attachmentsForTurn) ? attachmentsForTurn : [];
     const selectedFileMentions = Array.isArray(fileMentionsForTurn) ? fileMentionsForTurn : [];
@@ -283,6 +286,9 @@ export function useTurnSubmission({
   }
 
   async function handleSubmit({ mode = 'start', collaborationMode = null } = {}) {
+    if ((selectedSessionRef.current || selectedSession)?.archived) {
+      return false;
+    }
     const prepared = prepareComposerSubmission(input, attachments, fileMentions, collaborationMode);
     const project = projectForTurnSelection(selectedProject, selectedProjectRef, selectedSession, selectedSessionRef, projects);
     if ((!prepared.message && !attachments.length && !fileMentions.length) || !project) {

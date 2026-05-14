@@ -8,7 +8,7 @@
  * - CodexAppServerClient / createCodexAppServerClient — 客户端构造。
  * - getDesktopBridgeStatus — 当前桥接健康与能力摘要。
  * - listDesktopThreads / desktopThreadListRequestParams / filterDesktopThreadsForArchiveMode — Thread 列表与归档态筛选。
- * - readDesktopThread / setDesktopThreadName / archiveDesktopThread — Thread CRUD 辅助。
+ * - readDesktopThread / setDesktopThreadName / archiveDesktopThread / unarchiveDesktopThread — Thread CRUD 辅助。
  * - notifyDesktopThreadListChanged — 通过桌面 IPC 请求 Codex Desktop 热刷新线程列表。
  *
  * Inward（本模块依赖/组装的关键符号）: desktop-ipc-client（广播/probe）、child_process.spawn。
@@ -24,6 +24,7 @@ import path from 'node:path';
 import readline from 'node:readline';
 import {
   broadcastDesktopThreadArchived,
+  broadcastDesktopThreadUnarchived,
   broadcastDesktopThreadListRefresh,
   broadcastDesktopThreadTitleUpdated,
   probeDesktopIpc
@@ -545,6 +546,25 @@ export async function archiveDesktopThread(threadId) {
     const broadcast = await broadcastDesktopThreadArchived(threadId);
     if (!broadcast.sent) {
       console.warn(`[desktop-ipc] archive broadcast skipped thread=${threadId}: ${broadcast.reason}`);
+    }
+    return result;
+  } finally {
+    client.close();
+  }
+}
+
+export async function unarchiveDesktopThread(threadId) {
+  const client = await createCodexAppServerClient({
+    clientInfo: { name: 'CodexMobileArchive', title: null, version: '0.1.0' },
+    allowHeadlessLocal: true
+  });
+  try {
+    const result = await client.request('thread/unarchive', {
+      threadId
+    }, { timeoutMs: 20_000 });
+    const broadcast = await broadcastDesktopThreadUnarchived(threadId);
+    if (!broadcast.sent) {
+      console.warn(`[desktop-ipc] unarchive broadcast skipped thread=${threadId}: ${broadcast.reason}`);
     }
     return result;
   } finally {

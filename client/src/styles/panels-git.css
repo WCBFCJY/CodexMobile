@@ -13,7 +13,7 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
-  border: 1px solid rgba(222, 223, 220, 0.86);
+  border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
 }
@@ -29,7 +29,7 @@
 }
 
 .git-tabs button.is-active {
-  color: #174eb8;
+  color: var(--accent);
   background: var(--accent-soft);
 }
 
@@ -37,7 +37,7 @@
   display: grid;
   gap: 12px;
   padding: 14px;
-  border: 1px solid rgba(222, 223, 220, 0.86);
+  border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
 }
@@ -159,7 +159,7 @@
   min-width: 0;
   min-height: 34px;
   padding: 0 7px;
-  border: 1px solid rgba(222, 223, 220, 0.86);
+  border: 1px solid var(--line);
   border-radius: 7px;
   color: var(--text);
   background: var(--surface);
@@ -169,7 +169,7 @@
 
 .git-action-launcher button.is-active {
   color: var(--accent);
-  border-color: rgba(37, 99, 235, 0.28);
+  border-color: var(--accent-border);
   background: var(--accent-soft);
 }
 
@@ -190,7 +190,7 @@
   gap: 10px;
   min-width: 0;
   padding: 14px;
-  border: 1px solid rgba(222, 223, 220, 0.86);
+  border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
 }
@@ -228,7 +228,7 @@
   padding: 0 11px;
   border: 0;
   border-radius: 999px;
-  color: #174eb8;
+  color: var(--accent);
   background: var(--accent-soft);
   font-size: 13px;
 }
@@ -419,29 +419,29 @@
 [data-theme="dark"] .git-diff-card,
 [data-theme="dark"] .git-action-card,
 [data-theme="dark"] .git-action-launcher button {
-  border-color: #202024;
-  background: #0a0a0b;
+  border-color: var(--line);
+  background: var(--panel);
 }
 
 [data-theme="dark"] .git-tabs button.is-active,
 [data-theme="dark"] .git-action-launcher button.is-active,
 [data-theme="dark"] .git-section-head button,
 [data-theme="dark"] .git-action-grid button {
-  color: #dbeafe;
-  background: rgba(96, 165, 250, 0.15);
+  color: var(--accent);
+  background: var(--accent-soft);
 }
 
 [data-theme="dark"] .git-branch-list button {
-  border-color: #202024;
-  background: #000000;
+  border-color: var(--line);
+  background: var(--panel);
 }
 
 [data-theme="dark"] .git-diff-summary,
 [data-theme="dark"] .git-diff-pre,
 [data-theme="dark"] .git-output,
 [data-theme="dark"] .git-pr-draft pre {
-  color: #e4e4e7;
-  background: #101012;
+  color: var(--text);
+  background: var(--panel-2);
 }
 
 [data-theme="dark"] .git-safety-list span {

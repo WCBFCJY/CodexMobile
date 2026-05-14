@@ -43,26 +43,21 @@ export function DrawerSettingsView({
 
   return (
     <>
-      <div className={`drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+      <div className={`drawer-backdrop drawer-subpage-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
       <aside className={`drawer drawer-settings drawer-subpage ${open ? 'is-open' : ''}`}>
         <div className="drawer-subpage-header">
           <button className="icon-button" onClick={onBack} aria-label="返回">
             <ChevronLeft size={20} />
           </button>
           <strong>设置</strong>
-          <button className="icon-button" onClick={onClose} aria-label="关闭菜单">
-            <X size={20} />
-          </button>
+          <div className="drawer-subpage-actions">
+            <span className="settings-version-text">v{appVersion}</span>
+            <button className="icon-button" onClick={onClose} aria-label="关闭菜单">
+              <X size={20} />
+            </button>
+          </div>
         </div>
         <div className="drawer-subpage-content settings-view">
-          <section className="settings-overview" aria-label="设置概览">
-            <div>
-              <span className="subpage-eyebrow">CodexMobile</span>
-              <h2>偏好与维护</h2>
-            </div>
-            <span className="settings-version-chip">v{appVersion}</span>
-          </section>
-
           <section className="settings-section-card" aria-labelledby="appearance-title">
             <h3 id="appearance-title" className="drawer-section-title">外观</h3>
             <div className="settings-list">

@@ -1,5 +1,5 @@
 /**
- * 会话与消息 REST API：列表、归档箱、重命名、删除、读消息、刷新缓存等。
+ * 会话与消息 REST API：列表、归档箱、取消归档、重命名、删除、读消息、刷新缓存等。
  *
  * Keywords: session-routes, rest-api, archive-box, codex-data
  *
@@ -21,6 +21,7 @@ export function createSessionRouteHandler({
   listProjectSessions,
   renameSession,
   deleteSession,
+  unarchiveSession,
   listArchivedSessions,
   hideSessionMessage,
   readSessionMessages,
@@ -52,6 +53,25 @@ export function createSessionRouteHandler({
       } catch (error) {
         console.warn(`[sessions] archived list failed: ${error.message}`);
         sendJson(res, 500, { error: 'Failed to list archived sessions' });
+      }
+      return true;
+    }
+
+    if (method === 'POST' && parts.length === 4 && parts[0] === 'api' && parts[1] === 'sessions' && parts[3] === 'unarchive') {
+      const sessionId = decodeURIComponent(parts[2]);
+      try {
+        const result = await (unarchiveSession || (async () => {
+          const error = new Error('Unarchive is not available');
+          error.statusCode = 501;
+          throw error;
+        }))(sessionId);
+        const snapshot = await refreshCodexCache();
+        broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
+        sendJson(res, 200, { success: true, ...result });
+      } catch (error) {
+        const statusCode = error.statusCode || 500;
+        console.warn(`[sessions] unarchive failed session=${sessionId}: ${error.message}`);
+        sendJson(res, statusCode, { error: error.message || 'Failed to unarchive session' });
       }
       return true;
     }

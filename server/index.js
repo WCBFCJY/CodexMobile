@@ -40,7 +40,8 @@ import {
   readSessionMessages,
   rememberLiveSession,
   refreshCodexCache,
-  renameSession
+  renameSession,
+  unarchiveSession
 } from './codex-data.js';
 import { getCodexQuota } from './codex-quota.js';
 import {
@@ -498,6 +499,7 @@ const handleSessionApi = createSessionRouteHandler({
   listProjectSessions,
   renameSession,
   deleteSession,
+  unarchiveSession,
   listArchivedSessions,
   hideSessionMessage,
   readSessionMessages,
