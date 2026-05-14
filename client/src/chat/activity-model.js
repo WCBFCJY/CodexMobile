@@ -1069,8 +1069,15 @@ export function upsertActivityMessage(current, payload) {
   const payloadIsTerminal = ['completed', 'failed'].includes(payloadStatus);
   const hasRunningActivity = activities.some((item) => item?.status === 'running' || item?.status === 'queued');
   const hasSpecificTurnKey = Boolean(payload.turnId || payload.clientTurnId || previous?.turnId || previous?.clientTurnId);
+  const payloadCompletesChildOfTurn = !isTurnLevel && payloadIsTerminal && hasSpecificTurnKey;
   const messageStatus = isTurnLevel
     ? (payload.status || previous?.status || 'running')
+    : payloadCompletesChildOfTurn
+      ? previous?.status === 'failed'
+        ? 'failed'
+        : previous?.status === 'completed' && previous?.completedAt
+          ? 'completed'
+          : 'running'
     : hasRunningActivity
       ? 'running'
       : payloadIsTerminal

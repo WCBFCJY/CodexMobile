@@ -164,8 +164,27 @@ test('upsertActivityMessage does not lock turn card completion time from an inte
   });
 
   assert.equal(afterTool.length, 1);
+  assert.equal(afterTool[0].status, 'running');
   assert.equal(afterTool[0].completedAt, null);
   assert.equal(afterTool[0].durationMs, null);
+});
+
+test('upsertActivityMessage does not complete a turn card when only one child activity completes', () => {
+  const current = upsertActivityMessage([], {
+    sessionId: 'thread-1',
+    turnId: 'turn-1',
+    messageId: 'cmd-1',
+    kind: 'command_execution',
+    status: 'completed',
+    label: '命令已完成',
+    command: 'npm test',
+    timestamp: '2026-05-14T03:32:58.000Z'
+  });
+
+  assert.equal(current.length, 1);
+  assert.equal(current[0].status, 'running');
+  assert.equal(current[0].completedAt, null);
+  assert.equal(current[0].activities[0].status, 'completed');
 });
 
 test('completeActivityMessagesForTurn marks running activity steps completed', () => {

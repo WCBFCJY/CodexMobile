@@ -8,6 +8,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  activityCardHeadline,
   activityCardShouldOpen,
   activityMessageIsRunning,
   effectiveActivityMessageIsRunning,
@@ -55,4 +56,44 @@ test('activity card folds a forced-open process after runtime completion', () =>
   assert.equal(initialActivityCardOpenState({ running: true, hasProcess: true }), true);
   assert.equal(nextActivityCardOpenState({ previousOpen: true, running: false, hasProcess: true }), false);
   assert.equal(nextActivityCardOpenState({ previousOpen: false, running: false, hasProcess: true }), false);
+});
+
+test('activity card headline describes the active running step', () => {
+  assert.equal(activityCardHeadline({
+    message: { status: 'running' },
+    activities: [
+      { kind: 'command_execution', status: 'completed', label: '命令已完成' },
+      { kind: 'file_change', status: 'running', label: '正在编辑文件' }
+    ],
+    running: true
+  }), '正在编辑文件');
+});
+
+test('activity card headline keeps aborted distinct from normal completion', () => {
+  assert.equal(activityCardHeadline({
+    message: { status: 'completed', label: '已中止' },
+    activities: [{ kind: 'command_execution', status: 'completed', label: '命令已完成' }],
+    running: false
+  }), '已中止');
+});
+
+test('activity card headline summarizes completed visible steps', () => {
+  assert.equal(activityCardHeadline({
+    message: { status: 'completed' },
+    activities: [
+      { kind: 'command_execution', status: 'completed', label: '命令已完成' },
+      { kind: 'file_change', status: 'completed', label: '已编辑文件' }
+    ],
+    running: false
+  }), '已完成 · 2 个步骤');
+});
+
+test('activity card headline surfaces command exit code on failure', () => {
+  assert.equal(activityCardHeadline({
+    message: { status: 'failed' },
+    activities: [
+      { kind: 'command_execution', status: 'failed', label: '命令失败', exitCode: 1 }
+    ],
+    running: false
+  }), '失败 · 退出码 1');
 });

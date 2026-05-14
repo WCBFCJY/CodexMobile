@@ -14,7 +14,7 @@
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { formatDuration, formatDurationMs } from '../app/session-utils.js';
-import { effectiveActivityMessageIsRunning, initialActivityCardOpenState, nextActivityCardOpenState } from './activity-card-state.js';
+import { activityCardHeadline, effectiveActivityMessageIsRunning, initialActivityCardOpenState, nextActivityCardOpenState } from './activity-card-state.js';
 import { isVisibleActivityStep, shouldRenderActivityMessageInChat } from './activity-model.js';
 import { ActivityTimeline } from './ActivityTimeline.jsx';
 import { projectActivityView } from './activity-timeline-projection.js';
@@ -42,7 +42,7 @@ export function ActivityMessage({ message, now = Date.now(), forceRunning = fals
   const duration = !running
     ? formatDurationMs(completedDurationMs) || formatDuration(startedAt, endedAt)
     : formatDuration(startedAt, endedAt);
-  const headline = failed ? '处理失败' : running ? '处理中' : '已处理';
+  const headline = activityCardHeadline({ message, activities: visibleSteps, running });
 
   useEffect(() => {
     setOpen((previousOpen) => nextActivityCardOpenState({ previousOpen, running, hasProcess, forceOpen }));
