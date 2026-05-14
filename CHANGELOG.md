@@ -4,6 +4,15 @@ All notable changes to CodexMobile are tracked here.
 
 ## Unreleased
 
+## [2.0.1] - 2026-05-15
+
+### Fixed
+
+- Normalized session paths and timestamps so mobile project/session lists stay consistent after the 2.0 release.
+- Simplified drawer project counting by relying on normalized session state instead of duplicate local calculations.
+- Tightened security-option defaults and tests for safer local/private-network operation.
+- Updated the package version to `2.0.1`.
+
 ## [2.0.0] - 2026-05-15
 
 ### Added
