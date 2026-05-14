@@ -255,6 +255,7 @@ test('upsertActivityMessage coalesces adjacent loaded and live cards for the sam
 
   const activities = result.filter((message) => message.role === 'activity');
   assert.equal(activities.length, 1);
+  assert.equal(activities[0].id, 'status-headless-turn-1');
   assert.equal(activities[0].status, 'running');
   assert.equal(activities[0].turnId, 'headless-turn-1');
   assert.deepEqual(

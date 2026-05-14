@@ -105,6 +105,7 @@ test('mergeLiveSelectedThreadMessages coalesces loaded and live activity cards f
   const merged = mergeLiveSelectedThreadMessages(current, loaded);
   const activities = merged.filter((message) => message.role === 'activity');
   assert.equal(activities.length, 1);
+  assert.equal(activities[0].id, 'activity-live');
   assert.equal(activities[0].status, 'running');
   assert.equal(activities[0].turnId, 'headless-turn-1');
   assert.deepEqual(

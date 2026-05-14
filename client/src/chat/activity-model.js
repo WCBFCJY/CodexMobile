@@ -146,7 +146,7 @@ function activityMessagesShareRun(left = {}, right = {}) {
   return activityMessageRunKeys(left).some((key) => rightKeys.has(key));
 }
 
-function shouldCoalesceActivityMessages(left = {}, right = {}) {
+export function shouldCoalesceActivityMessages(left = {}, right = {}) {
   if (left?.role !== 'activity' || right?.role !== 'activity') {
     return false;
   }
@@ -177,7 +177,7 @@ function mergeActivityLists(left = [], right = []) {
   return [...left, ...right].reduce((items, activity) => mergeActivityStep(items, activity), []);
 }
 
-function mergeActivityMessages(left = {}, right = {}) {
+export function mergeActivityMessages(left = {}, right = {}) {
   const status = mergedActivityStatus(left, right);
   const primary = activityMessageIsActive(right)
     ? right
@@ -196,7 +196,7 @@ function mergeActivityMessages(left = {}, right = {}) {
   return {
     ...left,
     ...right,
-    id: left.id || right.id,
+    id: primary.id || left.id || right.id,
     role: 'activity',
     turnId: primary.turnId || right.turnId || left.turnId || null,
     clientTurnId: primary.clientTurnId || right.clientTurnId || left.clientTurnId || null,

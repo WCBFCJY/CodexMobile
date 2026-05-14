@@ -1,13 +1,17 @@
 /**
- * 测试 chat/chat-render-items.js：文件变更卡片应挂到同轮助手结果下方。
- * Keywords: chat-render, file-summary, tests
+ * 测试 chat/chat-render-items.js：运行中过程投影与文件变更汇总。
+ * Keywords: chat-render, process-stream, file-summary, tests
  * Exports: 无导出 / 内含用例
  * Inward: chat/chat-render-items.js
  */
 
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { chatRenderItems, fileSummaryForActivityMessage } from './chat/chat-render-items.js';
+import {
+  chatRenderItems,
+  fileSummaryForActivityMessage,
+  projectMessagesForActiveProcess
+} from './chat/chat-render-items.js';
 
 const fileChangeActivity = {
   id: 'activity-1',
@@ -62,4 +66,77 @@ test('fileSummaryForActivityMessage hides file cards while the activity is still
     ...fileChangeActivity,
     status: 'running'
   }), null);
+});
+
+test('projectMessagesForActiveProcess renders one current process while a loaded half-card exists', () => {
+  const messages = [
+    { id: 'user-1', role: 'user', sessionId: 'thread-1', content: '跑任务' },
+    {
+      id: 'activity-loaded',
+      role: 'activity',
+      status: 'completed',
+      sessionId: 'thread-1',
+      turnId: 'desktop-turn-1',
+      timestamp: '2026-05-14T03:40:01.000Z',
+      activities: [
+        { id: 'commentary-1', kind: 'agent_message', status: 'completed', label: '先查目录。' }
+      ]
+    },
+    {
+      id: 'activity-running',
+      role: 'activity',
+      status: 'running',
+      sessionId: 'thread-1',
+      turnId: 'headless-turn-1',
+      timestamp: '2026-05-14T03:40:20.000Z',
+      activities: [
+        { id: 'cmd-1', kind: 'command_execution', status: 'running', label: '正在运行命令' }
+      ]
+    }
+  ];
+
+  const projected = projectMessagesForActiveProcess(messages, 'activity-running');
+  const activities = projected.filter((message) => message.role === 'activity');
+  assert.equal(activities.length, 1);
+  assert.equal(activities[0].id, 'activity-running');
+  assert.equal(activities[0].status, 'running');
+  assert.equal(activities[0].turnId, 'headless-turn-1');
+  assert.deepEqual(
+    activities[0].activities.map((activity) => activity.id),
+    ['commentary-1', 'cmd-1']
+  );
+});
+
+test('chatRenderItems hides the loaded half-card when active process is running', () => {
+  const items = chatRenderItems([
+    { id: 'user-1', role: 'user', sessionId: 'thread-1', content: '跑任务' },
+    {
+      id: 'activity-loaded',
+      role: 'activity',
+      status: 'completed',
+      sessionId: 'thread-1',
+      turnId: 'desktop-turn-1',
+      timestamp: '2026-05-14T03:40:01.000Z',
+      activities: [
+        { id: 'commentary-1', kind: 'agent_message', status: 'completed', label: '先查目录。' }
+      ]
+    },
+    {
+      id: 'activity-running',
+      role: 'activity',
+      status: 'running',
+      sessionId: 'thread-1',
+      turnId: 'headless-turn-1',
+      timestamp: '2026-05-14T03:40:20.000Z',
+      activities: [
+        { id: 'cmd-1', kind: 'command_execution', status: 'running', label: '正在运行命令' }
+      ]
+    }
+  ], { activeActivityMessageId: 'activity-running' });
+
+  assert.deepEqual(items.map((item) => [item.type, item.message?.id]), [
+    ['message', 'user-1'],
+    ['message', 'activity-running']
+  ]);
+  assert.equal(items[1].message.status, 'running');
 });

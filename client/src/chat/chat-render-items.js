@@ -1,11 +1,12 @@
 /**
- * 聊天消息渲染队列：把已完成活动的文件变更汇总挂到同轮助手结果下方。
+ * 聊天消息渲染队列：把运行中过程投影成单流，并把已完成文件变更挂到同轮助手结果下方。
  *
- * Keywords: chat render, activity files, message order
+ * Keywords: chat render, activity files, process stream, message order
  *
  * Exports:
  * - chatRenderItems — 生成 ChatPane 可直接渲染的消息/文件卡片条目。
  * - fileSummaryForActivityMessage — 从单条 activity 消息提取完成后的文件汇总。
+ * - projectMessagesForActiveProcess — 运行中只保留一个当前过程流。
  *
  * Inward: activity-card-state、activity-model、activity-timeline-projection。
  *
@@ -13,7 +14,13 @@
  */
 
 import { effectiveActivityMessageIsRunning } from './activity-card-state.js';
-import { isVisibleActivityStep, shouldRenderActivityMessageInChat } from './activity-model.js';
+import {
+  coalesceActivityMessages,
+  isVisibleActivityStep,
+  mergeActivityMessages,
+  shouldCoalesceActivityMessages,
+  shouldRenderActivityMessageInChat
+} from './activity-model.js';
 import { projectActivityView } from './activity-timeline-projection.js';
 
 export function fileSummaryForActivityMessage(message, { forceRunning = false } = {}) {
@@ -29,7 +36,42 @@ export function fileSummaryForActivityMessage(message, { forceRunning = false } 
   return projectActivityView(visibleSteps, { running }).fileSummary;
 }
 
+export function projectMessagesForActiveProcess(messages = [], activeActivityMessageId = '') {
+  const coalesced = coalesceActivityMessages(Array.isArray(messages) ? messages : []);
+  if (!activeActivityMessageId) {
+    return coalesced;
+  }
+  const activeIndex = coalesced.findIndex((message) => message?.role === 'activity' && message.id === activeActivityMessageId);
+  const active = activeIndex >= 0 ? coalesced[activeIndex] : null;
+  if (!active) {
+    return coalesced;
+  }
+
+  let processMessage = active;
+  const swallowedIds = new Set();
+  coalesced.forEach((message) => {
+    if (message === active || message?.role !== 'activity') {
+      return;
+    }
+    if (!shouldCoalesceActivityMessages(message, processMessage)) {
+      return;
+    }
+    processMessage = mergeActivityMessages(message, processMessage);
+    if (message.id) {
+      swallowedIds.add(message.id);
+    }
+  });
+
+  if (!swallowedIds.size) {
+    return coalesced;
+  }
+  return coalesced
+    .filter((message) => !swallowedIds.has(message?.id))
+    .map((message) => (message === active ? processMessage : message));
+}
+
 export function chatRenderItems(messages = [], { activeActivityMessageId = '' } = {}) {
+  const projectedMessages = projectMessagesForActiveProcess(messages, activeActivityMessageId);
   const items = [];
   const pendingByTurn = new Map();
 
@@ -64,7 +106,7 @@ export function chatRenderItems(messages = [], { activeActivityMessageId = '' } 
     }
   };
 
-  for (const message of messages) {
+  for (const message of projectedMessages) {
     const item = { type: 'message', key: message.id || `${items.length}`, message };
     items.push(item);
     if (message?.role === 'activity') {
