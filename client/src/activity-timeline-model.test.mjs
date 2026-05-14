@@ -147,7 +147,7 @@ test('activity step detail titles describe read and search commands semantically
       id: 'read-1',
       kind: 'command_execution',
       label: '本地任务已处理',
-      command: "sed -n '1,220p' /Users/xiayanghui/编程项目/CodexMobile/client/src/App.jsx",
+      command: "sed -n '1,220p' /Users/xiayanghui/Code/CodexMobile/client/src/App.jsx",
       status: 'completed'
     },
     {

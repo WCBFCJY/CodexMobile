@@ -634,6 +634,11 @@ function ScreenshotViewportGuard() {
         .app-shell.is-screenshot-demo .activity-command-detail,
         .app-shell.is-screenshot-demo .activity-shell,
         .app-shell.is-screenshot-demo .activity-file-summary,
+        .app-shell.is-screenshot-demo .activity-file-item,
+        .app-shell.is-screenshot-demo .activity-file-item summary,
+        .app-shell.is-screenshot-demo .activity-diff-shell,
+        .app-shell.is-screenshot-demo .activity-diff-view,
+        .app-shell.is-screenshot-demo .activity-diff-row,
         .app-shell.is-screenshot-demo .composer-wrap,
         .app-shell.is-screenshot-demo .composer {
           max-width: 100%;
@@ -652,8 +657,32 @@ function ScreenshotViewportGuard() {
         .app-shell.is-screenshot-demo .activity-segment-tools,
         .app-shell.is-screenshot-demo .activity-meta-body,
         .app-shell.is-screenshot-demo .activity-command-detail,
-        .app-shell.is-screenshot-demo .activity-shell {
+        .app-shell.is-screenshot-demo .activity-shell,
+        .app-shell.is-screenshot-demo .activity-file-summary,
+        .app-shell.is-screenshot-demo .activity-file-item,
+        .app-shell.is-screenshot-demo .activity-diff-shell,
+        .app-shell.is-screenshot-demo .activity-diff-view,
+        .app-shell.is-screenshot-demo .activity-diff-row {
           width: 100%;
+        }
+
+        .app-shell.is-screenshot-demo .activity-file-item summary {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto auto auto;
+          gap: 5px;
+        }
+
+        .app-shell.is-screenshot-demo .activity-file-item summary span,
+        .app-shell.is-screenshot-demo .activity-diff-row code {
+          min-width: 0;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .app-shell.is-screenshot-demo .activity-diff-row {
+          grid-template-columns: 22px 22px 12px minmax(0, 1fr);
         }
 
         .app-shell.is-screenshot-demo .activity-command-detail summary {

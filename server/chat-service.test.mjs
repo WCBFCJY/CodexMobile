@@ -1149,7 +1149,7 @@ test('sendChat starts project-bound draft threads in the selected project cwd', 
     getProject: () => ({
       id: 'project-codexmobile',
       name: 'CodexMobile',
-      path: '/Users/xiayanghui/编程项目/CodexMobile',
+      path: '/Users/xiayanghui/Code/CodexMobile',
       projectless: false
     }),
     runCodexTurn: async (payload, emit) => {
@@ -1186,9 +1186,9 @@ test('sendChat starts project-bound draft threads in the selected project cwd', 
   });
   await flushQueuedWork();
 
-  assert.equal(runPayload.projectPath, '/Users/xiayanghui/编程项目/CodexMobile');
+  assert.equal(runPayload.projectPath, '/Users/xiayanghui/Code/CodexMobile');
   assert.equal(projectlessRegistrationCount, 0);
-  assert.equal(mobileRegistration.projectPath, '/Users/xiayanghui/编程项目/CodexMobile');
+  assert.equal(mobileRegistration.projectPath, '/Users/xiayanghui/Code/CodexMobile');
   assert.equal(mobileRegistration.projectless, false);
 });
 
