@@ -8,8 +8,10 @@
 - 帧率：30fps
 - 时长：约 27.7 秒
 - 成片：`out/codexmobile-xhs-showcase.mp4`
-- 素材：`public/withphone-transparent/*.png`，来自 `docs/images/codexmobile-real-ui/withphone-transparent/` 的已带手机壳透明截图（1236 x 2520）
+- 手机素材：`public/withphone-transparent/*.png`，来自 `docs/images/codexmobile-real-ui/withphone-transparent/` 的已带手机壳透明截图（1236 x 2520）
+- 页面素材：`public/real-ui-*.png`，来自 `docs/images/codexmobile-real-ui/` 的真实 UI 页面截图，用于浏览器 / 平板展示
 - 品牌：`codex-icon-512.png`、`pairing-wordmark.png`、`pairing-background*.png`
+- 输出保留：`out/codexmobile-xhs-showcase.mp4` 与 `out/codexmobile-xhs-contact-sheet.png`
 
 ## 命令
 

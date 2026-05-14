@@ -4,6 +4,30 @@ All notable changes to CodexMobile are tracked here.
 
 ## Unreleased
 
+## [2.0.0] - 2026-05-15
+
+### Added
+
+- Added a mobile home state and project picker so users can start from projects instead of only existing sessions.
+- Added terminal-first pairing commands with `npm run up` and `npm run pair`, plus refreshed pairing screen artwork and copy.
+- Added trusted device management, including current-device detection, revocation, token TTL handling, and settings-page security controls.
+- Added drawer subpages for archived sessions, settings, and Codex quota status.
+- Added Composer and Git panel branch workflows: branch listing, search, checkout, branch creation, linked worktree creation, and PR draft generation.
+- Added refreshed real UI screenshots and marketing/demo screenshot generation assets for the GitHub README.
+- Added request security controls for origins, trusted proxies, public access mode, permission policy, and safer upload/local-file handling.
+
+### Changed
+
+- Reworked the desktop/mobile shell layout, sidebar, chat surface, composer, pairing flow, and theme styling for the current CodexMobile UI.
+- Improved activity card headlines, live progress, merge behavior, and turn completion state so execution history is easier to scan on mobile.
+- Updated README and GitHub-facing project documentation to describe the current 2.0 product surface.
+- Updated the package version to `2.0.0`.
+
+### Fixed
+
+- Fixed outdated documentation around GitHub PR support, recursive tests, pairing flow, and cross-platform positioning.
+- Hardened session archive, local file preview, desktop activity parsing, and projectless session handling with additional tests.
+
 ## [1.4.0] - 2026-05-14
 
 ### Added
@@ -14,7 +38,7 @@ All notable changes to CodexMobile are tracked here.
 
 ### Changed
 
-- Rebranded the former codex-web-facing labels toward CodexPocket.
+- Refined internal codex-web activity/rendering labels without changing the CodexMobile product name.
 - Coalesced live and loaded-session activity cards so duplicated execution cards collapse into one clearer thread view.
 - Folded noisy tool groups and desktop handoff state into cleaner activity and top-bar presentations.
 - Refined mobile workflow handling across composer sends, top-bar status, and desktop/background routing.
