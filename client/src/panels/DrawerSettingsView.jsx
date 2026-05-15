@@ -11,7 +11,7 @@
  * Outward: Drawer 在 settings 子视图中渲染。
  */
 
-import { Archive, Bug, ChevronLeft, ChevronRight, Info, LogOut, MonitorCog, Moon, RefreshCw, ShieldCheck, Smartphone, Sun, Trash2 } from 'lucide-react';
+import { Archive, Bug, ChevronLeft, ChevronRight, Download, ExternalLink, Info, LogOut, MonitorCog, Moon, RefreshCw, ShieldCheck, Smartphone, Sun, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api.js';
 import { deviceMetaText, deviceStatusText, sortDevicesForDisplay } from '../security-devices.js';
@@ -37,6 +37,11 @@ export function DrawerSettingsView({
   const [devices, setDevices] = useState([]);
   const [devicesLoading, setDevicesLoading] = useState(false);
   const [devicesError, setDevicesError] = useState('');
+  const [updateInfo, setUpdateInfo] = useState(null);
+  const [updateProgress, setUpdateProgress] = useState(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateApplying, setUpdateApplying] = useState(false);
+  const [updateError, setUpdateError] = useState('');
   const sortedDevices = sortDevicesForDisplay(devices);
 
   async function loadDevices() {
@@ -76,11 +81,79 @@ export function DrawerSettingsView({
     }
   }
 
+  async function loadUpdateStatus() {
+    setUpdateLoading(true);
+    setUpdateError('');
+    try {
+      const data = await apiFetch('/api/update/status', { timeoutMs: 15_000 });
+      setUpdateInfo(data.update || null);
+    } catch (error) {
+      setUpdateError(error.message || '更新检查失败');
+    } finally {
+      setUpdateLoading(false);
+    }
+  }
+
+  async function loadUpdateProgress() {
+    try {
+      const data = await apiFetch('/api/update/progress', { timeoutMs: 8000 });
+      setUpdateProgress(data.progress || null);
+      if (['failed', 'success', 'restarting'].includes(data.progress?.state)) {
+        setUpdateApplying(false);
+      }
+    } catch (error) {
+      if (updateApplying) {
+        setUpdateError(error.message || '更新进度读取失败');
+      }
+    }
+  }
+
+  async function handleApplyUpdate() {
+    if (!updateInfo?.latestTag) {
+      return;
+    }
+    setUpdateApplying(true);
+    setUpdateError('');
+    try {
+      await apiFetch('/api/update/apply', {
+        method: 'POST',
+        body: { tag: updateInfo.latestTag },
+        timeoutMs: 15_000
+      });
+      await loadUpdateProgress();
+    } catch (error) {
+      setUpdateApplying(false);
+      setUpdateError(error.message || '更新启动失败');
+    }
+  }
+
   useEffect(() => {
     if (open) {
       loadDevices();
+      loadUpdateStatus();
+      loadUpdateProgress();
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+    const timer = window.setInterval(() => {
+      loadUpdateStatus();
+    }, 30 * 60 * 1000);
+    return () => window.clearInterval(timer);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !updateApplying) {
+      return undefined;
+    }
+    const timer = window.setInterval(() => {
+      loadUpdateProgress();
+    }, 1500);
+    return () => window.clearInterval(timer);
+  }, [open, updateApplying]);
 
   const runtimeDebugText = runtimeDebug?.envEnabled
     ? '环境变量已启用'
@@ -92,6 +165,19 @@ export function DrawerSettingsView({
     : desktopRefresh?.enabled
       ? '已开启'
       : '未开启';
+  const updateStateText = updateLoading
+    ? '正在检查'
+    : updateInfo?.updateAvailable
+      ? `发现 ${updateInfo.latestTag}`
+      : updateInfo
+        ? '已是最新'
+        : '未检查';
+  const progressText = updateProgress?.message || (
+    updateProgress?.state === 'failed'
+      ? updateProgress.error
+      : ''
+  );
+  const updateButtonDisabled = updateLoading || updateApplying || !updateInfo?.updateAvailable || !updateInfo?.latestTag;
 
   return (
     <>
@@ -162,6 +248,64 @@ export function DrawerSettingsView({
                 </div>
                 <ChevronRight size={16} className="settings-row-arrow" />
               </button>
+            </div>
+          </section>
+
+          <section className="settings-section-card" aria-labelledby="update-title">
+            <h3 id="update-title" className="drawer-section-title">版本与更新</h3>
+            <div className="settings-list">
+              <div className="settings-row">
+                <div className="settings-row-main">
+                  <span className="settings-row-icon" aria-hidden="true">
+                    <Download size={16} />
+                  </span>
+                  <div>
+                    <span className="settings-row-title">CodexMobile</span>
+                    <small>当前 v{appVersion} · {updateStateText}</small>
+                  </div>
+                </div>
+                <div className="settings-row-actions">
+                  {updateInfo?.releaseUrl ? (
+                    <a className="icon-button" href={updateInfo.releaseUrl} target="_blank" rel="noreferrer" aria-label="查看 Release">
+                      <ExternalLink size={16} />
+                    </a>
+                  ) : null}
+                  <button type="button" className="icon-button" onClick={loadUpdateStatus} disabled={updateLoading || updateApplying} aria-label="检查更新">
+                    <RefreshCw size={16} className={updateLoading ? 'spin' : ''} />
+                  </button>
+                </div>
+              </div>
+              {updateInfo?.updateAvailable ? (
+                <div className="settings-row is-stacked">
+                  <div className="settings-row-main">
+                    <span className="settings-row-icon" aria-hidden="true">
+                      <Download size={16} />
+                    </span>
+                    <div>
+                      <span className="settings-row-title">更新到 {updateInfo.latestTag}</span>
+                      <small>
+                        {updateInfo.stashRequired ? '会先自动 stash 本地改动。' : '本地工作区干净。'}
+                        {updateInfo.publishedAt ? ` 发布于 ${new Date(updateInfo.publishedAt).toLocaleDateString()}` : ''}
+                      </small>
+                    </div>
+                  </div>
+                  <button type="button" className="settings-small-button" onClick={handleApplyUpdate} disabled={updateButtonDisabled}>
+                    {updateApplying ? '更新中' : '更新并重启'}
+                  </button>
+                </div>
+              ) : null}
+              {updateError || progressText ? (
+                <div className={`settings-row-note ${updateError || updateProgress?.state === 'failed' ? 'is-error' : ''}`}>
+                  <Info size={13} />
+                  <span>{updateError || progressText}</span>
+                </div>
+              ) : null}
+              {updateProgress?.stashCreated ? (
+                <div className="settings-row-note">
+                  <Info size={13} />
+                  <span>本地改动已保存为 stash：{updateProgress.stashMessage}</span>
+                </div>
+              ) : null}
             </div>
           </section>
 

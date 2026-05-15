@@ -81,6 +81,8 @@ import { createGitRouteHandler } from './git-routes.js';
 import { createGitService } from './git-service.js';
 import { createNotificationRouteHandler } from './notification-routes.js';
 import { createSessionRouteHandler } from './session-routes.js';
+import { createUpdateRouteHandler } from './update-routes.js';
+import { createUpdateService } from './update-service.js';
 import { createVoiceRouteHandler } from './voice-routes.js';
 import { abortCodexTurn, getActiveRuns, runCodexTurn, steerCodexTurn } from './codex-runner.js';
 import { setDesktopFollowerModelAndReasoning } from './desktop-ipc-client.js';
@@ -145,6 +147,7 @@ const staticService = createStaticService({
   httpsRootCaPath: HTTPS_ROOT_CA_PATH
 });
 const gitService = createGitService({ getProject });
+const updateService = createUpdateService({ rootDir: ROOT_DIR });
 const pushService = createPushService({
   statePath: PUSH_STATE,
   subject: PUSH_SUBJECT
@@ -610,6 +613,7 @@ const handleSessionApi = createSessionRouteHandler({
   chatService
 });
 const handleGitApi = createGitRouteHandler({ gitService });
+const handleUpdateApi = createUpdateRouteHandler({ updateService });
 const handleFileApi = createFileRouteHandler({
   getProject,
   staticService,
@@ -960,6 +964,10 @@ async function handleApi(req, res, url) {
   }
 
   if (await handleGitApi(req, res, url)) {
+    return;
+  }
+
+  if (await handleUpdateApi(req, res, url)) {
     return;
   }
 

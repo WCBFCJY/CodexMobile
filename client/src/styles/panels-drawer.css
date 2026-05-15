@@ -1775,6 +1775,30 @@ button.settings-row.is-actionable:active {
   transform: rotate(90deg);
 }
 
+.settings-row-actions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.settings-small-button {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--subpage-line);
+  border-radius: 8px;
+  color: var(--subpage-text);
+  background: var(--subpage-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.settings-small-button:disabled {
+  opacity: 0.56;
+}
+
 .settings-segmented-control {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
