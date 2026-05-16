@@ -808,7 +808,7 @@
 }
 
 .message-row.is-user .message-content a {
-  color: #ffffff;
+  color: var(--bubble-user-text);
 }
 
 [data-theme="dark"] .message-content a {
@@ -816,7 +816,7 @@
 }
 
 [data-theme="dark"] .message-row.is-user .message-content a {
-  color: #ffffff;
+  color: var(--bubble-user-text);
 }
 
 .message-content pre,
@@ -959,27 +959,42 @@
 }
 
 .message-row.is-user .message-content code {
-  color: #f8fafc;
-  background: rgba(255, 255, 255, 0.16);
+  color: var(--bubble-user-text);
+  background: var(--bubble-user-code-bg);
 }
 
 .message-row.is-user .message-content pre {
-  color: #f8fafc;
-  background: rgba(255, 255, 255, 0.1);
+  color: var(--bubble-user-text);
+  background: var(--bubble-user-code-panel);
 }
 
 .message-row.is-user .markdown-code-block {
-  border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--bubble-user-line);
+  background: var(--bubble-user-code-panel);
 }
 
 .message-row.is-user .markdown-mermaid-block {
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: var(--bubble-user-line);
 }
 
 .message-row.is-user .markdown-code-head {
-  border-bottom-color: rgba(255, 255, 255, 0.14);
-  color: rgba(248, 250, 252, 0.72);
+  border-bottom-color: var(--bubble-user-line);
+  color: var(--bubble-user-muted);
+}
+
+.message-row.is-user .message-content blockquote {
+  color: var(--bubble-user-muted);
+  border-left-color: var(--bubble-user-line);
+}
+
+.message-row.is-user .markdown-table-wrap,
+.message-row.is-user .message-content th,
+.message-row.is-user .message-content td {
+  border-color: var(--bubble-user-line);
+}
+
+.message-row.is-user .message-content th {
+  background: var(--bubble-user-code-panel);
 }
 
 .markdown-table-wrap {
@@ -1790,6 +1805,35 @@
 
 [data-theme="dark"] .message-content pre code {
   background: transparent;
+}
+
+[data-theme="dark"] .message-row.is-user .message-content code {
+  color: var(--bubble-user-text);
+  background: var(--bubble-user-code-bg);
+}
+
+[data-theme="dark"] .message-row.is-user .message-content pre {
+  color: var(--bubble-user-text);
+  background: var(--bubble-user-code-panel);
+}
+
+[data-theme="dark"] .message-row.is-user .markdown-code-block {
+  border-color: var(--bubble-user-line);
+  background: var(--bubble-user-code-panel);
+}
+
+[data-theme="dark"] .message-row.is-user .markdown-mermaid-block {
+  border-color: var(--bubble-user-line);
+}
+
+[data-theme="dark"] .message-row.is-user .markdown-code-head {
+  color: var(--bubble-user-muted);
+  border-bottom-color: var(--bubble-user-line);
+}
+
+[data-theme="dark"] .message-row.is-user .message-content blockquote {
+  color: var(--bubble-user-muted);
+  border-left-color: var(--bubble-user-line);
 }
 
 [data-theme="dark"] .markdown-mermaid-canvas {

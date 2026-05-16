@@ -4,6 +4,13 @@ All notable changes to CodexMobile are tracked here.
 
 ## Unreleased
 
+## [2.0.3] - 2026-05-16
+
+### Fixed
+
+- Fixed user-message markdown styling so links, inline code, code blocks, blockquotes, and tables stay readable in both light and dark themes.
+- Updated the package version to `2.0.3`.
+
 ## [2.0.2] - 2026-05-15
 
 ### Added

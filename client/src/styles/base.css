@@ -31,6 +31,10 @@
   --soft-shadow: 0 10px 32px rgba(26, 28, 31, 0.1);
   --bubble-user: #f5f6f7;
   --bubble-user-text: #1a1c1f;
+  --bubble-user-muted: #626a73;
+  --bubble-user-line: rgba(26, 28, 31, 0.18);
+  --bubble-user-code-bg: rgba(17, 24, 39, 0.06);
+  --bubble-user-code-panel: rgba(17, 24, 39, 0.05);
   --send-button-bg: #1a1c1f;
   --send-button-text: #ffffff;
   --composer-height: calc(env(safe-area-inset-bottom, 0px) + 118px);
@@ -65,6 +69,10 @@
   --soft-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
   --bubble-user: #2b2b2b;
   --bubble-user-text: #ffffff;
+  --bubble-user-muted: rgba(248, 250, 252, 0.72);
+  --bubble-user-line: rgba(255, 255, 255, 0.16);
+  --bubble-user-code-bg: rgba(255, 255, 255, 0.16);
+  --bubble-user-code-panel: rgba(255, 255, 255, 0.1);
   --send-button-bg: #ffffff;
   --send-button-text: #000000;
 }
