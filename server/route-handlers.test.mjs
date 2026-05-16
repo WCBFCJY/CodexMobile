@@ -15,7 +15,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { createChatRouteHandler } from './chat-routes.js';
 import { createFeishuIntegration } from './feishu-routes.js';
-import { createFileRouteHandler } from './file-routes.js';
+import { createFileRouteHandler, isReadonlyLocalFileRoute } from './file-routes.js';
 import { createNotificationRouteHandler } from './notification-routes.js';
 import { createSessionRouteHandler } from './session-routes.js';
 import { createVoiceRouteHandler } from './voice-routes.js';
@@ -187,6 +187,14 @@ test('file route handler accepts local file URLs with source filename path segme
   );
   assert.equal(res.statusCode, 200);
   assert.deepEqual(calls, ['/api/local-file/%E9%9D%92%E7%94%9C.pdf']);
+});
+
+test('readonly local file route helper only allows GET previews before auth', () => {
+  assert.equal(isReadonlyLocalFileRoute('GET', '/api/local-file'), true);
+  assert.equal(isReadonlyLocalFileRoute('GET', '/api/local-file/%E9%9D%92%E7%94%9C.pdf'), true);
+  assert.equal(isReadonlyLocalFileRoute('PUT', '/api/local-file'), false);
+  assert.equal(isReadonlyLocalFileRoute('GET', '/api/local-image'), false);
+  assert.equal(isReadonlyLocalFileRoute('GET', '/api/files/search'), false);
 });
 
 test('file route handler routes remote image proxy requests', async () => {

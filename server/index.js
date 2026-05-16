@@ -76,7 +76,7 @@ import {
 import { getDesktopBridgeStatus } from './codex-app-server.js';
 import { createChatRouteHandler } from './chat-routes.js';
 import { createFeishuIntegration } from './feishu-routes.js';
-import { createFileRouteHandler } from './file-routes.js';
+import { createFileRouteHandler, isReadonlyLocalFileRoute } from './file-routes.js';
 import { createGitRouteHandler } from './git-routes.js';
 import { createGitService } from './git-service.js';
 import { createNotificationRouteHandler } from './notification-routes.js';
@@ -833,6 +833,10 @@ async function handleApi(req, res, url) {
 
   if (method === 'GET' && pathname === '/api/feishu/auth/callback') {
     await feishuIntegration.handleCallback(req, res, url);
+    return;
+  }
+
+  if (isReadonlyLocalFileRoute(method, pathname) && await handleFileApi(req, res, url)) {
     return;
   }
 

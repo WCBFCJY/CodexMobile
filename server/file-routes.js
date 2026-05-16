@@ -5,6 +5,7 @@
  *
  * Exports:
  * - createFileRouteHandler — 返回文件 API 处理函数。
+ * - isReadonlyLocalFileRoute — 判断无需登录即可读取的本地文件预览路由。
  *
  * Inward（本模块依赖/组装的关键符号）: http-utils、file-search、upload-service。
  *
@@ -15,6 +16,13 @@
 import { readBody, sendJson } from './http-utils.js';
 import { searchProjectFiles as defaultSearchProjectFiles } from './file-search.js';
 import { saveUpload as defaultSaveUpload } from './upload-service.js';
+
+export function isReadonlyLocalFileRoute(method = 'GET', pathname = '') {
+  return (method || 'GET') === 'GET' && (
+    pathname === '/api/local-file' ||
+    String(pathname || '').startsWith('/api/local-file/')
+  );
+}
 
 export function createFileRouteHandler({
   getProject,
@@ -44,7 +52,7 @@ export function createFileRouteHandler({
       return true;
     }
 
-    if (method === 'GET' && localFileRoute) {
+    if (isReadonlyLocalFileRoute(method, pathname)) {
       await staticService.sendLocalFile(req, res, url);
       return true;
     }

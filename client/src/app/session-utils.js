@@ -271,6 +271,12 @@ export function safeDecodeUriComponent(value) {
   }
 }
 
+export function localPathFileName(value, fallback = 'file') {
+  const normalized = String(value || '').replaceAll('\\', '/');
+  const name = normalized.split('/').filter(Boolean).pop() || fallback;
+  return name || fallback;
+}
+
 export function localImageApiPath(value) {
   const raw = String(value || '').trim();
   const normalized = /%[0-9a-f]{2}/i.test(raw) ? safeDecodeUriComponent(raw) : raw;
@@ -285,7 +291,8 @@ export function remoteImageApiPath(value) {
 export function localFileApiPath(value) {
   const raw = String(value || '').trim();
   const normalized = /%[0-9a-f]{2}/i.test(raw) ? safeDecodeUriComponent(raw) : raw;
-  return `/api/local-file?path=${encodeURIComponent(normalized)}`;
+  const fileName = localPathFileName(normalized);
+  return `/api/local-file/${encodeURIComponent(fileName)}?path=${encodeURIComponent(normalized)}`;
 }
 
 export function localFilePreviewPath(value) {

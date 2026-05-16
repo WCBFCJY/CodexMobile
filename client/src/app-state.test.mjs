@@ -356,7 +356,14 @@ test('viewportSizingMetrics exposes keyboard inset from visual viewport', () => 
 test('localFileApiPath uses Cookie auth and does not include token query parameters', () => {
   assert.equal(
     localFileApiPath('/Users/demo/report.md', 'secret token'),
-    '/api/local-file?path=%2FUsers%2Fdemo%2Freport.md'
+    '/api/local-file/report.md?path=%2FUsers%2Fdemo%2Freport.md'
+  );
+});
+
+test('localFileApiPath keeps original non-ascii filename in URL path segment', () => {
+  assert.equal(
+    localFileApiPath('/Users/demo/青甜丨2026年4月销售工资表.pdf'),
+    '/api/local-file/%E9%9D%92%E7%94%9C%E4%B8%A82026%E5%B9%B44%E6%9C%88%E9%94%80%E5%94%AE%E5%B7%A5%E8%B5%84%E8%A1%A8.pdf?path=%2FUsers%2Fdemo%2F%E9%9D%92%E7%94%9C%E4%B8%A82026%E5%B9%B44%E6%9C%88%E9%94%80%E5%94%AE%E5%B7%A5%E8%B5%84%E8%A1%A8.pdf'
   );
 });
 
