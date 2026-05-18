@@ -1,7 +1,7 @@
 /**
- * 静态资源与本地文件服务：MIME、缓存头、鉴权 local-image、Word 预览与 Range 流式传输。
+ * 静态资源与本地文件服务：MIME、缓存头、鉴权 local-image、多格式文件预览与 Range 流式传输。
  *
- * Keywords: static-service, local-files, word-preview, range, media, gzip
+ * Keywords: static-service, local-files, file-preview, office-preview, range, media
  *
  * Exports:
  * - DEFAULT_MIME_TYPES / EDITABLE_TEXT_EXTENSIONS。
@@ -17,10 +17,12 @@
  */
 import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
+import JSZip from 'jszip';
 import mammoth from 'mammoth';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import * as XLSX from 'xlsx';
 import { sendJson, sendStaticContent, staticCacheControl } from './http-utils.js';
 
 export const DEFAULT_MIME_TYPES = new Map([
@@ -42,6 +44,10 @@ export const DEFAULT_MIME_TYPES = new Map([
   ['.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   ['.docm', 'application/vnd.ms-word.document.macroEnabled.12'],
   ['.doc', 'application/msword'],
+  ['.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+  ['.xls', 'application/vnd.ms-excel'],
+  ['.pptx', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+  ['.ppt', 'application/vnd.ms-powerpoint'],
   ['.mp4', 'video/mp4'],
   ['.m4v', 'video/mp4'],
   ['.mov', 'video/quicktime'],
@@ -80,6 +86,13 @@ export const EDITABLE_TEXT_EXTENSIONS = new Set([
 const REMOTE_IMAGE_MAX_BYTES = 25 * 1024 * 1024;
 const REMOTE_IMAGE_TIMEOUT_MS = 15_000;
 const WORD_PREVIEW_EXTENSIONS = new Set(['.docx', '.docm']);
+const HTML_PREVIEW_EXTENSIONS = new Set(['.html', '.htm']);
+const SPREADSHEET_PREVIEW_EXTENSIONS = new Set(['.csv', '.xlsx', '.xls']);
+const PRESENTATION_PREVIEW_EXTENSIONS = new Set(['.pptx']);
+const PREVIEW_MAX_ROWS = 500;
+const PREVIEW_MAX_COLS = 80;
+const PREVIEW_MAX_SHEETS = 20;
+const PREVIEW_MAX_SLIDES = 120;
 
 export function resolveLocalImagePath(value) {
   const raw = String(value || '').trim();
@@ -380,34 +393,186 @@ export async function sendLocalFile(req, res, url, {
   }
 }
 
-function sanitizeMammothHtml(value) {
+function sanitizePreviewHtml(value) {
   return String(value || '')
     .replace(/<script\b[\s\S]*?<\/script>/gi, '')
-    .replace(/<style\b[\s\S]*?<\/style>/gi, '')
     .replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(/\s(?:href|src)\s*=\s*(["'])\s*javascript:[\s\S]*?\1/gi, '');
+}
+
+function decodeXmlText(value) {
+  return String(value || '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
+function normalizeSheetRows(rows, {
+  maxRows = PREVIEW_MAX_ROWS,
+  maxCols = PREVIEW_MAX_COLS
+} = {}) {
+  const normalized = (Array.isArray(rows) ? rows : [])
+    .slice(0, maxRows)
+    .map((row) => (Array.isArray(row) ? row : [row])
+      .slice(0, maxCols)
+      .map((cell) => String(cell ?? '')));
+  let lastRow = normalized.length - 1;
+  while (lastRow >= 0 && normalized[lastRow].every((cell) => !String(cell || '').trim())) {
+    lastRow -= 1;
+  }
+  const croppedRows = normalized.slice(0, lastRow + 1);
+  let lastCol = 0;
+  for (const row of croppedRows) {
+    for (let index = row.length - 1; index >= 0; index -= 1) {
+      if (String(row[index] || '').trim()) {
+        lastCol = Math.max(lastCol, index + 1);
+        break;
+      }
+    }
+  }
+  return croppedRows.map((row) => row.slice(0, lastCol));
+}
+
+function parseCsvRows(text) {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let quoted = false;
+  const raw = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  for (let index = 0; index < raw.length; index += 1) {
+    const char = raw[index];
+    if (quoted) {
+      if (char === '"' && raw[index + 1] === '"') {
+        cell += '"';
+        index += 1;
+      } else if (char === '"') {
+        quoted = false;
+      } else {
+        cell += char;
+      }
+    } else if (char === '"') {
+      quoted = true;
+    } else if (char === ',') {
+      row.push(cell);
+      cell = '';
+    } else if (char === '\n') {
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+    } else {
+      cell += char;
+    }
+  }
+  if (cell || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  return normalizeSheetRows(rows);
+}
+
+function spreadsheetPreviewFromWorkbook(buffer) {
+  const workbook = XLSX.read(buffer, {
+    type: 'buffer',
+    cellDates: false,
+    cellHTML: false,
+    cellNF: false
+  });
+  const sheetNames = Array.isArray(workbook.SheetNames) ? workbook.SheetNames.slice(0, PREVIEW_MAX_SHEETS) : [];
+  return sheetNames.map((name) => {
+    const rawRows = XLSX.utils.sheet_to_json(workbook.Sheets[name], {
+      header: 1,
+      raw: false,
+      defval: ''
+    });
+    return {
+      name,
+      rows: normalizeSheetRows(rawRows),
+      truncatedRows: rawRows.length > PREVIEW_MAX_ROWS
+    };
+  });
+}
+
+async function presentationPreviewFromPptx(buffer) {
+  const zip = await JSZip.loadAsync(buffer);
+  const slideEntries = Object.keys(zip.files)
+    .filter((name) => /^ppt\/slides\/slide\d+\.xml$/i.test(name))
+    .sort((left, right) => Number(left.match(/slide(\d+)\.xml/i)?.[1] || 0) - Number(right.match(/slide(\d+)\.xml/i)?.[1] || 0))
+    .slice(0, PREVIEW_MAX_SLIDES);
+  const slides = [];
+  for (const entryName of slideEntries) {
+    const xml = await zip.files[entryName].async('string');
+    const texts = [...xml.matchAll(/<a:t[^>]*>([\s\S]*?)<\/a:t>/gi)]
+      .map((match) => decodeXmlText(match[1]).replace(/\s+/g, ' ').trim())
+      .filter(Boolean);
+    const index = Number(entryName.match(/slide(\d+)\.xml/i)?.[1] || slides.length + 1);
+    slides.push({
+      index,
+      title: texts[0] || `Slide ${index}`,
+      texts
+    });
+  }
+  return {
+    slides,
+    truncatedSlides: slideEntries.length >= PREVIEW_MAX_SLIDES
+  };
 }
 
 export async function sendLocalFilePreview(req, res, url) {
   try {
     const { filePath, stat } = await resolveExistingLocalFile(url);
     const ext = path.extname(filePath).toLowerCase();
-    if (!WORD_PREVIEW_EXTENSIONS.has(ext)) {
-      sendJson(res, 415, { error: 'Only docx Word files can be previewed' });
+    if (WORD_PREVIEW_EXTENSIONS.has(ext)) {
+      const buffer = await fs.readFile(filePath);
+      const result = await mammoth.convertToHtml({ buffer });
+      sendJson(res, 200, {
+        kind: 'word',
+        html: sanitizePreviewHtml(result.value),
+        messages: Array.isArray(result.messages) ? result.messages.map((message) => ({
+          type: message.type || '',
+          message: message.message || ''
+        })) : [],
+        mtimeMs: Math.round(stat.mtimeMs),
+        size: stat.size
+      });
       return;
     }
-    const buffer = await fs.readFile(filePath);
-    const result = await mammoth.convertToHtml({ buffer });
-    sendJson(res, 200, {
-      kind: 'word',
-      html: sanitizeMammothHtml(result.value),
-      messages: Array.isArray(result.messages) ? result.messages.map((message) => ({
-        type: message.type || '',
-        message: message.message || ''
-      })) : [],
-      mtimeMs: Math.round(stat.mtimeMs),
-      size: stat.size
-    });
+    if (HTML_PREVIEW_EXTENSIONS.has(ext)) {
+      const html = await fs.readFile(filePath, 'utf8');
+      sendJson(res, 200, {
+        kind: 'html',
+        html: sanitizePreviewHtml(html),
+        mtimeMs: Math.round(stat.mtimeMs),
+        size: stat.size
+      });
+      return;
+    }
+    if (SPREADSHEET_PREVIEW_EXTENSIONS.has(ext)) {
+      const buffer = await fs.readFile(filePath);
+      const sheets = ext === '.csv'
+        ? [{ name: path.basename(filePath), rows: parseCsvRows(buffer.toString('utf8')), truncatedRows: false }]
+        : spreadsheetPreviewFromWorkbook(buffer);
+      sendJson(res, 200, {
+        kind: 'spreadsheet',
+        sheets,
+        mtimeMs: Math.round(stat.mtimeMs),
+        size: stat.size
+      });
+      return;
+    }
+    if (PRESENTATION_PREVIEW_EXTENSIONS.has(ext)) {
+      const preview = await presentationPreviewFromPptx(await fs.readFile(filePath));
+      sendJson(res, 200, {
+        kind: 'presentation',
+        ...preview,
+        mtimeMs: Math.round(stat.mtimeMs),
+        size: stat.size
+      });
+      return;
+    }
+    sendJson(res, 415, { error: 'This file type cannot be previewed yet' });
   } catch (error) {
     console.warn(`[local-file-preview] read failed path=${error.requestedPath || ''} checked=${(error.checkedPaths || []).join(' | ')} message=${error.message || ''}`);
     sendJson(res, error.statusCode || 500, {

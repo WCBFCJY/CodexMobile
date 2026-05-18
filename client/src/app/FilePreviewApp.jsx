@@ -1,7 +1,7 @@
 /**
- * 独立文件预览入口：按类型渲染 PDF/Word/Markdown/文本/媒体或下载 fallback，并提供工具栏与外链分享。
+ * 独立文件预览入口：按类型渲染 PDF/Office/HTML/Markdown/文本/媒体或下载 fallback，并提供工具栏与外链分享。
  *
- * Keywords: file-preview, pdf, word, markdown, media, workspace-file
+ * Keywords: file-preview, pdf, office, html, spreadsheet, presentation, media
  *
  * Exports:
  * - default — `FilePreviewApp`（由 `main` 按需挂载的整页预览壳）。
@@ -11,7 +11,7 @@
  * Outward: `main.jsx` 单独路由或入口挂载。
  */
 
-import { ArrowLeft, Check, Code2, Copy, ExternalLink, FileText, Minus, Plus, RefreshCw, Save, Share2, X } from 'lucide-react';
+import { ArrowLeft, Check, Code2, Copy, ExternalLink, FileText, Minus, PanelsTopLeft, Plus, RefreshCw, Save, Share2, Table2, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '../api.js';
 import { MarkdownContent } from '../chat/MarkdownContent.jsx';
@@ -48,6 +48,15 @@ function previewKind(pathValue, contentType) {
   ) {
     return 'word';
   }
+  if (lowerType.includes('presentationml.presentation') || lowerType.includes('ms-powerpoint') || /\.(?:pptx|ppt)(?:$|[:?#])/i.test(lowerPath)) {
+    return 'presentation';
+  }
+  if (lowerType.includes('spreadsheetml.sheet') || lowerType.includes('ms-excel') || /\.(?:xlsx|xls|csv)(?:$|[:?#])/i.test(lowerPath)) {
+    return 'spreadsheet';
+  }
+  if (lowerType.includes('html') || /\.html?(?:$|[:?#])/i.test(lowerPath)) {
+    return 'html';
+  }
   if (
     lowerType.includes('markdown') ||
     /\.(?:md|markdown)(?:$|[:?#])/i.test(lowerPath)
@@ -58,6 +67,33 @@ function previewKind(pathValue, contentType) {
     return 'text';
   }
   return 'download';
+}
+
+function usesPreviewDataApi(kind) {
+  return kind === 'word' || kind === 'html' || kind === 'spreadsheet' || kind === 'presentation';
+}
+
+function previewKindLabel(kind) {
+  if (kind === 'spreadsheet') {
+    return '表格';
+  }
+  if (kind === 'presentation') {
+    return 'PPT';
+  }
+  return kind.toUpperCase();
+}
+
+function previewKindIcon(kind) {
+  if (kind === 'spreadsheet') {
+    return <Table2 size={15} />;
+  }
+  if (kind === 'presentation') {
+    return <PanelsTopLeft size={15} />;
+  }
+  if (kind === 'word' || kind === 'html') {
+    return <FileText size={15} />;
+  }
+  return <Code2 size={15} />;
 }
 
 function isNativeMediaKind(kind) {
@@ -92,12 +128,15 @@ export default function FilePreviewApp() {
     error: '',
     text: '',
     html: '',
+    sheets: [],
+    slides: [],
     objectUrl: '',
     pdfData: null,
     contentType: '',
     mtimeMs: 0,
     editable: false
   });
+  const [sheetIndex, setSheetIndex] = useState(0);
 
   useEffect(() => {
     const theme = resolvePwaTheme(localStorage.getItem(THEME_KEY), window);
@@ -135,10 +174,11 @@ export default function FilePreviewApp() {
 
     async function loadFile() {
       if (!filePath) {
-        setState({ loading: false, error: '缺少文件路径', text: '', html: '', objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
+        setState({ loading: false, error: '缺少文件路径', text: '', html: '', sheets: [], slides: [], objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
         return;
       }
-      setState({ loading: true, error: '', text: '', html: '', objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
+      setSheetIndex(0);
+      setState({ loading: true, error: '', text: '', html: '', sheets: [], slides: [], objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
       try {
         const pathKind = previewKind(filePath, '');
         if (isNativeMediaKind(pathKind) || pathKind === 'pdf') {
@@ -147,6 +187,8 @@ export default function FilePreviewApp() {
             error: '',
             text: '',
             html: '',
+            sheets: [],
+            slides: [],
             objectUrl: '',
             pdfData: null,
             contentType: pathKind === 'pdf' ? 'application/pdf' : '',
@@ -155,7 +197,7 @@ export default function FilePreviewApp() {
           });
           return;
         }
-        if (pathKind === 'word') {
+        if (usesPreviewDataApi(pathKind)) {
           const result = await apiFetch(localFilePreviewDataPath(filePath));
           if (!stopped) {
             setState({
@@ -163,9 +205,11 @@ export default function FilePreviewApp() {
               error: '',
               text: '',
               html: result.html || '',
+              sheets: Array.isArray(result.sheets) ? result.sheets : [],
+              slides: Array.isArray(result.slides) ? result.slides : [],
               objectUrl: '',
               pdfData: null,
-              contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              contentType: result.kind || pathKind,
               mtimeMs: Number(result.mtimeMs || 0),
               editable: false
             });
@@ -194,17 +238,17 @@ export default function FilePreviewApp() {
           const text = await blob.text();
           if (!stopped) {
             setDraft(text);
-            setState({ loading: false, error: '', text, html: '', objectUrl: '', pdfData: null, contentType: blob.type, mtimeMs, editable });
+            setState({ loading: false, error: '', text, html: '', sheets: [], slides: [], objectUrl: '', pdfData: null, contentType: blob.type, mtimeMs, editable });
           }
           return;
         }
         if (kind === 'pdf') {
           const pdfData = await blob.arrayBuffer();
-          setState({ loading: false, error: '', text: '', html: '', objectUrl: '', pdfData, contentType: blob.type, mtimeMs, editable: false });
+          setState({ loading: false, error: '', text: '', html: '', sheets: [], slides: [], objectUrl: '', pdfData, contentType: blob.type, mtimeMs, editable: false });
           return;
         }
         objectUrl = URL.createObjectURL(blob);
-        setState({ loading: false, error: '', text: '', html: '', objectUrl, contentType: blob.type, mtimeMs, editable: false });
+        setState({ loading: false, error: '', text: '', html: '', sheets: [], slides: [], objectUrl, contentType: blob.type, mtimeMs, editable: false });
       } catch (error) {
         if (!stopped) {
           setState({
@@ -212,6 +256,8 @@ export default function FilePreviewApp() {
             error: error?.message || '文件读取失败',
             text: '',
             html: '',
+            sheets: [],
+            slides: [],
             objectUrl: '',
             pdfData: null,
             contentType: '',
@@ -236,9 +282,12 @@ export default function FilePreviewApp() {
   const subtitle = compactPath(filePath);
   const canRenderMarkdown = kind === 'markdown';
   const canEdit = state.editable && (kind === 'markdown' || kind === 'text');
-  const canAdjustFont = kind === 'markdown' || kind === 'text' || kind === 'word';
+  const canAdjustFont = kind === 'markdown' || kind === 'text' || kind === 'word' || kind === 'spreadsheet' || kind === 'presentation';
   const editing = mode === 'edit';
   const markdownText = canRenderMarkdown ? stripFrontmatter(state.text) : state.text;
+  const sheets = Array.isArray(state.sheets) ? state.sheets : [];
+  const slides = Array.isArray(state.slides) ? state.slides : [];
+  const selectedSheet = sheets[Math.min(sheetIndex, Math.max(0, sheets.length - 1))] || null;
 
   async function handleCopyPath() {
     const ok = await copyTextToClipboard(filePath);
@@ -380,8 +429,8 @@ export default function FilePreviewApp() {
           ) : (
             <div className="file-preview-segmented">
               <button type="button" className={mode !== 'edit' ? 'is-active' : ''} onClick={() => setMode('raw')}>
-                <Code2 size={15} />
-                <span>{kind.toUpperCase()}</span>
+                {previewKindIcon(kind)}
+                <span>{previewKindLabel(kind)}</span>
               </button>
               {canEdit ? (
                 <button type="button" className={mode === 'edit' ? 'is-active' : ''} onClick={() => setMode('edit')}>
@@ -433,6 +482,70 @@ export default function FilePreviewApp() {
         ) : null}
         {!state.loading && !state.error && kind === 'word' ? (
           <article className="file-preview-word" dangerouslySetInnerHTML={{ __html: state.html || '<p>Word 文档没有可预览文本。</p>' }} />
+        ) : null}
+        {!state.loading && !state.error && kind === 'html' ? (
+          <iframe
+            className="file-preview-html-frame"
+            title={title}
+            sandbox=""
+            srcDoc={state.html || '<p>HTML 文件没有可预览内容。</p>'}
+          />
+        ) : null}
+        {!state.loading && !state.error && kind === 'spreadsheet' ? (
+          <div className="file-preview-sheet">
+            {sheets.length > 1 ? (
+              <div className="file-preview-sheet-tabs">
+                {sheets.map((sheet, index) => (
+                  <button
+                    key={`${sheet.name || 'sheet'}-${index}`}
+                    type="button"
+                    className={index === sheetIndex ? 'is-active' : ''}
+                    onClick={() => setSheetIndex(index)}
+                  >
+                    {sheet.name || `Sheet ${index + 1}`}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            {selectedSheet?.rows?.length ? (
+              <div className="file-preview-sheet-scroll">
+                <table>
+                  <tbody>
+                    {selectedSheet.rows.map((row, rowIndex) => (
+                      <tr key={`row-${rowIndex}`}>
+                        {row.map((cell, cellIndex) => (
+                          rowIndex === 0 ? (
+                            <th key={`cell-${rowIndex}-${cellIndex}`}>{cell}</th>
+                          ) : (
+                            <td key={`cell-${rowIndex}-${cellIndex}`}>{cell}</td>
+                          )
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="file-preview-status">表格没有可预览内容。</div>
+            )}
+          </div>
+        ) : null}
+        {!state.loading && !state.error && kind === 'presentation' ? (
+          <div className="file-preview-presentation">
+            {slides.length ? slides.map((slide, index) => (
+              <article className="file-preview-slide" key={`slide-${slide.index || index}`}>
+                <div className="file-preview-slide-number">P{String(slide.index || index + 1).padStart(2, '0')}</div>
+                <h2>{slide.title || `Slide ${index + 1}`}</h2>
+                {Array.isArray(slide.texts) && slide.texts.length ? (
+                  <ul>
+                    {slide.texts.slice(1).map((text, textIndex) => (
+                      <li key={`slide-${slide.index || index}-${textIndex}`}>{text}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </article>
+            )) : <div className="file-preview-status">PPT 没有可预览文本。</div>}
+          </div>
         ) : null}
         {!state.loading && !state.error && !editing && (kind === 'text' || (kind === 'markdown' && mode === 'raw')) ? (
           <pre className="file-preview-text">{state.text}</pre>
