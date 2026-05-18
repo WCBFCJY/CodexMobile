@@ -41,6 +41,7 @@ test('composerSendState defaults running input to steer when possible', () => {
   });
 
   assert.equal(state.mode, 'steer');
+  assert.equal(state.label, '选择发送方式');
   assert.equal(state.showMenu, true);
   assert.equal(state.canSteer, true);
 });

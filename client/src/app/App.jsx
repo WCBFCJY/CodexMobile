@@ -53,6 +53,7 @@ import {
   reconcileThreadRuntimeWithSessions,
   resolveComposerGitProject,
   selectedRunKeys,
+  selectedMessagesHaveActiveTurnActivity,
   selectedSessionIsRunning,
   upsertSessionInProject
 } from './session-utils.js';
@@ -252,11 +253,18 @@ export default function App() {
   const syncRunningById = useMemo(() => syncRunningByIdFromRuntime(threadRuntimeById), [threadRuntimeById]);
   const selectedRuntime = selectRuntimeForSession(selectedSession, threadRuntimeById);
   const selectedSessionArchived = Boolean(selectedSession?.archived);
+  const selectedHasActiveTurnActivity = useMemo(
+    () => selectedMessagesHaveActiveTurnActivity(messages),
+    [messages]
+  );
   const running =
     hasRunningKey(syncRunningById, selectedRunKeys(selectedSession)) ||
     selectedRuntime?.status === 'running' ||
     selectedRuntime?.status === 'queued';
-  const selectedRunning = selectedSessionIsRunning({ running });
+  const selectedRunning = selectedSessionIsRunning({
+    running,
+    hasActiveTurnActivity: selectedHasActiveTurnActivity
+  });
   const drawerRunningById = syncRunningById;
   useEffect(() => {
     loadQueueDrafts(selectedSession).catch(() => null);

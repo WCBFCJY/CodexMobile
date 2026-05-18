@@ -2089,6 +2089,37 @@
   line-height: 1.78;
 }
 
+.file-preview-word {
+  max-width: 820px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 24px 20px 56px;
+  background: #fff;
+  color: #111;
+  font-size: calc(16px * var(--preview-font-scale, 1));
+  line-height: 1.75;
+  word-break: break-word;
+}
+
+.file-preview-word :where(p, li) {
+  line-height: 1.75;
+}
+
+.file-preview-word :where(img, table) {
+  max-width: 100%;
+}
+
+.file-preview-word table {
+  border-collapse: collapse;
+}
+
+.file-preview-word td,
+.file-preview-word th {
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
 .file-preview-text {
   margin: 0;
   min-height: 100%;
@@ -2334,6 +2365,7 @@
 [data-theme="dark"] .file-preview-tool-buttons a,
 [data-theme="dark"] .file-preview-segmented button,
 [data-theme="dark"] .file-preview-markdown,
+[data-theme="dark"] .file-preview-word,
 [data-theme="dark"] .file-preview-text,
 [data-theme="dark"] .file-preview-frame,
 [data-theme="dark"] .file-preview-status,
@@ -2346,6 +2378,7 @@
 
 [data-theme="dark"] .file-preview-body,
 [data-theme="dark"] .file-preview-markdown,
+[data-theme="dark"] .file-preview-word,
 [data-theme="dark"] .file-preview-text,
 [data-theme="dark"] .file-preview-editor {
   background: #000;
@@ -2371,6 +2404,11 @@
 [data-theme="dark"] .file-preview-markdown h2,
 [data-theme="dark"] .file-preview-markdown h3 {
   color: #fff;
+}
+
+[data-theme="dark"] .file-preview-word td,
+[data-theme="dark"] .file-preview-word th {
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 [data-theme="dark"] .pdf-preview {

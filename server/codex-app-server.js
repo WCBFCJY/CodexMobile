@@ -136,6 +136,36 @@ function unavailableBridgeError(transport) {
   return error;
 }
 
+function isDesktopProxyConnectionFailure(error) {
+  const message = String(error?.message || error || '');
+  return /failed to connect to socket|Connection refused|os error 61/i.test(message);
+}
+
+export function desktopProxyFailureFallbackTransport(env = process.env, {
+  allowReadOnlyIsolated = false,
+  allowHeadlessLocal = false
+} = {}) {
+  if (allowReadOnlyIsolated || isEnabled(env.CODEXMOBILE_ALLOW_ISOLATED_CODEX)) {
+    return {
+      mode: 'isolated-dev',
+      strict: false,
+      sockPath: null,
+      connected: true,
+      reason: '桌面端 control socket 无法连接，正在使用独立开发 app-server'
+    };
+  }
+  if (allowHeadlessLocal && !isEnabled(env.CODEXMOBILE_DISABLE_HEADLESS_CODEX)) {
+    return {
+      mode: 'headless-local',
+      strict: false,
+      sockPath: null,
+      connected: true,
+      reason: '桌面端 control socket 无法连接，正在使用后台 Codex 执行'
+    };
+  }
+  return null;
+}
+
 export function defaultServerRequestResult(message) {
   switch (message?.method) {
     case 'item/commandExecution/requestApproval':
@@ -365,8 +395,29 @@ function isArchivedOrDeletedDesktopThread(thread = null) {
 
 export async function createCodexAppServerClient(options = {}) {
   const client = new CodexAppServerClient(options);
-  await client.initialize();
-  return client;
+  try {
+    await client.initialize();
+    return client;
+  } catch (error) {
+    const fallbackTransport = client.transport.mode === 'desktop-proxy' && isDesktopProxyConnectionFailure(error)
+      ? desktopProxyFailureFallbackTransport(options.env || process.env, options)
+      : null;
+    client.close();
+    if (!fallbackTransport) {
+      throw error;
+    }
+    const fallbackClient = new CodexAppServerClient({
+      ...options,
+      transport: fallbackTransport
+    });
+    try {
+      await fallbackClient.initialize();
+      return fallbackClient;
+    } catch (fallbackError) {
+      fallbackClient.close();
+      throw fallbackError;
+    }
+  }
 }
 
 export async function getDesktopBridgeStatus({ force = false } = {}) {

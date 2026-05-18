@@ -81,7 +81,7 @@ export function composerSendState({
   if (running && hasInput) {
     return {
       disabled: false,
-      label: steerable ? '发送到当前任务' : '选择发送方式',
+      label: '选择发送方式',
       mode: steerable ? 'steer' : 'queue',
       showMenu: true,
       canSteer: Boolean(steerable),

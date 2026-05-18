@@ -1,11 +1,11 @@
 /**
- * 文件类 HTTP 路由：上传、本地文件读取、项目内文件搜索等。
+ * 文件类 HTTP 路由：上传、本地文件读取、Word 预览、项目内文件搜索等。
  *
- * Keywords: file-routes, multipart, local-file, file-search
+ * Keywords: file-routes, multipart, local-file, word-preview, file-search
  *
  * Exports:
  * - createFileRouteHandler — 返回文件 API 处理函数。
- * - isReadonlyLocalFileRoute — 判断无需登录即可读取的本地文件预览路由。
+ * - isReadonlyLocalFileRoute — 判断无需登录即可读取的本地文件/转换预览路由。
  *
  * Inward（本模块依赖/组装的关键符号）: http-utils、file-search、upload-service。
  *
@@ -20,7 +20,8 @@ import { saveUpload as defaultSaveUpload } from './upload-service.js';
 export function isReadonlyLocalFileRoute(method = 'GET', pathname = '') {
   return (method || 'GET') === 'GET' && (
     pathname === '/api/local-file' ||
-    String(pathname || '').startsWith('/api/local-file/')
+    String(pathname || '').startsWith('/api/local-file/') ||
+    pathname === '/api/local-file-preview'
   );
 }
 
@@ -53,6 +54,10 @@ export function createFileRouteHandler({
     }
 
     if (isReadonlyLocalFileRoute(method, pathname)) {
+      if (pathname === '/api/local-file-preview') {
+        await staticService.sendLocalFilePreview(req, res, url);
+        return true;
+      }
       await staticService.sendLocalFile(req, res, url);
       return true;
     }

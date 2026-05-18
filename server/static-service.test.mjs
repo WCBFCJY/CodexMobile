@@ -14,6 +14,8 @@ import path from 'node:path';
 import test from 'node:test';
 import { createStaticService } from './static-service.js';
 
+const MINIMAL_DOCX_BASE64 = 'UEsDBBQAAAAIAERpslzXeYTq8QAAALgBAAATAAAAW0NvbnRlbnRfVHlwZXNdLnhtbH2QzU7DMBCE730Ky9cqccoBIZSkB36OwKE8wMreJFb9J69b2rdn00KREOVozXwz62nXB+/EHjPZGDq5qhspMOhobBg7+b55ru6koALBgIsBO3lEkut+0W6OCUkwHKiTUynpXinSE3qgOiYMrAwxeyj8zKNKoLcworppmlulYygYSlXmDNkvhGgfcYCdK+LpwMr5loyOpHg4e+e6TkJKzmoorKt9ML+Kqq+SmsmThyabaMkGqa6VzOL1jh/0lSfK1qB4g1xewLNRfcRslIl65xmu/0/649o4DFbjhZ/TUo4aiXh77+qL4sGG71+06jR8/wlQSwMEFAAAAAgARGmyXCAbhuqyAAAALgEAAAsAAABfcmVscy8ucmVsc43Puw6CMBQG4J2naM4uBQdjDIXFmLAafICmPZRGeklbL7y9HRzEODie23fyN93TzOSOIWpnGdRlBQStcFJbxeAynDZ7IDFxK/nsLDJYMELXFs0ZZ57yTZy0jyQjNjKYUvIHSqOY0PBYOo82T0YXDE+5DIp6Lq5cId1W1Y6GTwPagpAVS3rJIPSyBjIsHv/h3ThqgUcnbgZt+vHlayPLPChMDB4uSCrf7TKzQHNKuorZvgBQSwMEFAAAAAgARGmyXEu+PFPNAAAAPgEAABEAAAB3b3JkL2RvY3VtZW50LnhtbHVPMU4DMRDs84qVe+KDAqHTnVOA6JBSgKgde0msnHctr8ldfo99Ih00oxmNZnZ22C1xggtmCUyjut92CpAc+0DHUX28v949KZBiyduJCUd1RVE7sxnm3rP7jkgFagNJP4/qVErqtRZ3wmhlywmpel+coy1V5qOeOfuU2aFIPRAn/dB1jzraQMpsAGrrgf210VUkUyE3KOaZPS5vfAgTwmetgX3GS8B50M1tmFdMf6Zf2C3gmH4/BYl8Rigo5f+8oCv7rNdh+rassdvn5gdQSwECFAMUAAAACABEabJc13mE6vEAAAC4AQAAEwAAAAAAAAAAAAAAgAEAAAAAW0NvbnRlbnRfVHlwZXNdLnhtbFBLAQIUAxQAAAAIAERpslwgG4bqsgAAAC4BAAALAAAAAAAAAAAAAACAASIBAABfcmVscy8ucmVsc1BLAQIUAxQAAAAIAERpslxLvjxTzQAAAD4BAAARAAAAAAAAAAAAAACAAf0BAAB3b3JkL2RvY3VtZW50LnhtbFBLBQYAAAAAAwADALkAAAD5AgAAAAA=';
+
 function req(headers = {}) {
   return { headers };
 }
@@ -53,6 +55,7 @@ async function withTempService(fn) {
   await fs.writeFile(path.join(generatedRoot, 'image.png'), Buffer.from([137, 80, 78, 71]));
   await fs.writeFile(path.join(root, 'report.md'), '# Report');
   await fs.writeFile(path.join(root, 'brief.pdf'), Buffer.from('%PDF-1.7'));
+  await fs.writeFile(path.join(root, 'brief.docx'), Buffer.from(MINIMAL_DOCX_BASE64, 'base64'));
   await fs.writeFile(path.join(root, 'clip.mp3'), Buffer.from([0x49, 0x44, 0x33, 0x04]));
   await fs.writeFile(path.join(root, '甘肃临夏萌宠乐园丨政府汇报项目前置简介.md'), '# 中文文件名');
   await fs.writeFile(path.join(root, 'secret.txt'), 'secret');
@@ -127,6 +130,22 @@ test('sendLocalFile serves pdf files with pdf content type', async () => {
     assert.equal(response.statusCode, 200);
     assert.equal(response.headers['content-type'], 'application/pdf');
     assert.match(response.headers['content-disposition'], /^inline;/);
+  });
+});
+
+test('sendLocalFilePreview converts docx files into sanitized html', async () => {
+  await withTempService(async (service, root) => {
+    const filePath = path.join(root, 'brief.docx');
+    const response = res();
+    await service.sendLocalFilePreview(req(), response, new URL(`http://local/api/local-file-preview?path=${encodeURIComponent(filePath)}`));
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.headers['content-type'], 'application/json; charset=utf-8');
+    const payload = JSON.parse(response.body.toString('utf8'));
+    assert.equal(payload.kind, 'word');
+    assert.match(payload.html, /CodexMobile Word Preview/);
+    assert.doesNotMatch(payload.html, /<script/i);
+    assert.ok(payload.mtimeMs > 0);
   });
 });
 

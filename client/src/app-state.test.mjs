@@ -13,6 +13,7 @@ import {
   createDraftSession,
   formatRelativeShort,
   localFileApiPath,
+  localFilePreviewDataPath,
   localFilePreviewPath,
   messagePageFromResponse,
   payloadRunKeys,
@@ -21,6 +22,7 @@ import {
   resolveComposerGitProject,
   resolveNewConversationProject,
   runningByIdWithSelectedActivity,
+  selectedMessagesHaveActiveTurnActivity,
   selectedSessionIsRunning,
   sessionMessagesApiPath,
   sessionRunBadgeState,
@@ -107,19 +109,34 @@ test('formatRelativeShort keeps sidebar time stable around now and future clock 
   assert.match(formatRelativeShort('2026-05-15T06:40:00+08:00', now), /05\/15.*06:40|15\/05.*06:40/);
 });
 
-test('selected desktop activity does not count as composer runtime without live sync state', () => {
+test('selected active turn activity counts as composer runtime without live sync state', () => {
+  const messages = [
+    { id: 'user-1', role: 'user', content: '继续查一下', turnId: 'turn-1' },
+    { id: 'activity-1', role: 'activity', kind: 'turn', status: 'running', turnId: 'turn-1' }
+  ];
+
+  assert.equal(selectedMessagesHaveActiveTurnActivity(messages), true);
   assert.equal(selectedSessionIsRunning({
     running: false,
-    hasRunningActivity: true
-  }), false);
+    hasActiveTurnActivity: true
+  }), true);
   assert.equal(selectedSessionIsRunning({
     running: true,
-    hasRunningActivity: false
+    hasActiveTurnActivity: false
   }), true);
   assert.equal(selectedSessionIsRunning({
     running: false,
-    hasRunningActivity: false
+    hasActiveTurnActivity: false
   }), false);
+});
+
+test('selected stale activity does not count as composer runtime after assistant content', () => {
+  const messages = [
+    { id: 'activity-1', role: 'activity', kind: 'turn', status: 'running', turnId: 'turn-1' },
+    { id: 'assistant-1', role: 'assistant', content: '已经完成', turnId: 'turn-1' }
+  ];
+
+  assert.equal(selectedMessagesHaveActiveTurnActivity(messages), false);
 });
 
 test('selected running activity does not synthesize sidebar runtime badges', () => {
@@ -377,6 +394,13 @@ test('localFilePreviewPath routes local files through the mobile preview page', 
   assert.equal(
     localFilePreviewPath('/Users/demo/report.md', 'secret token'),
     '/preview/file?path=%2FUsers%2Fdemo%2Freport.md'
+  );
+});
+
+test('localFilePreviewDataPath routes local Word files through the conversion API', () => {
+  assert.equal(
+    localFilePreviewDataPath('/Users/demo/brief.docx'),
+    '/api/local-file-preview?path=%2FUsers%2Fdemo%2Fbrief.docx'
   );
 });
 

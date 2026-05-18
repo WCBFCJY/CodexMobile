@@ -1,12 +1,12 @@
 /**
- * 静态资源与本地文件服务：MIME、缓存头、鉴权 local-image 与 Range 流式传输。
+ * 静态资源与本地文件服务：MIME、缓存头、鉴权 local-image、Word 预览与 Range 流式传输。
  *
- * Keywords: static-service, local-files, range, streaming, media, gzip
+ * Keywords: static-service, local-files, word-preview, range, media, gzip
  *
  * Exports:
  * - DEFAULT_MIME_TYPES / EDITABLE_TEXT_EXTENSIONS。
  * - resolveLocalImagePath / safeDecodeLocalPath / stripLocalFileLineSuffix。
- * - sendLocalImage / sendRemoteImage / sendLocalFile / writeLocalTextFile / serveFileFromRoot。
+ * - sendLocalImage / sendRemoteImage / sendLocalFile / sendLocalFilePreview / writeLocalTextFile / serveFileFromRoot。
  * - createStaticService — 组装根目录与缓存策略。
  *
  * Inward（本模块依赖/组装的关键符号）: http-utils.sendStaticContent、Node fs。
@@ -17,6 +17,7 @@
  */
 import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
+import mammoth from 'mammoth';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,6 +39,9 @@ export const DEFAULT_MIME_TYPES = new Map([
   ['.gif', 'image/gif'],
   ['.ico', 'image/x-icon'],
   ['.pdf', 'application/pdf'],
+  ['.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  ['.docm', 'application/vnd.ms-word.document.macroEnabled.12'],
+  ['.doc', 'application/msword'],
   ['.mp4', 'video/mp4'],
   ['.m4v', 'video/mp4'],
   ['.mov', 'video/quicktime'],
@@ -75,6 +79,7 @@ export const EDITABLE_TEXT_EXTENSIONS = new Set([
 
 const REMOTE_IMAGE_MAX_BYTES = 25 * 1024 * 1024;
 const REMOTE_IMAGE_TIMEOUT_MS = 15_000;
+const WORD_PREVIEW_EXTENSIONS = new Set(['.docx', '.docm']);
 
 export function resolveLocalImagePath(value) {
   const raw = String(value || '').trim();
@@ -375,6 +380,44 @@ export async function sendLocalFile(req, res, url, {
   }
 }
 
+function sanitizeMammothHtml(value) {
+  return String(value || '')
+    .replace(/<script\b[\s\S]*?<\/script>/gi, '')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, '')
+    .replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/\s(?:href|src)\s*=\s*(["'])\s*javascript:[\s\S]*?\1/gi, '');
+}
+
+export async function sendLocalFilePreview(req, res, url) {
+  try {
+    const { filePath, stat } = await resolveExistingLocalFile(url);
+    const ext = path.extname(filePath).toLowerCase();
+    if (!WORD_PREVIEW_EXTENSIONS.has(ext)) {
+      sendJson(res, 415, { error: 'Only docx Word files can be previewed' });
+      return;
+    }
+    const buffer = await fs.readFile(filePath);
+    const result = await mammoth.convertToHtml({ buffer });
+    sendJson(res, 200, {
+      kind: 'word',
+      html: sanitizeMammothHtml(result.value),
+      messages: Array.isArray(result.messages) ? result.messages.map((message) => ({
+        type: message.type || '',
+        message: message.message || ''
+      })) : [],
+      mtimeMs: Math.round(stat.mtimeMs),
+      size: stat.size
+    });
+  } catch (error) {
+    console.warn(`[local-file-preview] read failed path=${error.requestedPath || ''} checked=${(error.checkedPaths || []).join(' | ')} message=${error.message || ''}`);
+    sendJson(res, error.statusCode || 500, {
+      error: error.message || 'File preview failed',
+      path: error.requestedPath || '',
+      checked: error.checkedPaths || []
+    });
+  }
+}
+
 export async function writeLocalTextFile(req, res, url, body) {
   try {
     const { filePath, stat } = await resolveExistingLocalFile(url);
@@ -543,6 +586,10 @@ export function createStaticService({
     await sendLocalFile(req, res, url, { mimeTypes });
   }
 
+  async function sendLocalFilePreviewFromRequest(req, res, url) {
+    await sendLocalFilePreview(req, res, url);
+  }
+
   async function writeLocalFileFromRequest(req, res, url, body) {
     await writeLocalTextFile(req, res, url, body);
   }
@@ -552,6 +599,7 @@ export function createStaticService({
     sendLocalImage: sendLocalImageFromRequest,
     sendRemoteImage: sendRemoteImageFromRequest,
     sendLocalFile: sendLocalFileFromRequest,
+    sendLocalFilePreview: sendLocalFilePreviewFromRequest,
     writeLocalFile: writeLocalFileFromRequest
   };
 }

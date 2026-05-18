@@ -1,7 +1,7 @@
 /**
- * 独立文件预览入口：按类型渲染 PDF/ Markdown/文本/媒体或下载 fallback，并提供工具栏与外链分享。
+ * 独立文件预览入口：按类型渲染 PDF/Word/Markdown/文本/媒体或下载 fallback，并提供工具栏与外链分享。
  *
- * Keywords: file-preview, pdf, markdown, media, workspace-file
+ * Keywords: file-preview, pdf, word, markdown, media, workspace-file
  *
  * Exports:
  * - default — `FilePreviewApp`（由 `main` 按需挂载的整页预览壳）。
@@ -19,7 +19,7 @@ import { copyTextToClipboard } from '../utils/clipboard.js';
 import { THEME_KEY } from './AppState.js';
 import { PdfPreview } from './PdfPreview.jsx';
 import { resolvePwaTheme } from './pwa-theme.js';
-import { compactPath, localFileApiPath } from './session-utils.js';
+import { compactPath, localFileApiPath, localFilePreviewDataPath } from './session-utils.js';
 
 function fileNameFromPath(value) {
   const normalized = String(value || '').replaceAll('\\', '/');
@@ -40,6 +40,13 @@ function previewKind(pathValue, contentType) {
   }
   if (lowerType.includes('pdf') || /\.pdf(?:$|[:?#])/i.test(lowerPath)) {
     return 'pdf';
+  }
+  if (
+    lowerType.includes('wordprocessingml.document') ||
+    lowerType.includes('application/msword') ||
+    /\.(?:docx|docm|doc)(?:$|[:?#])/i.test(lowerPath)
+  ) {
+    return 'word';
   }
   if (
     lowerType.includes('markdown') ||
@@ -84,6 +91,7 @@ export default function FilePreviewApp() {
     loading: true,
     error: '',
     text: '',
+    html: '',
     objectUrl: '',
     pdfData: null,
     contentType: '',
@@ -127,10 +135,10 @@ export default function FilePreviewApp() {
 
     async function loadFile() {
       if (!filePath) {
-        setState({ loading: false, error: '缺少文件路径', text: '', objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
+        setState({ loading: false, error: '缺少文件路径', text: '', html: '', objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
         return;
       }
-      setState({ loading: true, error: '', text: '', objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
+      setState({ loading: true, error: '', text: '', html: '', objectUrl: '', pdfData: null, contentType: '', mtimeMs: 0, editable: false });
       try {
         const pathKind = previewKind(filePath, '');
         if (isNativeMediaKind(pathKind) || pathKind === 'pdf') {
@@ -138,12 +146,30 @@ export default function FilePreviewApp() {
             loading: false,
             error: '',
             text: '',
+            html: '',
             objectUrl: '',
             pdfData: null,
             contentType: pathKind === 'pdf' ? 'application/pdf' : '',
             mtimeMs: 0,
             editable: false
           });
+          return;
+        }
+        if (pathKind === 'word') {
+          const result = await apiFetch(localFilePreviewDataPath(filePath));
+          if (!stopped) {
+            setState({
+              loading: false,
+              error: '',
+              text: '',
+              html: result.html || '',
+              objectUrl: '',
+              pdfData: null,
+              contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              mtimeMs: Number(result.mtimeMs || 0),
+              editable: false
+            });
+          }
           return;
         }
         const response = await fetch(localFileApiPath(filePath), { credentials: 'same-origin' });
@@ -168,23 +194,24 @@ export default function FilePreviewApp() {
           const text = await blob.text();
           if (!stopped) {
             setDraft(text);
-            setState({ loading: false, error: '', text, objectUrl: '', pdfData: null, contentType: blob.type, mtimeMs, editable });
+            setState({ loading: false, error: '', text, html: '', objectUrl: '', pdfData: null, contentType: blob.type, mtimeMs, editable });
           }
           return;
         }
         if (kind === 'pdf') {
           const pdfData = await blob.arrayBuffer();
-          setState({ loading: false, error: '', text: '', objectUrl: '', pdfData, contentType: blob.type, mtimeMs, editable: false });
+          setState({ loading: false, error: '', text: '', html: '', objectUrl: '', pdfData, contentType: blob.type, mtimeMs, editable: false });
           return;
         }
         objectUrl = URL.createObjectURL(blob);
-        setState({ loading: false, error: '', text: '', objectUrl, contentType: blob.type, mtimeMs, editable: false });
+        setState({ loading: false, error: '', text: '', html: '', objectUrl, contentType: blob.type, mtimeMs, editable: false });
       } catch (error) {
         if (!stopped) {
           setState({
             loading: false,
             error: error?.message || '文件读取失败',
             text: '',
+            html: '',
             objectUrl: '',
             pdfData: null,
             contentType: '',
@@ -209,7 +236,7 @@ export default function FilePreviewApp() {
   const subtitle = compactPath(filePath);
   const canRenderMarkdown = kind === 'markdown';
   const canEdit = state.editable && (kind === 'markdown' || kind === 'text');
-  const canAdjustFont = kind === 'markdown' || kind === 'text';
+  const canAdjustFont = kind === 'markdown' || kind === 'text' || kind === 'word';
   const editing = mode === 'edit';
   const markdownText = canRenderMarkdown ? stripFrontmatter(state.text) : state.text;
 
@@ -403,6 +430,9 @@ export default function FilePreviewApp() {
         ) : null}
         {!state.loading && !state.error && kind === 'markdown' && mode === 'rendered' ? (
           <MarkdownContent text={markdownText} className="file-preview-markdown message-content" />
+        ) : null}
+        {!state.loading && !state.error && kind === 'word' ? (
+          <article className="file-preview-word" dangerouslySetInnerHTML={{ __html: state.html || '<p>Word 文档没有可预览文本。</p>' }} />
         ) : null}
         {!state.loading && !state.error && !editing && (kind === 'text' || (kind === 'markdown' && mode === 'raw')) ? (
           <pre className="file-preview-text">{state.text}</pre>

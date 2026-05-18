@@ -5,9 +5,9 @@
  *
  * Exports:
  * - 通用与展示 — `formatTime`、`formatRelativeShort`、`formatDuration*`、`subAgentRoleLabel`、`compactPath`、`safeStoredJsonArray` 等。
- * - 上下文与媒体 — `emptyContextStatus`、`imageUrlWithRetry`、`sourceMediaKind`、本地/远程源与 `local*ApiPath`、`remoteImageApiPath`、`dataImageObjectUrl`、`useResolvedImageSource`。
+ * - 上下文与媒体 — `emptyContextStatus`、`imageUrlWithRetry`、`sourceMediaKind`、本地/远程源与 `local*ApiPath`、`localFilePreviewDataPath`、`remoteImageApiPath`、`dataImageObjectUrl`、`useResolvedImageSource`。
  * - 会话生命周期 — `createClientTurnId`、`createDraftSession`、`resolveNewConversationProject`、`resolveComposerGitProject`、`isDraftSession`、`sessionMessagesApiPath`、标题补丁、`upsertSessionInProject`。
- * - Runtime — `payloadRunKeys`、`selectedRunKeys`、`reconcileThreadRuntimeWithSessions`、`is*Runtime`、`runningByIdWithSelectedActivity`、`sessionRunBadgeState`、`selectedSessionIsRunning`、`hasVisibleAssistantForTurn` 等。
+ * - Runtime — `payloadRunKeys`、`selectedRunKeys`、`reconcileThreadRuntimeWithSessions`、`is*Runtime`、`selectedMessagesHaveActiveTurnActivity`、`sessionRunBadgeState`、`selectedSessionIsRunning`、`hasVisibleAssistantForTurn` 等。
  *
  * Inward: `api`（blob）；`context-status`；`shared/session-title`。
  *
@@ -303,6 +303,12 @@ export function localFilePreviewPath(value) {
   return `/preview/file?${params.toString()}`;
 }
 
+export function localFilePreviewDataPath(value) {
+  const raw = String(value || '').trim();
+  const normalized = /%[0-9a-f]{2}/i.test(raw) ? safeDecodeUriComponent(raw) : raw;
+  return `/api/local-file-preview?path=${encodeURIComponent(normalized)}`;
+}
+
 export function dataImageObjectUrl(value) {
   const raw = String(value || '').trim();
   const match = raw.match(/^data:(image\/(?:png|jpe?g|webp|gif));base64,([\s\S]+)$/i);
@@ -589,8 +595,44 @@ export function sessionRunBadgeState(session, {
   return null;
 }
 
-export function selectedSessionIsRunning({ running = false } = {}) {
-  return Boolean(running);
+function messageHasVisibleContent(message = {}) {
+  return typeof message.content === 'string' && message.content.trim();
+}
+
+function messageIsActiveTurnActivity(message = {}) {
+  const kind = String(message?.kind || 'turn');
+  return (
+    message?.role === 'activity' &&
+    kind === 'turn' &&
+    ['running', 'queued'].includes(String(message.status || ''))
+  );
+}
+
+export function selectedMessagesHaveActiveTurnActivity(messages = []) {
+  const list = Array.isArray(messages) ? messages : [];
+  return list.some((message, index) => {
+    if (!messageIsActiveTurnActivity(message)) {
+      return false;
+    }
+    const hasSameTurnAssistant = list.some((candidate) =>
+      candidate?.role === 'assistant' &&
+      messageHasVisibleContent(candidate) &&
+      message.turnId &&
+      candidate.turnId === message.turnId
+    );
+    if (hasSameTurnAssistant) {
+      return false;
+    }
+    return !list.some((candidate, candidateIndex) =>
+      candidateIndex > index &&
+      candidate?.role === 'assistant' &&
+      messageHasVisibleContent(candidate)
+    );
+  });
+}
+
+export function selectedSessionIsRunning({ running = false, hasActiveTurnActivity = false } = {}) {
+  return Boolean(running || hasActiveTurnActivity);
 }
 
 export function hasVisibleAssistantForTurn(messages, payload) {

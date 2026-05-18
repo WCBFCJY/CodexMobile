@@ -192,9 +192,45 @@ test('file route handler accepts local file URLs with source filename path segme
 test('readonly local file route helper only allows GET previews before auth', () => {
   assert.equal(isReadonlyLocalFileRoute('GET', '/api/local-file'), true);
   assert.equal(isReadonlyLocalFileRoute('GET', '/api/local-file/%E9%9D%92%E7%94%9C.pdf'), true);
+  assert.equal(isReadonlyLocalFileRoute('GET', '/api/local-file-preview'), true);
   assert.equal(isReadonlyLocalFileRoute('PUT', '/api/local-file'), false);
   assert.equal(isReadonlyLocalFileRoute('GET', '/api/local-image'), false);
   assert.equal(isReadonlyLocalFileRoute('GET', '/api/files/search'), false);
+});
+
+test('file route handler routes local Word preview requests', async () => {
+  const calls = [];
+  const handler = createFileRouteHandler({
+    getProject: () => null,
+    staticService: {
+      async sendLocalImage() {
+        throw new Error('unexpected');
+      },
+      async sendLocalFile() {
+        throw new Error('unexpected');
+      },
+      async sendLocalFilePreview(req, res, url) {
+        calls.push(url.searchParams.get('path'));
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end('{"kind":"word"}');
+      }
+    },
+    saveUpload: async () => ({ name: 'file.txt' }),
+    uploadRoot: '/tmp/uploads',
+    maxUploadBytes: 100
+  });
+
+  const response = createResponse();
+  assert.equal(
+    await handler(
+      createRequest('GET'),
+      response,
+      new URL('http://local/api/local-file-preview?path=%2Ftmp%2Fbrief.docx')
+    ),
+    true
+  );
+  assert.equal(response.statusCode, 200);
+  assert.deepEqual(calls, ['/tmp/brief.docx']);
 });
 
 test('file route handler routes remote image proxy requests', async () => {

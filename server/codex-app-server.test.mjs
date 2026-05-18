@@ -1,12 +1,13 @@
 /**
- * 测试 server/codex-app-server.js：桌面线程列表参数与归档态筛选。
- * Keywords: codex-app-server, archive, thread-list, tests
+ * 测试 server/codex-app-server.js：桌面线程列表参数、归档筛选与 control socket 失败降级。
+ * Keywords: codex-app-server, archive, thread-list, socket, fallback
  * Exports: 无导出，内含用例
  * Inward: codex-app-server.js
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  desktopProxyFailureFallbackTransport,
   desktopThreadListRequestParams,
   filterDesktopThreadsForArchiveMode
 } from './codex-app-server.js';
@@ -35,4 +36,31 @@ test('filterDesktopThreadsForArchiveMode keeps archived threads only for archive
     'archived-1',
     'archived-2'
   ]);
+});
+
+test('desktopProxyFailureFallbackTransport falls back to isolated mode for read-only calls', () => {
+  assert.deepEqual(desktopProxyFailureFallbackTransport({}, { allowReadOnlyIsolated: true }), {
+    mode: 'isolated-dev',
+    strict: false,
+    sockPath: null,
+    connected: true,
+    reason: '桌面端 control socket 无法连接，正在使用独立开发 app-server'
+  });
+});
+
+test('desktopProxyFailureFallbackTransport falls back to headless mode for writable calls', () => {
+  assert.deepEqual(desktopProxyFailureFallbackTransport({}, { allowHeadlessLocal: true }), {
+    mode: 'headless-local',
+    strict: false,
+    sockPath: null,
+    connected: true,
+    reason: '桌面端 control socket 无法连接，正在使用后台 Codex 执行'
+  });
+});
+
+test('desktopProxyFailureFallbackTransport respects disabled headless mode', () => {
+  assert.equal(
+    desktopProxyFailureFallbackTransport({ CODEXMOBILE_DISABLE_HEADLESS_CODEX: '1' }, { allowHeadlessLocal: true }),
+    null
+  );
 });
