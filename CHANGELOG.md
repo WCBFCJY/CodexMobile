@@ -4,6 +4,18 @@ All notable changes to CodexMobile are tracked here.
 
 ## Unreleased
 
+## [2.0.4] - 2026-05-19
+
+### Added
+
+- Added richer local file previews for Word, HTML, spreadsheets, CSV, and PPTX files, including server-side preview extraction and front-end preview layouts.
+
+### Fixed
+
+- Added desktop proxy connection fallback handling so CodexMobile can continue through an isolated or headless local transport when the desktop control socket is unavailable.
+- Improved selected-session running detection so active turn cards keep the mobile UI in a running state until a visible assistant response arrives.
+- Updated the package version to `2.0.4`.
+
 ## [2.0.3] - 2026-05-16
 
 ### Fixed
