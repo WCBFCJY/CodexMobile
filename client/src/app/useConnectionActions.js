@@ -30,7 +30,7 @@ export function useConnectionActions({
     try {
       await apiFetch('/api/sync', { method: 'POST' });
       await loadStatus();
-      await loadProjects({ preserveSelection: true });
+      await loadProjects({ preserveSelection: true, preloadSessions: true });
       showToast({ level: 'success', title: '同步完成', body: '线程和状态已经刷新。' });
     } catch (error) {
       showToast({ level: 'error', title: '同步失败', body: error.message || '无法刷新同步。' });

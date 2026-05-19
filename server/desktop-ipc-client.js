@@ -7,8 +7,10 @@
  * - desktopIpcMethodVersion / desktopIpcSocketPath / getDesktopIpcSocketStatus。
  * - DesktopIpcClient — 连接与请求封装。
  * - probeDesktopIpc — 探测桌面端 IPC 是否可连。
+ * - startDesktopFollowerTurn / steerDesktopFollowerTurn / interruptDesktopFollowerTurn — 请求桌面端接管发送、追加与中断。
  * - compactDesktopFollowerThread — 请求桌面端压缩指定线程上下文。
  * - setDesktopFollowerModelAndReasoning — 同步桌面端当前线程模型设置。
+ * - setDesktopFollowerCollaborationMode — 同步桌面端当前线程协作模式。
  * - broadcastDesktopThreadArchived / broadcastDesktopThreadUnarchived — 同步线程归档态。
  * - broadcastDesktopThreadListRefresh — 通知 Codex Desktop 刷新线程列表相关查询。
  *
@@ -29,8 +31,12 @@ const DEFAULT_TIMEOUT_MS = 15_000;
 const DESKTOP_IPC_METHOD_VERSIONS = new Map([
   ['thread-archived', 2],
   ['thread-unarchived', 1],
+  ['thread-follower-start-turn', 1],
   ['thread-follower-compact-thread', 1],
+  ['thread-follower-steer-turn', 1],
+  ['thread-follower-interrupt-turn', 1],
   ['thread-follower-set-model-and-reasoning', 1],
+  ['thread-follower-set-collaboration-mode', 1],
   ['thread-follower-edit-last-user-turn', 1],
   ['thread-follower-command-approval-decision', 1],
   ['thread-follower-file-approval-decision', 1],
@@ -299,11 +305,40 @@ export async function compactDesktopFollowerThread(conversationId, options = {})
   }, options);
 }
 
+export async function startDesktopFollowerTurn(conversationId, turnStartParams, options = {}) {
+  return requestDesktopFollower('thread-follower-start-turn', {
+    conversationId,
+    turnStartParams
+  }, options);
+}
+
+export async function steerDesktopFollowerTurn(conversationId, { input, attachments = [], restoreMessage = {} }, options = {}) {
+  return requestDesktopFollower('thread-follower-steer-turn', {
+    conversationId,
+    input,
+    attachments,
+    restoreMessage
+  }, options);
+}
+
+export async function interruptDesktopFollowerTurn(conversationId, options = {}) {
+  return requestDesktopFollower('thread-follower-interrupt-turn', {
+    conversationId
+  }, options);
+}
+
 export async function setDesktopFollowerModelAndReasoning(conversationId, model, reasoningEffort, options = {}) {
   return requestDesktopFollower('thread-follower-set-model-and-reasoning', {
     conversationId,
     model,
     reasoningEffort
+  }, options);
+}
+
+export async function setDesktopFollowerCollaborationMode(conversationId, collaborationMode, options = {}) {
+  return requestDesktopFollower('thread-follower-set-collaboration-mode', {
+    conversationId,
+    collaborationMode
   }, options);
 }
 

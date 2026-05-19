@@ -24,9 +24,10 @@ test('desktop mirror IPC methods use the current desktop protocol version', () =
   assert.equal(desktopIpcMethodVersion('thread-follower-compact-thread'), 1);
   assert.equal(desktopIpcMethodVersion('thread-follower-set-model-and-reasoning'), 1);
   assert.equal(desktopIpcMethodVersion('thread-stream-state-changed'), 6);
-  assert.equal(desktopIpcMethodVersion('thread-follower-start-turn'), 0);
-  assert.equal(desktopIpcMethodVersion('thread-follower-steer-turn'), 0);
-  assert.equal(desktopIpcMethodVersion('thread-follower-interrupt-turn'), 0);
+  assert.equal(desktopIpcMethodVersion('thread-follower-start-turn'), 1);
+  assert.equal(desktopIpcMethodVersion('thread-follower-steer-turn'), 1);
+  assert.equal(desktopIpcMethodVersion('thread-follower-interrupt-turn'), 1);
+  assert.equal(desktopIpcMethodVersion('thread-follower-set-collaboration-mode'), 1);
 });
 
 function frameFor(payload) {
@@ -127,6 +128,57 @@ test('compactDesktopFollowerThread requests desktop context compaction', async (
   assert.equal(request.method, 'thread-follower-compact-thread');
   assert.equal(request.version, 1);
   assert.deepEqual(request.params, { conversationId: 'thread-1' });
+
+  server.close();
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+test('startDesktopFollowerTurn requests desktop turn start with turn params', async () => {
+  assert.equal(typeof desktopIpc.startDesktopFollowerTurn, 'function');
+
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-ipc-test-'));
+  const socketPath = path.join(dir, 'ipc.sock');
+  const server = net.createServer();
+  await new Promise((resolve) => server.listen(socketPath, resolve));
+
+  const turnStartParams = {
+    input: [{ type: 'text', text: '从手机发到桌面', text_elements: [] }],
+    cwd: '/tmp/project',
+    model: 'gpt-5.5',
+    effort: 'high'
+  };
+  const accepted = new Promise((resolve) => server.once('connection', resolve));
+  const sent = desktopIpc.startDesktopFollowerTurn('thread-1', turnStartParams, {
+    socketPath,
+    timeoutMs: 1000
+  });
+  const socket = await accepted;
+  const init = await readFrame(socket);
+  socket.write(frameFor({
+    type: 'response',
+    requestId: init.requestId,
+    resultType: 'success',
+    method: 'initialize',
+    result: { clientId: 'client-1' }
+  }));
+  const request = await readFrame(socket);
+  socket.write(frameFor({
+    type: 'response',
+    requestId: request.requestId,
+    resultType: 'success',
+    method: 'thread-follower-start-turn',
+    result: { turn: { id: 'desktop-turn-1' } }
+  }));
+  const result = await sent;
+
+  assert.deepEqual(result, { turn: { id: 'desktop-turn-1' } });
+  assert.equal(request.type, 'request');
+  assert.equal(request.method, 'thread-follower-start-turn');
+  assert.equal(request.version, 1);
+  assert.deepEqual(request.params, {
+    conversationId: 'thread-1',
+    turnStartParams
+  });
 
   server.close();
   await fs.rm(dir, { recursive: true, force: true });

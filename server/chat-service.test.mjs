@@ -11,6 +11,17 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createChatService } from './chat-service.js';
 
+function desktopOwnerUnavailableError() {
+  const error = new Error('桌面端 Codex 已连接，但当前线程没有可接管的桌面窗口。');
+  error.statusCode = 409;
+  error.code = 'CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE';
+  return error;
+}
+
+async function rejectDesktopFollowerTurn() {
+  throw desktopOwnerUnavailableError();
+}
+
 function makeChatService(overrides = {}) {
   const broadcasts = [];
   const service = createChatService({
@@ -26,6 +37,10 @@ function makeChatService(overrides = {}) {
     broadcast: (payload) => broadcasts.push(payload),
     runCodexTurn: async () => 'thread-1',
     steerCodexTurn: async () => ({ accepted: true, delivery: 'steered', sessionId: 'thread-1', turnId: 'active-turn' }),
+    startDesktopFollowerTurn: rejectDesktopFollowerTurn,
+    steerDesktopFollowerTurn: rejectDesktopFollowerTurn,
+    interruptDesktopFollowerTurn: async () => ({ interrupted: true }),
+    setDesktopFollowerCollaborationMode: async () => ({ ok: true }),
     abortCodexTurn: () => true,
     getActiveRuns: () => [],
     runImageTurn: async () => 'thread-1',
@@ -233,6 +248,47 @@ test('sendChat creates draft threads through headless even when desktop IPC cann
   assert.equal(result.desktopBridge.mode, 'headless-local');
   assert.equal(runPayload.draftSessionId, 'draft-project-1-1');
   assert.equal(broadcasts.some((payload) => payload.type === 'user-message'), true);
+});
+
+test('sendChat prefers desktop IPC for existing desktop threads when the owner is available', async () => {
+  let started = null;
+  let runPayload = null;
+  const { service, broadcasts } = makeChatService({
+    getDesktopBridgeStatus: async () => ({
+      strict: true,
+      connected: true,
+      mode: 'desktop-ipc',
+      reason: null,
+      capabilities: { sendToOpenDesktopThread: true, createThread: false, backgroundCodex: true }
+    }),
+    startDesktopFollowerTurn: async (conversationId, params) => {
+      started = { conversationId, params };
+      return { turn: { id: 'desktop-turn-1' } };
+    },
+    runCodexTurn: async (payload, emit) => {
+      runPayload = payload;
+      emit({ type: 'chat-complete', sessionId: payload.sessionId, turnId: payload.turnId });
+      return payload.sessionId;
+    }
+  });
+
+  const result = await service.sendChat({
+    projectId: 'project-1',
+    sessionId: 'thread-1',
+    clientTurnId: 'client-turn-1',
+    message: '从手机优先交给桌面 IPC'
+  });
+
+  assert.equal(result.delivery, 'started');
+  assert.equal(result.sessionId, 'thread-1');
+  assert.equal(result.turnId, 'desktop-turn-1');
+  assert.equal(result.clientTurnId, 'client-turn-1');
+  assert.equal(result.desktopBridge.mode, 'desktop-ipc');
+  assert.equal(started.conversationId, 'thread-1');
+  assert.equal(started.params.input.at(-1).text, '从手机优先交给桌面 IPC');
+  assert.equal(runPayload, null);
+  assert.equal(service.getTurn('client-turn-1')?.source, 'desktop-ipc');
+  assert.equal(broadcasts.some((payload) => payload.type === 'status-update' && payload.source === 'desktop-ipc'), true);
 });
 
 test('sendChat ignores desktop follower bridge for existing desktop-ipc threads', async () => {

@@ -1,13 +1,13 @@
 /**
- * 组装聊天业务：队列、后台 Codex、图片与自动标题等子能力。
+ * 组装聊天业务：桌面 IPC 优先投递、后台 Codex 兜底、队列、图片与自动标题等子能力。
  *
- * Keywords: chat-service, desktop-bridge, codex-turn, queue, attachments
+ * Keywords: chat-service, desktop-ipc, headless-fallback, codex-turn, queue
  *
  * Exports:
  * - createChatService — 创建可注入依赖的聊天服务实例。
  * - normalizeSelectedSkills — 再导出自 chat-request-prep。
  *
- * Inward（本模块依赖/组装的关键符号）: chat-queue、chat-delivery（headless）、chat-request-prep、chat-image-handler、interaction-requests、desktop-ipc、runtime-debug。
+ * Inward（本模块依赖/组装的关键符号）: chat-queue、chat-delivery、chat-request-prep、chat-image-handler、interaction-requests、desktop-ipc、runtime-debug。
  *
  * Outward（谁在用/调用场景）: HTTP 聊天路由或上层服务装配。
  *
@@ -32,13 +32,20 @@ import {
   prepareChatRequest,
   projectlessThreadWorkingDirectory
 } from './chat-request-prep.js';
+import { buildCodexTurnInput } from './codex-native-images.js';
 import { createChatImageHandler } from './chat-image-handler.js';
 import { createChatAutoNamer } from './chat-auto-title.js';
 import {
   compactActiveRuns,
   runtimeDebugLine
 } from './runtime-debug.js';
-import { compactDesktopFollowerThread } from './desktop-ipc-client.js';
+import {
+  compactDesktopFollowerThread,
+  interruptDesktopFollowerTurn as interruptDesktopFollowerTurnInCodexApp,
+  setDesktopFollowerCollaborationMode as setDesktopFollowerCollaborationModeInCodexApp,
+  startDesktopFollowerTurn as startDesktopFollowerTurnInCodexApp,
+  steerDesktopFollowerTurn as steerDesktopFollowerTurnInCodexApp
+} from './desktop-ipc-client.js';
 import { createInteractionBroker } from './interaction-requests.js';
 
 export { normalizeSelectedSkills } from './chat-request-prep.js';
@@ -78,6 +85,10 @@ export function createChatService({
   useLegacyImageGenerator,
   maybeAutoNameSession,
   compactCodexThread = compactDesktopFollowerThread,
+  startDesktopFollowerTurn = startDesktopFollowerTurnInCodexApp,
+  steerDesktopFollowerTurn = steerDesktopFollowerTurnInCodexApp,
+  interruptDesktopFollowerTurn = interruptDesktopFollowerTurnInCodexApp,
+  setDesktopFollowerCollaborationMode = setDesktopFollowerCollaborationModeInCodexApp,
   registerProjectlessThread = registerProjectlessThreadInCodexState,
   registerMobileSession = registerMobileSessionInIndex,
   rememberLiveSession = () => null,
@@ -124,7 +135,7 @@ export function createChatService({
       connected: true,
       strict: false,
       mode: 'headless-local',
-      reason: '移动端发送已改为后台 Codex 执行，不再交给桌面端 IPC 接管。',
+      reason: '桌面端 IPC 不可用或未接管当前线程，本次已改用后台 Codex 执行。',
       capabilities: {
         ...(bridge?.capabilities || {}),
         createThread: true,
@@ -132,6 +143,142 @@ export function createChatService({
         headless: true,
         backgroundCodex: true
       }
+    };
+  }
+
+  function desktopIpcUnavailableError(message = '桌面端 Codex 已连接，但当前线程没有可接管的桌面窗口。') {
+    const error = new Error(message);
+    error.statusCode = 409;
+    error.code = 'CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE';
+    return error;
+  }
+
+  async function sendViaDesktopIpc({
+    bridge,
+    project,
+    selectedSessionId,
+    draftSessionId,
+    turnId,
+    sendMode,
+    codexMessage,
+    visibleMessage,
+    attachments,
+    selectedSkills,
+    model,
+    reasoningEffort,
+    permissionMode,
+    collaborationMode
+  }) {
+    if (!selectedSessionId) {
+      throw desktopIpcUnavailableError('桌面端 IPC 还不能从手机直接新建桌面线程。');
+    }
+
+    const input = buildCodexTurnInput({
+      message: codexMessage,
+      attachments,
+      selectedSkills
+    });
+    const now = new Date().toISOString();
+    const lastSession = getSession(selectedSessionId);
+    const cwd = lastSession?.cwd || lastSession?.projectPath || project.path || null;
+    const baseTurnStartParams = {
+      input,
+      cwd,
+      approvalPolicy: 'never',
+      approvalsReviewer: 'user',
+      sandboxPolicy: permissionMode === 'bypassPermissions'
+        ? { type: 'dangerFullAccess' }
+        : { type: 'workspaceWrite', networkAccess: false },
+      model: model || null,
+      effort: reasoningEffort || null,
+      collaborationMode: collaborationMode || null,
+      attachments: []
+    };
+
+    let result;
+    try {
+      if (sendMode === 'steer') {
+        if (collaborationMode) {
+          await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode, { timeoutMs: 2500 });
+        }
+        result = await steerDesktopFollowerTurn(selectedSessionId, {
+          input,
+          attachments: [],
+          restoreMessage: {
+            text: codexMessage,
+            cwd,
+            context: {
+              workspaceRoots: project.path ? [project.path] : [],
+              collaborationMode: collaborationMode || null
+            },
+            responsesapiClientMetadata: null
+          }
+        }, { timeoutMs: 2500 });
+      } else {
+        if (sendMode === 'interrupt') {
+          await interruptDesktopFollowerTurn(selectedSessionId, { timeoutMs: 2500 });
+        }
+        if (collaborationMode) {
+          await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode, { timeoutMs: 2500 });
+        }
+        result = await startDesktopFollowerTurn(selectedSessionId, baseTurnStartParams, { timeoutMs: 2500 });
+      }
+    } catch (error) {
+      if (error?.message === 'no-client-found' || error?.statusCode === 409) {
+        throw desktopIpcUnavailableError();
+      }
+      throw error;
+    }
+
+    const appTurnId = result?.result?.turn?.id || result?.turn?.id || turnId;
+    rememberTurn(turnId, {
+      projectId: project.id,
+      projectPath: project.path,
+      sessionId: selectedSessionId,
+      previousSessionId: selectedSessionId,
+      draftSessionId,
+      source: 'desktop-ipc',
+      status: 'running',
+      label: sendMode === 'steer' ? '已发送到当前任务' : '已交给电脑端处理',
+      startedAt: now
+    });
+    broadcast({
+      type: 'user-message',
+      source: 'desktop-ipc',
+      sessionId: selectedSessionId,
+      projectId: project.id,
+      turnId,
+      clientTurnId: turnId,
+      message: {
+        id: `local-${Date.now()}`,
+        role: 'user',
+        content: visibleMessage,
+        turnId,
+        deliveryState: 'confirmed',
+        timestamp: now
+      }
+    });
+    broadcast({
+      type: 'status-update',
+      source: 'desktop-ipc',
+      projectId: project.id,
+      sessionId: selectedSessionId,
+      turnId,
+      kind: 'turn',
+      status: 'running',
+      label: sendMode === 'steer' ? '已发送到当前任务' : '已交给电脑端处理',
+      detail: '',
+      timestamp: new Date().toISOString()
+    });
+    return {
+      accepted: true,
+      queued: false,
+      sessionId: selectedSessionId,
+      draftSessionId,
+      turnId: appTurnId,
+      clientTurnId: turnId,
+      delivery: sendMode === 'steer' ? 'steered' : (sendMode === 'interrupt' ? 'interrupted-started' : 'started'),
+      desktopBridge: bridge
     };
   }
 
@@ -354,6 +501,48 @@ export function createChatService({
         delivery: 'queued',
         desktopBridge: headlessDeliveryBridge(bridge)
       };
+    }
+
+    if (bridge?.mode === 'desktop-ipc' && bridge?.connected && bridge?.capabilities?.sendToOpenDesktopThread && !imagePrompt) {
+      if (selectedSessionId) {
+        try {
+          runtimeDebugLine('sendChat.branch', {
+            branch: 'desktop-ipc',
+            bridgeMode: bridge?.mode,
+            selectedSessionId,
+            sendMode
+          });
+          return await sendViaDesktopIpc({
+            bridge,
+            project,
+            selectedSessionId,
+            draftSessionId,
+            turnId,
+            sendMode,
+            codexMessage,
+            visibleMessage,
+            attachments,
+            selectedSkills,
+            model: modelForTurn,
+            reasoningEffort: reasoningEffortForTurn,
+            permissionMode: body.permissionMode || 'default',
+            collaborationMode: collaborationMode || null
+          });
+        } catch (error) {
+          runtimeDebugLine('sendChat.branch', {
+            branch: 'desktop-ipc-fallback',
+            selectedSessionId,
+            reason: error?.code || error?.message || 'desktop-ipc-failed'
+          });
+          console.log('[desktop-ipc] send unavailable, using headless fallback:', error.message);
+        }
+      } else {
+        runtimeDebugLine('sendChat.branch', {
+          branch: 'desktop-ipc-draft-fallback',
+          bridgeMode: bridge?.mode,
+          draftSessionId
+        });
+      }
     }
 
     if (sendMode === 'steer') {

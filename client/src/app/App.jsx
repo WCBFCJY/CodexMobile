@@ -525,7 +525,7 @@ export default function App() {
         }
         await loadStatus();
         if (!stopped) {
-          await loadProjects({ preserveSelection: true, silent: true });
+          await loadProjects({ preserveSelection: true, silent: true, preloadSessions: true });
         }
       })
       .catch(() => null);

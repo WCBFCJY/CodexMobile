@@ -4,6 +4,7 @@
  * Keywords: bootstrap, load-status, session-restore
  *
  * Exports:
+ * - `projectsToPreloadForSidebar` — 计算侧栏同步后需要静默补齐会话的项目。
  * - `useAppBootstrap` — `loadStatus`、`loadProjects` 等启动向方法集合的 hook。
  *
  * Inward: `api`；`session-utils`、`context-status`、`interaction-model`、`selection-persistence`。
@@ -27,6 +28,12 @@ import {
   readStoredSelection,
   selectedSessionFromStoredSelection
 } from './selection-persistence.js';
+
+export function projectsToPreloadForSidebar(projects = [], preferredProjectId = '') {
+  return projects
+    .filter((project) => project?.id && project.id !== preferredProjectId && Number(project.sessionCount || 0) > 0)
+    .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+}
 
 export function useAppBootstrap({
   defaultStatus,
@@ -145,6 +152,7 @@ export function useAppBootstrap({
   const loadProjects = useCallback(async (options = {}) => {
     const preserveSelection = Boolean(options?.preserveSelection);
     const refreshSessions = options?.refreshSessions !== false;
+    const preloadSessions = Boolean(options?.preloadSessions);
     const storedSelection = readStoredSelection();
     const data = await apiFetch('/api/projects');
     const list = data.projects || [];
@@ -171,6 +179,18 @@ export function useAppBootstrap({
         preserveSelection,
         silent: Boolean(options?.silent)
       });
+    }
+    if (preloadSessions) {
+      const preferredProjectId = preferred?.id || '';
+      const projectsToPreload = projectsToPreloadForSidebar(list, preferredProjectId);
+      await Promise.all(projectsToPreload.map(async (project) => {
+        try {
+          const sessionData = await apiFetch(`/api/projects/${encodeURIComponent(project.id)}/sessions`);
+          setSessionsByProject((current) => ({ ...current, [project.id]: sessionData.sessions || [] }));
+        } catch {
+          // Keep sidebar refresh best-effort; the selected project path above remains authoritative.
+        }
+      }));
     }
   }, [loadSessions, selectedProjectRef, selectedSessionRef, setExpandedProjectIds, setProjects, setSelectedProject]);
 
