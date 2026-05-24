@@ -157,6 +157,46 @@ test('file route handler searches project files and preserves project not found 
   assert.deepEqual(JSON.parse(missingRes.body), { error: 'Project not found' });
 });
 
+test('file route handler lists local roots and directories', async () => {
+  const handler = createFileRouteHandler({
+    getProject: () => null,
+    localFileRoots: () => [{ id: 'home', label: 'Home', path: '/Users/example' }],
+    listLocalDirectory: async (requestedPath) => {
+      assert.equal(requestedPath, '/Users/example');
+      return {
+        path: '/Users/example',
+        parentPath: '/Users',
+        entries: [{ name: 'Code', path: '/Users/example/Code', kind: 'directory' }]
+      };
+    },
+    staticService: {
+      async sendLocalImage() {
+        throw new Error('unexpected');
+      }
+    },
+    saveUpload: async () => ({ name: 'file.txt' }),
+    uploadRoot: '/tmp/uploads',
+    maxUploadBytes: 100
+  });
+
+  const rootsRes = createResponse();
+  assert.equal(await handler(createRequest('GET'), rootsRes, new URL('http://local/api/files/roots')), true);
+  assert.deepEqual(JSON.parse(rootsRes.body), {
+    roots: [{ id: 'home', label: 'Home', path: '/Users/example' }]
+  });
+
+  const listRes = createResponse();
+  assert.equal(
+    await handler(createRequest('GET'), listRes, new URL('http://local/api/files/list?path=%2FUsers%2Fexample')),
+    true
+  );
+  assert.deepEqual(JSON.parse(listRes.body), {
+    path: '/Users/example',
+    parentPath: '/Users',
+    entries: [{ name: 'Code', path: '/Users/example/Code', kind: 'directory' }]
+  });
+});
+
 test('file route handler accepts local file URLs with source filename path segment', async () => {
   const calls = [];
   const handler = createFileRouteHandler({

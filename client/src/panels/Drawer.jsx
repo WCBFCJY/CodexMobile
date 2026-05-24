@@ -1,7 +1,7 @@
 /**
- * 主侧栏抽屉：项目 / 会话列表、配额与设置入口、归档与子代理等。
+ * 主侧栏抽屉：项目 / 会话列表、文件管理入口、配额与设置入口、归档与子代理等。
  *
- * Keywords: drawer, sidebar, sessions, projects, settings, archive-box, desktop-refresh, security-devices
+ * Keywords: drawer, sidebar, sessions, projects, file-manager, settings, archive-box, desktop-refresh, security-devices
  *
  * Exports:
  * - Drawer — 侧栏根组件。
@@ -61,6 +61,7 @@ export function Drawer({
   onNewConversation,
   onSync,
   syncing,
+  onOpenFileManager,
   theme,
   setTheme,
   runtimeDebug,
@@ -661,6 +662,14 @@ export function Drawer({
 
         <footer className="drawer-footer">
           <div className="drawer-footer-actions">
+            <button
+              type="button"
+              className="footer-icon-button"
+              onClick={onOpenFileManager}
+              aria-label="文件管理"
+            >
+              <Folder size={16} />
+            </button>
             <button
               type="button"
               className="footer-icon-button"

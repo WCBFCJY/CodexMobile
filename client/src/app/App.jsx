@@ -1,13 +1,13 @@
 /**
- * CodexMobile Web：根级应用编排——认证门禁、服务端状态与 WS、会话域数据流、把 props 下发给 Shell。
+ * CodexMobile Web：根级应用编排——认证门禁、服务端状态与 WS、会话/文件管理数据流、把 props 下发给 Shell。
  *
- * Keywords: pairing, websocket, bootstrap, session-orchestration, composer-props
+ * Keywords: pairing, websocket, bootstrap, session-orchestration, file-manager, composer-props
  *
  * Exports:
  * - default — `App`（入口挂载的根组件）。
  *
  * Inward（本模块组装）: `PairingScreen`, `AppShell`；多处 `use*` hooks（bootstrap / session / submit / runtime / uploads 等）；
- *   `session-utils`、`api`、`AppState` reducer。
+ *   `session-utils`、`api`、`AppState` 与 file-manager reducer。
  *
  * Outward（谁消费）: 应用入口（如 `main`）仅挂载本 default；DOM 拼装见 `AppShell.jsx`。
  *
@@ -26,6 +26,7 @@ import {
 import { useComposerSelections } from '../composer/useComposerSelections.js';
 import { useQueueDrafts } from '../composer/useQueueDrafts.js';
 import { connectionRecoveryState } from '../connection-recovery.js';
+import { fileManagerReducer, initialFileManagerState } from '../file-manager-state.js';
 import { mergeContextStatus, normalizeContextStatus } from './context-status.js';
 import { DEFAULT_REASONING_EFFORT, DEFAULT_STATUS, REASONING_DEFAULT_VERSION } from './defaults.js';
 import { appReducer, createInitialUiState, THEME_KEY } from './AppState.js';
@@ -94,6 +95,7 @@ export default function App() {
   const [contextStatus, setContextStatus] = useState(() => normalizeContextStatus(DEFAULT_STATUS.context));
   const [authenticated, setAuthenticated] = useState(Boolean(getToken()));
   const [uiState, dispatchUi] = useReducer(appReducer, undefined, () => createInitialUiState());
+  const [fileManager, dispatchFileManager] = useReducer(fileManagerReducer, initialFileManagerState);
   const setDrawerOpen = useCallback((value) => dispatchUi({ type: 'ui/drawerOpen', value }), []);
   const setPreviewImage = useCallback((value) => dispatchUi({ type: 'ui/previewImage', value }), []);
   const setDocsOpen = useCallback((value) => dispatchUi({ type: 'ui/docsOpen', value }), []);
@@ -1005,6 +1007,14 @@ export default function App() {
       onOpenAuth: handleOpenDocsAuth,
       onRefresh: handleRefreshDocs
     },
+    fileManagerPanelProps: {
+      open: fileManager.open,
+      state: fileManager,
+      dispatch: dispatchFileManager,
+      projects,
+      selectedProject,
+      onClose: () => dispatchFileManager({ type: 'close' })
+    },
     gitPanelProps: {
       open: gitPanel.open,
       action: gitPanel.action,
@@ -1057,6 +1067,10 @@ export default function App() {
     onNewConversation: handleNewConversation,
     onSync: handleSync,
     syncing,
+    onOpenFileManager: () => {
+      dispatchFileManager({ type: 'open', path: selectedProject?.path || '' });
+      setDrawerOpen(false);
+    },
     theme,
     setTheme,
     runtimeDebug: status.runtimeDebug,

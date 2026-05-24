@@ -1012,7 +1012,9 @@ async function requestHandler(req, res) {
       ...securityOptions,
       allowedOrigins: [...new Set([requestOrigin(req), ...(securityOptions.allowedOrigins || [])].filter(Boolean))]
     };
-    setSecurityHeaders(res, { secure: secureRequest });
+    setSecurityHeaders(res, url.pathname === '/preview/file'
+      ? { secure: secureRequest, frameAncestors: "'self'", frameOptions: 'SAMEORIGIN' }
+      : { secure: secureRequest });
     if (!requestMayUsePublicHttp(req, requestSecurityOptions)) {
       sendJson(res, 403, { error: 'HTTPS is required for public access' });
       return;

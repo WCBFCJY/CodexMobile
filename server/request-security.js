@@ -77,7 +77,7 @@ export function clearAuthCookie({ secure = false } = {}) {
   return buildAuthCookie('', { secure, maxAgeSeconds: 0 });
 }
 
-export function contentSecurityPolicy() {
+export function contentSecurityPolicy({ frameAncestors = "'none'" } = {}) {
   return [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'",
@@ -85,17 +85,17 @@ export function contentSecurityPolicy() {
     "img-src 'self' data: blob:",
     "connect-src 'self' https: wss:",
     "font-src 'self' data:",
-    "frame-ancestors 'none'",
+    `frame-ancestors ${frameAncestors}`,
     "base-uri 'self'",
     "form-action 'self'"
   ].join('; ');
 }
 
-export function setSecurityHeaders(res, { secure = false, cspReportOnly = false } = {}) {
+export function setSecurityHeaders(res, { secure = false, cspReportOnly = false, frameAncestors = "'none'", frameOptions = 'DENY' } = {}) {
   res.setHeader('x-content-type-options', 'nosniff');
   res.setHeader('referrer-policy', 'no-referrer');
-  res.setHeader('x-frame-options', 'DENY');
-  res.setHeader(cspReportOnly ? 'content-security-policy-report-only' : 'content-security-policy', contentSecurityPolicy());
+  res.setHeader('x-frame-options', frameOptions);
+  res.setHeader(cspReportOnly ? 'content-security-policy-report-only' : 'content-security-policy', contentSecurityPolicy({ frameAncestors }));
   res.setHeader('permissions-policy', 'camera=(), geolocation=(), microphone=()');
   if (secure) {
     res.setHeader('strict-transport-security', 'max-age=15552000; includeSubDomains');

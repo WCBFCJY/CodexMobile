@@ -1,19 +1,23 @@
 /**
- * 文件类 HTTP 路由：上传、本地文件读取、Word 预览、项目内文件搜索等。
+ * 文件类 HTTP 路由：上传、本地文件读取、目录浏览、Word 预览、项目内文件搜索等。
  *
- * Keywords: file-routes, multipart, local-file, word-preview, file-search
+ * Keywords: file-routes, multipart, local-file, file-browser, word-preview, file-search
  *
  * Exports:
  * - createFileRouteHandler — 返回文件 API 处理函数。
  * - isReadonlyLocalFileRoute — 判断无需登录即可读取的本地文件/转换预览路由。
  *
- * Inward（本模块依赖/组装的关键符号）: http-utils、file-search、upload-service。
+ * Inward（本模块依赖/组装的关键符号）: http-utils、file-browser、file-search、upload-service。
  *
  * Outward（谁在用/调用场景）: server/index。
  *
  * 不负责: Git 与聊天业务。
  */
 import { readBody, sendJson } from './http-utils.js';
+import {
+  listLocalDirectory as defaultListLocalDirectory,
+  localFileRoots as defaultLocalFileRoots
+} from './file-browser.js';
 import { searchProjectFiles as defaultSearchProjectFiles } from './file-search.js';
 import { saveUpload as defaultSaveUpload } from './upload-service.js';
 
@@ -27,6 +31,8 @@ export function isReadonlyLocalFileRoute(method = 'GET', pathname = '') {
 
 export function createFileRouteHandler({
   getProject,
+  localFileRoots = defaultLocalFileRoots,
+  listLocalDirectory = defaultListLocalDirectory,
   searchProjectFiles = defaultSearchProjectFiles,
   staticService,
   saveUpload = defaultSaveUpload,
@@ -83,6 +89,21 @@ export function createFileRouteHandler({
         sendJson(res, 200, { files });
       } catch (error) {
         sendJson(res, error.statusCode || 500, { error: error.message || 'Failed to search files' });
+      }
+      return true;
+    }
+
+    if (method === 'GET' && pathname === '/api/files/roots') {
+      sendJson(res, 200, { roots: localFileRoots() });
+      return true;
+    }
+
+    if (method === 'GET' && pathname === '/api/files/list') {
+      try {
+        const result = await listLocalDirectory(url.searchParams.get('path') || '');
+        sendJson(res, 200, result);
+      } catch (error) {
+        sendJson(res, error.statusCode || 500, { error: error.message || 'Failed to list directory' });
       }
       return true;
     }

@@ -76,3 +76,12 @@ test('setSecurityHeaders sets CSP and HSTS on secure requests', () => {
   assert.match(headers['content-security-policy'], /frame-ancestors 'none'/);
   assert.match(headers['permissions-policy'], /camera=\(\)/);
 });
+
+test('setSecurityHeaders can allow same-origin embedding for preview surfaces', () => {
+  const headers = {};
+  const res = { setHeader: (key, value) => { headers[key.toLowerCase()] = value; } };
+  setSecurityHeaders(res, { frameAncestors: "'self'", frameOptions: 'SAMEORIGIN' });
+
+  assert.match(headers['content-security-policy'], /frame-ancestors 'self'/);
+  assert.equal(headers['x-frame-options'], 'SAMEORIGIN');
+});
