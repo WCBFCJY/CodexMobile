@@ -234,8 +234,44 @@ test('readonly local file route helper only allows GET previews before auth', ()
   assert.equal(isReadonlyLocalFileRoute('GET', '/api/local-file/%E9%9D%92%E7%94%9C.pdf'), true);
   assert.equal(isReadonlyLocalFileRoute('GET', '/api/local-file-preview'), true);
   assert.equal(isReadonlyLocalFileRoute('PUT', '/api/local-file'), false);
+  assert.equal(isReadonlyLocalFileRoute('DELETE', '/api/local-file'), false);
   assert.equal(isReadonlyLocalFileRoute('GET', '/api/local-image'), false);
   assert.equal(isReadonlyLocalFileRoute('GET', '/api/files/search'), false);
+});
+
+test('file route handler routes local file delete requests', async () => {
+  const calls = [];
+  const handler = createFileRouteHandler({
+    getProject: () => null,
+    staticService: {
+      async sendLocalImage() {
+        throw new Error('unexpected');
+      },
+      async sendLocalFile() {
+        throw new Error('unexpected');
+      },
+      async deleteLocalFile(req, res, url) {
+        calls.push(url.searchParams.get('path'));
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end('{"ok":true}');
+      }
+    },
+    saveUpload: async () => ({ name: 'file.txt' }),
+    uploadRoot: '/tmp/uploads',
+    maxUploadBytes: 100
+  });
+
+  const res = createResponse();
+  assert.equal(
+    await handler(
+      createRequest('DELETE'),
+      res,
+      new URL('http://local/api/local-file?path=%2Ftmp%2Fold.md')
+    ),
+    true
+  );
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(calls, ['/tmp/old.md']);
 });
 
 test('file route handler routes local Word preview requests', async () => {

@@ -78,6 +78,11 @@ export function createFileRouteHandler({
       return true;
     }
 
+    if (method === 'DELETE' && localFileRoute) {
+      await staticService.deleteLocalFile(req, res, url);
+      return true;
+    }
+
     if (method === 'GET' && pathname === '/api/files/search') {
       const project = getProject(url.searchParams.get('projectId') || '');
       if (!project) {

@@ -329,3 +329,23 @@ test('writeLocalFile saves editable text files with conflict protection and back
     assert.equal(await fs.readFile(filePath, 'utf8'), '# Updated');
   });
 });
+
+test('deleteLocalFile removes regular files and keeps a backup copy', async () => {
+  await withTempService(async (service, root) => {
+    const filePath = path.join(root, 'secret.txt');
+    const deleteResponse = res();
+
+    await service.deleteLocalFile(
+      req(),
+      deleteResponse,
+      new URL(`http://local/api/local-file?path=${encodeURIComponent(filePath)}`)
+    );
+
+    assert.equal(deleteResponse.statusCode, 200);
+    const payload = JSON.parse(deleteResponse.body.toString('utf8'));
+    assert.equal(payload.ok, true);
+    assert.ok(payload.backupPath);
+    await assert.rejects(() => fs.stat(filePath), { code: 'ENOENT' });
+    assert.equal(await fs.readFile(payload.backupPath, 'utf8'), 'secret');
+  });
+});

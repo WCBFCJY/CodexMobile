@@ -26,7 +26,7 @@ import {
 import { useComposerSelections } from '../composer/useComposerSelections.js';
 import { useQueueDrafts } from '../composer/useQueueDrafts.js';
 import { connectionRecoveryState } from '../connection-recovery.js';
-import { fileManagerReducer, initialFileManagerState } from '../file-manager-state.js';
+import { createInitialFileManagerState, fileManagerReducer, rememberFileManagerView } from '../file-manager-state.js';
 import { mergeContextStatus, normalizeContextStatus } from './context-status.js';
 import { DEFAULT_REASONING_EFFORT, DEFAULT_STATUS, REASONING_DEFAULT_VERSION } from './defaults.js';
 import { appReducer, createInitialUiState, THEME_KEY } from './AppState.js';
@@ -95,7 +95,7 @@ export default function App() {
   const [contextStatus, setContextStatus] = useState(() => normalizeContextStatus(DEFAULT_STATUS.context));
   const [authenticated, setAuthenticated] = useState(Boolean(getToken()));
   const [uiState, dispatchUi] = useReducer(appReducer, undefined, () => createInitialUiState());
-  const [fileManager, dispatchFileManager] = useReducer(fileManagerReducer, initialFileManagerState);
+  const [fileManager, dispatchFileManager] = useReducer(fileManagerReducer, undefined, () => createInitialFileManagerState());
   const setDrawerOpen = useCallback((value) => dispatchUi({ type: 'ui/drawerOpen', value }), []);
   const setPreviewImage = useCallback((value) => dispatchUi({ type: 'ui/previewImage', value }), []);
   const setDocsOpen = useCallback((value) => dispatchUi({ type: 'ui/docsOpen', value }), []);
@@ -376,6 +376,10 @@ export default function App() {
   useEffect(() => {
     selectedModelRef.current = selectedModel;
   }, [selectedModel]);
+
+  useEffect(() => {
+    rememberFileManagerView(fileManager);
+  }, [fileManager.open, fileManager.path]);
 
   useEffect(() => {
     selectedReasoningEffortRef.current = selectedReasoningEffort;

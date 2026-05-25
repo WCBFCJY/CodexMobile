@@ -4,6 +4,24 @@ All notable changes to CodexMobile are tracked here.
 
 ## Unreleased
 
+## [2.0.5] - 2026-05-25
+
+### Added
+
+- Added a full file manager workspace with local directory browsing, common locations, path jumping, search, and desktop-side embedded file previews.
+- Added local file deletion from the file manager with confirmation and backup copies before removal.
+- Added persistence for the file manager open state and current path across refreshes.
+
+### Changed
+
+- Updated file preview embedding so the desktop file manager can use the full right-side preview area without nested headers or duplicated raw-view controls.
+- Switched chat delivery to prefer desktop IPC for existing desktop threads, while keeping headless local execution as a fallback when needed.
+
+### Fixed
+
+- Tightened file manager layout tests and styling so navigation controls stay in the left sidebar and preview content occupies the right pane cleanly.
+- Updated the package version to `2.0.5`.
+
 ## [2.0.4] - 2026-05-19
 
 ### Added

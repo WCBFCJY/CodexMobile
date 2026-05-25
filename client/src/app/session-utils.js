@@ -295,11 +295,14 @@ export function localFileApiPath(value) {
   return `/api/local-file/${encodeURIComponent(fileName)}?path=${encodeURIComponent(normalized)}`;
 }
 
-export function localFilePreviewPath(value) {
+export function localFilePreviewPath(value, options = {}) {
   const raw = String(value || '').trim();
   const normalized = /%[0-9a-f]{2}/i.test(raw) ? safeDecodeUriComponent(raw) : raw;
   const params = new URLSearchParams();
   params.set('path', normalized);
+  if (options?.embed) {
+    params.set('embed', '1');
+  }
   return `/preview/file?${params.toString()}`;
 }
 

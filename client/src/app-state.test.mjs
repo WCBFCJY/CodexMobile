@@ -395,6 +395,10 @@ test('localFilePreviewPath routes local files through the mobile preview page', 
     localFilePreviewPath('/Users/demo/report.md', 'secret token'),
     '/preview/file?path=%2FUsers%2Fdemo%2Freport.md'
   );
+  assert.equal(
+    localFilePreviewPath('/Users/demo/report.md', { embed: true }),
+    '/preview/file?path=%2FUsers%2Fdemo%2Freport.md&embed=1'
+  );
 });
 
 test('localFilePreviewDataPath routes local Word files through the conversion API', () => {

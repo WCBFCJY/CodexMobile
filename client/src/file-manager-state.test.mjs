@@ -8,9 +8,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  createInitialFileManagerState,
   fileManagerEntryOpenAction,
   fileManagerReducer,
   initialFileManagerState,
+  rememberFileManagerView,
   sortFileManagerEntries
 } from './file-manager-state.js';
 
@@ -26,6 +28,24 @@ test('fileManagerReducer opens at the requested path and closes without losing i
   const closed = fileManagerReducer(opened, { type: 'close' });
   assert.equal(closed.open, false);
   assert.equal(closed.path, '/Users/example/Code');
+});
+
+test('file manager restores open page and path after refresh', () => {
+  const store = new Map();
+  const storage = {
+    getItem: (key) => store.get(key) || '',
+    setItem: (key, value) => store.set(key, value),
+    removeItem: (key) => store.delete(key)
+  };
+
+  rememberFileManagerView({ open: true, path: '/Users/example/Documents' }, storage);
+
+  const restored = createInitialFileManagerState({ storage });
+  assert.equal(restored.open, true);
+  assert.equal(restored.path, '/Users/example/Documents');
+
+  rememberFileManagerView({ open: false, path: '/Users/example/Documents' }, storage);
+  assert.equal(createInitialFileManagerState({ storage }).open, false);
 });
 
 test('fileManagerReducer keeps server listing metadata together', () => {

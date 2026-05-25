@@ -1,7 +1,7 @@
 /**
- * 本机文件管理面板：列出连接电脑目录、常用入口、路径跳转，并在桌面端内嵌现有预览页。
+ * 本机文件管理面板：左侧集中目录浏览与位置操作，右侧整屏承载桌面端文件预览/编辑。
  *
- * Keywords: file-manager, local-files, directory, preview, drawer
+ * Keywords: file-manager, local-files, directory, preview, desktop-workbench
  *
  * Exports:
  * - FileManagerPanel — 全屏文件浏览面板组件。
@@ -13,11 +13,11 @@
  * 不负责: 文件内容解析、保存编辑与危险文件操作。
  */
 
-import { ArrowUp, ChevronLeft, ExternalLink, File, FileText, Folder, FolderOpen, HardDrive, Home, Loader2, RefreshCw, Search, X } from 'lucide-react';
+import { ArrowUp, ChevronDown, ChevronLeft, ExternalLink, File, FileText, Folder, FolderOpen, HardDrive, Home, Loader2, MapPinned, RefreshCw, Search, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '../api.js';
 import { fileManagerEntryOpenAction, sortFileManagerEntries } from '../file-manager-state.js';
-import { compactPath, localFilePreviewPath } from '../app/session-utils.js';
+import { compactPath, localFileApiPath, localFilePreviewPath } from '../app/session-utils.js';
 
 function entryIcon(entry) {
   if (entry.kind === 'directory') {
@@ -99,6 +99,10 @@ export function FileManagerPanel({
   const [pathDraft, setPathDraft] = useState('');
   const [query, setQuery] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
+  const [rootsMenuOpen, setRootsMenuOpen] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [deletingPath, setDeletingPath] = useState('');
   const [desktopPreview, setDesktopPreview] = useState(() => {
     if (typeof window === 'undefined' || !window.matchMedia) {
       return false;
@@ -114,6 +118,7 @@ export function FileManagerPanel({
     ...roots
   ]), [projectRootItems, roots, selectedProject]);
   const normalizedQuery = query.trim().toLowerCase();
+  const searchVisible = searchExpanded || Boolean(query);
   const visibleEntries = useMemo(() => {
     if (!normalizedQuery) {
       return sortFileManagerEntries(entries);
@@ -127,6 +132,7 @@ export function FileManagerPanel({
   const loadDirectory = useCallback(async (nextPath = '') => {
     dispatch({ type: 'loading', path: nextPath });
     setSelectedFile(null);
+    setDeleteError('');
     try {
       const params = new URLSearchParams();
       if (nextPath) {
@@ -201,6 +207,7 @@ export function FileManagerPanel({
       return;
     }
     if (action.type === 'preview') {
+      setDeleteError('');
       setSelectedFile(entry);
       return;
     }
@@ -213,51 +220,125 @@ export function FileManagerPanel({
     loadDirectory(pathDraft);
   }
 
+  function openRoot(rootPath) {
+    setQuery('');
+    setRootsMenuOpen(false);
+    loadDirectory(rootPath);
+  }
+
+  function toggleSearch() {
+    setSearchExpanded((value) => !value);
+  }
+
+  async function deleteSelectedFile() {
+    if (!selectedFile?.path || selectedFile.kind === 'directory' || deletingPath) {
+      return;
+    }
+    const confirmed = window.confirm(`删除文件「${selectedFile.name || '未命名文件'}」？`);
+    if (!confirmed) {
+      return;
+    }
+    setDeleteError('');
+    setDeletingPath(selectedFile.path);
+    try {
+      await apiFetch(localFileApiPath(selectedFile.path), { method: 'DELETE' });
+      setSelectedFile(null);
+      await loadDirectory(currentPath);
+    } catch (error) {
+      setDeleteError(error?.message || '删除失败');
+    } finally {
+      setDeletingPath('');
+    }
+  }
+
   return (
     <section className="file-manager-panel" role="dialog" aria-modal="true" aria-label="文件管理">
-      <header className="file-manager-header">
-        <button className="icon-button" type="button" onClick={onClose} aria-label="关闭文件管理">
-          <ChevronLeft size={22} />
-        </button>
-        <div className="file-manager-title">
-          <strong>文件管理</strong>
-          <span>{currentPath ? compactPath(currentPath) : '本机文件'}</span>
-        </div>
-        <button className="icon-button" type="button" onClick={onClose} aria-label="关闭文件管理">
-          <X size={20} />
-        </button>
-      </header>
-
-      <div className="file-manager-body">
-        <div className="file-manager-roots" aria-label="常用位置">
-          {rootItems.map((root) => (
-            <button key={`${root.id}-${root.path}`} type="button" onClick={() => { setQuery(''); loadDirectory(root.path); }}>
-              {root.id === 'home' ? <Home size={15} /> : root.project ? <FolderOpen size={15} /> : <HardDrive size={15} />}
-              <span>{root.label}</span>
+      <div className="file-manager-shell">
+        <aside className="file-manager-sidebar" aria-label="文件浏览">
+          <header className="file-manager-header">
+            <button className="icon-button" type="button" onClick={onClose} aria-label="关闭文件管理">
+              <ChevronLeft size={22} />
             </button>
-          ))}
-        </div>
-        {rootsError ? <div className="file-manager-inline-error">{rootsError}</div> : null}
+            <div className="file-manager-title">
+              <strong>文件管理</strong>
+              <span>{currentPath ? compactPath(currentPath) : '本机文件'}</span>
+            </div>
+          </header>
 
-        <form className="file-manager-location" onSubmit={submitPath}>
-          <input value={pathDraft} onChange={(event) => setPathDraft(event.target.value)} aria-label="文件路径" placeholder="/Users/..." />
-          <button type="submit" aria-label="跳转路径">
-            <ExternalLink size={15} />
-          </button>
-          <button type="button" onClick={() => state.parentPath && loadDirectory(state.parentPath)} disabled={!state.parentPath} aria-label="返回上级">
-            <ArrowUp size={15} />
-          </button>
-          <button type="button" onClick={() => loadDirectory(currentPath)} disabled={state.loading} aria-label="刷新目录">
-            {state.loading ? <Loader2 className="spin" size={15} /> : <RefreshCw size={15} />}
-          </button>
-        </form>
+          <div className="file-manager-sidebar-actions">
+            <div className="file-manager-root-menu">
+              <button
+                type="button"
+                className="file-manager-tool-button"
+                onClick={() => setRootsMenuOpen((value) => !value)}
+                aria-label="常用位置"
+                aria-expanded={rootsMenuOpen ? 'true' : 'false'}
+              >
+                <MapPinned size={16} />
+                <span>位置</span>
+                <ChevronDown size={14} />
+              </button>
+              {rootsMenuOpen ? (
+                <div className="file-manager-root-popover" role="menu" aria-label="常用位置">
+                  {rootItems.map((root) => (
+                    <button key={`${root.id}-${root.path}`} type="button" onClick={() => openRoot(root.path)} role="menuitem">
+                      {root.id === 'home' ? <Home size={15} /> : root.project ? <FolderOpen size={15} /> : <HardDrive size={15} />}
+                      <span>{root.label}</span>
+                      <small>{compactPath(root.path)}</small>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <button className="file-manager-tool-button is-icon" type="button" onClick={() => state.parentPath && loadDirectory(state.parentPath)} disabled={!state.parentPath} aria-label="返回上级">
+              <ArrowUp size={16} />
+            </button>
+            <button className="file-manager-tool-button is-icon" type="button" onClick={() => loadDirectory(currentPath)} disabled={state.loading} aria-label="刷新目录">
+              {state.loading ? <Loader2 className="spin" size={16} /> : <RefreshCw size={16} />}
+            </button>
+            {selectedFile?.path ? (
+              <a className="file-manager-tool-button is-icon" href={localFilePreviewPath(selectedFile.path)} target="_blank" rel="noreferrer noopener" aria-label="打开完整预览">
+                <ExternalLink size={16} />
+              </a>
+            ) : null}
+            {selectedFile?.path && selectedFile.kind !== 'directory' ? (
+              <button
+                className="file-manager-tool-button is-icon is-danger"
+                type="button"
+                onClick={deleteSelectedFile}
+                disabled={deletingPath === selectedFile.path}
+                aria-label="删除文件"
+              >
+                {deletingPath === selectedFile.path ? <Loader2 className="spin" size={16} /> : <Trash2 size={16} />}
+              </button>
+            ) : null}
+            <div className={`file-manager-search-toggle ${searchVisible ? 'is-open' : ''}`}>
+              <button className="file-manager-tool-button is-icon" type="button" onClick={toggleSearch} aria-label="搜索当前目录" aria-expanded={searchVisible ? 'true' : 'false'}>
+                <Search size={16} />
+              </button>
+              {searchVisible ? (
+                <label className="file-manager-search">
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="搜索当前目录"
+                    aria-label="搜索当前目录"
+                    autoFocus
+                  />
+                </label>
+              ) : null}
+            </div>
+          </div>
 
-        <label className="file-manager-search">
-          <Search size={16} />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索当前目录" aria-label="搜索当前目录" />
-        </label>
+          {rootsError || deleteError ? <div className="file-manager-inline-error">{deleteError || rootsError}</div> : null}
 
-        <div className="file-manager-workspace">
+          <form className="file-manager-location" onSubmit={submitPath}>
+            <input value={pathDraft} onChange={(event) => setPathDraft(event.target.value)} aria-label="文件路径" placeholder="/Users/..." />
+            <button type="submit" aria-label="跳转路径">
+              <ExternalLink size={15} />
+            </button>
+          </form>
+
           <div className="file-manager-list" role="list" aria-busy={state.loading ? 'true' : 'false'}>
             {state.loading ? <div className="file-manager-status">正在读取目录...</div> : null}
             {!state.loading && state.error ? <div className="file-manager-error">{state.error}</div> : null}
@@ -283,33 +364,22 @@ export function FileManagerPanel({
               </button>
             )) : null}
           </div>
-          <aside className="file-manager-preview" aria-label="文件预览">
-            {selectedFile?.path ? (
-              <>
-                <div className="file-manager-preview-head">
-                  <div>
-                    <strong>{selectedFile.name}</strong>
-                    <span>{compactPath(selectedFile.path)}</span>
-                  </div>
-                  <a href={localFilePreviewPath(selectedFile.path)} target="_blank" rel="noreferrer noopener" aria-label="打开完整预览">
-                    <ExternalLink size={16} />
-                  </a>
-                </div>
-                <iframe
-                  className="file-manager-preview-frame"
-                  src={localFilePreviewPath(selectedFile.path)}
-                  title={`预览 ${selectedFile.name || '文件'}`}
-                />
-              </>
+        </aside>
+
+        <main className="file-manager-preview" aria-label="文件预览">
+          {selectedFile?.path ? (
+            <iframe
+              className="file-manager-preview-frame"
+              src={localFilePreviewPath(selectedFile.path, { embed: true })}
+              title={`预览 ${selectedFile.name || '文件'}`}
+            />
             ) : (
-              <div className="file-manager-preview-empty">
-                <FileText size={26} />
-                <strong>选择一个文件</strong>
-                <span>桌面端会在这里查看或编辑文本文件。</span>
-              </div>
-            )}
-          </aside>
-        </div>
+            <div className="file-manager-preview-empty">
+              <FileText size={30} />
+              <strong>选择一个文件</strong>
+            </div>
+          )}
+        </main>
       </div>
     </section>
   );

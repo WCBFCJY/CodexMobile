@@ -1,7 +1,7 @@
 /**
- * 独立文件预览入口：按类型渲染 PDF/Office/HTML/Markdown/文本/媒体或下载 fallback，并提供工具栏与外链分享。
+ * 独立/内嵌文件预览入口：按类型渲染 PDF/Office/HTML/Markdown/文本/媒体或下载 fallback，并提供工具栏与外链分享。
  *
- * Keywords: file-preview, pdf, office, html, spreadsheet, presentation, media
+ * Keywords: file-preview, embedded-preview, pdf, office, html, spreadsheet, presentation, media
  *
  * Exports:
  * - default — `FilePreviewApp`（由 `main` 按需挂载的整页预览壳）。
@@ -115,6 +115,7 @@ function cleanMimeType(value, fallback = 'application/octet-stream') {
 export default function FilePreviewApp() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const filePath = params.get('path') || '';
+  const embedded = params.get('embed') === '1';
   const rawFileUrl = localFileApiPath(filePath);
   const [mode, setMode] = useState('rendered');
   const [fontScale, setFontScale] = useState(1);
@@ -141,6 +142,7 @@ export default function FilePreviewApp() {
   useEffect(() => {
     const theme = resolvePwaTheme(localStorage.getItem(THEME_KEY), window);
     const previousTheme = document.documentElement.dataset.theme;
+    const previewEmbeddedClass = 'is-file-preview-embedded';
     const previousBody = {
       position: document.body.style.position,
       inset: document.body.style.inset,
@@ -149,6 +151,7 @@ export default function FilePreviewApp() {
     };
     const previousHtmlOverflow = document.documentElement.style.overflow;
     document.documentElement.dataset.theme = theme;
+    document.documentElement.classList.toggle(previewEmbeddedClass, embedded);
     document.documentElement.style.overflow = 'hidden';
     document.body.style.position = 'static';
     document.body.style.inset = 'auto';
@@ -160,13 +163,14 @@ export default function FilePreviewApp() {
       } else {
         delete document.documentElement.dataset.theme;
       }
+      document.documentElement.classList.remove(previewEmbeddedClass);
       document.documentElement.style.overflow = previousHtmlOverflow;
       document.body.style.position = previousBody.position;
       document.body.style.inset = previousBody.inset;
       document.body.style.overflow = previousBody.overflow;
       document.body.style.touchAction = previousBody.touchAction;
     };
-  }, []);
+  }, [embedded]);
 
   useEffect(() => {
     let stopped = false;
@@ -379,33 +383,35 @@ export default function FilePreviewApp() {
   }
 
   return (
-    <main className="file-preview-page" style={{ '--preview-font-scale': fontScale }}>
-      <header className="file-preview-header">
-        <button type="button" className="file-preview-icon-button" onClick={() => window.history.back()} aria-label="返回">
-          <ArrowLeft size={18} />
-        </button>
-        <div className="file-preview-title">
-          <strong>{title}</strong>
-          <span>{subtitle}</span>
-        </div>
-        <div className="file-preview-header-actions">
-          <button type="button" className="file-preview-icon-button" onClick={handleCopyPath} aria-label="复制路径">
-            {copied ? <Check size={16} /> : <Copy size={16} />}
+    <main className={`file-preview-page ${embedded ? 'is-embedded' : ''}`} style={{ '--preview-font-scale': fontScale }}>
+      {!embedded ? (
+        <header className="file-preview-header">
+          <button type="button" className="file-preview-icon-button" onClick={() => window.history.back()} aria-label="返回">
+            <ArrowLeft size={18} />
           </button>
-          <button
-            type="button"
-            className="file-preview-icon-button"
-            onClick={handleShareFile}
-            disabled={sharing || state.loading || !!state.error}
-            aria-label="分享文件"
-          >
-            <Share2 size={16} />
-          </button>
-          <button type="button" className="file-preview-icon-button" onClick={() => window.location.reload()} aria-label="刷新">
-            <RefreshCw size={17} />
-          </button>
-        </div>
-      </header>
+          <div className="file-preview-title">
+            <strong>{title}</strong>
+            <span>{subtitle}</span>
+          </div>
+          <div className="file-preview-header-actions">
+            <button type="button" className="file-preview-icon-button" onClick={handleCopyPath} aria-label="复制路径">
+              {copied ? <Check size={16} /> : <Copy size={16} />}
+            </button>
+            <button
+              type="button"
+              className="file-preview-icon-button"
+              onClick={handleShareFile}
+              disabled={sharing || state.loading || !!state.error}
+              aria-label="分享文件"
+            >
+              <Share2 size={16} />
+            </button>
+            <button type="button" className="file-preview-icon-button" onClick={() => window.location.reload()} aria-label="刷新">
+              <RefreshCw size={17} />
+            </button>
+          </div>
+        </header>
+      ) : null}
 
       {kind !== 'pdf' ? (
         <div className="file-preview-toolbar" aria-label="预览工具">
@@ -414,10 +420,6 @@ export default function FilePreviewApp() {
               <button type="button" className={mode === 'rendered' ? 'is-active' : ''} onClick={() => setMode('rendered')}>
                 <FileText size={15} />
                 <span>渲染</span>
-              </button>
-              <button type="button" className={mode === 'raw' ? 'is-active' : ''} onClick={() => setMode('raw')}>
-                <Code2 size={15} />
-                <span>原文</span>
               </button>
               {canEdit ? (
                 <button type="button" className={mode === 'edit' ? 'is-active' : ''} onClick={() => setMode('edit')}>

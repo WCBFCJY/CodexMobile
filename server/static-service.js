@@ -6,7 +6,7 @@
  * Exports:
  * - DEFAULT_MIME_TYPES / EDITABLE_TEXT_EXTENSIONS。
  * - resolveLocalImagePath / safeDecodeLocalPath / stripLocalFileLineSuffix。
- * - sendLocalImage / sendRemoteImage / sendLocalFile / sendLocalFilePreview / writeLocalTextFile / serveFileFromRoot。
+ * - sendLocalImage / sendRemoteImage / sendLocalFile / sendLocalFilePreview / writeLocalTextFile / deleteLocalFile / serveFileFromRoot。
  * - createStaticService — 组装根目录与缓存策略。
  *
  * Inward（本模块依赖/组装的关键符号）: http-utils.sendStaticContent、Node fs。
@@ -628,6 +628,31 @@ export async function writeLocalTextFile(req, res, url, body) {
   }
 }
 
+export async function deleteLocalFile(req, res, url) {
+  try {
+    const { filePath, stat } = await resolveExistingLocalFile(url);
+    const backupRoot = path.join(process.cwd(), '.codexmobile', 'backups', 'deleted-local-files');
+    await fs.mkdir(backupRoot, { recursive: true });
+    const backupPath = path.join(backupRoot, backupFileName(filePath));
+    await fs.copyFile(filePath, backupPath);
+    await fs.unlink(filePath);
+    sendJson(res, 200, {
+      ok: true,
+      path: filePath,
+      mtimeMs: Math.round(stat.mtimeMs),
+      size: stat.size,
+      backupPath
+    });
+  } catch (error) {
+    sendJson(res, error.statusCode || 500, {
+      error: error.message || 'Failed to delete file',
+      path: error.requestedPath || '',
+      checked: error.checkedPaths || [],
+      details: error.details || []
+    });
+  }
+}
+
 export async function serveFileFromRoot(req, res, rootDir, requestedPath, cacheControl, {
   mimeTypes = DEFAULT_MIME_TYPES
 } = {}) {
@@ -759,12 +784,17 @@ export function createStaticService({
     await writeLocalTextFile(req, res, url, body);
   }
 
+  async function deleteLocalFileFromRequest(req, res, url) {
+    await deleteLocalFile(req, res, url);
+  }
+
   return {
     serveStatic,
     sendLocalImage: sendLocalImageFromRequest,
     sendRemoteImage: sendRemoteImageFromRequest,
     sendLocalFile: sendLocalFileFromRequest,
     sendLocalFilePreview: sendLocalFilePreviewFromRequest,
-    writeLocalFile: writeLocalFileFromRequest
+    writeLocalFile: writeLocalFileFromRequest,
+    deleteLocalFile: deleteLocalFileFromRequest
   };
 }
