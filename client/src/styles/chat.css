@@ -1405,7 +1405,7 @@
 
 .message-row.is-user .message-bubble time,
 .message-row.is-user .message-delivery {
-  color: rgba(255, 255, 255, 0.64);
+  color: var(--bubble-user-muted);
 }
 
 .message-delivery.is-failed {

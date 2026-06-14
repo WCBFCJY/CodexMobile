@@ -272,7 +272,7 @@
 
 .file-manager-row {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
+  grid-template-columns: 34px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
   min-height: 58px;
@@ -337,12 +337,6 @@
   line-height: 16px;
 }
 
-.file-manager-entry-kind {
-  color: var(--muted);
-  font-size: 12px;
-  white-space: nowrap;
-}
-
 .file-manager-status,
 .file-manager-error,
 .file-manager-inline-error {
@@ -356,6 +350,112 @@
 .file-manager-inline-error {
   padding: 8px 14px 12px;
   text-align: left;
+}
+
+.file-manager-tree {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+  padding: 6px 0 10px;
+}
+
+.file-manager-tree-row {
+  --tree-depth: 0;
+  display: grid;
+  grid-template-columns: 16px 20px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 30px;
+  padding: 0 10px 0 calc(10px + var(--tree-depth) * 16px);
+  border: 0;
+  color: var(--text);
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.file-manager-tree-row:hover,
+.file-manager-tree-row:focus-visible,
+.file-manager-tree-row:active {
+  background: var(--panel-2);
+}
+
+.file-manager-tree-row.is-selected,
+.file-manager-tree-row.is-selected:hover,
+.file-manager-tree-row.is-selected:focus-visible {
+  background: var(--accent-soft);
+}
+
+.file-manager-tree-twist,
+.file-manager-tree-icon {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 24px;
+  color: var(--muted);
+}
+
+.file-manager-tree-icon {
+  width: 20px;
+}
+
+.file-manager-tree-icon.is-directory {
+  color: var(--accent);
+}
+
+.file-manager-tree-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.file-manager-tree-quick-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.file-manager-tree-row:hover .file-manager-tree-copy,
+.file-manager-tree-row:hover .file-manager-tree-quick-actions,
+.file-manager-tree-row:focus-within .file-manager-tree-quick-actions,
+.file-manager-tree-row:focus-within .file-manager-tree-copy,
+.file-manager-tree-quick-actions.is-active,
+.file-manager-tree-copy.is-copied {
+  opacity: 1;
+}
+
+.file-manager-tree-action {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 5px;
+  color: var(--muted);
+  background: transparent;
+}
+
+.file-manager-tree-action:hover,
+.file-manager-tree-action:focus-visible,
+.file-manager-tree-copy.is-copied {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.file-manager-tree-action:disabled {
+  opacity: 0.65;
 }
 
 .file-manager-error,

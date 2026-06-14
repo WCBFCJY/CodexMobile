@@ -8,6 +8,7 @@
  * - createInitialFileManagerState — 从 storage 恢复刷新前打开的文件管理路径。
  * - rememberFileManagerView — 持久化/清除文件管理页刷新恢复状态。
  * - sortFileManagerEntries — 目录优先、名称排序的条目排序器。
+ * - flattenFileManagerTree — 把已加载的目录树压平成可渲染的缩进列表。
  * - fileManagerEntryOpenAction — 判断点击条目时应进目录、内嵌预览还是跳转预览页。
  * - fileManagerReducer — 管理打开、加载、失败与路径跳转状态。
  *
@@ -85,6 +86,40 @@ export function sortFileManagerEntries(entries = []) {
       numeric: true,
       sensitivity: 'base'
     });
+  });
+}
+
+export function flattenFileManagerTree({
+  entries = [],
+  expandedByPath = {},
+  childrenByPath = {},
+  loadingByPath = {},
+  depth = 0
+} = {}) {
+  return sortFileManagerEntries(entries).flatMap((entry) => {
+    const path = normalizedPath(entry.path);
+    const expandable = entry.kind === 'directory';
+    const expanded = expandable && Boolean(expandedByPath[path]);
+    const row = {
+      entry,
+      depth,
+      expandable,
+      expanded,
+      loading: expandable && Boolean(loadingByPath[path])
+    };
+    if (!expanded) {
+      return [row];
+    }
+    return [
+      row,
+      ...flattenFileManagerTree({
+        entries: childrenByPath[path] || [],
+        expandedByPath,
+        childrenByPath,
+        loadingByPath,
+        depth: depth + 1
+      })
+    ];
   });
 }
 

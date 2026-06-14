@@ -6,18 +6,19 @@
  * Exports:
  * - FileManagerPanel — 全屏文件浏览面板组件。
  *
- * Inward: apiFetch、file-manager-state、session-utils、本地项目列表与 lucide-react。
+ * Inward: apiFetch、file-manager-state、session-utils、clipboard、本地项目列表与 lucide-react。
  *
  * Outward: AppShell 在 Drawer 底部入口打开后渲染。
  *
  * 不负责: 文件内容解析、保存编辑与危险文件操作。
  */
 
-import { ArrowUp, ChevronDown, ChevronLeft, ExternalLink, File, FileText, Folder, FolderOpen, HardDrive, Home, Loader2, MapPinned, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { ArrowUp, Check, ChevronDown, ChevronLeft, ChevronRight, Copy, ExternalLink, File, FilePlus, FileText, Folder, FolderOpen, FolderPlus, HardDrive, Home, Loader2, MapPinned, Pencil, RefreshCw, Search, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '../api.js';
-import { fileManagerEntryOpenAction, sortFileManagerEntries } from '../file-manager-state.js';
+import { fileManagerEntryOpenAction, flattenFileManagerTree, sortFileManagerEntries } from '../file-manager-state.js';
 import { compactPath, localFileApiPath, localFilePreviewPath } from '../app/session-utils.js';
+import { copyTextToClipboard } from '../utils/clipboard.js';
 
 function entryIcon(entry) {
   if (entry.kind === 'directory') {
@@ -86,6 +87,31 @@ function dedupeRoots(roots = []) {
   });
 }
 
+function defaultCreateName(kind) {
+  return kind === 'directory' ? '新建文件夹' : '未命名.md';
+}
+
+function mapPathPrefix(value, oldPath, newPath) {
+  const source = String(value || '');
+  if (!source || !oldPath || !newPath) {
+    return source;
+  }
+  if (source === oldPath) {
+    return newPath;
+  }
+  if (source.startsWith(`${oldPath}/`)) {
+    return `${newPath}${source.slice(oldPath.length)}`;
+  }
+  return source;
+}
+
+function remapPathRecord(record = {}, oldPath = '', newPath = '') {
+  return Object.entries(record || {}).reduce((next, [key, value]) => {
+    next[mapPathPrefix(key, oldPath, newPath)] = value;
+    return next;
+  }, {});
+}
+
 export function FileManagerPanel({
   open,
   state,
@@ -103,6 +129,12 @@ export function FileManagerPanel({
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [deletingPath, setDeletingPath] = useState('');
+  const [creatingKind, setCreatingKind] = useState('');
+  const [renamingPath, setRenamingPath] = useState('');
+  const [copiedPath, setCopiedPath] = useState('');
+  const [treeExpandedByPath, setTreeExpandedByPath] = useState({});
+  const [treeChildrenByPath, setTreeChildrenByPath] = useState({});
+  const [treeLoadingByPath, setTreeLoadingByPath] = useState({});
   const [desktopPreview, setDesktopPreview] = useState(() => {
     if (typeof window === 'undefined' || !window.matchMedia) {
       return false;
@@ -128,11 +160,29 @@ export function FileManagerPanel({
       return haystack.includes(normalizedQuery);
     }));
   }, [entries, normalizedQuery]);
+  const treeRows = useMemo(() => {
+    const rows = flattenFileManagerTree({
+      entries,
+      expandedByPath: treeExpandedByPath,
+      childrenByPath: treeChildrenByPath,
+      loadingByPath: treeLoadingByPath
+    });
+    if (!normalizedQuery) {
+      return rows;
+    }
+    return rows.filter((row) => {
+      const haystack = `${row.entry.name || ''} ${row.entry.path || ''}`.toLowerCase();
+      return haystack.includes(normalizedQuery);
+    });
+  }, [entries, normalizedQuery, treeChildrenByPath, treeExpandedByPath, treeLoadingByPath]);
 
   const loadDirectory = useCallback(async (nextPath = '') => {
     dispatch({ type: 'loading', path: nextPath });
     setSelectedFile(null);
     setDeleteError('');
+    setTreeExpandedByPath({});
+    setTreeChildrenByPath({});
+    setTreeLoadingByPath({});
     try {
       const params = new URLSearchParams();
       if (nextPath) {
@@ -150,6 +200,64 @@ export function FileManagerPanel({
       dispatch({ type: 'failed', error: error?.message || '目录读取失败' });
     }
   }, [dispatch]);
+
+  async function refreshCurrentTree({
+    clearSelected = false,
+    selectedEntry = null,
+    pathMap = null
+  } = {}) {
+    const mappedExpandedByPath = pathMap
+      ? remapPathRecord(treeExpandedByPath, pathMap.oldPath, pathMap.newPath)
+      : treeExpandedByPath;
+    if (pathMap) {
+      setTreeExpandedByPath(mappedExpandedByPath);
+      setTreeChildrenByPath((value) => remapPathRecord(value, pathMap.oldPath, pathMap.newPath));
+      setSelectedFile((value) => {
+        if (!value?.path) {
+          return value;
+        }
+        return {
+          ...value,
+          path: mapPathPrefix(value.path, pathMap.oldPath, pathMap.newPath)
+        };
+      });
+    }
+
+    dispatch({ type: 'loading', path: currentPath });
+    try {
+      const params = new URLSearchParams();
+      if (currentPath) {
+        params.set('path', currentPath);
+      }
+      const data = await apiFetch(`/api/files/list?${params.toString()}`);
+      dispatch({
+        type: 'loaded',
+        path: data.path || currentPath,
+        parentPath: data.parentPath || '',
+        entries: Array.isArray(data.entries) ? data.entries : []
+      });
+      setPathDraft(data.path || currentPath);
+
+      const expandedPaths = Object.keys(mappedExpandedByPath).filter((path) => mappedExpandedByPath[path]);
+      const nextChildrenByPath = {};
+      await Promise.all(expandedPaths.map(async (path) => {
+        const childParams = new URLSearchParams({ path });
+        const childData = await apiFetch(`/api/files/list?${childParams.toString()}`);
+        nextChildrenByPath[path] = Array.isArray(childData.entries) ? childData.entries : [];
+      }));
+      setTreeChildrenByPath((value) => ({
+        ...value,
+        ...nextChildrenByPath
+      }));
+      if (clearSelected) {
+        setSelectedFile(null);
+      } else if (selectedEntry?.kind === 'file') {
+        setSelectedFile(selectedEntry);
+      }
+    } catch (error) {
+      dispatch({ type: 'failed', error: error?.message || '目录读取失败' });
+    }
+  }
 
   useEffect(() => {
     if (!open || typeof window === 'undefined' || !window.matchMedia) {
@@ -203,6 +311,10 @@ export function FileManagerPanel({
     const action = fileManagerEntryOpenAction(entry, { desktop: desktopPreview });
     if (action.type === 'directory') {
       setQuery('');
+      if (desktopPreview) {
+        toggleTreeDirectory(entry);
+        return;
+      }
       loadDirectory(action.path);
       return;
     }
@@ -226,8 +338,116 @@ export function FileManagerPanel({
     loadDirectory(rootPath);
   }
 
+  async function toggleTreeDirectory(entry) {
+    const path = entry?.path || '';
+    if (!path) {
+      return;
+    }
+    const shouldExpand = !treeExpandedByPath[path];
+    setTreeExpandedByPath((value) => ({
+      ...value,
+      [path]: shouldExpand
+    }));
+    if (!shouldExpand || treeChildrenByPath[path] || treeLoadingByPath[path]) {
+      return;
+    }
+    setDeleteError('');
+    setTreeLoadingByPath((value) => ({ ...value, [path]: true }));
+    try {
+      const params = new URLSearchParams({ path });
+      const data = await apiFetch(`/api/files/list?${params.toString()}`);
+      setTreeChildrenByPath((value) => ({
+        ...value,
+        [path]: Array.isArray(data.entries) ? data.entries : []
+      }));
+    } catch (error) {
+      setDeleteError(error?.message || '目录读取失败');
+    } finally {
+      setTreeLoadingByPath((value) => ({ ...value, [path]: false }));
+    }
+  }
+
   function toggleSearch() {
     setSearchExpanded((value) => !value);
+  }
+
+  async function handleCopyTreePath(event, entry) {
+    event.stopPropagation();
+    const path = entry?.path || '';
+    if (!path) {
+      return;
+    }
+    const ok = await copyTextToClipboard(path);
+    if (!ok) {
+      setDeleteError('复制路径失败');
+      return;
+    }
+    setDeleteError('');
+    setCopiedPath(path);
+    window.setTimeout(() => {
+      setCopiedPath((value) => (value === path ? '' : value));
+    }, 1200);
+  }
+
+  async function handleCreateEntry(kind) {
+    if (!desktopPreview || creatingKind) {
+      return;
+    }
+    const entryKindValue = kind === 'directory' ? 'directory' : 'file';
+    const label = entryKindValue === 'directory' ? '文件夹' : '文档';
+    const name = window.prompt(`新建${label}名称`, defaultCreateName(entryKindValue))?.trim();
+    if (!name) {
+      return;
+    }
+    setDeleteError('');
+    setCreatingKind(entryKindValue);
+    try {
+      const data = await apiFetch('/api/files/create', {
+        method: 'POST',
+        body: {
+          path: currentPath,
+          kind: entryKindValue,
+          name
+        }
+      });
+      setQuery('');
+      await refreshCurrentTree({ selectedEntry: data.entry?.kind === 'file' ? data.entry : null });
+    } catch (error) {
+      setDeleteError(error?.message || '创建失败');
+    } finally {
+      setCreatingKind('');
+    }
+  }
+
+  async function handleRenameTreeEntry(event, entry) {
+    event.stopPropagation();
+    if (!entry?.path || renamingPath) {
+      return;
+    }
+    const name = window.prompt(`重命名${entry.kind === 'directory' ? '文件夹' : '文件'}`, entry.name || '')?.trim();
+    if (!name || name === entry.name) {
+      return;
+    }
+    setDeleteError('');
+    setRenamingPath(entry.path);
+    try {
+      const data = await apiFetch('/api/files/rename', {
+        method: 'POST',
+        body: {
+          path: entry.path,
+          name
+        }
+      });
+      setQuery('');
+      await refreshCurrentTree({
+        selectedEntry: data.entry?.kind === 'file' ? data.entry : null,
+        pathMap: data.oldPath && data.entry?.path ? { oldPath: data.oldPath, newPath: data.entry.path } : null
+      });
+    } catch (error) {
+      setDeleteError(error?.message || '重命名失败');
+    } finally {
+      setRenamingPath('');
+    }
   }
 
   async function deleteSelectedFile() {
@@ -242,8 +462,7 @@ export function FileManagerPanel({
     setDeletingPath(selectedFile.path);
     try {
       await apiFetch(localFileApiPath(selectedFile.path), { method: 'DELETE' });
-      setSelectedFile(null);
-      await loadDirectory(currentPath);
+      await refreshCurrentTree({ clearSelected: true });
     } catch (error) {
       setDeleteError(error?.message || '删除失败');
     } finally {
@@ -296,6 +515,28 @@ export function FileManagerPanel({
             <button className="file-manager-tool-button is-icon" type="button" onClick={() => loadDirectory(currentPath)} disabled={state.loading} aria-label="刷新目录">
               {state.loading ? <Loader2 className="spin" size={16} /> : <RefreshCw size={16} />}
             </button>
+            {desktopPreview ? (
+              <>
+                <button
+                  className="file-manager-tool-button is-icon"
+                  type="button"
+                  onClick={() => handleCreateEntry('file')}
+                  disabled={state.loading || Boolean(creatingKind)}
+                  aria-label="新建空文档"
+                >
+                  {creatingKind === 'file' ? <Loader2 className="spin" size={16} /> : <FilePlus size={16} />}
+                </button>
+                <button
+                  className="file-manager-tool-button is-icon"
+                  type="button"
+                  onClick={() => handleCreateEntry('directory')}
+                  disabled={state.loading || Boolean(creatingKind)}
+                  aria-label="新建文件夹"
+                >
+                  {creatingKind === 'directory' ? <Loader2 className="spin" size={16} /> : <FolderPlus size={16} />}
+                </button>
+              </>
+            ) : null}
             {selectedFile?.path ? (
               <a className="file-manager-tool-button is-icon" href={localFilePreviewPath(selectedFile.path)} target="_blank" rel="noreferrer noopener" aria-label="打开完整预览">
                 <ExternalLink size={16} />
@@ -339,31 +580,85 @@ export function FileManagerPanel({
             </button>
           </form>
 
-          <div className="file-manager-list" role="list" aria-busy={state.loading ? 'true' : 'false'}>
-            {state.loading ? <div className="file-manager-status">正在读取目录...</div> : null}
-            {!state.loading && state.error ? <div className="file-manager-error">{state.error}</div> : null}
-            {!state.loading && !state.error && visibleEntries.length === 0 ? (
-              <div className="file-manager-status">{normalizedQuery ? '没有匹配文件' : '这个目录是空的'}</div>
-            ) : null}
-            {!state.loading && !state.error ? visibleEntries.map((entry) => (
-              <button
-                key={entry.path}
-                type="button"
-                className={`file-manager-row ${selectedFile?.path === entry.path ? 'is-selected' : ''}`}
-                onClick={() => openEntry(entry)}
-                role="listitem"
-              >
-                <span className={`file-manager-entry-icon is-${entry.kind}`} aria-hidden="true">
-                  {entryIcon(entry)}
-                </span>
-                <span className="file-manager-entry-main">
-                  <strong>{entry.name}</strong>
-                  <small>{entry.kind === 'directory' ? compactPath(entry.path) : [formatFileSize(entry.size), formatMtime(entry.mtimeMs)].filter(Boolean).join(' · ')}</small>
-                </span>
-                <span className="file-manager-entry-kind">{entry.kind === 'directory' ? '目录' : entry.editable ? '可编辑' : '文件'}</span>
-              </button>
-            )) : null}
-          </div>
+          {desktopPreview ? (
+            <div className="file-manager-tree" role="tree" aria-busy={state.loading ? 'true' : 'false'}>
+              {state.loading ? <div className="file-manager-status">正在读取目录...</div> : null}
+              {!state.loading && state.error ? <div className="file-manager-error">{state.error}</div> : null}
+              {!state.loading && !state.error && treeRows.length === 0 ? (
+                <div className="file-manager-status">{normalizedQuery ? '没有匹配文件' : '这个目录是空的'}</div>
+              ) : null}
+              {!state.loading && !state.error ? treeRows.map((row) => (
+                <div
+                  key={row.entry.path}
+                  className={`file-manager-tree-row ${selectedFile?.path === row.entry.path ? 'is-selected' : ''}`}
+                  style={{ '--tree-depth': row.depth }}
+                  onClick={() => openEntry(row.entry)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      openEntry(row.entry);
+                    }
+                  }}
+                  role="treeitem"
+                  tabIndex={0}
+                  aria-level={row.depth + 1}
+                  aria-expanded={row.expandable ? (row.expanded ? 'true' : 'false') : undefined}
+                >
+                  <span className="file-manager-tree-twist" aria-hidden="true">
+                    {row.loading ? <Loader2 className="spin" size={13} /> : row.expandable ? (row.expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />) : null}
+                  </span>
+                  <span className={`file-manager-tree-icon is-${row.entry.kind}`} aria-hidden="true">
+                    {entryIcon(row.entry)}
+                  </span>
+                  <span className="file-manager-tree-name">{row.entry.name}</span>
+                  <span className={`file-manager-tree-quick-actions ${copiedPath === row.entry.path || renamingPath === row.entry.path ? 'is-active' : ''}`}>
+                    <button
+                      type="button"
+                      className="file-manager-tree-action"
+                      onClick={(event) => handleRenameTreeEntry(event, row.entry)}
+                      disabled={renamingPath === row.entry.path}
+                      aria-label={`重命名 ${row.entry.name || ''}`}
+                    >
+                      {renamingPath === row.entry.path ? <Loader2 className="spin" size={13} /> : <Pencil size={13} />}
+                    </button>
+                    <button
+                      type="button"
+                      className={`file-manager-tree-action file-manager-tree-copy ${copiedPath === row.entry.path ? 'is-copied' : ''}`}
+                      onClick={(event) => handleCopyTreePath(event, row.entry)}
+                      aria-label={`复制路径 ${row.entry.name || ''}`}
+                    >
+                      {copiedPath === row.entry.path ? <Check size={13} /> : <Copy size={13} />}
+                    </button>
+                  </span>
+                </div>
+              )) : null}
+            </div>
+          ) : (
+            <div className="file-manager-list" role="list" aria-busy={state.loading ? 'true' : 'false'}>
+              {state.loading ? <div className="file-manager-status">正在读取目录...</div> : null}
+              {!state.loading && state.error ? <div className="file-manager-error">{state.error}</div> : null}
+              {!state.loading && !state.error && visibleEntries.length === 0 ? (
+                <div className="file-manager-status">{normalizedQuery ? '没有匹配文件' : '这个目录是空的'}</div>
+              ) : null}
+              {!state.loading && !state.error ? visibleEntries.map((entry) => (
+                <button
+                  key={entry.path}
+                  type="button"
+                  className={`file-manager-row ${selectedFile?.path === entry.path ? 'is-selected' : ''}`}
+                  onClick={() => openEntry(entry)}
+                  role="listitem"
+                >
+                  <span className={`file-manager-entry-icon is-${entry.kind}`} aria-hidden="true">
+                    {entryIcon(entry)}
+                  </span>
+                  <span className="file-manager-entry-main">
+                    <strong>{entry.name}</strong>
+                    <small>{entry.kind === 'directory' ? compactPath(entry.path) : [formatFileSize(entry.size), formatMtime(entry.mtimeMs)].filter(Boolean).join(' · ')}</small>
+                  </span>
+                </button>
+              )) : null}
+            </div>
+          )}
         </aside>
 
         <main className="file-manager-preview" aria-label="文件预览">

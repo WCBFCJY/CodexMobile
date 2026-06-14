@@ -197,6 +197,82 @@ test('file route handler lists local roots and directories', async () => {
   });
 });
 
+test('file route handler creates files and folders in the current directory', async () => {
+  const calls = [];
+  const handler = createFileRouteHandler({
+    getProject: () => null,
+    createLocalFileEntry: async (requestedPath, payload) => {
+      calls.push({ requestedPath, payload });
+      return {
+        parentPath: requestedPath,
+        entry: { name: payload.name, path: `${requestedPath}/${payload.name}`, kind: payload.kind }
+      };
+    },
+    staticService: {
+      async sendLocalImage() {
+        throw new Error('unexpected');
+      }
+    },
+    saveUpload: async () => ({ name: 'file.txt' }),
+    uploadRoot: '/tmp/uploads',
+    maxUploadBytes: 100
+  });
+
+  const fileReq = createRequest('POST', { path: '/Users/example/Docs', kind: 'file', name: 'note.md' });
+  const fileRes = createResponse();
+  assert.equal(await callWithBody(handler, fileReq, fileRes, new URL('http://local/api/files/create')), true);
+  assert.equal(fileRes.statusCode, 200);
+  assert.deepEqual(JSON.parse(fileRes.body), {
+    parentPath: '/Users/example/Docs',
+    entry: { name: 'note.md', path: '/Users/example/Docs/note.md', kind: 'file' }
+  });
+  assert.deepEqual(calls, [
+    {
+      requestedPath: '/Users/example/Docs',
+      payload: { path: '/Users/example/Docs', kind: 'file', name: 'note.md' }
+    }
+  ]);
+});
+
+test('file route handler renames local file manager entries', async () => {
+  const calls = [];
+  const handler = createFileRouteHandler({
+    getProject: () => null,
+    renameLocalFileEntry: async (requestedPath, payload) => {
+      calls.push({ requestedPath, payload });
+      return {
+        oldPath: requestedPath,
+        parentPath: '/Users/example/Docs',
+        entry: { name: payload.name, path: `/Users/example/Docs/${payload.name}`, kind: 'file' }
+      };
+    },
+    staticService: {
+      async sendLocalImage() {
+        throw new Error('unexpected');
+      }
+    },
+    saveUpload: async () => ({ name: 'file.txt' }),
+    uploadRoot: '/tmp/uploads',
+    maxUploadBytes: 100
+  });
+
+  const renameReq = createRequest('POST', { path: '/Users/example/Docs/old.md', name: 'new.md' });
+  const renameRes = createResponse();
+  assert.equal(await callWithBody(handler, renameReq, renameRes, new URL('http://local/api/files/rename')), true);
+  assert.equal(renameRes.statusCode, 200);
+  assert.deepEqual(JSON.parse(renameRes.body), {
+    oldPath: '/Users/example/Docs/old.md',
+    parentPath: '/Users/example/Docs',
+    entry: { name: 'new.md', path: '/Users/example/Docs/new.md', kind: 'file' }
+  });
+  assert.deepEqual(calls, [
+    {
+      requestedPath: '/Users/example/Docs/old.md',
+      payload: { path: '/Users/example/Docs/old.md', name: 'new.md' }
+    }
+  ]);
+});
+
 test('file route handler accepts local file URLs with source filename path segment', async () => {
   const calls = [];
   const handler = createFileRouteHandler({

@@ -123,6 +123,13 @@ function visibleCodexEnvelopeMessage(message) {
   return extractCodexRequestSection(value) || extractDiffComment(value);
 }
 
+export function isInternalUserInput(message) {
+  const value = String(message || '').trim();
+  return /^#\s*AGENTS\.md instructions\b/i.test(value) ||
+    /^<environment_context\b/i.test(value) ||
+    /^<heartbeat\b/i.test(value);
+}
+
 export function sanitizeVisibleUserMessage(message) {
   const value = String(message || '').trim();
   if (!value) {
@@ -1091,10 +1098,13 @@ export function messagesFromDesktopThread(thread, { includeActivity = false, tur
     items.forEach((item, itemIndex) => {
       const timestamp = item.type === 'agentMessage' ? completedAt || startedAt : startedAt;
       if (item.type === 'userMessage') {
+        const content = textFromDesktopUserInput(item.content);
+        if (isInternalUserInput(content)) {
+          return;
+        }
         completeCurrentSegment('completed', { completedAt: timestamp });
         segmentIndex += 1;
         finalAssistantText = '';
-        const content = textFromDesktopUserInput(item.content);
         if (content) {
           messages.push({
             id: item.id || `${turnId}-user-${itemIndex}`,

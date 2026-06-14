@@ -11,6 +11,7 @@ import test from 'node:test';
 
 const componentSource = readFileSync(new URL('./panels/FileManagerPanel.jsx', import.meta.url), 'utf8');
 const previewSource = readFileSync(new URL('./app/FilePreviewApp.jsx', import.meta.url), 'utf8');
+const pdfPreviewSource = readFileSync(new URL('./app/PdfPreview.jsx', import.meta.url), 'utf8');
 const cssSource = readFileSync(new URL('./styles/panels-files.css', import.meta.url), 'utf8');
 const themeSource = readFileSync(new URL('./styles/theme.css', import.meta.url), 'utf8');
 
@@ -51,4 +52,51 @@ test('embedded preview disables the tablet-sized root clamp inside the iframe', 
 test('file preview toolbar keeps edit instead of a duplicated raw tab', () => {
   assert.doesNotMatch(previewSource, /<span>原文<\/span>/);
   assert.match(previewSource, /<span>编辑<\/span>/);
+});
+
+test('file preview toolbar can copy the original local file path', () => {
+  assert.match(previewSource, /async function handleCopyPath/);
+  assert.match(previewSource, /className="file-preview-tool-buttons"[\s\S]*?onClick=\{handleCopyPath\}[\s\S]*?aria-label="复制文件原路径"/);
+  assert.match(previewSource, /<PdfPreview[\s\S]*?onCopyPath=\{handleCopyPath\}/);
+  assert.match(pdfPreviewSource, /aria-label="复制文件原路径"/);
+});
+
+test('desktop file manager renders a compact tree without trailing editable labels', () => {
+  assert.match(componentSource, /className="file-manager-tree"/);
+  assert.match(componentSource, /flattenFileManagerTree/);
+  assert.doesNotMatch(componentSource, /file-manager-entry-kind/);
+  assert.doesNotMatch(componentSource, /可编辑/);
+  assert.match(cssSource, /\.file-manager-tree-row/);
+});
+
+test('desktop file manager entries expose an inline copy-path action', () => {
+  assert.match(componentSource, /copyTextToClipboard/);
+  assert.match(componentSource, /function handleCopyTreePath/);
+  assert.match(componentSource, /event\.stopPropagation\(\)/);
+  assert.match(componentSource, /aria-label=\{`复制路径/);
+  assert.match(cssSource, /\.file-manager-tree-copy/);
+});
+
+test('desktop file manager toolbar exposes quick create file and folder actions', () => {
+  assert.match(componentSource, /function defaultCreateName/);
+  assert.match(componentSource, /async function handleCreateEntry/);
+  assert.match(componentSource, /\/api\/files\/create/);
+  assert.match(componentSource, /aria-label="新建空文档"/);
+  assert.match(componentSource, /aria-label="新建文件夹"/);
+  assert.match(componentSource, /desktopPreview \? \(/);
+});
+
+test('desktop file manager refreshes local operations without collapsing expanded folders', () => {
+  assert.match(componentSource, /async function refreshCurrentTree/);
+  assert.match(componentSource, /Object\.keys\(mappedExpandedByPath\)/);
+  assert.match(componentSource, /setTreeChildrenByPath\(\(value\) => \(\{/);
+  assert.match(componentSource, /await refreshCurrentTree\(\{ clearSelected: true \}\)/);
+  assert.doesNotMatch(componentSource, /deleteSelectedFile[\s\S]*?await loadDirectory\(currentPath\)/);
+});
+
+test('desktop file manager entries expose inline rename actions for files and folders', () => {
+  assert.match(componentSource, /async function handleRenameTreeEntry/);
+  assert.match(componentSource, /\/api\/files\/rename/);
+  assert.match(componentSource, /aria-label=\{`重命名/);
+  assert.match(cssSource, /\.file-manager-tree-quick-actions/);
 });

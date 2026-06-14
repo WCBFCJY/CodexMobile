@@ -11,6 +11,7 @@ import {
   createInitialFileManagerState,
   fileManagerEntryOpenAction,
   fileManagerReducer,
+  flattenFileManagerTree,
   initialFileManagerState,
   rememberFileManagerView,
   sortFileManagerEntries
@@ -90,4 +91,30 @@ test('fileManagerEntryOpenAction previews files inline only on desktop layouts',
     type: 'navigate',
     path: '/Users/example/README.md'
   });
+});
+
+test('flattenFileManagerTree exposes expanded folders as vscode-like rows', () => {
+  const rows = flattenFileManagerTree({
+    entries: [
+      { name: 'README.md', kind: 'file', path: '/repo/README.md' },
+      { name: 'src', kind: 'directory', path: '/repo/src' }
+    ],
+    expandedByPath: { '/repo/src': true },
+    loadingByPath: { '/repo/src/components': true },
+    childrenByPath: {
+      '/repo/src': [
+        { name: 'components', kind: 'directory', path: '/repo/src/components' },
+        { name: 'App.jsx', kind: 'file', path: '/repo/src/App.jsx' }
+      ]
+    }
+  });
+
+  assert.deepEqual(rows.map((row) => [row.entry.name, row.depth, row.expanded, row.loading]), [
+    ['src', 0, true, false],
+    ['components', 1, false, true],
+    ['App.jsx', 1, false, false],
+    ['README.md', 0, false, false]
+  ]);
+  assert.equal(rows[0].expandable, true);
+  assert.equal(rows[3].expandable, false);
 });

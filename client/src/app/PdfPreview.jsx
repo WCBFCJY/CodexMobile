@@ -11,7 +11,7 @@
  * Outward: `FilePreviewApp` 等文件预览壳。
  */
 
-import { ChevronLeft, ChevronRight, ExternalLink, Maximize2, Minus, Plus } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Copy, ExternalLink, Maximize2, Minus, Plus } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
@@ -20,7 +20,7 @@ const workerUrl = new URL(pdfWorkerUrl, window.location.href);
 workerUrl.searchParams.set('codexmobileWorkerMime', '2');
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl.href;
 
-export function PdfPreview({ data, fileUrl = '' }) {
+export function PdfPreview({ data, fileUrl = '', copied = false, onCopyPath = null }) {
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
   const renderTaskRef = useRef(null);
@@ -190,6 +190,11 @@ export function PdfPreview({ data, fileUrl = '' }) {
             </button>
           ) : null}
         </div>
+        {onCopyPath ? (
+          <button type="button" className="pdf-preview-copy-path" onClick={onCopyPath} aria-label="复制文件原路径">
+            {copied ? <Check size={16} /> : <Copy size={16} />}
+          </button>
+        ) : null}
         {fileUrl ? (
           <a className="pdf-preview-open-original" href={fileUrl} target="_blank" rel="noreferrer noopener" aria-label="打开原文件">
             <ExternalLink size={16} />

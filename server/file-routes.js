@@ -1,7 +1,7 @@
 /**
- * 文件类 HTTP 路由：上传、本地文件读取、目录浏览、Word 预览、项目内文件搜索等。
+ * 文件类 HTTP 路由：上传、本地文件读取、目录浏览创建重命名、Word 预览、项目内文件搜索等。
  *
- * Keywords: file-routes, multipart, local-file, file-browser, word-preview, file-search
+ * Keywords: file-routes, multipart, local-file, file-browser, file-create, file-rename
  *
  * Exports:
  * - createFileRouteHandler — 返回文件 API 处理函数。
@@ -15,8 +15,10 @@
  */
 import { readBody, sendJson } from './http-utils.js';
 import {
+  createLocalFileEntry as defaultCreateLocalFileEntry,
   listLocalDirectory as defaultListLocalDirectory,
-  localFileRoots as defaultLocalFileRoots
+  localFileRoots as defaultLocalFileRoots,
+  renameLocalFileEntry as defaultRenameLocalFileEntry
 } from './file-browser.js';
 import { searchProjectFiles as defaultSearchProjectFiles } from './file-search.js';
 import { saveUpload as defaultSaveUpload } from './upload-service.js';
@@ -33,6 +35,8 @@ export function createFileRouteHandler({
   getProject,
   localFileRoots = defaultLocalFileRoots,
   listLocalDirectory = defaultListLocalDirectory,
+  createLocalFileEntry = defaultCreateLocalFileEntry,
+  renameLocalFileEntry = defaultRenameLocalFileEntry,
   searchProjectFiles = defaultSearchProjectFiles,
   staticService,
   saveUpload = defaultSaveUpload,
@@ -109,6 +113,32 @@ export function createFileRouteHandler({
         sendJson(res, 200, result);
       } catch (error) {
         sendJson(res, error.statusCode || 500, { error: error.message || 'Failed to list directory' });
+      }
+      return true;
+    }
+
+    if (method === 'POST' && pathname === '/api/files/create') {
+      try {
+        const body = await readBody(req, { maxBytes: 16 * 1024 });
+        const result = await createLocalFileEntry(body.path || '', body);
+        sendJson(res, 200, result);
+      } catch (error) {
+        sendJson(res, error.message === 'Request body too large' ? 413 : error.statusCode || 400, {
+          error: error.message || 'Failed to create file'
+        });
+      }
+      return true;
+    }
+
+    if (method === 'POST' && pathname === '/api/files/rename') {
+      try {
+        const body = await readBody(req, { maxBytes: 16 * 1024 });
+        const result = await renameLocalFileEntry(body.path || '', body);
+        sendJson(res, 200, result);
+      } catch (error) {
+        sendJson(res, error.message === 'Request body too large' ? 413 : error.statusCode || 400, {
+          error: error.message || 'Failed to rename file'
+        });
       }
       return true;
     }

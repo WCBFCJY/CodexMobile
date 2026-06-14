@@ -394,7 +394,7 @@ export default function FilePreviewApp() {
             <span>{subtitle}</span>
           </div>
           <div className="file-preview-header-actions">
-            <button type="button" className="file-preview-icon-button" onClick={handleCopyPath} aria-label="复制路径">
+            <button type="button" className="file-preview-icon-button" onClick={handleCopyPath} aria-label="复制文件原路径">
               {copied ? <Check size={16} /> : <Copy size={16} />}
             </button>
             <button
@@ -453,6 +453,9 @@ export default function FilePreviewApp() {
                 </button>
               </>
             ) : null}
+            <button type="button" onClick={handleCopyPath} aria-label="复制文件原路径">
+              {copied ? <Check size={15} /> : <Copy size={15} />}
+            </button>
             {canAdjustFont ? (
               <>
                 <button type="button" onClick={() => setFontScale((value) => Math.max(0.88, value - 0.06))} aria-label="缩小字号">
@@ -561,7 +564,7 @@ export default function FilePreviewApp() {
           />
         ) : null}
         {!state.loading && !state.error && kind === 'pdf' ? (
-          <PdfPreview data={state.pdfData} fileUrl={rawFileUrl} />
+          <PdfPreview data={state.pdfData} fileUrl={rawFileUrl} copied={copied} onCopyPath={handleCopyPath} />
         ) : null}
         {!state.loading && !state.error && kind === 'image' ? (
           <div className="file-preview-media-shell">

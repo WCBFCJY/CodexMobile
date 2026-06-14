@@ -26,6 +26,7 @@ import {
   extractProposedPlanContent,
   implementedPlanContentFromMessage,
   implementedPlanContentsMatch,
+  isInternalUserInput,
   messagesFromDesktopThread as defaultMessagesFromDesktopThread,
   planMessageFromContent,
   planRequestMessageFromContent,
@@ -92,6 +93,23 @@ function ensureRolloutTurn(turns, sessionId, timestamp) {
   return turn;
 }
 
+function upsertRolloutTurn(turns, sessionId, turnId, timestamp) {
+  const id = String(turnId || '').trim() || `${sessionId}-turn-${turns.length + 1}`;
+  const existing = turns.find((turn) => turn.id === id);
+  if (existing) {
+    if (!existing.startedAt) {
+      existing.startedAt = epochSecondsFromIso(timestamp);
+    }
+    return existing;
+  }
+  const turn = {
+    id,
+    startedAt: epochSecondsFromIso(timestamp)
+  };
+  turns.push(turn);
+  return turn;
+}
+
 export function messagesFromRolloutJsonl(content, sessionId) {
   const messages = [];
   const turns = [];
@@ -109,11 +127,12 @@ export function messagesFromRolloutJsonl(content, sessionId) {
       continue;
     }
     const timestamp = entry.timestamp || new Date().toISOString();
+    if (entry.type === 'event_msg' && entry.payload?.type === 'task_started') {
+      upsertRolloutTurn(turns, sessionId, entry.payload?.turn_id, timestamp);
+      continue;
+    }
     if (entry.type === 'turn_context') {
-      turns.push({
-        id: entry.payload?.turn_id || `${sessionId}-turn-${turns.length + 1}`,
-        startedAt: epochSecondsFromIso(timestamp)
-      });
+      upsertRolloutTurn(turns, sessionId, entry.payload?.turn_id, timestamp);
       continue;
     }
     if (entry.type !== 'response_item' || entry.payload?.type !== 'message') {
@@ -130,6 +149,9 @@ export function messagesFromRolloutJsonl(content, sessionId) {
     if (!contentText) {
       continue;
     }
+    if (role === 'user' && isInternalUserInput(contentText)) {
+      continue;
+    }
     const implementedPlanContent = role === 'user' ? implementedPlanContentFromMessage(contentText) : '';
     if (implementedPlanContent) {
       removeImplementedPlanRequests(messages, implementedPlanContent);
@@ -140,6 +162,12 @@ export function messagesFromRolloutJsonl(content, sessionId) {
       userIndex = userCountsByTurn.get(turn.id) || 0;
       userCountsByTurn.set(turn.id, userIndex + 1);
     }
+    const userMetadata = role === 'user'
+      ? {
+        segmentIndex: userIndex,
+        ...guidedUserMetadata(userIndex > 0)
+      }
+      : {};
     if (role === 'assistant') {
       const proposedPlan = extractProposedPlanContent(contentText);
       if (proposedPlan) {
@@ -172,8 +200,7 @@ export function messagesFromRolloutJsonl(content, sessionId) {
       id: entry.payload.id || `${turn.id}-${role}-${messages.length + 1}`,
       role,
       content: role === 'user' ? sanitizeVisibleUserMessage(contentText) : contentText,
-      ...(role === 'user' ? { segmentIndex: userIndex } : {}),
-      ...(role === 'user' ? guidedUserMetadata(userIndex > 0) : {}),
+      ...userMetadata,
       timestamp,
       turnId: turn.id,
       sessionId

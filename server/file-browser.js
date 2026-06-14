@@ -1,11 +1,13 @@
 /**
- * 本地文件浏览服务：解析桌面路径、列目录、生成常用根入口与文件编辑元数据。
+ * 本地文件浏览服务：解析桌面路径、列目录、创建/重命名空条目并生成常用根入口与文件编辑元数据。
  *
  * Keywords: file-browser, directory, roots, metadata, local-files
  *
  * Exports:
  * - localFileRoots — 返回 Home / 常用目录 / 当前工作目录等入口。
  * - listLocalDirectory — 读取指定目录并返回目录优先的文件条目。
+ * - createLocalFileEntry — 在指定目录内创建空文件或文件夹并返回条目元数据。
+ * - renameLocalFileEntry — 在同一父目录内重命名文件或文件夹。
  * - fileBrowserInternals — 测试用路径解析和排序辅助函数。
  *
  * Inward: Node fs/os/path；static-service 的可编辑扩展名集合。
@@ -71,6 +73,23 @@ function sortBrowserEntries(entries) {
   });
 }
 
+function rejectFileManagerError(message, statusCode = 400) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
+
+function normalizedEntryName(name) {
+  const entryName = String(name || '').trim();
+  if (!entryName) {
+    throw rejectFileManagerError('File name is required');
+  }
+  if (entryName === '.' || entryName === '..' || entryName.includes('/') || entryName.includes('\\')) {
+    throw rejectFileManagerError('File name cannot include path separators');
+  }
+  return entryName;
+}
+
 async function browserEntryFromDirent(root, dirent) {
   const filePath = path.join(root, dirent.name);
   let stat;
@@ -83,6 +102,21 @@ async function browserEntryFromDirent(root, dirent) {
   const ext = kind === 'file' ? path.extname(filePath).toLowerCase() : '';
   return {
     name: dirent.name,
+    path: filePath,
+    kind,
+    size: kind === 'file' ? stat.size : null,
+    mtimeMs: Math.round(stat.mtimeMs),
+    extension: ext,
+    editable: kind === 'file' && EDITABLE_TEXT_EXTENSIONS.has(ext)
+  };
+}
+
+async function browserEntryFromPath(filePath) {
+  const stat = await fs.stat(filePath);
+  const kind = stat.isDirectory() ? 'directory' : 'file';
+  const ext = kind === 'file' ? path.extname(filePath).toLowerCase() : '';
+  return {
+    name: path.basename(filePath),
     path: filePath,
     kind,
     size: kind === 'file' ? stat.size : null,
@@ -134,6 +168,85 @@ export async function listLocalDirectory(value, { limit = 500 } = {}) {
     parentPath: dirPath === path.parse(dirPath).root ? '' : path.dirname(dirPath),
     entries: sortBrowserEntries(entries),
     truncated: dirents.length > entries.length
+  };
+}
+
+export async function createLocalFileEntry(value, { kind = 'file', name = '' } = {}) {
+  const requestedPath = resolveBrowserPath(value);
+  const dirPath = path.resolve(requestedPath);
+  const entryKindValue = kind === 'directory' ? 'directory' : 'file';
+  const entryName = normalizedEntryName(name);
+
+  let stat;
+  try {
+    stat = await fs.stat(dirPath);
+  } catch (error) {
+    error.statusCode = error.code === 'ENOENT' ? 404 : 500;
+    throw error;
+  }
+  if (!stat.isDirectory()) {
+    throw rejectFileManagerError('Path is not a directory');
+  }
+
+  const filePath = path.join(dirPath, entryName);
+  try {
+    if (entryKindValue === 'directory') {
+      await fs.mkdir(filePath);
+    } else {
+      const handle = await fs.open(filePath, 'wx');
+      await handle.close();
+    }
+  } catch (error) {
+    if (error.code === 'EEXIST') {
+      throw rejectFileManagerError('File already exists', 409);
+    }
+    throw error;
+  }
+
+  return {
+    parentPath: dirPath,
+    entry: await browserEntryFromPath(filePath)
+  };
+}
+
+export async function renameLocalFileEntry(value, { name = '' } = {}) {
+  const requestedPath = resolveBrowserPath(value);
+  const filePath = path.resolve(requestedPath);
+  const entryName = normalizedEntryName(name);
+  let stat;
+  try {
+    stat = await fs.stat(filePath);
+  } catch (error) {
+    error.statusCode = error.code === 'ENOENT' ? 404 : 500;
+    throw error;
+  }
+  if (!stat.isFile() && !stat.isDirectory()) {
+    throw rejectFileManagerError('Only files and directories can be renamed');
+  }
+
+  const parentPath = path.dirname(filePath);
+  const nextPath = path.join(parentPath, entryName);
+  if (nextPath === filePath) {
+    return {
+      oldPath: filePath,
+      parentPath,
+      entry: await browserEntryFromPath(filePath)
+    };
+  }
+  try {
+    await fs.lstat(nextPath);
+    throw rejectFileManagerError('File already exists', 409);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  await fs.rename(filePath, nextPath);
+  return {
+    oldPath: filePath,
+    parentPath,
+    entry: await browserEntryFromPath(nextPath)
   };
 }
 

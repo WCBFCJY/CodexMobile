@@ -530,6 +530,44 @@ test('messagesFromDesktopThread hides desktop injected browser context from user
   assert.equal(messages[0].content, '移动端点线程重命名，没弹窗 没反应啊');
 });
 
+test('messagesFromDesktopThread hides internal automatic user inputs', () => {
+  const messages = messagesFromDesktopThread({
+    id: 'thread-1',
+    turns: [
+      {
+        id: 'turn-1',
+        status: 'completed',
+        startedAt: 1770000000,
+        completedAt: 1770000003,
+        items: [
+          {
+            id: 'context-1',
+            type: 'userMessage',
+            content: [{
+              type: 'text',
+              text: '<environment_context>\n<current_date>2026-06-14</current_date>\n</environment_context>'
+            }]
+          },
+          {
+            id: 'heartbeat-1',
+            type: 'userMessage',
+            content: [{
+              type: 'text',
+              text: '<heartbeat>\n<automation_id>lifeos</automation_id>\n</heartbeat>'
+            }]
+          },
+          { id: 'answer-1', type: 'agentMessage', phase: 'final_answer', text: '已完成自动规划。' }
+        ]
+      }
+    ]
+  });
+
+  assert.deepEqual(
+    messages.map((message) => [message.role, message.content]),
+    [['assistant', '已完成自动规划。']]
+  );
+});
+
 test('messagesFromDesktopThread drops duplicate guided browser request envelopes', () => {
   const messages = messagesFromDesktopThread({
     id: 'thread-1',

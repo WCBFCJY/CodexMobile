@@ -442,6 +442,78 @@ test('session message reader falls back to rollout jsonl when desktop thread is 
   }
 });
 
+test('session message reader hides internal rollout user inputs while keeping automatic assistant output', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codexmobile-message-reader-auto-user-'));
+  try {
+    const rolloutPath = path.join(dir, 'rollout.jsonl');
+    await fs.writeFile(rolloutPath, [
+      JSON.stringify({
+        timestamp: '2026-06-13T22:01:08.000Z',
+        type: 'event_msg',
+        payload: { type: 'task_started', turn_id: 'turn-auto' }
+      }),
+      JSON.stringify({
+        timestamp: '2026-06-13T22:01:10.000Z',
+        type: 'response_item',
+        payload: {
+          type: 'message',
+          role: 'user',
+          content: [{ type: 'input_text', text: '<environment_context>\n  <current_date>2026-06-14</current_date>\n</environment_context>' }]
+        }
+      }),
+      JSON.stringify({
+        timestamp: '2026-06-13T22:01:10.100Z',
+        type: 'turn_context',
+        payload: { turn_id: 'turn-auto' }
+      }),
+      JSON.stringify({
+        timestamp: '2026-06-13T22:01:10.200Z',
+        type: 'response_item',
+        payload: {
+          type: 'message',
+          role: 'user',
+          content: [{ type: 'input_text', text: '<heartbeat>\n  <automation_id>lifeos</automation_id>\n</heartbeat>' }]
+        }
+      }),
+      JSON.stringify({
+        timestamp: '2026-06-13T22:03:28.000Z',
+        type: 'response_item',
+        payload: {
+          type: 'message',
+          role: 'assistant',
+          content: [{ type: 'output_text', text: '已完成自动规划。' }]
+        }
+      })
+    ].join('\n'));
+
+    const reader = createSessionMessageReader({
+      readDeletedMessageIds: async () => new Set(),
+      readDesktopThread: async () => {
+        const error = new Error('thread not loaded: session-1');
+        error.statusCode = 404;
+        throw error;
+      },
+      resolveSessionThread: async (sessionId) => ({
+        id: sessionId,
+        filePath: rolloutPath
+      }),
+      readRawSessionActivities: async () => [],
+      readDesktopCollabActivities: async () => []
+    });
+
+    const result = await reader.readSessionMessages('session-1');
+
+    assert.deepEqual(
+      result.messages.map((message) => [message.role, message.turnId, message.guideLabel || '', String(message.content).split('\n')[0]]),
+      [
+        ['assistant', 'turn-auto', '', '已完成自动规划。']
+      ]
+    );
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
+
 test('messagesFromRolloutJsonl converts proposed plan answers into standalone plan UI messages', () => {
   const content = [
     JSON.stringify({
