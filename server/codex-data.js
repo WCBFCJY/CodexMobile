@@ -22,7 +22,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
-import { archiveDesktopThread, listDesktopThreads, readDesktopThread, unarchiveDesktopThread } from './codex-app-server.js';
+import { archiveDesktopThread, listDesktopThreads, readDesktopThread, resolveAppServerTransport, unarchiveDesktopThread } from './codex-app-server.js';
 import {
   CODEX_SESSION_INDEX,
   CODEX_SESSIONS_DIR,
@@ -140,9 +140,12 @@ async function resolveSessionThread(sessionId) {
   };
 }
 
+const desktopAvailable = resolveAppServerTransport().mode === 'desktop-proxy';
+
 const sessionMessageReader = createSessionMessageReader({
   resolveSessionThread,
-  getConfigContext: () => cache.config?.context || {}
+  getConfigContext: () => cache.config?.context || {},
+  desktopAvailable
 });
 
 function toPublicProject(entry) {
