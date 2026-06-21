@@ -1,0 +1,14 @@
+services:
+  codexmobile:
+    image: ghcr.io/flyyangx/codexmobile:latest
+    container_name: codexmobile
+    restart: unless-stopped
+    init: true
+    ports:
+      - "3321:3321"
+    volumes:
+      - ~/codex:/app/.codex
+      - ~/codexmobile:/app/.codexmobile
+      - ~/workspace:/workspace
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
