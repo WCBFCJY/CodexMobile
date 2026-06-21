@@ -29,6 +29,12 @@ export function normalizePermissionMode(permissionMode, { dangerFullAccessEnable
     }
     return 'bypassPermissions';
   }
+  if (value === 'sandboxOff') {
+    if (!dangerFullAccessEnabled) {
+      throw dangerFullAccessDisabledError();
+    }
+    return 'sandboxOff';
+  }
   if (value === 'acceptEdits') {
     return 'acceptEdits';
   }
@@ -40,12 +46,18 @@ export function codexSandboxForPermissionMode(permissionMode, options = {}) {
   if (normalized === 'bypassPermissions') {
     return { sandboxMode: 'danger-full-access', approvalPolicy: 'never' };
   }
-  return { sandboxMode: 'workspace-write', approvalPolicy: 'never' };
+  if (normalized === 'sandboxOff') {
+    return { sandboxMode: 'danger-full-access', approvalPolicy: 'on-request' };
+  }
+  if (normalized === 'acceptEdits') {
+    return { sandboxMode: 'workspace-write', approvalPolicy: 'never' };
+  }
+  return { sandboxMode: 'workspace-write', approvalPolicy: 'on-request' };
 }
 
 export function desktopSandboxPolicyForPermissionMode(permissionMode, options = {}) {
   const normalized = normalizePermissionMode(permissionMode, options);
-  if (normalized === 'bypassPermissions') {
+  if (normalized === 'bypassPermissions' || normalized === 'sandboxOff') {
     return { type: 'dangerFullAccess' };
   }
   const writableRoots = Array.isArray(options.writableRoots)
@@ -65,6 +77,13 @@ export function desktopTurnPermissionsForPermissionMode(permissionMode, options 
   if (normalized === 'bypassPermissions') {
     return {
       approvalPolicy: 'never',
+      approvalsReviewer: 'user',
+      sandboxPolicy: { type: 'dangerFullAccess' }
+    };
+  }
+  if (normalized === 'sandboxOff') {
+    return {
+      approvalPolicy: 'on-request',
       approvalsReviewer: 'user',
       sandboxPolicy: { type: 'dangerFullAccess' }
     };
