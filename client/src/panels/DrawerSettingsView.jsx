@@ -19,6 +19,7 @@ import { deviceMetaText, deviceStatusText, sortDevicesForDisplay } from '../secu
 export function DrawerSettingsView({
   open,
   onClose,
+  onBack,
   theme,
   setTheme,
   onOpenArchiveBox,
@@ -94,22 +95,20 @@ export function DrawerSettingsView({
 
   return (
     <>
-      <div className={`drawer-backdrop drawer-subpage-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+      <div className={`drawer-backdrop drawer-subpage-backdrop ${open ? 'is-open' : ''}`} onClick={onBack} />
       <aside className={`drawer drawer-settings drawer-subpage ${open ? 'is-open' : ''}`}>
         <div className="drawer-subpage-header">
           <button className="icon-button" onClick={onBack} aria-label="返回">
             <ChevronLeft size={20} />
           </button>
           <strong>设置</strong>
-          <div className="drawer-subpage-actions">
-            <span className="settings-version-text">v{appVersion}</span>
-          </div>
+
         </div>
         <div className="drawer-subpage-content settings-view">
           <section className="settings-section-card" aria-labelledby="appearance-title">
             <h3 id="appearance-title" className="drawer-section-title">外观</h3>
             <div className="settings-list">
-              <div className="settings-row is-stacked">
+              <div className="settings-row">
                 <div className="settings-row-main">
                   <span className="settings-row-icon" aria-hidden="true">
                     {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
