@@ -340,7 +340,10 @@ export async function readCodexWorkspaceState() {
 }
 
 export function defaultProjectlessWorkspaceRoot() {
-  return process.env.CODEXMOBILE_WORKDIR || path.join(process.cwd(), '.codexmobile', 'state', 'default');
+  if (process.env.CODEXMOBILE_WORKDIR) {
+    return path.resolve(process.env.CODEXMOBILE_WORKDIR, 'Default');
+  }
+  return path.join(process.cwd(), '.codexmobile', 'state', 'default');
 }
 
 async function readCodexGlobalStateForMutation() {
