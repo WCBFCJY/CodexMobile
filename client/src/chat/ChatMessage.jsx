@@ -101,13 +101,11 @@ function ChatMessageView({
         {afterContent ? <div className="message-after-content">{afterContent}</div> : null}
         {canAct ? (
           <div className="message-actions" aria-label="消息操作">
-            <button type="button" className="message-action" onClick={handleCopy}>
-              {copied ? <Check size={13} /> : <Copy size={13} />}
-              <span>{copied ? '已复制' : '复制'}</span>
+            <button type="button" className="message-action" onClick={handleCopy} title={copied ? '已复制' : '复制'}>
+              {copied ? <Check size={14} /> : <Copy size={14} />}
             </button>
-            <button type="button" className="message-action is-delete" onClick={() => onDeleteMessage?.(message)}>
-              <Trash2 size={13} />
-              <span>删除</span>
+            <button type="button" className="message-action is-delete" onClick={() => onDeleteMessage?.(message)} title="删除">
+              <Trash2 size={14} />
             </button>
           </div>
         ) : null}
