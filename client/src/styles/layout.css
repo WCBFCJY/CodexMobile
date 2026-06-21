@@ -3,7 +3,7 @@
   position: fixed;
   inset: 0;
   --desktop-drawer-width: 320px;
-  --desktop-main-max: 1040px;
+  --desktop-main-max: none;
   --desktop-main-gutter: 14px;
   --desktop-shell-offset: 0px;
   display: grid;
@@ -43,32 +43,25 @@
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.62) 62%, rgba(0, 0, 0, 0));
 }
 
-@media (min-width: 1024px) {
-  .app-shell {
-    --desktop-main-gutter: max(28px, calc((100vw - var(--desktop-shell-offset) - var(--desktop-main-max)) / 2));
-    grid-template-columns: 0 minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    grid-template-areas:
-      "drawer topbar"
-      "drawer chat"
-      "drawer composer";
-    transition: grid-template-columns 180ms ease;
-    touch-action: auto;
-  }
+/* Desktop layout — driven by .is-desktop class (React state), NOT media queries */
+.app-shell.is-desktop {
+  --desktop-main-gutter: 28px;
+  --desktop-shell-offset: var(--desktop-drawer-width);
+  grid-template-columns: var(--desktop-drawer-width) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "drawer topbar"
+    "drawer chat"
+    "drawer composer";
+  touch-action: auto;
+}
 
-  .app-shell.drawer-active {
-    --desktop-shell-offset: var(--desktop-drawer-width);
-    grid-template-columns: var(--desktop-drawer-width) minmax(0, 1fr);
-  }
-
-  .app-shell::before {
-    left: var(--desktop-shell-offset);
-  }
+.app-shell.is-desktop::before {
+  left: var(--desktop-shell-offset);
 }
 
 @media (min-width: 1280px) {
   .app-shell {
     --desktop-drawer-width: 340px;
-    --desktop-main-max: 1080px;
   }
 }
