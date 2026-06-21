@@ -697,7 +697,7 @@ export function Drawer({
               <BarChart3 size={16} />
             </button>
           </div>
-          <span className="drawer-footer-status">{statusText}</span>
+          {runningCount ? <span className="drawer-footer-status">{statusText}</span> : null}
         </footer>
 
         {threadActionMenu ? (
