@@ -35,8 +35,6 @@ const execFileAsync = promisify(execFile);
 const DEFAULT_SKILL_ROOTS = [
   path.join(process.cwd(), 'skills'),
   path.join(CODEX_HOME, 'skills'),
-  path.join(os.homedir(), '.agents', 'skills'),
-  path.join(os.homedir(), 'Library', 'Mobile Documents', 'com~apple~CloudDocs', 'agent-skills', 'skills'),
   path.join(CODEX_HOME, 'plugins', 'cache', 'openai-bundled'),
   path.join(CODEX_HOME, 'plugins', 'cache', 'openai-curated')
 ];
@@ -342,7 +340,7 @@ export async function readCodexWorkspaceState() {
 }
 
 export function defaultProjectlessWorkspaceRoot() {
-  return path.join(os.homedir(), 'Documents', 'Codex');
+  return process.env.CODEXMOBILE_WORKDIR || path.join(process.cwd(), '.codexmobile', 'state', 'default');
 }
 
 async function readCodexGlobalStateForMutation() {
