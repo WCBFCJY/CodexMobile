@@ -26,7 +26,6 @@
   backdrop-filter: blur(18px);
   overflow: hidden;
   transform: translateX(-105%);
-  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 50;
 }
 
@@ -187,6 +186,9 @@
   min-height: 0;
   overflow: auto;
   padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .drawer-action,
@@ -868,7 +870,7 @@
 .drawer-brand-wordmark {
   display: block;
   width: 128px;
-  height: auto;
+  height: 18px;
   min-width: 0;
   opacity: 0.88;
 }
@@ -980,6 +982,14 @@
 
 .drawer-new-row {
   flex: 0 0 auto;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+[data-theme="dark"] .drawer-new-row {
+  background: #262626;
 }
 
 .drawer-new-row > svg:last-child {
@@ -1652,7 +1662,7 @@
 .archive-list-panel {
   display: grid;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 18px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -1676,32 +1686,31 @@
 
 .drawer-section-title {
   margin: 0;
-  padding: 0 2px;
-  color: var(--subpage-muted);
+  padding: 0 8px 8px;
+  color: #7c8288;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 650;
   line-height: 16px;
 }
 
 .settings-list {
   overflow: hidden;
-  border: 1px solid var(--subpage-line);
   border-radius: 8px;
   background: var(--subpage-card-strong);
 }
 
 [data-theme="dark"] .settings-list {
-  background: var(--subpage-card);
+  background: #262626;
 }
 
 .settings-row {
   width: 100%;
-  min-height: 58px;
+  min-height: 54px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 9px 12px;
   border: 0;
   border-bottom: 1px solid var(--subpage-line);
   color: var(--subpage-text);
@@ -1731,7 +1740,7 @@ button.settings-row.is-actionable:active {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .settings-row-icon {
@@ -1741,8 +1750,8 @@ button.settings-row.is-actionable:active {
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  color: var(--subpage-accent);
-  background: var(--subpage-accent-soft);
+  color: var(--subpage-text);
+  background: transparent;
 }
 
 .settings-row-main > div {
@@ -1800,31 +1809,37 @@ button.settings-row.is-actionable:active {
 }
 
 .settings-segmented-control {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 3px;
-  width: 100%;
-  padding: 3px;
-  border-radius: 8px;
-  background: var(--subpage-soft);
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(44px, 1fr);
+  gap: 2px;
+  flex: 0 0 auto;
+  padding: 2px;
+  border-radius: 7px;
+  background: #e8ece7;
+}
+
+[data-theme="dark"] .settings-segmented-control {
+  background: #171717;
 }
 
 .settings-segmented-control button {
   min-width: 0;
-  min-height: 34px;
+  min-height: 28px;
   padding: 0 8px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 5px;
   color: var(--subpage-muted);
   background: transparent;
-  font-size: 13px;
-  font-weight: 680;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .settings-segmented-control button.is-selected {
   color: var(--subpage-text);
   background: var(--subpage-card-strong);
-  box-shadow: 0 1px 4px rgba(20, 24, 31, 0.1);
+  box-shadow: 0 1px 3px rgba(20, 24, 31, 0.12);
 }
 
 [data-theme="dark"] .settings-segmented-control button.is-selected {
@@ -1890,7 +1905,7 @@ button.settings-row.is-actionable:active {
   display: flex;
   align-items: flex-start;
   gap: 7px;
-  padding: 0 12px 12px 52px;
+  padding: 4px 12px 12px 52px;
   border-bottom: 1px solid var(--subpage-line);
   color: var(--subpage-muted);
   font-size: 12px;
@@ -2221,48 +2236,40 @@ button.archive-empty-state {
   }
 }
 
-@media (min-width: 1024px) {
-  .drawer-main-backdrop {
-    display: none;
-  }
+/* Desktop drawer — driven by .is-desktop class (React state), NOT media queries */
+.app-shell.is-desktop .drawer-main-backdrop {
+  display: none;
+}
 
-  .app-shell > .drawer:not(.drawer-subpage) {
-    grid-area: drawer;
-    position: relative;
-    top: auto;
-    bottom: auto;
-    left: auto;
-    z-index: 2;
-    width: var(--desktop-drawer-width);
-    max-width: none;
-    height: 100%;
-    min-height: 0;
-    padding: 16px 14px;
-    border-right: 1px solid #e5e7eb;
-    background: #ffffff;
-    box-shadow: none;
-    transform: none;
-    transition: opacity 160ms ease;
-  }
+.app-shell.is-desktop > .drawer:not(.drawer-subpage) {
+  grid-area: drawer;
+  position: relative;
+  top: auto;
+  bottom: auto;
+  left: auto;
+  z-index: 2;
+  width: var(--desktop-drawer-width);
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  padding: 16px 14px;
+  border-right: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: none;
+  transform: none;
+  transition: none;
+  opacity: 1;
+  pointer-events: auto;
+}
 
-  .app-shell:not(.drawer-active) > .drawer:not(.drawer-subpage) {
-    width: 0;
-    padding: 0;
-    border-right: 0;
-    opacity: 0;
-    pointer-events: none;
-  }
+.app-shell.is-desktop > .drawer:not(.drawer-subpage) .drawer-header-action.sidebar-toggle-button {
+  display: none;
+}
 
-  .app-shell.drawer-active > .drawer:not(.drawer-subpage) {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  [data-theme="dark"] .app-shell > .drawer:not(.drawer-subpage) {
-    border-right-color: var(--line);
-    background: var(--surface);
-    box-shadow: none;
-  }
+[data-theme="dark"] .app-shell.is-desktop > .drawer:not(.drawer-subpage) {
+  border-right-color: var(--line);
+  background: var(--surface);
+  box-shadow: none;
 }
 
 /* Native-like project/thread list refinement. Keep header, search, create and footer actions intact. */
