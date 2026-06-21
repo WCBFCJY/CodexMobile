@@ -360,14 +360,17 @@ function broadcastModelSettings(settings, { source = 'server', desktopSync = nul
   return payload;
 }
 
-function startModelSettingsWatcher() {
+function startModelSettingsWatcher(hasClients = () => true) {
+  let initialized = false;
   async function tick() {
+    if (initialized && !hasClients()) return;
     try {
       const settings = publicModelSettings(await readCodexModelSettings(), { source: 'codex-config' });
       const key = modelSettingsKey(settings);
       if (!lastObservedModelSettingsKey) {
         liveModelSettings = settings;
         lastObservedModelSettingsKey = key;
+        initialized = true;
         return;
       }
       if (key === lastObservedModelSettingsKey) {
@@ -378,6 +381,7 @@ function startModelSettingsWatcher() {
     } catch (error) {
       console.warn('[model-settings] Watch failed:', error.message);
     }
+    initialized = true;
   }
   tick();
   const timer = setInterval(tick, 2500);
@@ -386,8 +390,10 @@ function startModelSettingsWatcher() {
   }
 }
 
-function startThreadModelSettingsWatcher() {
+function startThreadModelSettingsWatcher(hasClients = () => true) {
+  let initialized = false;
   async function tick() {
+    if (initialized && !hasClients()) return;
     try {
       const settingsRows = await readCodexThreadModelSettings({ limit: 250 });
       const seen = new Set();
@@ -415,6 +421,7 @@ function startThreadModelSettingsWatcher() {
     } catch (error) {
       console.warn('[model-settings] Thread watch failed:', error.message);
     }
+    initialized = true;
   }
   tick();
   const timer = setInterval(tick, 2500);
@@ -1085,8 +1092,8 @@ async function main() {
 
   server.on('upgrade', handleUpgrade);
   desktopIpcBroadcastListener.start();
-  startModelSettingsWatcher();
-  startThreadModelSettingsWatcher();
+  startModelSettingsWatcher(() => sockets.size > 0);
+  startThreadModelSettingsWatcher(() => sockets.size > 0);
 
   server.listen(PORT, HOST, () => {
     console.log(`CodexMobile listening on http://${HOST}:${PORT}`);
