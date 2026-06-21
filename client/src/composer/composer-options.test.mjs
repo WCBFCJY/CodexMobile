@@ -47,10 +47,12 @@ test('permission options hide danger full access unless backend enables it', () 
   assert.deepEqual(permissionOptionsForSecurity({ dangerFullAccessEnabled: true }).map((option) => option.value), [
     'default',
     'acceptEdits',
+    'sandboxOff',
     'bypassPermissions'
   ]);
   assert.equal(normalizePermissionModeForSecurity('legacyExtraMode', { dangerFullAccessEnabled: false }), 'default');
   assert.equal(normalizePermissionModeForSecurity('bypassPermissions', { dangerFullAccessEnabled: false }), 'default');
+  assert.equal(normalizePermissionModeForSecurity('sandboxOff', { dangerFullAccessEnabled: false }), 'default');
 });
 
 test('permission mode preference is persisted separately from security filtering', () => {
