@@ -107,6 +107,20 @@
   color: var(--muted);
 }
 
+.file-manager-tool-button svg,
+.file-manager-tool-button span {
+  color: var(--muted);
+}
+
+.file-manager-tool-button:hover svg,
+.file-manager-tool-button:focus-visible svg,
+.file-manager-tool-button:active svg,
+.file-manager-tool-button:hover span,
+.file-manager-tool-button:focus-visible span,
+.file-manager-tool-button:active span {
+  color: var(--text);
+}
+
 .file-manager-tool-button:disabled {
   opacity: 0.36;
 }
@@ -220,22 +234,28 @@
 }
 
 .file-manager-location {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 34px;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
-  min-height: 38px;
+  height: 38px;
   margin: 0 14px 10px;
-  padding: 3px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--panel);
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--muted);
+  background: var(--panel-2);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .file-manager-location {
+  color: var(--muted);
+  background: var(--panel-2);
 }
 
 .file-manager-location input {
+  flex: 1;
   min-width: 0;
-  padding: 0 8px;
   border: 0;
   outline: 0;
   color: var(--text);
@@ -243,13 +263,28 @@
   font: 13px/18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
+[data-theme="dark"] .file-manager-location input {
+  color: var(--text);
+}
+
+.file-manager-location input::placeholder {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .file-manager-location input::placeholder {
+  color: var(--muted);
+}
+
 .file-manager-location button {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
   border: 0;
-  border-radius: 7px;
+  border-radius: 0;
   color: var(--muted);
   background: transparent;
 }
@@ -258,7 +293,7 @@
 .file-manager-location button:focus-visible,
 .file-manager-location button:active {
   color: var(--text);
-  background: var(--panel-2);
+  background: transparent;
 }
 
 .file-manager-list {
@@ -507,7 +542,6 @@
 [data-theme="dark"] .file-manager-preview,
 [data-theme="dark"] .file-manager-root-popover,
 [data-theme="dark"] .file-manager-tool-button,
-[data-theme="dark"] .file-manager-location,
 [data-theme="dark"] .file-manager-search,
 [data-theme="dark"] .file-manager-entry-icon {
   background: var(--panel);
