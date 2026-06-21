@@ -9,6 +9,7 @@
  * - createLocalFileEntry — 在指定目录内创建空文件或文件夹并返回条目元数据。
  * - renameLocalFileEntry — 在同一父目录内重命名文件或文件夹。
  * - fileBrowserInternals — 测试用路径解析和排序辅助函数。
+ * - isPathAllowed — 检查路径是否在允许的工作目录范围内。
  *
  * Inward: Node fs/os/path；static-service 的可编辑扩展名集合。
  *
@@ -21,8 +22,42 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { EDITABLE_TEXT_EXTENSIONS } from './static-service.js';
+import { defaultProjectlessWorkspaceRoot } from './codex-config.js';
 
 const ROOT_DIR = path.parse(os.homedir()).root || path.sep;
+
+/**
+ * 获取允许访问的工作目录。
+ * 使用 defaultProjectlessWorkspaceRoot()，它已优先使用 CODEXMOBILE_WORKDIR。
+ */
+function getAllowedWorkspace() {
+  return path.resolve(defaultProjectlessWorkspaceRoot());
+}
+
+/**
+ * 检查路径是否在允许的工作目录范围内。
+ * @param {string} requestedPath - 请求的路径
+ * @returns {{ allowed: boolean, allowedRoot: string, resolvedPath: string }}
+ */
+export function isPathAllowed(requestedPath) {
+  const allowedRoot = getAllowedWorkspace();
+  const resolvedPath = path.resolve(requestedPath);
+  const rootWithSep = allowedRoot.endsWith(path.sep) ? allowedRoot : `${allowedRoot}${path.sep}`;
+  
+  if (resolvedPath === allowedRoot || resolvedPath.startsWith(rootWithSep)) {
+    return { allowed: true, allowedRoot, resolvedPath };
+  }
+  
+  return { allowed: false, allowedRoot, resolvedPath };
+}
+
+function rejectPathNotAllowed(resolvedPath, allowedRoot) {
+  const error = new Error(`路径 "${resolvedPath}" 不在允许的工作目录范围内。允许的目录: ${allowedRoot}`);
+  error.statusCode = 403;
+  error.code = 'PATH_NOT_ALLOWED';
+  error.allowedRoot = allowedRoot;
+  return error;
+}
 
 function uniqueRoots(roots) {
   const seen = new Set();
@@ -127,20 +162,27 @@ async function browserEntryFromPath(filePath) {
 }
 
 export function localFileRoots({ cwd = process.cwd(), homedir = os.homedir() } = {}) {
-  return uniqueRoots([
-    { id: 'home', label: 'Home', path: homedir },
-    { id: 'desktop', label: 'Desktop', path: path.join(homedir, 'Desktop') },
-    { id: 'documents', label: 'Documents', path: path.join(homedir, 'Documents') },
-    { id: 'downloads', label: 'Downloads', path: path.join(homedir, 'Downloads') },
-    { id: 'code', label: 'Code', path: path.join(homedir, 'Code') },
-    { id: 'cwd', label: 'CodexMobile', path: cwd },
-    { id: 'root', label: ROOT_DIR === '/' ? 'Macintosh HD' : ROOT_DIR, path: ROOT_DIR }
-  ]);
+  // 只返回允许访问的工作目录
+  const allowedRoot = getAllowedWorkspace();
+  return [
+    {
+      id: 'workspace',
+      label: path.basename(allowedRoot) || allowedRoot,
+      path: allowedRoot
+    }
+  ];
 }
 
 export async function listLocalDirectory(value, { limit = 500 } = {}) {
   const requestedPath = resolveBrowserPath(value);
   const dirPath = path.resolve(requestedPath);
+  
+  // 检查路径是否允许访问
+  const pathCheck = isPathAllowed(dirPath);
+  if (!pathCheck.allowed) {
+    throw rejectPathNotAllowed(dirPath, pathCheck.allowedRoot);
+  }
+  
   let stat;
   try {
     stat = await fs.stat(dirPath);
@@ -174,6 +216,13 @@ export async function listLocalDirectory(value, { limit = 500 } = {}) {
 export async function createLocalFileEntry(value, { kind = 'file', name = '' } = {}) {
   const requestedPath = resolveBrowserPath(value);
   const dirPath = path.resolve(requestedPath);
+  
+  // 检查路径是否允许访问
+  const pathCheck = isPathAllowed(dirPath);
+  if (!pathCheck.allowed) {
+    throw rejectPathNotAllowed(dirPath, pathCheck.allowedRoot);
+  }
+  
   const entryKindValue = kind === 'directory' ? 'directory' : 'file';
   const entryName = normalizedEntryName(name);
 
@@ -212,6 +261,13 @@ export async function createLocalFileEntry(value, { kind = 'file', name = '' } =
 export async function renameLocalFileEntry(value, { name = '' } = {}) {
   const requestedPath = resolveBrowserPath(value);
   const filePath = path.resolve(requestedPath);
+  
+  // 检查路径是否允许访问
+  const pathCheck = isPathAllowed(filePath);
+  if (!pathCheck.allowed) {
+    throw rejectPathNotAllowed(filePath, pathCheck.allowedRoot);
+  }
+  
   const entryName = normalizedEntryName(name);
   let stat;
   try {
