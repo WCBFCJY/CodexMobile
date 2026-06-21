@@ -88,7 +88,7 @@ export function useSessionLivePolling({
       }
     }
 
-    const intervalMs = 1800;
+    const intervalMs = 5000;
     const timer = window.setInterval(pollSelectedSession, intervalMs);
     pollSelectedSession();
     return () => {
