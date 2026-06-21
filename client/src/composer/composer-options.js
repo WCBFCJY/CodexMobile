@@ -16,6 +16,7 @@
 export const PERMISSION_OPTIONS = [
   { value: 'default', label: '默认权限' },
   { value: 'acceptEdits', label: '自动审查' },
+  { value: 'sandboxOff', label: '关闭沙箱', danger: true },
   { value: 'bypassPermissions', label: '完全访问权限', danger: true }
 ];
 
@@ -84,7 +85,13 @@ export function writeStoredPermissionMode(value, storage = globalThis.localStora
 }
 
 export function permissionOptionsForSecurity(security = {}) {
-  return PERMISSION_OPTIONS.filter((option) => option.value !== 'bypassPermissions' || security?.dangerFullAccessEnabled);
+  const dangerEnabled = security?.dangerFullAccessEnabled;
+  return PERMISSION_OPTIONS.filter((option) => {
+    if (option.value === 'bypassPermissions' || option.value === 'sandboxOff') {
+      return dangerEnabled;
+    }
+    return true;
+  });
 }
 
 export function normalizePermissionModeForSecurity(value, security = {}) {
