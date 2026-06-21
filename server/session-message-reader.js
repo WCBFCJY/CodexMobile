@@ -246,6 +246,28 @@ function removeImplementedPlanRequests(messages, implementedPlanContent) {
   }
 }
 
+function contextStateFromJsonlContent(content, sessionId) {
+  const state = { sessionId, runtime: null };
+  let start = 0;
+  if (content.length > ROLLOUT_CONTEXT_READ_BYTES) {
+    const skip = content.length - ROLLOUT_CONTEXT_READ_BYTES;
+    const nextNewline = content.indexOf('\n', skip);
+    start = nextNewline === -1 ? skip : nextNewline + 1;
+  }
+  const text = start > 0 ? content.slice(start) : content;
+  for (const line of text.split('\n')) {
+    if (!line.trim()) {
+      continue;
+    }
+    try {
+      applyContextEntry(state, JSON.parse(line), sessionId);
+    } catch {
+      // Skip malformed or partial JSONL rows.
+    }
+  }
+  return state;
+}
+
 async function readRolloutThreadFromFile(filePath, sessionId) {
   if (!filePath) {
     return null;
@@ -256,7 +278,8 @@ async function readRolloutThreadFromFile(filePath, sessionId) {
     id: sessionId,
     path: filePath,
     turns: parsed.turns,
-    messages: parsed.messages
+    messages: parsed.messages,
+    _contextContent: content
   };
 }
 
@@ -566,9 +589,22 @@ export function createSessionMessageReader({
   filterDeletedMessages = defaultFilterDeletedMessages,
   readRolloutContextState: readRolloutContextStateImpl = readRolloutContextState,
   resolveSessionThread = async () => null,
-  getConfigContext = () => ({})
+  getConfigContext = () => ({}),
+  desktopAvailable = true
 } = {}) {
   async function readThread(sessionId) {
+    if (!desktopAvailable) {
+      const session = await resolveSessionThread(sessionId);
+      const filePath = session?.filePath || session?.path || '';
+      const thread = await readRolloutThreadFromFile(filePath, sessionId).catch(() => null);
+      if (thread) {
+        return thread;
+      }
+      const error = new Error('Desktop thread not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
     try {
       const response = await readDesktopThread(sessionId, { includeTurns: true });
       if (response?.thread) {
@@ -585,6 +621,9 @@ export function createSessionMessageReader({
     } catch (error) {
       if (!canFallbackToRollout(error)) {
         throw error;
+      }
+      if (error?.statusCode === 503) {
+        desktopIpcSkipUntil = Date.now() + IPC_SKIP_MS;
       }
     }
 
@@ -609,7 +648,10 @@ export function createSessionMessageReader({
     const baseMessages = Array.isArray(thread.messages)
       ? thread.messages.map((message) => ({ ...message }))
       : messagesFromDesktopThread(thread, { includeActivity: false });
-    const contextState = await readRolloutContextStateImpl(thread.path, sessionId);
+    const contextState = thread._contextContent
+      ? contextStateFromJsonlContent(thread._contextContent, sessionId)
+      : await readRolloutContextStateImpl(thread.path, sessionId);
+    thread._contextContent = null;
     const orderedBaseMessages = sortMessagesByConversationOrder(filterDeletedMessages(baseMessages, deletedIds));
     const page = paginateMessages(orderedBaseMessages, { limit, offset, latest });
 
