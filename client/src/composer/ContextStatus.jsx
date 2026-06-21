@@ -89,7 +89,7 @@ export function ContextStatusDetails({ contextStatus }) {
   );
 }
 
-export function ContextStatusButton({ contextStatus, open, onToggle, variant = 'default' }) {
+export function ContextStatusButton({ contextStatus, open, onToggle, variant = 'default', buttonRef }) {
   const context = normalizeContextStatus(contextStatus);
   const usedPercent = numberOrNull(context.percent);
   const inputTokens = context.inputTokens;
@@ -106,6 +106,7 @@ export function ContextStatusButton({ contextStatus, open, onToggle, variant = '
     const highUsage = usedPercent !== null && usedPercent >= 85;
     return (
       <button
+        ref={buttonRef}
         type="button"
         className={`context-status-compact ${compact.detected ? 'is-compacted' : ''} ${hasWindow ? 'has-window' : ''} ${highUsage ? 'is-high-usage' : ''}`}
         onClick={onToggle}
