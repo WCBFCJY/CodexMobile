@@ -42,7 +42,6 @@ import { useSessionActions } from './useSessionActions.js';
 import { useTurnSubmission } from './useTurnSubmission.js';
 import { useTurnRuntime } from './useTurnRuntime.js';
 import { useViewportSizing } from './useViewportSizing.js';
-import { usePwaUpdate } from './pwa-update.js';
 import { applyPwaTheme } from './pwa-theme.js';
 import { mergeModelSettingsIntoStatus, nextSyncedComposerSettings } from './model-sync.js';
 import { rememberSelectedSession } from './selection-persistence.js';
@@ -112,7 +111,6 @@ export default function App() {
     showToast,
     enableNotifications
   } = useNotifications();
-  const pwaUpdate = usePwaUpdate();
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [expandedProjectIds, setExpandedProjectIds] = useState({});
@@ -251,6 +249,22 @@ export default function App() {
       setDrawerOpen(true);
     }
   }, [authenticated, setDrawerOpen]);
+
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' && window.matchMedia?.(DESKTOP_SHELL_MEDIA)?.matches
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mql = window.matchMedia(DESKTOP_SHELL_MEDIA);
+    function onChange(e) {
+      setIsDesktop(e.matches);
+      if (e.matches) setDrawerOpen(true);
+      else setDrawerOpen(false);
+    }
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, [setDrawerOpen]);
 
   const syncRunningById = useMemo(() => syncRunningByIdFromRuntime(threadRuntimeById), [threadRuntimeById]);
   const selectedRuntime = selectRuntimeForSession(selectedSession, threadRuntimeById);
@@ -787,7 +801,10 @@ export default function App() {
   );
   const shellClass = useMemo(() => {
     const classes = ['app-shell'];
-    if (drawerOpen) {
+    if (isDesktop) {
+      classes.push('is-desktop');
+      classes.push('drawer-active');
+    } else if (drawerOpen) {
       classes.push('drawer-active');
     }
     if (homeVisible) {
@@ -797,7 +814,7 @@ export default function App() {
       classes.push('is-home-exiting');
     }
     return classes.join(' ');
-  }, [drawerOpen, homeExiting, homeVisible]);
+  }, [drawerOpen, homeExiting, homeVisible, isDesktop]);
 
   useEffect(() => {
     if (homeVisible) {
@@ -830,9 +847,9 @@ export default function App() {
   });
   const topBarRuntime = selectedRuntime || (selectedRunning ? { status: 'running' } : null);
   const handleToggleDrawer = useCallback(() => {
-    const desktopShell = typeof window !== 'undefined' && window.matchMedia?.(DESKTOP_SHELL_MEDIA)?.matches;
-    setDrawerOpen((current) => (desktopShell ? !current : true));
-  }, [setDrawerOpen]);
+    if (isDesktop) return;
+    setDrawerOpen(true);
+  }, [isDesktop, setDrawerOpen]);
 
   const handleComposerSubmit = useCallback(async (options = {}) => {
     if ((selectedSessionRef.current || selectedSession)?.archived) {
@@ -1042,11 +1059,6 @@ export default function App() {
       toasts,
       onDismiss: dismissToast
     },
-    pwaUpdateProps: {
-      available: pwaUpdate.available,
-      onRefresh: pwaUpdate.refresh,
-      onDismiss: pwaUpdate.dismiss
-    },
     imagePreviewProps: {
       image: previewImage,
       onClose: () => setPreviewImage(null)
@@ -1073,7 +1085,7 @@ export default function App() {
     syncing,
     onOpenFileManager: () => {
       dispatchFileManager({ type: 'open', path: selectedProject?.path || '' });
-      setDrawerOpen(false);
+      if (window.innerWidth < 1024) setDrawerOpen(false);
     },
     theme,
     setTheme,
