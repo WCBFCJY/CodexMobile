@@ -94,14 +94,14 @@ export function useSessionActions({
       setMessages([]);
       setMessagePage(emptyMessagePage());
       setContextStatus(emptyContextStatus());
-      setDrawerOpen(false);
+      if (window.innerWidth < 1024) setDrawerOpen(false);
       return;
     }
     setSessionLoadingId(requestedSessionId);
     setMessages([]);
     setMessagePage(emptyMessagePage());
     setContextStatus(normalizeContextStatus(session?.context || defaultStatus.context, defaultStatus.context));
-    setDrawerOpen(false);
+    if (window.innerWidth < 1024) setDrawerOpen(false);
     try {
       const data = await apiFetch(sessionMessagesApiPath(session.id));
       if (selectedSessionRef.current?.id !== requestedSessionId) {
@@ -338,7 +338,7 @@ export function useSessionActions({
     setMessages([]);
     setMessagePage(emptyMessagePage());
     setAttachments([]);
-    setDrawerOpen(false);
+    if (window.innerWidth < 1024) setDrawerOpen(false);
   }
 
   async function handleLoadOlderMessages() {
