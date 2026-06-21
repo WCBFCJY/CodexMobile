@@ -13,7 +13,7 @@
  * 不负责: 文件内容解析、保存编辑与危险文件操作。
  */
 
-import { ArrowUp, Check, ChevronDown, ChevronLeft, ChevronRight, Copy, ExternalLink, File, FilePlus, FileText, Folder, FolderOpen, FolderPlus, HardDrive, Home, Loader2, MapPinned, Pencil, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { ArrowRight, ArrowUp, Check, ChevronDown, ChevronLeft, ChevronRight, Copy, ExternalLink, File, FilePlus, FileText, Folder, FolderOpen, FolderPlus, HardDrive, Home, Loader2, MapPinned, Pencil, RefreshCw, Search, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '../api.js';
 import { fileManagerEntryOpenAction, flattenFileManagerTree, sortFileManagerEntries } from '../file-manager-state.js';
@@ -576,7 +576,7 @@ export function FileManagerPanel({
           <form className="file-manager-location" onSubmit={submitPath}>
             <input value={pathDraft} onChange={(event) => setPathDraft(event.target.value)} aria-label="文件路径" placeholder="/Users/..." />
             <button type="submit" aria-label="跳转路径">
-              <ExternalLink size={15} />
+              <ArrowRight size={15} />
             </button>
           </form>
 
