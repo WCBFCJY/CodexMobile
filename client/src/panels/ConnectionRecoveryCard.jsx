@@ -11,8 +11,13 @@
  * Outward: 主布局在断线、重连或需重新配对时挂载。
  */
 
+import { useState } from 'react';
+import { X } from 'lucide-react';
+
 export function ConnectionRecoveryCard({ state, onRetry, onSync, onPair, onStatus }) {
-  if (!state) {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (!state || dismissed) {
     return null;
   }
 
@@ -43,6 +48,9 @@ export function ConnectionRecoveryCard({ state, onRetry, onSync, onPair, onStatu
           {state.secondaryLabel}
         </button>
       ) : null}
+      <button type="button" className="connection-recovery-dismiss" onClick={() => setDismissed(true)} aria-label="关闭">
+        <X size={14} />
+      </button>
     </section>
   );
 }
