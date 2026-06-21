@@ -14,6 +14,7 @@
 
 import { ArrowUp, Bot, Check, ChevronDown, ChevronRight, ClipboardList, FileText, Folder, GitBranch, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X, Zap } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { apiFetch } from '../api.js';
 import { detectComposerToken, exactSlashCommandForInput, filteredSlashCommands, replaceComposerToken } from '../composer-shortcuts.js';
 import { composerSendState } from '../send-state.js';
@@ -77,7 +78,15 @@ export function Composer({
   const textareaRef = useRef(null);
   const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const attachBtnRef = useRef(null);
+  const permissionBtnRef = useRef(null);
+  const skillBtnRef = useRef(null);
+  const branchBtnRef = useRef(null);
+  const modelBtnRef = useRef(null);
+  const modelMenuRef = useRef(null);
+  const contextBtnRef = useRef(null);
   const [openMenu, setOpenMenu] = useState(null);
+  const [menuPos, setMenuPos] = useState(null);
   const [modelSubmenu, setModelSubmenu] = useState(null);
   const [skillFilter, setSkillFilter] = useState('');
   const [projectFilter, setProjectFilter] = useState('');
@@ -318,11 +327,25 @@ export function Composer({
       return;
     }
     setOpenMenu((current) => {
-      const next = current === name ? null : name;
-      if (next !== 'model' || current !== 'model') {
+      if (current === name) {
+        setMenuPos(null);
+        return null;
+      }
+      const ref = name === 'attach' ? attachBtnRef
+        : name === 'permission' ? permissionBtnRef
+        : name === 'skill' ? skillBtnRef
+        : name === 'branch' ? branchBtnRef
+        : name === 'context' ? contextBtnRef
+        : modelBtnRef;
+      const btn = ref.current;
+      if (btn) {
+        const rect = btn.getBoundingClientRect();
+        setMenuPos({ left: rect.left, right: window.innerWidth - rect.right, bottom: window.innerHeight - rect.top });
+      }
+      if (name !== 'model' || current !== 'model') {
         setModelSubmenu(null);
       }
-      return next;
+      return name;
     });
     if (name !== 'skill') {
       setSkillFilter('');
@@ -448,8 +471,9 @@ export function Composer({
         multiple
         onChange={(event) => handleFiles(event, 'file')}
       />
-      {openMenu === 'attach' ? (
-        <div className="composer-menu attach-menu">
+      {openMenu ? createPortal(<div className="menu-backdrop" onClick={() => setOpenMenu(null)} />, document.body) : null}
+      {openMenu === 'attach' && menuPos ? createPortal(
+        <div className="composer-menu attach-menu" style={{ left: menuPos.left, bottom: menuPos.bottom + 6 }}>
           <button
             type="button"
             className={selectedCollaborationMode === 'plan' ? 'is-selected' : ''}
@@ -470,10 +494,11 @@ export function Composer({
             <FileText size={17} />
             文件
           </button>
-        </div>
+        </div>,
+        document.body
       ) : null}
-      {openMenu === 'permission' ? (
-        <div className="composer-menu permission-menu">
+      {openMenu === 'permission' && menuPos ? createPortal(
+        <div className="composer-menu permission-menu" style={{ right: menuPos.right, bottom: menuPos.bottom + 6 }}>
           {permissionOptions.map((option) => (
             <button
               key={option.value}
@@ -488,10 +513,11 @@ export function Composer({
               {option.label}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       ) : null}
-      {openMenu === 'skill' ? (
-        <div className="composer-menu skill-menu">
+      {openMenu === 'skill' && menuPos ? createPortal(
+        <div className="composer-menu skill-menu" style={{ right: menuPos.right, bottom: menuPos.bottom + 6 }}>
           <div className="skill-search-wrap">
             <Search size={14} />
             <input
@@ -534,11 +560,12 @@ export function Composer({
           ) : (
             <div className="menu-empty">{skillList.length ? '没有匹配的 skill' : 'skill 列表还没加载'}</div>
           )}
-        </div>
+        </div>,
+        document.body
       ) : null}
-      {openMenu === 'model' ? (
+      {openMenu === 'model' && menuPos ? createPortal(
         <>
-          <div className={`composer-menu model-menu ${modelSubmenu ? 'has-submenu' : ''}`}>
+          <div ref={modelMenuRef} className={`composer-menu model-menu ${modelSubmenu ? 'has-submenu' : ''}`} style={{ right: menuPos.right + 74, bottom: menuPos.bottom + 6 }}>
             <div className="menu-section-label">智能</div>
             {REASONING_OPTIONS.map((option) => (
               <button
@@ -560,7 +587,6 @@ export function Composer({
               className={`model-menu-parent ${modelSubmenu === 'model' ? 'is-selected' : ''}`}
               onClick={() => setModelSubmenu((current) => (current === 'model' ? null : 'model'))}
             >
-              <span className="menu-spacer" />
               <span className="menu-item-main">
                 <strong>{selectedModelLabel}</strong>
                 <small>模型</small>
@@ -572,7 +598,6 @@ export function Composer({
               className={`model-menu-parent ${modelSubmenu === 'speed' ? 'is-selected' : ''}`}
               onClick={() => setModelSubmenu((current) => (current === 'speed' ? null : 'speed'))}
             >
-              <span className="menu-spacer" />
               <span className="menu-item-main">
                 <strong>速度</strong>
                 <small>{modelSpeedLabel(normalizedModelSpeed)}</small>
@@ -581,7 +606,7 @@ export function Composer({
             </button>
           </div>
           {modelSubmenu === 'model' ? (
-            <div className="composer-menu model-submenu">
+            <div className="composer-menu model-submenu" style={{ left: (modelMenuRef.current?.getBoundingClientRect().right || 0) + 6, bottom: menuPos.bottom + 6 }}>
               <div className="menu-section-label">模型</div>
               {modelList.map((model) => (
                 <button
@@ -600,7 +625,7 @@ export function Composer({
             </div>
           ) : null}
           {modelSubmenu === 'speed' ? (
-            <div className="composer-menu model-submenu">
+            <div className="composer-menu model-submenu" style={{ left: (modelMenuRef.current?.getBoundingClientRect().right || 0) + 6, bottom: menuPos.bottom + 6 }}>
               <div className="menu-section-label">速度</div>
               {MODEL_SPEED_OPTIONS.map((option) => (
                 <button
@@ -613,19 +638,19 @@ export function Composer({
                   }}
                 >
                   {normalizedModelSpeed === option.value ? <Check size={16} /> : <span className="menu-spacer" />}
-                  {option.value === 'fast' ? <Zap size={15} /> : null}
                   <span className="menu-item-main">
-                    <strong>{option.label}</strong>
+                    <strong>{option.label}{option.value === 'fast' ? <Zap size={13} /> : null}</strong>
                     <small>{option.description}</small>
                   </span>
                 </button>
               ))}
             </div>
           ) : null}
-        </>
+        </>,
+        document.body
       ) : null}
-      {openMenu === 'branch' && gitProject ? (
-        <div className="composer-menu branch-menu" aria-label="选择分支">
+      {openMenu === 'branch' && gitProject && menuPos ? createPortal(
+        <div className="composer-menu branch-menu" style={{ right: menuPos.right, bottom: menuPos.bottom + 6 }} aria-label="选择分支">
           <div className="skill-search-wrap">
             <Search size={14} />
             <input
@@ -677,15 +702,17 @@ export function Composer({
             <Plus size={16} />
             <span>创建并检出新分支...</span>
           </button>
-        </div>
+        </div>,
+        document.body
       ) : null}
-      {openMenu === 'context' ? (
-        <div className="context-popover" role="status">
+      {openMenu === 'context' && menuPos ? createPortal(
+        <div className="context-popover" role="status" style={{ right: menuPos.right, bottom: menuPos.bottom + 6 }}>
           <ContextStatusDetails contextStatus={contextStatus} />
-        </div>
+        </div>,
+        document.body
       ) : null}
-      {openMenu === 'project' && homeMode ? (
-        <div className="composer-menu project-menu" aria-label="选择项目">
+      {openMenu === 'project' && homeMode && menuPos ? createPortal(
+        <div className="composer-menu project-menu" style={{ left: menuPos.left, bottom: menuPos.bottom + 6 }} aria-label="选择项目">
           <div className="skill-search-wrap">
             <Search size={14} />
             <input
@@ -738,7 +765,8 @@ export function Composer({
           ) : (
             <div className="menu-empty">{regularProjects.length ? '没有匹配的项目' : '暂无可用项目'}</div>
           )}
-        </div>
+        </div>,
+        document.body
       ) : null}
       {tokenPanelOpen ? (
         <div className="composer-menu shortcut-menu" role="listbox">
@@ -921,6 +949,7 @@ export function Composer({
         <div className="composer-controls">
           <button
             type="button"
+            ref={attachBtnRef}
             className="composer-attach"
             aria-label="添加附件"
             onClick={() => toggleMenu('attach')}
@@ -931,6 +960,7 @@ export function Composer({
           <div className="composer-tool-strip" role="toolbar" aria-label="发送选项">
             <button
               type="button"
+              ref={permissionBtnRef}
               className={`composer-tool-icon ${normalizedPermissionMode === 'bypassPermissions' ? 'is-permission-bypass' : ''}`}
               onClick={() => toggleMenu('permission')}
               disabled={composerReadOnly}
@@ -941,6 +971,7 @@ export function Composer({
             </button>
             <button
               type="button"
+              ref={skillBtnRef}
               className="composer-tool-icon composer-tool-skills"
               data-count={selectedSkills.length > 0 ? String(selectedSkills.length) : undefined}
               onClick={() => toggleMenu('skill')}
@@ -953,6 +984,7 @@ export function Composer({
             {gitProject ? (
               <button
                 type="button"
+                ref={branchBtnRef}
                 className="composer-tool-icon"
                 onClick={() => toggleMenu('branch')}
                 disabled={composerReadOnly}
@@ -968,8 +1000,9 @@ export function Composer({
               contextStatus={contextStatus}
               open={openMenu === 'context'}
               onToggle={() => toggleMenu('context')}
+              buttonRef={contextBtnRef}
             />
-            <button type="button" className="model-chip" onClick={() => toggleMenu('model')} disabled={composerReadOnly} title={`${selectedModelLabel} · ${reasoningLabel(selectedReasoningEffort)}`}>
+            <button type="button" ref={modelBtnRef} className="model-chip" onClick={() => toggleMenu('model')} disabled={composerReadOnly} title={`${selectedModelLabel} · ${reasoningLabel(selectedReasoningEffort)}`}>
               <span className="model-chip-text">
                 <span className="model-chip-name">{shortModelName(selectedModelLabel)}</span>
                 <span className="model-chip-dot" aria-hidden="true" />
