@@ -31,48 +31,40 @@
 }
 
 .composer-menu {
-  position: absolute;
-  bottom: calc(100% + 8px);
+  position: fixed;
   z-index: 60;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 150px;
-  max-width: min(84vw, 300px);
+  gap: 1px;
+  min-width: 132px;
+  max-width: min(84vw, 280px);
   max-height: 42svh;
-  padding: 7px;
+  padding: 5px;
   overflow: auto;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 12px;
   background: var(--glass-strong);
   box-shadow: var(--soft-shadow);
   backdrop-filter: blur(22px) saturate(1.18);
 }
 
-.attach-menu {
-  left: 14px;
-}
-
-.permission-menu {
-  right: 58px;
-  left: auto;
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: transparent;
 }
 
 .skill-menu {
-  right: 96px;
-  left: auto;
-  min-width: 238px;
+  min-width: 210px;
 }
 
 .branch-menu {
-  right: 12px;
-  left: auto;
   width: min(84vw, 294px);
   min-width: min(84vw, 264px);
 }
 
 .project-menu {
-  left: 12px;
   min-width: min(84vw, 288px);
   max-width: min(84vw, 320px);
 }
@@ -84,10 +76,9 @@
 }
 
 .model-menu {
-  right: 188px;
-  width: 168px;
-  min-width: 168px;
-  max-width: 168px;
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
   overflow: visible;
 }
 
@@ -96,15 +87,13 @@
 }
 
 .model-submenu {
-  right: 12px;
-  width: 176px;
-  min-width: 176px;
-  max-width: min(46vw, 210px);
+  width: 128px;
+  min-width: 128px;
+  max-width: min(42vw, 150px);
   z-index: 61;
 }
 
 .send-mode-menu {
-  right: 12px;
   min-width: 242px;
 }
 
@@ -200,15 +189,16 @@
 .composer-menu button {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
   width: 100%;
-  min-height: 38px;
-  padding: 8px 9px;
+  min-height: 30px;
+  padding: 4px 7px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text);
   background: transparent;
   text-align: left;
+  font-size: 12.5px;
 }
 
 .composer-menu button.is-selected {
@@ -232,6 +222,12 @@
   flex: 0 0 auto;
   margin-left: auto;
   color: var(--muted);
+}
+
+.menu-item-main strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .composer-menu button.model-menu-parent.is-selected .submenu-chevron {
@@ -309,9 +305,15 @@
 }
 
 .menu-spacer {
+  display: block;
   width: 16px;
   height: 16px;
   flex: 0 0 auto;
+}
+
+.composer-menu button > svg {
+  flex: 0 0 auto;
+  display: block;
 }
 
 .composer {
@@ -324,6 +326,7 @@
   box-shadow: var(--soft-shadow);
   backdrop-filter: blur(22px) saturate(1.18);
   overflow: hidden;
+  transition: border-color 0.18s, box-shadow 0.18s;
 }
 
 .app-shell.is-home .composer-wrap {
@@ -578,6 +581,20 @@
   background: transparent;
   line-height: 1.45;
   font-size: 16px;
+}
+
+.composer:focus-within {
+  border-color: #b8b8b4;
+  box-shadow: 0 8px 28px rgba(20, 24, 31, 0.08), 0 0 0 2px rgba(120, 120, 116, 0.12);
+}
+
+[data-theme="dark"] .composer {
+  box-shadow: none;
+}
+
+[data-theme="dark"] .composer:focus-within {
+  border-color: #4a4a4a;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.06);
 }
 
 .composer textarea::placeholder {
@@ -933,23 +950,20 @@
 }
 
 .context-popover {
-  position: absolute;
-  left: 50%;
-  right: auto;
-  bottom: calc(100% + 10px);
-  z-index: 38;
+  position: fixed;
+  left: auto;
+  z-index: 60;
   width: max-content;
   max-width: min(280px, calc(100vw - 24px));
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
   color: var(--text);
-  background: var(--glass-strong);
+  background: var(--panel);
   box-shadow: var(--soft-shadow);
   font-size: 12px;
   line-height: 20px;
   text-align: left;
-  transform: translateX(-50%);
 }
 
 [data-theme="dark"] .context-popover {
@@ -977,14 +991,12 @@
 
 @media (max-width: 360px) {
   .model-menu {
-    right: 160px;
     width: 148px;
     min-width: 148px;
     max-width: 148px;
   }
 
   .model-submenu {
-    right: 4px;
     width: 156px;
     min-width: 156px;
     max-width: 156px;
@@ -1009,8 +1021,8 @@
   }
 
   .composer {
-    max-width: var(--desktop-main-max);
-    margin: 0 auto;
+    max-width: none;
+    margin: 0;
     border-radius: 18px;
   }
 
@@ -1028,15 +1040,6 @@
     max-height: min(420px, 52vh);
   }
 
-  .attach-menu,
-  .shortcut-menu {
-    left: var(--desktop-main-gutter);
-  }
-
-  .project-menu {
-    left: var(--desktop-main-gutter);
-  }
-
   .app-shell.is-home .project-menu {
     height: min(360px, 36svh);
     max-height: min(360px, 36svh);
@@ -1045,29 +1048,6 @@
   .app-shell.is-home .composer-wrap {
     bottom: 50%;
     transform: translate3d(0, 50%, 0);
-  }
-
-  .permission-menu {
-    right: calc(var(--desktop-main-gutter) + 164px);
-    left: auto;
-  }
-
-  .skill-menu {
-    right: calc(var(--desktop-main-gutter) + 118px);
-    left: auto;
-  }
-
-  .model-menu {
-    right: calc(var(--desktop-main-gutter) + 220px);
-  }
-
-  .model-submenu {
-    right: calc(var(--desktop-main-gutter) + 44px);
-  }
-
-  .send-mode-menu,
-  .shortcut-menu {
-    right: var(--desktop-main-gutter);
   }
 
   .context-popover {
