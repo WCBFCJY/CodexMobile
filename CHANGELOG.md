@@ -2,7 +2,201 @@
 
 All notable changes to CodexMobile are tracked here.
 
+---
+
+## 最新变更
+
+### Docker 部署支持
+
+- **Dockerfile**：多阶段构建 Docker 镜像
+  - 构建阶段：使用 `node:24-bookworm-slim` 构建前端
+  - 运行阶段：包含完整运行时依赖（git、python3、ffmpeg、sqlite3、fonts-noto-cjk 等）
+  - 全局安装 `@openai/codex` CLI
+  - 预设数据目录结构：`/app/.codex`、`/app/.codexmobile`、`/workspace`
+
+- **docker-compose.yml**：一键部署配置
+  - 使用 GitHub Container Registry 镜像：`ghcr.io/flyyangx/codexmobile:latest`
+  - 自动挂载数据卷：codex 配置、codexmobile 状态、工作目录
+  - 预设 `CODEXMOBILE_ENABLE_DANGER_FULL_ACCESS=1` 环境变量
+
+- **docker-entrypoint.sh**：容器启动入口脚本
+  - 自动创建运行时数据目录
+  - 确保工作目录与配置目录分离
+
+- **GitHub Actions 自动发布**（`.github/workflows/docker-publish.yml`）
+  - 支持 `linux/amd64` 和 `linux/arm64` 多架构构建
+  - 自动推送到 GitHub Container Registry
+  - 支持 tag 触发和手动触发
+
+### 文件访问安全限制
+
+- **路径限制**：文件浏览器 API（`/api/files/*`、`/api/local-file`）现在只能访问工作目录
+  - 只允许访问 `CODEXMOBILE_WORKDIR` 或默认工作目录
+  - 访问其他路径返回 403 错误
+  - 防止通过文件 API 访问系统敏感文件
+
+- **根目录 API 变更**：`/api/files/roots` 现在只返回一个工作目录入口
+
+### 权限模式增强
+
+- **新增 `sandboxOff` 权限模式**：
+  - `sandboxMode: 'danger-full-access'`（无沙箱限制）
+  - `approvalPolicy: 'on-request'`（需要审批）
+  - 适合需要完全文件系统访问但仍需用户确认的场景
+
+- **`default` 权限模式变更**：
+  - 审批策略从 `never` 改为 `on-request`
+  - 每次文件操作都需要用户确认
+
+- **新增环境变量 `CODEXMOBILE_ENABLE_DANGER_FULL_ACCESS`**：
+  - 控制是否允许使用 `bypassPermissions` 和 `sandboxOff` 模式
+  - 公网部署时自动禁用（默认行为）
+  - 私网/Docker 部署时可显式启用
+
+### 移除的功能
+
+- **自更新功能**：移除了 `update-service.js`、`update-routes.js` 和 `scripts/apply-update.mjs`
+  - Docker 部署通过 `docker pull` 更新镜像
+  - 本地部署通过 `git pull` 更新代码
+
+### 其他变更
+
+- **`defaultProjectlessWorkspaceRoot()`** 支持环境变量：
+  - 优先使用 `CODEXMOBILE_WORKDIR` 环境变量
+  - Docker 默认工作目录为 `/workspace`
+
+
+### 新增功能
+
+#### 2.0.x 版本新增
+- **文件管理器**：完整的文件浏览、搜索、路径跳转、本地文件预览（Word、HTML、CSV、PPTX、PDF）
+- **本地文件删除**：支持从文件管理器删除本地文件，删除前自动备份
+- **移动端交互请求**：支持 Codex app-server 提示、命令/文件审批、权限请求、MCP 询问
+- **GitHub Release 自更新**：设置页支持检查更新、应用更新标签、依赖安装和重新构建
+- **首页和项目选择**：移动端可从项目层进入，而非必须先进入历史线程
+- **可信设备管理**：设置页可查看、撤销可信设备，区分当前设备
+- **分支工作流**：Composer 和 Git 面板支持分支读取、搜索、切换、创建分支、创建 worktree、生成 PR 草稿
+- **归档箱**：侧栏归档箱视图，支持搜索、查看、取消归档
+- **额度面板**：Codex 额度状态查看
+- **安全控制**：请求来源、可信代理、公网访问模式、权限策略、上传/本地文件访问保护
+
+#### 1.x 版本新增
+- **PWA 更新检测**：检测新构建版本，提示用户刷新
+- **WebSocket 同步**：移动端/桌面端实时同步，包含同步存储、广播、reducer
+- **运行时调试**：检查活跃运行状态和桥接行为
+- **文件差异高亮**：activity 中显示 inline add/delete 高亮
+- **系统主题**：支持跟随 OS 浅色/深色主题
+- **模型速度选择器**：Standard/Fast 选择，Fast 会传递 `service tier` 到后端
+- **Memory Citation 卡片**：折叠显示 `<oai-mem-citation>` 块
+- **队列面板**：queued drafts 查看、恢复、删除、立即发送
+- **Composer 快捷键**：`/` 命令（状态、压缩上下文、代码审查、子代理）
+- **`$skill` 自动补全**：基于现有 skills 列表
+- **`@file` 搜索**：项目内文件搜索，自动忽略 .git、node_modules 等
+- **文件提及**：选中的本地路径作为上下文附加
+- **扩展 Git 面板**：status、diff、pull、sync、commit+push
+- **Toast 通知**：Git 进度、任务完成、失败、用户输入提示
+- **Web Push**：HTTPS PWA 后台完成通知
+- **连接恢复卡片**：重连、同步、修复配对、检查状态入口
+- **桌面线程状态徽章**：IPC 在线、线程待确认、后台执行中
+- **统一侧栏运行指示器**：区分桌面端/移动端发起的发送
+
+### 依赖变化
+
+| 新增依赖 | 用途 |
+|---------|------|
+| `mermaid` ^11.15.0 | Mermaid 图表渲染 |
+| `react-markdown` ^10.1.0 | Markdown 渲染 |
+| `remark-breaks` ^4.0.0 | Markdown 换行支持 |
+| `remark-gfm` ^4.0.1 | GitHub Flavored Markdown |
+| `pdfjs-dist` ^5.7.284 | PDF 预览 |
+| `mammoth` ^1.12.0 | Word 文档预览 |
+| `xlsx` ^0.18.5 | Excel 文件预览 |
+| `jszip` ^3.10.1 | ZIP 文件处理 |
+| `web-push` ^3.6.7 | Web Push 通知 |
+| `@openai/codex-sdk` ^0.128.0 | 升级 Codex SDK |
+
+### 新增脚本
+
+| 脚本 | 用途 |
+|------|------|
+| `npm run up` | 构建前端、启动/重启服务、输出配对入口 |
+| `npm run pair` | 申请一次性配对码，输出手机链接 |
+
+
+### 新增配置项
+
+- `CODEXMOBILE_PUSH_SUBJECT`：Web Push VAPID subject
+- `CODEXMOBILE_PAIRING_CODE_TTL_MS`：配对码有效期
+- `CODEXMOBILE_PAIRING_CODE_LENGTH`：配对码长度
+- `CODEXMOBILE_TOKEN_TTL_MS`：可信设备 token 有效期
+- `CODEXMOBILE_PUBLIC_ACCESS`：公开访问模式
+- `CODEXMOBILE_ALLOWED_ORIGINS`：允许的前端来源
+- `CODEXMOBILE_TRUSTED_PROXY_CIDRS`：可信代理网段
+- `CODEXMOBILE_DANGER_FULL_ACCESS`：是否允许高风险权限模式
+- `CODEXMOBILE_AUTO_TITLE`：自动标题生成开关
+- `CODEXMOBILE_TITLE_BASE_URL/API_KEY/MODEL`：自动标题生成配置
+
+### 新增文件清单（部分）
+
+| 目录 | 文件数 | 说明 |
+|------|--------|------|
+| `server/` | 70+ | 服务端模块化拆分 |
+| `server/sync/` | 4 | 同步相关模块 |
+| `client/src/app/` | 20 | 应用核心模块 |
+| `client/src/chat/` | 11 | 聊天相关组件 |
+| `client/src/composer/` | 2 | 输入组件 |
+| `client/src/panels/` | 14 | 面板组件 |
+| `client/src/sync/` | 2 | 同步相关 |
+| `client/src/utils/` | 1 | 工具函数 |
+| `shared/` | 4 | 客户端/服务端共享代码 |
+| `scripts/` | 9 | 运维脚本 |
+| `marketing/` | 2 个子目录 | 营销素材和截图生成工具 |
+| `docs/superpowers/plans/` | 1 | 开发计划文档 |
+| `.github/workflows/` | 1 | GitHub Actions 工作流 |
+
+### Docker 容器化部署（新增）
+
+- **Dockerfile**：多阶段构建 Docker 镜像
+  - 构建阶段：使用 `node:24-bookworm-slim` 构建前端
+  - 运行阶段：包含完整运行时依赖（git、python3、ffmpeg、sqlite3、fonts-noto-cjk 等）
+  - 全局安装 `@openai/codex` CLI
+  - 预设数据目录结构：`/app/.codex`、`/app/.codexmobile`、`/workspace`
+
+- **docker-compose.yml**：一键部署配置
+  - 使用 GitHub Container Registry 镜像：`ghcr.io/flyyangx/codexmobile:latest`
+  - 自动挂载数据卷：codex 配置、codexmobile 状态、工作目录
+
+- **docker-entrypoint.sh**：容器启动入口脚本
+  - 自动创建运行时数据目录
+  - 确保工作目录与配置目录分离
+
+- **GitHub Actions 自动发布**（`.github/workflows/docker-publish.yml`）
+  - 支持 `linux/amd64` 和 `linux/arm64` 多架构构建
+  - 自动推送到 GitHub Container Registry
+  - 支持 tag 触发和手动触发
+
+### 测试覆盖
+
+BranchA 包含大量测试文件（`*.test.mjs`、`*.test.js`），覆盖：
+- Activity 合并、去重、折叠
+- Composer `/`、`@file`、`$skill` token 解析
+- Queue add/list/delete/restore/steer
+- Desktop IPC 能力判断和发送路径
+- Git status/diff/pull/sync/commit-push
+- Git 分支读取、切换、worktree、PR 草稿
+- Web Push subscription 和通知
+- 文件搜索、上传、本地静态资源安全
+- 配对、可信设备、权限策略、请求安全
+- 自动标题、额度查询、会话列表、归档同步
+
+---
+
 ## Unreleased
+
+### Added
+
+- Added Docker containerization support with multi-stage builds, Docker Compose configuration, and GitHub Actions auto-publishing to GitHub Container Registry.
+- Added `CODEXMOBILE_WORKDIR` environment variable for Docker workspace directory configuration.
 
 ## [2.0.5] - 2026-05-25
 

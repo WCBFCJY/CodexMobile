@@ -28,15 +28,43 @@ function ChatMessageView({
   onDeleteMessage,
   onImplementPlan,
   onAdjustPlan,
-  afterContent = null
+  afterContent = null,
+  isLastAssistantInTurn = false
 }) {
   const [copied, setCopied] = useState(false);
+  const [touchActive, setTouchActive] = useState(false);
   const copiedTimerRef = useRef(null);
+  const messageRowRef = useRef(null);
 
   useEffect(() => () => {
     if (copiedTimerRef.current) {
       window.clearTimeout(copiedTimerRef.current);
     }
+  }, []);
+
+  // 触屏设备点击消息气泡显示操作按钮
+  useEffect(() => {
+    const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (!isTouchDevice) return;
+
+    const handleClick = (e) => {
+      const row = messageRowRef.current;
+      if (!row) return;
+
+      // 点击操作按钮区域不切换状态
+      if (e.target.closest('.message-actions')) return;
+
+      // 点击当前消息，显示操作按钮
+      if (row.contains(e.target)) {
+        setTouchActive(true);
+      } else {
+        // 点击其他地方，隐藏
+        setTouchActive(false);
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
   }, []);
 
   if (message.role === 'activity') {
@@ -62,7 +90,7 @@ function ChatMessageView({
   }
   const isUser = message.role === 'user';
   const isGuided = isUser && (message.guided || message.kind === 'guided_user');
-  const canAct = message.role === 'user' || message.role === 'assistant';
+  const canAct = message.role === 'user' || (message.role === 'assistant' && isLastAssistantInTurn);
   const userMedia = isUser ? splitMessageImages(message.content) : { text: message.content, images: [] };
   const visibleContent = isUser ? userMedia.text : message.content;
   const userDeliveryText = isUser ? deliveryStatusText(message) : '';
@@ -81,7 +109,7 @@ function ChatMessageView({
   }
 
   return (
-    <div className={`message-row ${isUser ? 'is-user' : 'is-assistant'}`}>
+    <div ref={messageRowRef} className={`message-row ${isUser ? 'is-user' : 'is-assistant'} ${touchActive ? 'is-touch-active' : ''}`}>
       <div className="message-stack">
         {isGuided ? (
           <div className="message-guide-label">

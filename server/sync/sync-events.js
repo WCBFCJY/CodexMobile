@@ -103,7 +103,6 @@ function assistantMessage(payload = {}) {
     timestamp: payload.timestamp || nowIso(),
     sessionId: payload.sessionId || null,
     turnId: payload.turnId || payload.clientTurnId || null,
-    done: payload.done !== false,
     phase: payload.phase || null,
     planImplementation: payload.planImplementation || null
   };
@@ -112,8 +111,8 @@ function assistantMessage(payload = {}) {
 function shouldSuppressInternalHandoff(payload = {}) {
   const source = String(payload.source || '').trim();
   const label = `${payload.label || ''} ${payload.detail || ''}`.trim();
-  if (source === 'desktop-ipc' && payload.type === 'status-update') {
-    return true;
+  if (source === 'headless-local' && payload.type === 'status-update') {
+    return false;
   }
   return /已交给桌面端处理|后台启动中|正在完成\s*\d+\s*步操作/.test(label);
 }
@@ -157,9 +156,8 @@ export function normalizeLegacyPayloadToSyncEvents(payload = {}) {
       return [];
     }
     return [
-      baseEvent(payload, payload.done === false ? 'message.assistant.delta' : 'message.assistant.completed', {
-        message: assistantMessage(payload),
-        status: payload.done === false ? 'running' : 'completed'
+      baseEvent(payload, 'message.assistant.completed', {
+        message: assistantMessage(payload)
       })
     ];
   }
@@ -204,8 +202,7 @@ export function normalizeLegacyPayloadToSyncEvents(payload = {}) {
         model: payload.model || null,
         modelShort: payload.modelShort || null,
         reasoningEffort: payload.reasoningEffort || null,
-        provider: payload.provider || null,
-        desktopSync: payload.desktopSync || null
+        provider: payload.provider || null
       })
     ];
   }
@@ -221,9 +218,9 @@ export function normalizeLegacyPayloadToSyncEvents(payload = {}) {
   if (payload.type === 'desktop-thread-updated') {
     const status = clean(payload.status);
     if (!status) {
-      return [baseEvent(payload, 'thread.updated', { source: 'desktop-ipc' })];
+      return [baseEvent(payload, 'thread.updated', { source: 'headless-local' })];
     }
-    return [baseEvent(payload, turnEventTypeForStatus(status, 'turn.running'), { status, source: 'desktop-ipc' })];
+    return [baseEvent(payload, turnEventTypeForStatus(status, 'turn.running'), { status, source: 'headless-local' })];
   }
   if (payload.type === 'session-renamed') {
     return [

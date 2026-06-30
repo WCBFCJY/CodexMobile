@@ -1,13 +1,12 @@
 /**
  * 读写 ~/.codex 下 config.toml、技能列表、模型缓存与项目外线程注册。
  *
- * Keywords: codex-config, toml, skills, sqlite-path, projectless
+ * Keywords: codex-config, toml, skills, projectless
  *
  * Exports:
  * - CODEX_HOME 等路径常量。
  * - readCodexSkills / readCodexModels / readCodexWorkspaceState。
  * - registerProjectlessThread(s) / readCodexConfig / readCodexModelSettings / writeCodexModelSettings。
- * - readCodexThreadModelSettings / normalizeCodexThreadModelSettingsRow / modelSettingsKey。
  *
  * Inward（本模块依赖/组装的关键符号）: Node fs、CODEX_HOME 目录布局。
  *
@@ -15,12 +14,10 @@
  *
  * 不负责: 执行 Codex 二进制。
  */
-import { execFile } from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { promisify } from 'node:util';
 
 export const CODEX_HOME = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
 export const CODEX_CONFIG_PATH = path.join(CODEX_HOME, 'config.toml');
@@ -28,10 +25,8 @@ export const CODEX_GLOBAL_STATE_PATH = path.join(CODEX_HOME, '.codex-global-stat
 export const CODEX_MODELS_CACHE_PATH = path.join(CODEX_HOME, 'models_cache.json');
 export const CODEX_SESSIONS_DIR = path.join(CODEX_HOME, 'sessions');
 export const CODEX_SESSION_INDEX = path.join(CODEX_HOME, 'session_index.jsonl');
-export const CODEX_STATE_DB = path.join(CODEX_HOME, 'state_5.sqlite');
 let codexGlobalStateMutationQueue = Promise.resolve();
 let codexConfigMutationQueue = Promise.resolve();
-const execFileAsync = promisify(execFile);
 const DEFAULT_SKILL_ROOTS = [
   path.join(process.cwd(), 'skills'),
   path.join(CODEX_HOME, 'skills'),
@@ -113,25 +108,6 @@ export function modelSettingsKey(settings = {}) {
     settings.model || '',
     settings.reasoningEffort || ''
   ].join('\n');
-}
-
-export function normalizeCodexThreadModelSettingsRow(row = {}) {
-  const sessionId = String(row.sessionId || row.id || '').trim();
-  const model = String(row.model || '').trim();
-  const reasoningEffort = String(row.reasoningEffort || row.reasoning_effort || '').trim();
-  if (!sessionId || (!model && !reasoningEffort)) {
-    return null;
-  }
-  const provider = String(row.provider || row.modelProvider || row.model_provider || 'openai').trim() || 'openai';
-  const updatedAtMs = Number(row.updatedAtMs ?? row.updated_at_ms);
-  return {
-    provider,
-    model: model || 'gpt-5.5',
-    modelShort: shortModelName(model || 'gpt-5.5'),
-    reasoningEffort: reasoningEffort || null,
-    sessionId,
-    updatedAtMs: Number.isFinite(updatedAtMs) ? updatedAtMs : null
-  };
 }
 
 function publicModel(entry) {
@@ -341,9 +317,28 @@ export async function readCodexWorkspaceState() {
 
 export function defaultProjectlessWorkspaceRoot() {
   if (process.env.CODEXMOBILE_WORKDIR) {
-    return path.resolve(process.env.CODEXMOBILE_WORKDIR, 'Default');
+    return path.resolve(process.env.CODEXMOBILE_WORKDIR);
   }
   return path.join(process.cwd(), '.codexmobile', 'state', 'default');
+}
+
+export async function ensureDefaultProjectPath() {
+  const defaultPath = defaultProjectPath();
+  try {
+    await fs.mkdir(defaultPath, { recursive: true });
+  } catch (error) {
+    if (error.code !== 'EEXIST') {
+      throw error;
+    }
+  }
+  return defaultPath;
+}
+
+export function defaultProjectPath() {
+  if (process.env.CODEXMOBILE_WORKDIR) {
+    return path.resolve(process.env.CODEXMOBILE_WORKDIR, 'Default');
+  }
+  return process.cwd();
 }
 
 async function readCodexGlobalStateForMutation() {
@@ -515,38 +510,6 @@ export async function readCodexModelSettings() {
   return settings;
 }
 
-export async function readCodexThreadModelSettings({ limit = 200 } = {}) {
-  try {
-    await fs.access(CODEX_STATE_DB);
-    const cappedLimit = Math.max(1, Math.min(1000, Number(limit) || 200));
-    const query = `
-      select
-        id as sessionId,
-        model,
-        reasoning_effort as reasoningEffort,
-        model_provider as provider,
-        updated_at_ms as updatedAtMs
-      from threads
-      where (model is not null and trim(model) != '')
-         or (reasoning_effort is not null and trim(reasoning_effort) != '')
-      order by updated_at_ms desc
-      limit ${cappedLimit}
-    `;
-    const { stdout } = await execFileAsync('sqlite3', ['-json', CODEX_STATE_DB, query], {
-      maxBuffer: 2 * 1024 * 1024
-    });
-    const parsed = JSON.parse(stdout || '[]');
-    return (Array.isArray(parsed) ? parsed : [])
-      .map((row) => normalizeCodexThreadModelSettingsRow(row))
-      .filter(Boolean);
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      console.warn('[config] Failed to read Codex thread model settings:', error.message);
-    }
-    return [];
-  }
-}
-
 export async function writeCodexModelSettings({ model, reasoningEffort } = {}) {
   const assignments = {};
   if (model != null && String(model).trim()) {
@@ -671,9 +634,9 @@ export async function readCodexConfig() {
     }
   }
 
-  const cwd = process.cwd();
-  if (!projectMap.has(cwd)) {
-    projectMap.set(cwd, { path: cwd, trustLevel: 'trusted' });
+  const defaultPath = await ensureDefaultProjectPath();
+  if (!projectMap.has(defaultPath)) {
+    projectMap.set(defaultPath, { path: defaultPath, trustLevel: 'trusted' });
   }
 
   config.modelShort = shortModelName(config.model);

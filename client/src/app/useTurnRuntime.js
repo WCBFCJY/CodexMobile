@@ -12,7 +12,7 @@
  * Outward: `App.jsx` 编排会话与聊天数据流。
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { apiFetch } from '../api.js';
 import {
   completeActivityMessagesForTurn,
@@ -72,12 +72,16 @@ export function useTurnRuntime({
   setMessages,
   setContextStatus
 }) {
+  const turnRefreshInProgressRef = useRef(new Set());
+  const lastRefreshTriggerTimeRef = useRef(0);
+
   useEffect(
     () => () => {
       for (const timer of turnRefreshTimersRef.current.values()) {
         window.clearTimeout(timer);
       }
       turnRefreshTimersRef.current.clear();
+      turnRefreshInProgressRef.current.clear();
     },
     [turnRefreshTimersRef]
   );
@@ -226,6 +230,12 @@ export function useTurnRuntime({
       window.clearTimeout(timer);
       turnRefreshTimersRef.current.delete(turnId);
     }
+    const delayedTimer = turnRefreshTimersRef.current.get(`${turnId}-delayed`);
+    if (delayedTimer) {
+      window.clearTimeout(delayedTimer);
+      turnRefreshTimersRef.current.delete(`${turnId}-delayed`);
+    }
+    turnRefreshInProgressRef.current.delete(turnId);
   }
 
   async function refreshMessagesForPayload(payload) {
@@ -276,22 +286,46 @@ export function useTurnRuntime({
     if (!turnId || !payload?.sessionId || !payloadMatchesCurrentConversation(payload)) {
       return;
     }
+
+    if (turnRefreshInProgressRef.current.has(turnId)) {
+      return;
+    }
+
+    const MIN_TRIGGER_INTERVAL = 5000;
+    const now = Date.now();
+    const elapsed = now - lastRefreshTriggerTimeRef.current;
+    
+    if (attempt === 0 && elapsed < MIN_TRIGGER_INTERVAL && lastRefreshTriggerTimeRef.current > 0) {
+      const waitMs = MIN_TRIGGER_INTERVAL - elapsed;
+      const delayedTimer = window.setTimeout(() => {
+        scheduleTurnRefresh(payload, 0);
+      }, waitMs);
+      turnRefreshTimersRef.current.set(`${turnId}-delayed`, delayedTimer);
+      return;
+    }
+
+    turnRefreshInProgressRef.current.add(turnId);
+    lastRefreshTriggerTimeRef.current = now;
     clearTurnRefreshTimer(turnId);
+
     const delays = [300, 800, 1500, 2500, 4000, 6500, 10000, 15000, 22000, 30000, 30000];
     const delay = delays[attempt];
     if (delay === undefined) {
+      turnRefreshInProgressRef.current.delete(turnId);
       finalizeTurnWithoutAssistant(payload);
       return;
     }
 
     const timer = window.setTimeout(async () => {
       if (!payloadMatchesCurrentConversation(payload)) {
+        turnRefreshInProgressRef.current.delete(turnId);
         return;
       }
       const loaded = await refreshMessagesForPayload(payload);
       if (loaded) {
         clearTurnRefreshTimer(turnId);
         clearRun(payload);
+        turnRefreshInProgressRef.current.delete(turnId);
         return;
       }
       scheduleTurnRefresh(payload, attempt + 1);

@@ -75,7 +75,7 @@ export function ContextStatusDetails({ contextStatus }) {
 
   return (
     <>
-      <div className="context-popover-title">背景信息窗口：</div>
+      <div className="context-popover-title">背景信息窗口</div>
       <div>
         {usedPercent !== null && remainingPercent !== null
           ? `${usedPercent}% 已用（剩余 ${remainingPercent}%）`

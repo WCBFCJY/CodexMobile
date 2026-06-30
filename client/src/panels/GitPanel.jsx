@@ -11,7 +11,7 @@
  * Outward: App / TopBar 在打开 Git 抽屉时使用。
  */
 
-import { Check, ChevronLeft, Copy, ExternalLink, FileText, FolderGit2, GitBranch, GitCommitHorizontal, GitPullRequest, Loader2, Plus, RefreshCw, UploadCloud, X } from 'lucide-react';
+import { Check, ChevronDown, Copy, ExternalLink, FileText, FolderGit2, GitBranch, GitCommitHorizontal, GitPullRequest, ListTree, Loader2, MoreHorizontal, Plus, RefreshCw, UploadCloud, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '../api.js';
 import { gitActionRequestConfig } from '../git-panel-actions.js';
@@ -24,6 +24,7 @@ function gitActionTitle(action) {
     branch: '创建分支',
     status: 'Git 状态',
     diff: 'Git Diff',
+    actions: 'Git 操作',
     pull: '拉取',
     sync: '同步',
     commit: '提交',
@@ -44,6 +45,49 @@ function gitBranchDraft(project) {
     .replace(/-+/g, '-')
     .replace(/^[.-]+|[.-]+$/g, '');
   return `codex/${name || 'changes'}`;
+}
+
+// 把 unified diff 文本解析成按文件分组的结构化数据
+function parseDiffPatch(patch) {
+  if (!patch) return [];
+  const lines = patch.split('\n');
+  const files = [];
+  let current = null;
+  let hunkLines = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith('diff --git ')) {
+      if (current) {
+        current.hunks.push({ lines: hunkLines });
+        hunkLines = [];
+      }
+      current = { header: line, hunks: [] };
+      files.push(current);
+    } else if (line.startsWith('@@')) {
+      if (current && hunkLines.length) {
+        current.hunks.push({ lines: hunkLines });
+        hunkLines = [];
+      }
+      hunkLines.push({ type: 'hunk', text: line });
+    } else if (current) {
+      let type = 'context';
+      if (line.startsWith('+')) type = 'add';
+      else if (line.startsWith('-')) type = 'del';
+      else if (line.startsWith('index ') || line.startsWith('--- ') || line.startsWith('+++ ')) type = 'meta';
+      if (type === 'meta') continue;
+      hunkLines.push({ type, text: line });
+    }
+  }
+  if (current && hunkLines.length) {
+    current.hunks.push({ lines: hunkLines });
+  }
+  return files;
+}
+
+function diffFileName(header) {
+  const match = header.match(/^diff --git a\/(\S+) b\/(\S+)/);
+  return match ? match[2] : header;
 }
 
 export function GitPanel({ open, action, project, onClose, onToast }) {
@@ -151,7 +195,8 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
     setBaseBranch('');
     setPanelAction(action || 'status');
     refreshAll();
-  }, [open, action, projectId, refreshAll]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, action, projectId]);
 
   useEffect(() => {
     if (open && activeAction === 'diff' && !diffLoaded && !busy) {
@@ -228,9 +273,7 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
   return (
     <section className="docs-panel git-panel git-action-sheet" role="dialog" aria-modal="true" aria-label={title}>
       <header className="docs-panel-header">
-        <button className="icon-button" type="button" onClick={onClose} aria-label="关闭 Git">
-          <ChevronLeft size={22} />
-        </button>
+        <span className="docs-panel-spacer" aria-hidden="true" />
         <div className="docs-panel-title">
           <strong>{title}</strong>
           <span>{status?.branch || project?.name || 'Git'}</span>
@@ -244,8 +287,16 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
         <GitStatusSummary status={status} fileCount={fileCount} warnings={safetyWarnings} onRefresh={refreshAll} busy={busy} />
         <GitActionLauncher activeAction={activeAction} onSelect={selectPanelAction} disabled={busy} />
 
-        {activeAction === 'branches' ? (
-          <BranchSheet
+        {activeAction === 'status' ? (
+          <StatusFileList status={status} />
+        ) : null}
+
+        {activeAction === 'diff' ? (
+          <DiffSheet diff={diff} busy={busyAction === 'diff'} onRefresh={loadDiff} />
+        ) : null}
+
+        {activeAction === 'actions' ? (
+          <ActionsSheet
             branches={branchList}
             branchName={branchName}
             setBranchName={setBranchName}
@@ -257,50 +308,15 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
             canCreateBranch={canCreateBranch}
             canCreateWorktree={canCreateWorktree && !branchControlsLimited}
             limited={branchControlsLimited}
-          />
-        ) : null}
-
-        {activeAction === 'branch' ? (
-          <CreateBranchSheet
-            branchName={branchName}
-            setBranchName={setBranchName}
-            busy={busy}
-            busyAction={busyAction}
-            onCreateBranch={() => runGitAction('branch')}
-            canCreateBranch={canCreateBranch}
-          />
-        ) : null}
-
-        {activeAction === 'diff' ? (
-          <DiffSheet diff={diff} busy={busyAction === 'diff'} onRefresh={loadDiff} />
-        ) : null}
-
-        {activeAction === 'commit' || activeAction === 'commit-push' ? (
-          <CommitSheet
-            action={activeAction}
             commitMessage={commitMessage}
             setCommitMessage={setCommitMessage}
             canCommit={canCommit}
-            busy={busy}
-            busyAction={busyAction}
-            onCommit={() => runGitAction(activeAction)}
+            onCommit={(action) => runGitAction(action)}
             blockReason={blockReason}
-          />
-        ) : null}
-
-        {activeAction === 'status' ? (
-          <StatusFileList status={status} />
-        ) : null}
-
-        {activeAction === 'pull' || activeAction === 'sync' || activeAction === 'push' ? (
-          <ActionProgress action={activeAction} busy={busy} result={result} blockReason={blockReason} onRun={() => runGitAction(activeAction)} />
-        ) : null}
-
-        {activeAction === 'pr-draft' ? (
-          <PrDraftSheet
+            result={result}
+            onRun={(action) => runGitAction(action)}
             baseBranch={baseBranch || defaultBaseBranch}
             setBaseBranch={setBaseBranch}
-            busy={busy}
             draft={prDraft}
             canGenerate={canPush}
             copied={copiedDraft}
@@ -317,19 +333,14 @@ export function GitPanel({ open, action, project, onClose, onToast }) {
 }
 
 function GitActionLauncher({ activeAction, onSelect, disabled }) {
-  const actions = [
-    ['status', FileText, '状态'],
+  const tabs = [
+    ['status', ListTree, '状态'],
     ['diff', FileText, 'Diff'],
-    ['pull', RefreshCw, 'Pull'],
-    ['sync', RefreshCw, 'Sync'],
-    ['commit', GitCommitHorizontal, 'Commit'],
-    ['push', UploadCloud, 'Push'],
-    ['commit-push', UploadCloud, 'Commit+Push'],
-    ['branches', GitBranch, '分支']
+    ['actions', MoreHorizontal, '操作']
   ];
   return (
     <nav className="git-action-launcher" aria-label="Git 操作">
-      {actions.map(([nextAction, Icon, label]) => (
+      {tabs.map(([nextAction, Icon, label]) => (
         <button
           key={nextAction}
           type="button"
@@ -342,6 +353,68 @@ function GitActionLauncher({ activeAction, onSelect, disabled }) {
         </button>
       ))}
     </nav>
+  );
+}
+
+function ActionsSheet(props) {
+  const { busy } = props;
+
+  return (
+    <section className="git-actions-page">
+      <RemoteActionsSheet busy={busy} result={props.result} blockReason={props.blockReason} onRun={props.onRun} />
+      <CommitSheet
+        action="commit"
+        commitMessage={props.commitMessage}
+        setCommitMessage={props.setCommitMessage}
+        canCommit={props.canCommit}
+        busy={busy}
+        busyAction={props.busyAction}
+        onCommit={() => props.onCommit('commit')}
+        onCommitPush={() => props.onCommit('commit-push')}
+        blockReason={props.blockReason}
+      />
+      <BranchSheet
+        branches={props.branches}
+        branchName={props.branchName}
+        setBranchName={props.setBranchName}
+        busy={busy}
+        busyAction={props.busyAction}
+        onCheckout={props.onCheckout}
+        onCreateBranch={props.onCreateBranch}
+        onCreateWorktree={props.onCreateWorktree}
+        canCreateBranch={props.canCreateBranch}
+        canCreateWorktree={props.canCreateWorktree}
+        limited={props.limited}
+      />
+    </section>
+  );
+}
+
+function RemoteActionsSheet({ busy, result, blockReason, onRun }) {
+  const items = [
+    ['pull', RefreshCw, '拉取'],
+    ['sync', RefreshCw, '同步'],
+    ['push', UploadCloud, '推送']
+  ];
+  return (
+    <section className="git-action-card">
+      <div className="git-section-head">
+        <strong>Git 操作</strong>
+        <span>{busy ? '正在执行...' : result ? '已完成' : '准备执行'}</span>
+      </div>
+      {busy ? <div className="git-inline-progress"><Loader2 className="spin" size={16} /> 正在处理 Git 操作</div> : null}
+      {!busy ? (
+        <div className="git-action-grid git-action-grid-3">
+          {items.map(([action, Icon, label]) => (
+            <button key={action} type="button" onClick={() => onRun(action)} disabled={Boolean(blockReason)}>
+              <Icon size={15} />
+              {label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      {blockReason ? <small className="git-diff-note">{blockReason}</small> : null}
+    </section>
   );
 }
 
@@ -454,6 +527,22 @@ function CreateBranchSheet({ branchName, setBranchName, busy, busyAction, onCrea
 }
 
 function DiffSheet({ diff, busy, onRefresh }) {
+  const files = useMemo(() => parseDiffPatch(diff?.patch), [diff?.patch]);
+  const summaryStats = useMemo(() => {
+    if (!diff?.summary) return null;
+    const lines = diff.summary.split('\n').filter(Boolean);
+    const last = lines[lines.length - 1] || '';
+    const fileMatch = last.match(/(\d+)\s+files?\s+changed/);
+    const addMatch = last.match(/(\d+)\s+insertions?\(\+\)/);
+    const delMatch = last.match(/(\d+)\s+deletions?\(-\)/);
+    return {
+      files: fileMatch ? fileMatch[1] : null,
+      adds: addMatch ? addMatch[1] : null,
+      dels: delMatch ? delMatch[1] : null,
+      raw: last
+    };
+  }, [diff?.summary]);
+
   return (
     <section className="git-diff-card">
       <div className="git-section-head">
@@ -463,24 +552,84 @@ function DiffSheet({ diff, busy, onRefresh }) {
           刷新
         </button>
       </div>
-      {diff?.summary ? <pre className="git-diff-summary">{diff.summary}</pre> : null}
-      <pre className="git-diff-pre">{diff?.patch || (busy ? '正在读取 diff...' : '暂无 diff')}</pre>
+      {summaryStats ? (
+        <div className="git-diff-summary-bar">
+          {summaryStats.files ? <span className="git-diff-stat-files">{summaryStats.files} 文件</span> : null}
+          {summaryStats.adds ? <span className="git-diff-stat-add">+{summaryStats.adds}</span> : null}
+          {summaryStats.dels ? <span className="git-diff-stat-del">-{summaryStats.dels}</span> : null}
+        </div>
+      ) : null}
+      {busy && !diff?.patch ? (
+        <div className="git-diff-empty">正在读取 diff...</div>
+      ) : files.length ? (
+        <div className="git-diff-files">
+          {files.map((file, fi) => (
+            <DiffFileBlock key={fi} file={file} />
+          ))}
+        </div>
+      ) : (
+        <div className="git-diff-empty">暂无 diff</div>
+      )}
       {diff?.truncated ? <small className="git-diff-note">diff 太长，已截断显示。</small> : null}
     </section>
   );
 }
 
-function CommitSheet({ action, commitMessage, setCommitMessage, canCommit, busy, busyAction, onCommit, blockReason }) {
+function DiffFileBlock({ file }) {
+  const [collapsed, setCollapsed] = useState(false);
+  let addCount = 0;
+  let delCount = 0;
+  file.hunks.forEach((hunk) => hunk.lines.forEach((row) => {
+    if (row.type === 'add') addCount += 1;
+    if (row.type === 'del') delCount += 1;
+  }));
+
+  return (
+    <div className="git-diff-file">
+      <div className="git-diff-file-head" onClick={() => setCollapsed((v) => !v)} role="button" tabIndex={0}>
+        <ChevronDown size={14} className={collapsed ? 'git-diff-chevron-collapsed' : ''} />
+        <FileText size={14} />
+        <span className="git-diff-file-name">{diffFileName(file.header)}</span>
+        <span className="git-diff-file-stats">
+          <span className="git-diff-add-count">+{addCount}</span>
+          <span className="git-diff-del-count">-{delCount}</span>
+        </span>
+      </div>
+      {!collapsed ? (
+        <div className="git-diff-body">
+          {file.hunks.map((hunk, hi) => (
+            <div key={hi} className="git-diff-hunk">
+              {hunk.lines.map((row, ri) => (
+                <div key={ri} className={`git-diff-row git-diff-${row.type}`}>
+                  <span className="git-diff-sign">
+                    {row.type === 'add' ? '+' : row.type === 'del' ? '-' : ' '}
+                  </span>
+                  <span className="git-diff-text">{row.text.replace(/^[+\-\s]/, '')}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function CommitSheet({ action, commitMessage, setCommitMessage, canCommit, busy, busyAction, onCommit, onCommitPush, blockReason }) {
   return (
     <section className="git-action-card">
       <label className="git-field">
         <span>提交信息</span>
         <input value={commitMessage} onChange={(event) => setCommitMessage(event.target.value)} />
       </label>
-      <div className="git-action-grid">
+      <div className="git-action-grid git-action-grid-2">
         <button type="button" onClick={onCommit} disabled={busy || !canCommit}>
-          {busyAction === action ? <Loader2 className="spin" size={15} /> : action === 'commit-push' ? <UploadCloud size={15} /> : <GitCommitHorizontal size={15} />}
-          {action === 'commit-push' ? '提交并推送' : '提交'}
+          {busyAction === 'commit' ? <Loader2 className="spin" size={15} /> : <GitCommitHorizontal size={15} />}
+          提交
+        </button>
+        <button type="button" onClick={onCommitPush} disabled={busy || !canCommit}>
+          {busyAction === 'commit-push' ? <Loader2 className="spin" size={15} /> : <UploadCloud size={15} />}
+          提交并推送
         </button>
       </div>
       {blockReason ? <small className="git-diff-note">{blockReason}</small> : null}

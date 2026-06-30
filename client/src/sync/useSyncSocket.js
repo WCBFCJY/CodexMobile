@@ -27,6 +27,8 @@ import {
   removeStalePlanRequestsAfterUserMessages,
   upsertStatusMessage
 } from '../chat/activity-model.js';
+
+const turnFailureCount = new Map();
 import {
   resolveInteractionRequestMessage,
   upsertInteractionRequestMessage
@@ -224,26 +226,44 @@ export function applySyncSocketPayload(payload, context) {
     clearRuntimeForEvent(event, context);
     if (syncEventMatchesCurrent(event, context.selectedSessionRef)) {
       if (event.eventType === 'turn.failed') {
-        context.setMessages((current) =>
-          upsertStatusMessage(current, {
-            ...legacyPayload,
-            kind: 'turn',
-            status: 'failed',
-            label: '任务失败',
-            detail: event.detail || '任务失败'
-          })
-        );
-      } else if (event.eventType === 'turn.aborted') {
-        context.setMessages((current) =>
-          upsertStatusMessage(current, {
-            ...legacyPayload,
-            kind: 'turn',
-            status: 'completed',
-            label: '已中止'
-          })
-        );
-      } else if (event.sessionId || event.turnId) {
-        context.scheduleTurnRefresh(legacyPayload);
+        const errorDetail = event.detail || '任务失败';
+        const isTurnLevel = /(fail|2|5)/i.test(errorDetail);
+        if (isTurnLevel) {
+          const turnKey = event.turnId || event.clientTurnId || '';
+          const count = (turnFailureCount.get(turnKey) || 0) + 1;
+          turnFailureCount.set(turnKey, count);
+          const retryNote = count > 1 ? `（第 ${count} 次重试）` : '';
+          const failureContent = `**任务失败${retryNote}**: ${errorDetail}`;
+          const failureId = `assistant-${turnKey}`;
+          context.setMessages((current) => {
+            const existing = current.find((m) => m.id === failureId);
+            if (existing) {
+              if (existing.content === failureContent) {
+                return current;
+              }
+              return current.map((m) => (m.id === failureId ? { ...m, content: failureContent } : m));
+            }
+            return upsertAssistantMessage(current, {
+              ...legacyPayload,
+              content: failureContent,
+              kind: 'agent_message'
+            });
+          });
+        }
+      } else {
+        turnFailureCount.delete(event.turnId || event.clientTurnId || '');
+        if (event.eventType === 'turn.aborted') {
+          context.setMessages((current) =>
+            upsertStatusMessage(current, {
+              ...legacyPayload,
+              kind: 'turn',
+              status: 'completed',
+              label: '已中止'
+            })
+          );
+        } else if (event.legacyType === 'chat-complete' && (event.sessionId || event.turnId)) {
+          context.scheduleTurnRefresh(legacyPayload);
+        }
       }
     }
     return true;
@@ -297,8 +317,23 @@ export function applySyncSocketPayload(payload, context) {
     return true;
   }
 
-  if (event.eventType?.startsWith('message.assistant') && event.message && syncEventMatchesCurrent(event, context.selectedSessionRef)) {
+  if (event.eventType === 'message.assistant.completed' && event.message && syncEventMatchesCurrent(event, context.selectedSessionRef)) {
     if (String(event.message.content || '').trim()) {
+      // 收到 assistant.completed 时更新 runtime 为 running
+      if (event.sessionId) {
+        context.setThreadRuntimeById((current) => ({
+          ...current,
+          [event.sessionId]: {
+            ...current[event.sessionId],
+            status: 'running',
+            label: '正在后台运行 Codex',
+            sessionId: event.sessionId,
+            turnId: event.turnId || current[event.sessionId]?.turnId || null,
+            startedAt: current[event.sessionId]?.startedAt || event.timestamp || new Date().toISOString()
+          }
+        }));
+      }
+      
       if (isCommentaryAssistantMessage(event)) {
         context.setMessages((current) => upsertActivityMessage(
           removeAssistantMessageCoveredByProcessText(current, commentaryDescriptorFromAssistantEvent(event)),
@@ -308,8 +343,8 @@ export function applySyncSocketPayload(payload, context) {
         context.setMessages((current) => upsertAssistantMessage(current, {
           ...legacyPayload,
           ...event.message,
-          content: event.message.content,
-          done: event.message.done
+          messageId: event.message.id,
+          content: event.message.content
         }));
       }
     }

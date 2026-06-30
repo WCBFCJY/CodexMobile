@@ -37,7 +37,6 @@ import { useDocsActions } from './useDocsActions.js';
 import { useFileUploads } from './useFileUploads.js';
 import { useAppWebSocket } from './useAppWebSocket.js';
 import { upsertActivityMessage } from '../chat/activity-model.js';
-import { useSessionLivePolling } from './useSessionLivePolling.js';
 import { useSessionActions } from './useSessionActions.js';
 import { useTurnSubmission } from './useTurnSubmission.js';
 import { useTurnRuntime } from './useTurnRuntime.js';
@@ -140,6 +139,8 @@ export default function App() {
     }
     return localStorage.getItem('codexmobile.reasoningEffort') || DEFAULT_REASONING_EFFORT;
   });
+  const [filePanelEnabled, setFilePanelEnabled] = useState(() => localStorage.getItem('codexmobile.filePanelEnabled') === 'true');
+  const [hideDefaultProject, setHideDefaultProject] = useState(() => localStorage.getItem('codexmobile.hideDefaultProject') === 'true');
   const {
     fileMentions,
     setFileMentions,
@@ -154,9 +155,10 @@ export default function App() {
   const [runningById, setRunningById] = useState({});
   const [threadRuntimeById, setThreadRuntimeById] = useState({});
   const [syncing, setSyncing] = useState(false);
-  const [desktopHandoffPending, setDesktopHandoffPending] = useState(false);
   const [homeExiting, setHomeExiting] = useState(false);
   const [connectionState, setConnectionState] = useState(() => (getToken() ? 'connecting' : 'disconnected'));
+  const [showRecoveryCard, setShowRecoveryCard] = useState(false);
+  const disconnectedAtRef = useRef(null);
   const wsRef = useRef(null);
   const selectedProjectRef = useRef(null);
   const selectedSessionRef = useRef(null);
@@ -173,12 +175,37 @@ export default function App() {
   const selectedReasoningEffortRef = useRef(selectedReasoningEffort);
   const modelSettingsRequestRef = useRef(0);
   const modelSettingsSyncQueueRef = useRef(Promise.resolve());
-  const sessionLivePollRef = useRef(false);
   const bootstrapStartedRef = useRef(false);
   const drawerSyncAtRef = useRef(0);
   const desktopDrawerSeededRef = useRef(false);
   const composerRef = useRef(null);
   const gitQuickDialogResolverRef = useRef(null);
+
+  // 断连 2 秒后才显示恢复卡片（connecting 状态不弹窗）
+  useEffect(() => {
+    if (connectionState === 'disconnected') {
+      // 记录首次断连时间
+      if (!disconnectedAtRef.current) {
+        disconnectedAtRef.current = Date.now();
+      }
+      // 检查是否已超过 2 秒
+      const elapsed = Date.now() - disconnectedAtRef.current;
+      if (elapsed >= 2000) {
+        setShowRecoveryCard(true);
+      } else {
+        const timer = setTimeout(() => {
+          setShowRecoveryCard(true);
+        }, 2000 - elapsed);
+        return () => clearTimeout(timer);
+      }
+    } else if (connectionState === 'connected') {
+      // 连接恢复，重置状态
+      disconnectedAtRef.current = null;
+      setShowRecoveryCard(false);
+    }
+    // connecting 状态保持 showRecoveryCard 不变
+    return undefined;
+  }, [connectionState]);
 
   const handleAuthRevoked = useCallback(() => {
     clearToken();
@@ -351,17 +378,6 @@ export default function App() {
     messagesRef.current = messages;
   }, [messages]);
 
-  useSessionLivePolling({
-    authenticated,
-    selectedSession,
-    running,
-    defaultStatus: DEFAULT_STATUS,
-    sessionLivePollRef,
-    selectedSessionRef,
-    setContextStatus,
-    setMessages
-  });
-
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
     applyPwaTheme(theme);
@@ -487,13 +503,6 @@ export default function App() {
       if (modelSettingsRequestRef.current === requestId && data.settings) {
         setStatus((current) => mergeModelSettingsIntoStatus(current, data.settings));
       }
-      if (data.desktopSync?.attempted && !data.desktopSync?.synced) {
-        showToast({
-          level: 'warning',
-          title: '模型已保存',
-          body: '桌面端当前线程没有立即接收模型设置，后续会按配置同步。'
-        });
-      }
     });
     modelSettingsSyncQueueRef.current = task;
     try {
@@ -519,6 +528,22 @@ export default function App() {
     selectedReasoningEffortRef.current = reasoningEffort;
     syncModelSettings({ model: selectedModelRef.current, reasoningEffort });
   }, [syncModelSettings]);
+
+  const handleFilePanelToggle = useCallback(() => {
+    setFilePanelEnabled((prev) => {
+      const next = !prev;
+      localStorage.setItem('codexmobile.filePanelEnabled', String(next));
+      return next;
+    });
+  }, []);
+
+  const handleHideDefaultProjectToggle = useCallback(() => {
+    setHideDefaultProject((prev) => {
+      const next = !prev;
+      localStorage.setItem('codexmobile.hideDefaultProject', String(next));
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     if (bootstrapStartedRef.current) {
@@ -634,7 +659,9 @@ export default function App() {
     setSyncing,
     loadStatus,
     loadProjects,
-    showToast
+    showToast,
+    selectedSession,
+    setMessages
   });
 
   const {
@@ -839,10 +866,10 @@ export default function App() {
     },
     [contextStatus, selectedSession]
   );
+  // 卡片显示后，保持 disconnected 状态的文案，不随 connecting 状态变化
   const recoveryState = connectionRecoveryState({
     authenticated,
-    connectionState,
-    desktopBridge: status.desktopBridge,
+    connectionState: showRecoveryCard && connectionState !== 'connected' ? 'disconnected' : connectionState,
     syncing
   });
   const topBarRuntime = selectedRuntime || (selectedRunning ? { status: 'running' } : null);
@@ -950,49 +977,6 @@ export default function App() {
     }
   }, [selectedProject, selectedSession, showToast]);
 
-  const handleDesktopHandoff = useCallback(async () => {
-    const session = selectedSessionRef.current || selectedSession;
-    if (!session?.id || isDraftSession(session)) {
-      showToast({
-        level: 'warning',
-        title: '暂时不能回到桌面',
-        body: '请先打开一个已创建的对话。'
-      });
-      return false;
-    }
-    if (selectedRunning) {
-      showToast({
-        level: 'warning',
-        title: '执行完成后再回到桌面',
-        body: '当前对话还在执行中，完成后再打开桌面端更安全。'
-      });
-      return false;
-    }
-    setDesktopHandoffPending(true);
-    try {
-      await apiFetch('/api/desktop-handoff', {
-        method: 'POST',
-        timeoutMs: 12_000,
-        body: { sessionId: session.id }
-      });
-      showToast({
-        level: 'success',
-        title: '已重启桌面端',
-        body: 'Codex 桌面端会重新进入当前对话。'
-      });
-      return true;
-    } catch (error) {
-      showToast({
-        level: 'error',
-        title: '桌面端打开失败',
-        body: error.message || '请确认 Mac 上已安装并可打开 Codex.app。'
-      });
-      return false;
-    } finally {
-      setDesktopHandoffPending(false);
-    }
-  }, [selectedSession, selectedRunning, showToast]);
-
   if (!authenticated) {
     return <PairingScreen pairing={status.pairing} onPaired={bootstrap} />;
   }
@@ -1002,14 +986,11 @@ export default function App() {
       selectedProject,
       selectedSession,
       connectionState,
-      desktopBridge: status.desktopBridge,
       selectedRuntime: topBarRuntime,
       onMenu: handleToggleDrawer,
       onOpenDocs: () => setDocsOpen(true),
       onGitAction: handleGitAction,
-      onDesktopHandoff: handleDesktopHandoff,
-      desktopHandoffSupported: status.desktopRefresh?.supported !== false,
-      desktopHandoffPending,
+      onOpenGitPanel: () => setGitPanel((current) => ({ ...current, open: true, action: 'status' })),
       notificationSupported,
       notificationEnabled,
       onEnableNotifications: enableNotifications,
@@ -1049,7 +1030,7 @@ export default function App() {
       onSubmit: closeGitQuickDialog
     },
     recoveryCardProps: {
-      state: recoveryState,
+      state: showRecoveryCard ? recoveryState : null,
       onRetry: handleRetryConnection,
       onSync: handleSync,
       onPair: handleResetPairing,
@@ -1090,15 +1071,17 @@ export default function App() {
     theme,
     setTheme,
     runtimeDebug: status.runtimeDebug,
-    desktopRefresh: status.desktopRefresh,
     security: status.security,
     onLoggedOut: handleAuthRevoked,
-    refreshStatus: loadStatus
+    refreshStatus: loadStatus,
+    filePanelEnabled,
+    onFilePanelToggle: handleFilePanelToggle,
+    hideDefaultProject,
+    onHideDefaultProjectToggle: handleHideDefaultProjectToggle
   };
   const chatProps = {
     messages,
     selectedSession,
-    loading: sessionLoading,
     loadError: sessionLoadError,
     running: selectedRunning,
     activeRuntimeStartedAt: selectedRuntime?.startedAt || selectedRuntime?.updatedAt || null,
@@ -1147,7 +1130,6 @@ export default function App() {
     uploading,
     contextStatus: visibleContextStatus,
     runSteerable: selectedRuntime?.steerable !== false,
-    desktopBridge: status.desktopBridge,
     queueDrafts,
     onRestoreQueueDraft: restoreQueueDraft,
     onRemoveQueueDraft: removeQueueDraft,
@@ -1158,7 +1140,8 @@ export default function App() {
     readOnlyReason: '已归档线程只能查看，取消归档后才能继续对话',
     homeMode: homeVisible,
     projects,
-    onSelectHomeProject: handleNewConversation
+    onSelectHomeProject: handleNewConversation,
+    hideDefaultProject
   };
 
   return (
@@ -1169,6 +1152,9 @@ export default function App() {
       chatProps={chatProps}
       composerProps={composerProps}
       homeVisible={homePaneVisible}
+      filePanelEnabled={filePanelEnabled}
+      selectedProject={selectedProject}
+      projects={projects}
     />
   );
 }

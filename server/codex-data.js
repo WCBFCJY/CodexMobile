@@ -1,38 +1,32 @@
 /**
- * Codex 侧项目/会话数据聚合缓存：同步索引、消息读取、隐藏与桌面 thread 联动。
+ * Codex 侧项目/会话数据聚合缓存：同步索引、消息读取与隐藏。
  *
- * Keywords: codex-data, session-cache, sqlite, desktop-sync
+ * Keywords: codex-data, session-cache, sqlite
  *
  * Exports:
- * - 再导出 desktop/session 解析符号。
  * - refreshCodexCache / getCacheSnapshot — 缓存生命周期。
  * - listProjects / getProject / listProjectSessions / getSession / rememberLiveSession。
  * - projectlessMobileSessionRegistrations — 找出需补登记到 Codex 全局 state 的移动端普通对话。
  * - renameSession / deleteSession / unarchiveSession / hideSessionMessage / readSessionMessages / getHostName。
  *
- * Inward（本模块依赖/组装的关键符号）: session-index-builder、session-message-reader、mobile-session-index、codex-app-server、session-local-state。
+ * Inward（本模块依赖/组装的关键符号）: session-index-builder、session-message-reader、mobile-session-index、session-local-state。
  *
  * Outward（谁在用/调用场景）: server/index、各 API handler 注入。
  *
  * 不负责: HTTP 细节。
  */
-import { execFile } from 'node:child_process';
 import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { promisify } from 'node:util';
-import { archiveDesktopThread, listDesktopThreads, readDesktopThread, resolveAppServerTransport, unarchiveDesktopThread } from './codex-app-server.js';
 import {
   CODEX_SESSION_INDEX,
   CODEX_SESSIONS_DIR,
-  CODEX_STATE_DB,
   defaultProjectlessWorkspaceRoot,
   readCodexConfig,
   readCodexWorkspaceState,
   registerProjectlessThreads
 } from './codex-config.js';
-import { broadcastDesktopThreadTitleUpdated } from './desktop-ipc-client.js';
 import {
   readMobileSessionIndex,
   renameMobileSession
@@ -58,11 +52,8 @@ export { messagesFromDesktopThread } from './desktop-thread-projector.js';
 export { normalizeComparablePath } from './session-index-builder.js';
 
 const INCLUDE_MISSING_SUBAGENT_THREADS = process.env.CODEXMOBILE_INCLUDE_MISSING_SUBAGENT_THREADS === '1';
-const USE_APP_SERVER_THREAD_LIST = /^(1|true|yes|on)$/i.test(String(process.env.CODEXMOBILE_USE_APP_SERVER_THREAD_LIST || '').trim());
-const execFileAsync = promisify(execFile);
 const LOCAL_THREAD_SCAN_LIMIT = 1000;
 const LOCAL_THREAD_HEAD_BYTES = 512 * 1024;
-const THREAD_LIST_FALLBACK_MS = Math.max(1000, Number(process.env.CODEXMOBILE_THREAD_LIST_FALLBACK_MS) || 2500);
 const SESSION_CACHE_PATH = path.join(process.cwd(), '.codexmobile', 'state', 'session-cache.json');
 
 let cache = {
@@ -140,12 +131,9 @@ async function resolveSessionThread(sessionId) {
   };
 }
 
-const desktopAvailable = resolveAppServerTransport().mode === 'desktop-proxy';
-
 const sessionMessageReader = createSessionMessageReader({
   resolveSessionThread,
-  getConfigContext: () => cache.config?.context || {},
-  desktopAvailable
+  getConfigContext: () => cache.config?.context || {}
 });
 
 function toPublicProject(entry) {
@@ -159,31 +147,6 @@ function toPublicProject(entry) {
     updatedAt: entry.updatedAt,
     sessionCount: entry.sessionCount || 0
   };
-}
-
-async function readThreadSpawnEdges() {
-  try {
-    await fs.access(CODEX_STATE_DB);
-    const query = `
-      select
-        parent_thread_id as parentSessionId,
-        child_thread_id as childSessionId,
-        status
-      from thread_spawn_edges
-    `;
-    const { stdout } = await execFileAsync('sqlite3', ['-json', CODEX_STATE_DB, query], {
-      maxBuffer: 1024 * 1024
-    });
-    const parsed = JSON.parse(stdout || '[]');
-    return Array.isArray(parsed)
-      ? parsed.filter((edge) => edge?.parentSessionId && edge?.childSessionId)
-      : [];
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      console.warn('[sessions] Failed to read subagent thread edges:', error.message);
-    }
-    return [];
-  }
 }
 
 async function collectJsonlFiles(dir, files = []) {
@@ -225,7 +188,7 @@ function fallbackUserPreviewFromPayload(payload = {}) {
   return '';
 }
 
-function localThreadFromJsonl(raw, filePath, stat, threadNameIndex = new Map(), threadSqliteIndex = new Map()) {
+function localThreadFromJsonl(raw, filePath, stat, threadNameIndex = new Map()) {
   let meta = null;
   let preview = '';
   let fallbackPreview = '';
@@ -257,74 +220,25 @@ function localThreadFromJsonl(raw, filePath, stat, threadNameIndex = new Map(), 
   if (!id) {
     return null;
   }
-  const sqliteThread = threadSqliteIndex.get(id) || {};
   const updatedAtMs = Number(stat?.mtimeMs || Date.now());
-  const sqliteSource = sqliteThread.agentNickname || sqliteThread.agentRole
-    ? {
-      subAgent: {
-        thread_spawn: {
-          agent_nickname: sqliteThread.agentNickname || null,
-          agent_role: sqliteThread.agentRole || null
-        }
-      }
-    }
-    : (sqliteThread.threadSource || sqliteThread.source || meta?.source || 'vscode');
   return {
     id,
-    cwd: sqliteThread.cwd || meta?.cwd || '',
+    cwd: meta?.cwd || '',
     path: filePath,
-    preview: sqliteThread.firstUserMessage || preview || fallbackPreview,
-    name: threadNameIndex.get(id) || sqliteThread.title || meta?.title || null,
-    source: sqliteSource,
-    model: sqliteThread.model || meta?.model || null,
-    reasoningEffort: sqliteThread.reasoningEffort || meta?.reasoning_effort || meta?.model_reasoning_effort || null,
-    modelProvider: sqliteThread.modelProvider || meta?.model_provider || null,
-    updatedAt: sqliteThread.updatedAt || Math.floor(updatedAtMs / 1000),
-    archived: Boolean(sqliteThread.archived),
-    archivedAt: sqliteThread.archivedAt || null,
-    agentNickname: sqliteThread.agentNickname || null,
-    agentRole: sqliteThread.agentRole || null,
+    preview: preview || fallbackPreview,
+    name: threadNameIndex.get(id) || meta?.title || null,
+    source: meta?.source || 'vscode',
+    model: meta?.model || null,
+    reasoningEffort: meta?.reasoning_effort || meta?.model_reasoning_effort || null,
+    modelProvider: meta?.model_provider || null,
+    updatedAt: Math.floor(updatedAtMs / 1000),
+    archived: false,
+    archivedAt: null,
+    agentNickname: null,
+    agentRole: null,
     status: 'completed',
     skipContextState: true
   };
-}
-
-async function readThreadSqliteIndex() {
-  try {
-    await fs.access(CODEX_STATE_DB);
-    const query = `
-      select
-        id,
-        title,
-        cwd,
-        source,
-        thread_source as threadSource,
-        model,
-        reasoning_effort as reasoningEffort,
-        model_provider as modelProvider,
-        updated_at as updatedAt,
-        archived,
-        archived_at as archivedAt,
-        first_user_message as firstUserMessage,
-        agent_nickname as agentNickname,
-        agent_role as agentRole
-      from threads
-    `;
-    const { stdout } = await execFileAsync('sqlite3', ['-json', CODEX_STATE_DB, query], {
-      maxBuffer: 16 * 1024 * 1024
-    });
-    const parsed = JSON.parse(stdout || '[]');
-    return new Map(
-      (Array.isArray(parsed) ? parsed : [])
-        .filter((thread) => thread?.id)
-        .map((thread) => [thread.id, thread])
-    );
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      console.warn('[sessions] Failed to read sqlite thread index:', error.message);
-    }
-    return new Map();
-  }
 }
 
 async function readThreadNameIndex() {
@@ -354,26 +268,6 @@ async function readThreadNameIndex() {
     }
   }
   return names;
-}
-
-function sqlString(value) {
-  return `'${String(value || '').replace(/'/g, "''")}'`;
-}
-
-async function updateThreadTitleInSqlite(sessionId, title) {
-  try {
-    await fs.access(CODEX_STATE_DB);
-    const nowMs = Date.now();
-    const nowSeconds = Math.floor(nowMs / 1000);
-    await execFileAsync('sqlite3', [
-      CODEX_STATE_DB,
-      `update threads set title=${sqlString(title)}, updated_at=${nowSeconds}, updated_at_ms=${nowMs} where id=${sqlString(sessionId)}`
-    ]);
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      console.warn('[sessions] Failed to update sqlite thread title:', error.message);
-    }
-  }
 }
 
 async function updateThreadNameIndex(sessionId, title) {
@@ -432,7 +326,6 @@ async function readLocalThreadHead(filePath) {
 
 async function listLocalDesktopThreadsFromJsonl({ limit = LOCAL_THREAD_SCAN_LIMIT } = {}) {
   const threadNameIndex = await readThreadNameIndex();
-  const threadSqliteIndex = await readThreadSqliteIndex();
   const files = await collectJsonlFiles(CODEX_SESSIONS_DIR);
   const withStats = await Promise.all(files.map(async (filePath) => {
     try {
@@ -449,7 +342,7 @@ async function listLocalDesktopThreadsFromJsonl({ limit = LOCAL_THREAD_SCAN_LIMI
   for (const item of sorted) {
     try {
       const raw = await readLocalThreadHead(item.filePath);
-      const thread = localThreadFromJsonl(raw, item.filePath, item.stat, threadNameIndex, threadSqliteIndex);
+      const thread = localThreadFromJsonl(raw, item.filePath, item.stat, threadNameIndex);
       if (thread) {
         threads.push(thread);
       }
@@ -461,34 +354,6 @@ async function listLocalDesktopThreadsFromJsonl({ limit = LOCAL_THREAD_SCAN_LIMI
 }
 
 async function listDesktopThreadsForCache() {
-  if (!USE_APP_SERVER_THREAD_LIST) {
-    return listLocalDesktopThreadsFromJsonl({ limit: LOCAL_THREAD_SCAN_LIMIT });
-  }
-  const remote = listDesktopThreads({ limit: 1000 })
-    .then((threads) => ({ source: 'desktop', threads }))
-    .catch((error) => ({ source: 'error', error }));
-  const fallback = new Promise((resolve) => {
-    const timer = setTimeout(() => {
-      resolve({ source: 'fallback-timeout' });
-    }, THREAD_LIST_FALLBACK_MS);
-    if (typeof timer.unref === 'function') {
-      timer.unref();
-    }
-  });
-  const result = await Promise.race([remote, fallback]);
-  if (result.source === 'desktop') {
-    return result.threads;
-  }
-  if (result.source === 'error') {
-    console.warn('[sessions] Desktop thread/list failed, using local session files:', result.error.message);
-  } else {
-    console.warn(`[sessions] Desktop thread/list did not respond within ${THREAD_LIST_FALLBACK_MS}ms, using local session files.`);
-    remote.then((late) => {
-      if (late.source === 'error') {
-        console.warn('[sessions] Late desktop thread/list failed:', late.error.message);
-      }
-    });
-  }
   return listLocalDesktopThreadsFromJsonl({ limit: LOCAL_THREAD_SCAN_LIMIT });
 }
 
@@ -565,22 +430,11 @@ async function listLocalArchivedSessions({ limit = 200 } = {}) {
 
 export async function listArchivedSessions({ limit = 200 } = {}) {
   const cappedLimit = Math.max(1, Math.min(Number(limit) || 200, 500));
-  try {
-    const threads = await listDesktopThreads({ limit: cappedLimit, archived: true });
-    return {
-      sessions: threads.map((thread) => archivedSessionFromThread(thread)).filter(Boolean),
-      syncedAt: new Date().toISOString(),
-      source: 'desktop'
-    };
-  } catch (error) {
-    console.warn('[sessions] Desktop archived thread/list failed, using local archived sessions:', error.message);
-    return {
-      sessions: await listLocalArchivedSessions({ limit: cappedLimit }),
-      syncedAt: new Date().toISOString(),
-      source: 'local',
-      staleReason: error.message || 'desktop archived thread/list failed'
-    };
-  }
+  return {
+    sessions: await listLocalArchivedSessions({ limit: cappedLimit }),
+    syncedAt: new Date().toISOString(),
+    source: 'local'
+  };
 }
 
 function inferredProjectlessWorkspaceRoot(projectPath, defaultWorkspaceRoot = defaultProjectlessWorkspaceRoot) {
@@ -635,7 +489,6 @@ export async function refreshCodexCache() {
     }
   }
   const hiddenSessionIds = await readHiddenSessionIds();
-  const spawnEdges = await readThreadSpawnEdges();
   const desktopThreads = await listDesktopThreadsForCache();
   const sessionIndex = await buildSessionIndex({
     config,
@@ -643,9 +496,8 @@ export async function refreshCodexCache() {
     mobileSessionIndex,
     hiddenSessionIds,
     desktopThreads,
-    spawnEdges,
+    spawnEdges: [],
     includeMissingSubagentThreads: INCLUDE_MISSING_SUBAGENT_THREADS,
-    readDesktopThread,
     readRolloutContextState
   });
 
@@ -753,7 +605,6 @@ export async function applySessionTitleUpdate(sessionId, title, { projectId = nu
   }
 
   await updateThreadNameIndex(id, nextTitle);
-  updateThreadTitleInSqlite(id, nextTitle).catch(() => {});
 
   const existing = cache.sessionById.get(id) || null;
   const updatedAt = new Date().toISOString();
@@ -825,11 +676,6 @@ export async function renameSession(sessionId, projectId, title, { auto = false 
   }
 
   const renamed = await applySessionTitleUpdate(session.id, nextTitle, { projectId: session.projectId, auto });
-  if (!session.mobileOnly) {
-    broadcastDesktopThreadTitleUpdated(session.id, nextTitle).catch((error) => {
-      console.warn(`[desktop-ipc] title broadcast failed thread=${session.id}: ${error.message}`);
-    });
-  }
 
   return renamed || { ...session, title: nextTitle, titleLocked: !auto, titleAutoGenerated: auto ? 'model' : null };
 }
@@ -847,19 +693,13 @@ export async function deleteSession(sessionId, projectId) {
     throw error;
   }
 
-  let archivedDesktopThread = false;
-  if (!session.mobileOnly) {
-    await archiveDesktopThread(session.id);
-    archivedDesktopThread = true;
-  }
-
   const hidden = await hideSessionInMobile(session);
 
   return {
     deletedSessionId: sessionId,
     projectId: session.projectId,
-    hiddenOnly: !archivedDesktopThread,
-    archivedDesktopThread,
+    hiddenOnly: true,
+    archivedDesktopThread: false,
     hiddenAt: hidden.hiddenAt,
     deletedFile: false,
     deletedIndexRows: false,
@@ -875,12 +715,11 @@ export async function unarchiveSession(sessionId) {
     throw error;
   }
 
-  await unarchiveDesktopThread(id);
   const local = await unhideSessionInMobile(id);
 
   return {
     sessionId: id,
-    unarchivedDesktopThread: true,
+    unarchivedDesktopThread: false,
     unhidden: local.unhidden
   };
 }

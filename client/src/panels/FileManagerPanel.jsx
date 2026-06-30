@@ -14,7 +14,7 @@
  */
 
 import { ArrowRight, ArrowUp, Check, ChevronDown, ChevronLeft, ChevronRight, Copy, ExternalLink, File, FilePlus, FileText, Folder, FolderOpen, FolderPlus, HardDrive, Home, Loader2, MapPinned, Pencil, RefreshCw, Search, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiFetch } from '../api.js';
 import { fileManagerEntryOpenAction, flattenFileManagerTree, sortFileManagerEntries } from '../file-manager-state.js';
 import { compactPath, localFileApiPath, localFilePreviewPath } from '../app/session-utils.js';
@@ -126,6 +126,7 @@ export function FileManagerPanel({
   const [query, setQuery] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [rootsMenuOpen, setRootsMenuOpen] = useState(false);
+  const rootsMenuRef = useRef(null);
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [deletingPath, setDeletingPath] = useState('');
@@ -271,6 +272,22 @@ export function FileManagerPanel({
       queryList.removeEventListener?.('change', syncDesktopPreview);
     };
   }, [open]);
+
+  // 点击外部关闭位置菜单
+  useEffect(() => {
+    if (!rootsMenuOpen) {
+      return undefined;
+    }
+    function handleClickOutside(event) {
+      if (rootsMenuRef.current && !rootsMenuRef.current.contains(event.target)) {
+        setRootsMenuOpen(false);
+      }
+    }
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [rootsMenuOpen]);
 
   useEffect(() => {
     if (!open) {
@@ -485,7 +502,7 @@ export function FileManagerPanel({
           </header>
 
           <div className="file-manager-sidebar-actions">
-            <div className="file-manager-root-menu">
+            <div className="file-manager-root-menu" ref={rootsMenuRef}>
               <button
                 type="button"
                 className="file-manager-tool-button"

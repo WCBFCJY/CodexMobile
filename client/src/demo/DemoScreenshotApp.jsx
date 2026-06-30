@@ -406,14 +406,10 @@ function basePanelProps({ scene, theme }) {
       selectedProject: project,
       selectedSession: selectedSessionForScene(scene),
       connectionState: 'connected',
-      desktopBridge: { available: true, connected: true, mode: 'ipc' },
       selectedRuntime: scene === 'chat' || scene === 'composer' ? { status: 'running', startedAt: '2026-05-15T02:07:00+08:00', steerable: true } : null,
       onMenu: noop,
       onOpenDocs: noop,
       onGitAction: noop,
-      onDesktopHandoff: noopAsync,
-      desktopHandoffSupported: true,
-      desktopHandoffPending: false,
       notificationSupported: true,
       notificationEnabled: true,
       onEnableNotifications: noop,
@@ -498,7 +494,6 @@ function drawerProps({ scene, theme }) {
     theme,
     setTheme: noop,
     runtimeDebug: { enabled: false },
-    desktopRefresh: { supported: true, enabled: true },
     security: {
       approvalPolicy: 'on-request',
       sandboxMode: 'workspace-write',
@@ -574,7 +569,6 @@ function composerProps({ scene }) {
       label: '上下文 32%'
     },
     runSteerable: true,
-    desktopBridge: { available: true, connected: true, mode: 'ipc' },
     queueDrafts: scene === 'chat' || isLongTask
       ? [{ id: 'queue-1', text: '顺便把 README 截图引用也更新掉', mode: 'queue', createdAt: '2026-05-15T02:08:00+08:00' }]
       : [],

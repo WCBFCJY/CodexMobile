@@ -57,11 +57,15 @@
 
 .skill-menu {
   min-width: 210px;
+  transform: scale(0.9);
+  transform-origin: bottom left;
 }
 
 .branch-menu {
   width: min(84vw, 294px);
   min-width: min(84vw, 264px);
+  transform: scale(0.9);
+  transform-origin: bottom left;
 }
 
 .project-menu {
@@ -80,6 +84,8 @@
   min-width: 120px;
   max-width: 120px;
   overflow: visible;
+  transform: scale(0.9);
+  transform-origin: bottom right;
 }
 
 .model-menu.has-submenu {
@@ -91,6 +97,8 @@
   min-width: 128px;
   max-width: min(42vw, 150px);
   z-index: 61;
+  transform: scale(0.9);
+  transform-origin: bottom left;
 }
 
 .send-mode-menu {
@@ -98,10 +106,13 @@
 }
 
 .shortcut-menu {
-  left: 12px;
-  right: 12px;
+  bottom: calc(var(--keyboard-inset, 0px) + var(--composer-height, 118px) + 8px);
+  left: 26px;
+  right: 50%;
   max-width: none;
   max-height: min(280px, 38svh);
+  transform: scale(0.9);
+  transform-origin: bottom left;
 }
 
 .send-mode-menu button > span:last-child,
@@ -581,6 +592,22 @@
   background: transparent;
   line-height: 1.45;
   font-size: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+
+.composer textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.composer textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.composer textarea::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 3px;
+  opacity: 0.5;
 }
 
 .composer:focus-within {
@@ -741,6 +768,14 @@
 
 [data-theme="dark"] .composer-tool-icon.is-permission-bypass {
   color: var(--danger);
+}
+
+.composer-tool-icon.is-auto-review {
+  color: #3b82f6;
+}
+
+[data-theme="dark"] .composer-tool-icon.is-auto-review {
+  color: #60a5fa;
 }
 
 .composer-tool-skills[data-count]::after {
@@ -1021,13 +1056,19 @@
   }
 
   .composer {
-    max-width: none;
-    margin: 0;
+    max-width: 1024px;
+    margin: 0 auto;
     border-radius: 18px;
+  }
+
+  .home-project-strip {
+    max-width: 1024px;
+    margin: 0 auto;
   }
 
   .composer textarea {
     max-height: 220px;
+    min-height: 66px;
   }
 
   .composer-tool-strip {

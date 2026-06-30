@@ -156,10 +156,10 @@ test('selected running activity does not synthesize sidebar runtime badges', () 
   );
 });
 
-test('desktop ipc active runs expose both app and client turn ids', () => {
+test('headless active runs expose both app and client turn ids', () => {
   assert.deepEqual(
     payloadRunKeys({
-      source: 'desktop-ipc',
+      source: 'headless-local',
       turnId: 'desktop-turn-1',
       clientTurnId: 'client-turn-1',
       sessionId: 'thread-1',
@@ -184,7 +184,7 @@ test('turn completion finishes matching running activity before thread refresh',
       ]
     }
   ], {
-    source: 'desktop-ipc',
+    source: 'headless-local',
     sessionId: 'thread-1',
     turnId: 'desktop-turn-1',
     clientTurnId: 'client-turn-1',

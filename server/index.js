@@ -1,7 +1,7 @@
 /**
  * CodexMobile 服务端主入口：装配 HTTP/HTTPS、WebSocket、路由与 Codex 缓存同步。
  *
- * Keywords: http-server, https, websocket, codex-cache, auth, routes, desktop-refresh
+ * Keywords: http-server, https, websocket, codex-cache, auth, routes
  *
  * Exports:
  * - 无 default；副作用启动 main()。
@@ -67,13 +67,11 @@ import {
 } from './codex-data.js';
 import { getCodexQuota } from './codex-quota.js';
 import {
-  modelSettingsKey,
   readCodexConfig,
   readCodexModelSettings,
-  readCodexThreadModelSettings,
-  writeCodexModelSettings
+  writeCodexModelSettings,
+  modelSettingsKey
 } from './codex-config.js';
-import { getDesktopBridgeStatus } from './codex-app-server.js';
 import { createChatRouteHandler } from './chat-routes.js';
 import { createFeishuIntegration } from './feishu-routes.js';
 import { createFileRouteHandler, isReadonlyLocalFileRoute } from './file-routes.js';
@@ -82,8 +80,7 @@ import { createGitService } from './git-service.js';
 import { createNotificationRouteHandler } from './notification-routes.js';
 import { createSessionRouteHandler } from './session-routes.js';
 import { createVoiceRouteHandler } from './voice-routes.js';
-import { abortCodexTurn, getActiveRuns, runCodexTurn, steerCodexTurn } from './codex-runner.js';
-import { setDesktopFollowerModelAndReasoning } from './desktop-ipc-client.js';
+import { abortCodexTurn, getActiveRuns, runCodexTurn } from './codex-runner.js';
 import { GENERATED_ROOT, isImageRequest, runImageTurn } from './image-generator.js';
 import { useLegacyImageGenerator } from './codex-native-images.js';
 import { getLarkDocsStatus, logoutLarkCli, startLarkCliAuth } from './lark-cli.js';
@@ -92,19 +89,13 @@ import { publicVoiceSpeechStatus } from './voice-speaker.js';
 import { publicVoiceRealtimeStatus, startVoiceRealtimeProxy } from './realtime-voice.js';
 import { maybeAutoNameSession } from './session-title-generator.js';
 import { createChatService } from './chat-service.js';
-import { createDesktopIpcBroadcastListener } from './desktop-ipc-broadcast-listener.js';
 import {
   configureRuntimeDebug,
   getRuntimeDebugPublicState,
   runtimeDebugStatusActiveRuns,
   setRuntimeDebugUiEnabled
 } from './runtime-debug.js';
-import {
-  configureDesktopRefresh,
-  getDesktopRefreshPublicState,
-  openDesktopThread,
-  setDesktopRefreshEnabled
-} from './desktop-refresh.js';
+
 import { readBody, sendJson } from './http-utils.js';
 import { createPushService } from './push-service.js';
 import { createStaticService } from './static-service.js';
@@ -113,7 +104,7 @@ import { createSyncBridge } from './sync/sync-bridge.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, '..');
 configureRuntimeDebug({ rootDir: ROOT_DIR });
-configureDesktopRefresh({ rootDir: ROOT_DIR });
+
 const CLIENT_DIST = path.join(ROOT_DIR, 'client', 'dist');
 const UPLOAD_ROOT = path.join(ROOT_DIR, '.codexmobile', 'uploads');
 const IMAGE_PROMPT_STATE = path.join(ROOT_DIR, '.codexmobile', 'state', 'image-prompts.json');
@@ -194,7 +185,6 @@ const feishuIntegration = createFeishuIntegration({
 let statusConfigFallback = null;
 let liveModelSettings = null;
 let lastObservedModelSettingsKey = '';
-const lastObservedThreadModelSettingsKeys = new Map();
 
 async function getStatusConfigFallback() {
   if (!statusConfigFallback) {
@@ -344,12 +334,11 @@ function sendSocketPayload(payload) {
   }
 }
 
-function broadcastModelSettings(settings, { source = 'server', desktopSync = null, sessionId = null } = {}) {
+function broadcastModelSettings(settings, { source = 'server', sessionId = null } = {}) {
   const payload = {
     type: 'model-settings-updated',
     source,
     ...publicModelSettings(settings, sessionId ? { sessionId } : {}),
-    desktopSync,
     timestamp: new Date().toISOString()
   };
   if (!payload.sessionId) {
@@ -384,47 +373,7 @@ function startModelSettingsWatcher(hasClients = () => true) {
     initialized = true;
   }
   tick();
-  const timer = setInterval(tick, 2500);
-  if (typeof timer.unref === 'function') {
-    timer.unref();
-  }
-}
-
-function startThreadModelSettingsWatcher(hasClients = () => true) {
-  let initialized = false;
-  async function tick() {
-    if (initialized && !hasClients()) return;
-    try {
-      const settingsRows = await readCodexThreadModelSettings({ limit: 250 });
-      const seen = new Set();
-      for (const settings of settingsRows) {
-        if (!settings.sessionId) {
-          continue;
-        }
-        seen.add(settings.sessionId);
-        const key = modelSettingsKey(settings);
-        const previousKey = lastObservedThreadModelSettingsKeys.get(settings.sessionId);
-        lastObservedThreadModelSettingsKeys.set(settings.sessionId, key);
-        if (!previousKey || previousKey === key) {
-          continue;
-        }
-        broadcastModelSettings(settings, {
-          source: 'desktop-thread',
-          sessionId: settings.sessionId
-        });
-      }
-      for (const sessionId of lastObservedThreadModelSettingsKeys.keys()) {
-        if (!seen.has(sessionId)) {
-          lastObservedThreadModelSettingsKeys.delete(sessionId);
-        }
-      }
-    } catch (error) {
-      console.warn('[model-settings] Thread watch failed:', error.message);
-    }
-    initialized = true;
-  }
-  tick();
-  const timer = setInterval(tick, 2500);
+  const timer = setInterval(tick, 5000);
   if (typeof timer.unref === 'function') {
     timer.unref();
   }
@@ -437,7 +386,6 @@ const chatService = createChatService({
   getProject,
   getSession,
   getCacheSnapshot,
-  getDesktopBridgeStatus,
   listProjectSessions,
   readSessionMessages,
   refreshCodexCache,
@@ -446,7 +394,6 @@ const chatService = createChatService({
   runCodexTurn,
   abortCodexTurn,
   getActiveRuns,
-  steerCodexTurn,
   runImageTurn,
   isImageRequest,
   useLegacyImageGenerator,
@@ -454,149 +401,7 @@ const chatService = createChatService({
   rememberLiveSession
 });
 
-function desktopBroadcastSessionId(message = {}) {
-  const params = message.params || {};
-  const change = params.change || params.state || params.thread || {};
-  return String(
-    params.conversationId ||
-    params.conversation_id ||
-    params.threadId ||
-    params.thread_id ||
-    params.sessionId ||
-    params.session_id ||
-    change.conversationId ||
-    change.conversation_id ||
-    change.threadId ||
-    change.thread_id ||
-    change.sessionId ||
-    change.session_id ||
-    ''
-  ).trim();
-}
 
-function desktopBroadcastRuntimeStatus(message = {}) {
-  const params = message.params || {};
-  const change = params.change || params.state || params.thread || {};
-  const status = String(
-    params.status ||
-    params.streamState ||
-    params.stream_state ||
-    change.status ||
-    change.streamState ||
-    change.stream_state ||
-    ''
-  ).toLowerCase();
-  if (['running', 'queued', 'streaming', 'active'].includes(status)) {
-    return 'running';
-  }
-  if (['completed', 'complete', 'success', 'succeeded', 'idle', 'stopped'].includes(status)) {
-    return 'completed';
-  }
-  if (['failed', 'error', 'cancelled', 'canceled', 'interrupted', 'aborted'].includes(status)) {
-    return 'failed';
-  }
-  if (params.isStreaming === false || params.streaming === false || change.isStreaming === false || change.streaming === false) {
-    return 'completed';
-  }
-  return '';
-}
-
-function desktopBroadcastIsThreadStateChange(message = {}) {
-  return ['thread-stream-state-changed', 'thread-read-state-changed'].includes(String(message.method || ''));
-}
-
-function syncStateHasDesktopRuntime(sessionId) {
-  const id = String(sessionId || '').trim();
-  if (!id) {
-    return false;
-  }
-  const runtimeById = syncBridge.publicState()?.runtimeById || {};
-  return Object.values(runtimeById).some(
-    (runtime) => runtime?.source === 'desktop-ipc' && String(runtime?.sessionId || '') === id
-  );
-}
-
-async function refreshAfterDesktopThreadStateChange({ sessionId, projectId, inferIdleCompletion = false } = {}) {
-  const snapshot = await startSyncRefresh();
-  if (snapshot?.projects) {
-    broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
-  }
-  if (!inferIdleCompletion || !sessionId) {
-    return;
-  }
-  const refreshedSession = getSession(sessionId);
-  if (!refreshedSession || refreshedSession.runtime?.status === 'running') {
-    return;
-  }
-  broadcast({
-    type: 'desktop-thread-updated',
-    source: 'desktop-ipc',
-    sessionId,
-    projectId: projectId || refreshedSession.projectId || null,
-    status: 'completed',
-    timestamp: new Date().toISOString()
-  });
-}
-
-const desktopIpcBroadcastListener = createDesktopIpcBroadcastListener({
-  async onBroadcast(message) {
-    const params = message.params || {};
-    if (desktopBroadcastIsThreadStateChange(message)) {
-      const sessionId = desktopBroadcastSessionId(message);
-      if (!sessionId) {
-        return;
-      }
-      const session = getSession(sessionId);
-      const status = desktopBroadcastRuntimeStatus(message);
-      broadcast({
-        type: 'desktop-thread-updated',
-        source: 'desktop-ipc',
-        method: message.method,
-        sessionId,
-        projectId: params.projectId || params.project_id || session?.projectId || null,
-        status: status || undefined,
-        timestamp: new Date().toISOString()
-      });
-      const shouldRefresh =
-        (status && status !== 'running') ||
-        (!status && syncStateHasDesktopRuntime(sessionId));
-      if (shouldRefresh) {
-        refreshAfterDesktopThreadStateChange({
-          sessionId,
-          projectId: params.projectId || params.project_id || session?.projectId || null,
-          inferIdleCompletion: !status
-        }).catch((error) => {
-          console.warn('[desktop-ipc] sync refresh after thread state change failed:', error.message);
-        });
-      }
-      return;
-    }
-    if (message?.method !== 'thread-title-updated') {
-      return;
-    }
-    const sessionId = String(params.conversationId || params.threadId || '').trim();
-    const title = String(params.title || params.name || '').trim();
-    if (!sessionId || !title) {
-      return;
-    }
-    const renamed = await applySessionTitleUpdate(sessionId, title, { projectId: params.projectId || null });
-    if (!renamed?.projectId) {
-      return;
-    }
-    broadcast({
-      type: 'session-renamed',
-      source: 'desktop-ipc',
-      projectId: renamed.projectId,
-      sessionId: renamed.id,
-      title: renamed.title,
-      titleLocked: renamed.titleLocked,
-      updatedAt: renamed.updatedAt,
-      session: renamed
-    });
-    const snapshot = getCacheSnapshot();
-    broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
-  }
-});
 const handleNotificationApi = createNotificationRouteHandler({
   pushService,
   remoteAddress
@@ -688,8 +493,6 @@ async function refreshCodexCacheForSyncResponse() {
 async function publicStatus(authenticated, req = null) {
   const snapshot = getCacheSnapshot();
   const config = mergeStatusModelSettings(snapshot.config || await getStatusConfigFallback() || {});
-  const desktopBridge = await getDesktopBridgeStatus();
-  syncBridge.setBridgeStatus(desktopBridge);
   const activeRuns = [
     ...getActiveRuns(),
     ...chatService.getActiveImageRuns()
@@ -697,7 +500,6 @@ async function publicStatus(authenticated, req = null) {
   runtimeDebugStatusActiveRuns(activeRuns);
   return {
     connected: true,
-    desktopBridge,
     hostName: getHostName(),
     port: PORT,
     pairing: pairingTerminalStatus(),
@@ -717,7 +519,6 @@ async function publicStatus(authenticated, req = null) {
     localHeadlessRuns: activeRuns,
     syncState: syncBridge.publicState(),
     runtimeDebug: getRuntimeDebugPublicState(),
-    desktopRefresh: getDesktopRefreshPublicState(),
     auth: {
       required: true,
       authenticated,
@@ -893,34 +694,7 @@ async function handleApi(req, res, url) {
     return;
   }
 
-  if (method === 'POST' && pathname === '/api/desktop-refresh') {
-    const body = await readBody(req);
-    const desktopRefresh = setDesktopRefreshEnabled(Boolean(body.enabled));
-    sendJson(res, 200, { success: true, desktopRefresh });
-    return;
-  }
 
-  if (method === 'POST' && pathname === '/api/desktop-handoff') {
-    const body = await readBody(req);
-    const sessionId = String(body.sessionId || body.threadId || '').trim();
-    const result = await openDesktopThread(sessionId, { reason: 'manual-desktop-handoff' });
-    if (result.triggered) {
-      sendJson(res, 200, { success: true, ...result });
-      return;
-    }
-    const statusCode = result.reason === 'desktop-refresh-missing-thread'
-      ? 400
-      : result.reason === 'desktop-refresh-unsupported-platform'
-        ? 501
-        : 500;
-    sendJson(res, statusCode, {
-      success: false,
-      error: result.error || '无法打开桌面端对话',
-      code: result.reason || 'desktop-handoff-failed',
-      ...result
-    });
-    return;
-  }
 
   if (method === 'POST' && pathname === '/api/model-settings') {
     const body = await readBody(req);
@@ -934,21 +708,8 @@ async function handleApi(req, res, url) {
 
     const written = publicModelSettings(await writeCodexModelSettings({ model, reasoningEffort }), { source: 'mobile' });
     statusConfigFallback = null;
-    let desktopSync = { attempted: false, synced: false, error: null };
-    const sessionId = String(body.sessionId || body.conversationId || '').trim();
-    const desktopBridge = await getDesktopBridgeStatus();
-    if (sessionId && desktopBridge?.connected && desktopBridge?.capabilities?.sendToOpenDesktopThread) {
-      desktopSync = { attempted: true, synced: false, error: null };
-      try {
-        await setDesktopFollowerModelAndReasoning(sessionId, written.model, written.reasoningEffort, { timeoutMs: 2500 });
-        desktopSync.synced = true;
-      } catch (error) {
-        desktopSync.error = error.code || error.message || 'desktop-sync-failed';
-        console.warn('[model-settings] Desktop IPC model sync failed:', error.message);
-      }
-    }
-    const payload = broadcastModelSettings(written, { source: 'mobile', desktopSync });
-    sendJson(res, 200, { success: true, settings: payload, desktopSync });
+    const payload = broadcastModelSettings(written, { source: 'mobile' });
+    sendJson(res, 200, { success: true, settings: payload });
     return;
   }
 
@@ -1091,9 +852,7 @@ async function main() {
   };
 
   server.on('upgrade', handleUpgrade);
-  desktopIpcBroadcastListener.start();
   startModelSettingsWatcher(() => sockets.size > 0);
-  startThreadModelSettingsWatcher(() => sockets.size > 0);
 
   server.listen(PORT, HOST, () => {
     console.log(`CodexMobile listening on http://${HOST}:${PORT}`);

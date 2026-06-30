@@ -10,5 +10,14 @@ services:
       - ~/codex:/app/.codex
       - ~/codexmobile:/app/.codexmobile
       - ~/workspace:/workspace
+      - ~/.env:/app/.env:ro
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_API_KEY=your_openai_api_key
+      # 允许的 Origin（替换为你的实际访问地址）
+      # 例如：http://172.20.x.x:3321 或 https://your-domain.com
+      - CODEXMOBILE_ALLOWED_ORIGINS=http://172.20.0.0/16:3321
+      # 启用完全访问模式（允许使用 bypassPermissions 和 sandboxOff 权限模式）
+      # 公网部署时建议设为 0，私网部署时可设为 1
+      # - CODEXMOBILE_ENABLE_DANGER_FULL_ACCESS=1
+      # 如果使用反向代理，设置公网访问地址
+      # - CODEXMOBILE_PUBLIC_URL=https://your-domain.com

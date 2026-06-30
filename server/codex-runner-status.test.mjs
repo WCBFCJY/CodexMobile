@@ -1,7 +1,7 @@
 /**
- * 测试 server/codex-runner.js：状态标签、消息阶段与回合完成判定辅助。
+ * 测试 server/codex-runner.js：状态标签辅助。
  *
- * Keywords: codex-runner, test, status, phase
+ * Keywords: codex-runner, test, status
  *
  * Exports: 无导出，内含用例
  *
@@ -9,7 +9,7 @@
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { appServerAgentMessagePhase, shouldCompleteTurnFromAppServerItem, statusLabel } from './codex-runner.js';
+import { statusLabel } from './codex-runner.js';
 
 test('statusLabel uses mobile-friendly command labels', () => {
   assert.equal(statusLabel('command_execution', 'running'), '正在处理本地任务');
@@ -24,67 +24,13 @@ test('statusLabel uses mobile-friendly tool and file labels', () => {
   assert.equal(statusLabel('file_change', 'completed'), '文件已更新');
 });
 
-test('completed final assistant item can finish a headless turn without turn completed notification', () => {
-  assert.equal(
-    shouldCompleteTurnFromAppServerItem('item/completed', {
-      type: 'agentMessage',
-      phase: 'final_answer',
-      status: 'completed',
-      text: '处理完成'
-    }),
-    true
-  );
-  assert.equal(
-    shouldCompleteTurnFromAppServerItem('item/completed', {
-      type: 'agentMessage',
-      phase: 'commentary',
-      status: 'completed',
-      text: '正在处理'
-    }),
-    false
-  );
-  assert.equal(
-    shouldCompleteTurnFromAppServerItem('item/started', {
-      type: 'agentMessage',
-      phase: 'final_answer',
-      text: '还在输出'
-    }),
-    false
-  );
+test('statusLabel uses mobile-friendly reasoning labels', () => {
+  assert.equal(statusLabel('reasoning', 'running'), '正在思考');
+  assert.equal(statusLabel('reasoning', 'completed'), '思考完成');
 });
 
-test('appServerAgentMessagePhase uses delta params before cached item metadata', () => {
-  assert.equal(
-    appServerAgentMessagePhase({
-      itemId: 'message-1',
-      phase: 'commentary'
-    }),
-    'commentary'
-  );
-  assert.equal(
-    appServerAgentMessagePhase({
-      item: {
-        id: 'message-1',
-        phase: 'final_answer'
-      }
-    }),
-    'final_answer'
-  );
-});
-
-test('appServerAgentMessagePhase falls back to cached item phase for agent message deltas', () => {
-  const state = {
-    items: new Map([
-      ['message-1', { id: 'message-1', type: 'agentMessage', phase: 'commentary' }]
-    ])
-  };
-
-  assert.equal(
-    appServerAgentMessagePhase({ itemId: 'message-1' }, state, 'message-1'),
-    'commentary'
-  );
-  assert.equal(
-    appServerAgentMessagePhase({ itemId: 'message-2' }, state, 'message-2'),
-    ''
-  );
+test('statusLabel uses mobile-friendly turn labels', () => {
+  assert.equal(statusLabel('turn', 'running'), '正在处理');
+  assert.equal(statusLabel('turn', 'completed'), '任务已完成');
+  assert.equal(statusLabel('turn', 'failed'), '任务失败');
 });

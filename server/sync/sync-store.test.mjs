@@ -13,27 +13,27 @@ import assert from 'node:assert/strict';
 import { normalizeLegacyPayloadToSyncEvents } from './sync-events.js';
 import { createSyncStore } from './sync-store.js';
 
-test('desktop IPC running and completed update one runtime without chat activity semantics', () => {
+test('headless running and completed update one runtime without chat activity semantics', () => {
   const store = createSyncStore();
   const [running] = normalizeLegacyPayloadToSyncEvents({
     type: 'status-update',
-    source: 'desktop-ipc',
+    source: 'headless-local',
     kind: 'turn',
     status: 'running',
     sessionId: 'session-1',
     turnId: 'turn-1',
-    label: '已交给桌面端处理'
+    label: '已交给后台处理'
   });
 
   assert.equal(running.eventType, 'turn.running');
   assert.equal(running.suppressedInChat, true);
   store.applyEvent(running);
-  assert.equal(store.snapshot().runtimeById['session-1'].source, 'desktop-ipc');
+  assert.equal(store.snapshot().runtimeById['session-1'].source, 'headless-local');
   assert.equal(store.snapshot().runtimeById['turn-1'].status, 'running');
 
   const [completed] = normalizeLegacyPayloadToSyncEvents({
     type: 'desktop-thread-updated',
-    source: 'desktop-ipc',
+    source: 'headless-local',
     status: 'completed',
     sessionId: 'session-1',
     turnId: 'turn-1'
@@ -44,23 +44,23 @@ test('desktop IPC running and completed update one runtime without chat activity
   assert.equal(store.snapshot().terminalById['session-1'].status, 'completed');
 });
 
-test('desktop IPC terminal event clears client turn keys for the same session', () => {
+test('headless terminal event clears client turn keys for the same session', () => {
   const store = createSyncStore();
   const [running] = normalizeLegacyPayloadToSyncEvents({
     type: 'status-update',
-    source: 'desktop-ipc',
+    source: 'headless-local',
     kind: 'turn',
     status: 'running',
     sessionId: 'session-1',
     turnId: 'client-turn-1',
-    label: '已交给桌面端处理'
+    label: '已交给后台处理'
   });
   store.applyEvent(running);
   assert.equal(store.snapshot().runtimeById['client-turn-1'].status, 'running');
 
   const [completed] = normalizeLegacyPayloadToSyncEvents({
     type: 'desktop-thread-updated',
-    source: 'desktop-ipc',
+    source: 'headless-local',
     status: 'completed',
     sessionId: 'session-1'
   });
@@ -71,20 +71,20 @@ test('desktop IPC terminal event clears client turn keys for the same session', 
   assert.equal(store.snapshot().terminalById['client-turn-1'].status, 'completed');
 });
 
-test('headless and desktop running events share the same runtime projection shape', () => {
+test('headless running events share the same runtime projection shape', () => {
   const store = createSyncStore();
   for (const payload of [
-    { type: 'status-update', source: 'desktop-ipc', status: 'running', sessionId: 'desktop-session', turnId: 'desktop-turn' },
-    { type: 'status-update', source: 'headless-local', status: 'running', sessionId: 'headless-session', turnId: 'headless-turn' }
+    { type: 'status-update', source: 'headless-local', status: 'running', sessionId: 'headless-session-1', turnId: 'headless-turn-1' },
+    { type: 'status-update', source: 'headless-local', status: 'running', sessionId: 'headless-session-2', turnId: 'headless-turn-2' }
   ]) {
     for (const event of normalizeLegacyPayloadToSyncEvents(payload)) {
       store.applyEvent(event);
     }
   }
   const snapshot = store.snapshot();
-  assert.deepEqual(Object.keys(snapshot.runtimeById['desktop-session']).sort(), Object.keys(snapshot.runtimeById['headless-session']).sort());
-  assert.equal(snapshot.runtimeById['desktop-session'].source, 'desktop-ipc');
-  assert.equal(snapshot.runtimeById['headless-session'].source, 'headless-local');
+  assert.deepEqual(Object.keys(snapshot.runtimeById['headless-session-1']).sort(), Object.keys(snapshot.runtimeById['headless-session-2']).sort());
+  assert.equal(snapshot.runtimeById['headless-session-1'].source, 'headless-local');
+  assert.equal(snapshot.runtimeById['headless-session-2'].source, 'headless-local');
 });
 
 test('assistant plan updates preserve plan implementation metadata', () => {
@@ -168,11 +168,11 @@ test('sessions synced and rename events update sidebar projection data', () => {
   assert.equal(store.snapshot().projects[0].sessions[0].title, '新标题');
 });
 
-test('desktop thread updates without an explicit runtime status do not create running state', () => {
+test('thread updates without an explicit runtime status do not create running state', () => {
   const store = createSyncStore();
   const [event] = normalizeLegacyPayloadToSyncEvents({
     type: 'desktop-thread-updated',
-    source: 'desktop-ipc',
+    source: 'headless-local',
     sessionId: 'session-1'
   });
   assert.equal(event.eventType, 'thread.updated');
@@ -200,7 +200,6 @@ test('model updates keep thread scope in sync state', () => {
     reasoningEffort: 'medium',
     sessionId: 'session-1',
     updatedAt: event.timestamp,
-    source: 'desktop-thread',
-    desktopSync: null
+    source: 'desktop-thread'
   });
 });

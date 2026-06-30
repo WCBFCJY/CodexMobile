@@ -11,7 +11,7 @@
  * Outward: Drawer 在 settings 子视图中渲染。
  */
 
-import { Archive, Bug, ChevronLeft, ChevronRight, Info, LogOut, MonitorCog, Moon, RefreshCw, ShieldCheck, Smartphone, Sun, Trash2 } from 'lucide-react';
+import { Archive, Bug, ChevronLeft, ChevronRight, Columns, EyeOff, Info, LogOut, Moon, RefreshCw, ShieldCheck, Smartphone, Sun, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api.js';
 import { deviceMetaText, deviceStatusText, sortDevicesForDisplay } from '../security-devices.js';
@@ -27,12 +27,12 @@ export function DrawerSettingsView({
   runtimeDebugSaving,
   runtimeDebugError,
   onRuntimeDebugToggle,
-  desktopRefresh,
-  desktopRefreshSaving,
-  desktopRefreshError,
-  onDesktopRefreshToggle,
   onLoggedOut,
-  appVersion
+  appVersion,
+  filePanelEnabled,
+  onFilePanelToggle,
+  hideDefaultProject,
+  onHideDefaultProjectToggle
 }) {
   const [devices, setDevices] = useState([]);
   const [devicesLoading, setDevicesLoading] = useState(false);
@@ -87,11 +87,6 @@ export function DrawerSettingsView({
     : runtimeDebug?.uiEnabled
       ? '已开启'
       : '未开启';
-  const desktopRefreshText = !desktopRefresh?.supported
-    ? '当前不可用'
-    : desktopRefresh?.enabled
-      ? '已开启'
-      : '未开启';
 
   return (
     <>
@@ -142,6 +137,46 @@ export function DrawerSettingsView({
                   </button>
                 </div>
               </div>
+              <label className="settings-row">
+                <div className="settings-row-main">
+                  <span className="settings-row-icon" aria-hidden="true">
+                    <Columns size={16} />
+                  </span>
+                  <div>
+                    <span className="settings-row-title">PC 三栏布局</span>
+                    <small>在桌面端显示文件面板</small>
+                  </div>
+                </div>
+                <div className="settings-switch">
+                  <input
+                    type="checkbox"
+                    className="settings-switch-input"
+                    checked={Boolean(filePanelEnabled)}
+                    onChange={onFilePanelToggle}
+                  />
+                  <span className="settings-switch-slider" aria-hidden="true" />
+                </div>
+              </label>
+              <label className="settings-row">
+                <div className="settings-row-main">
+                  <span className="settings-row-icon" aria-hidden="true">
+                    <EyeOff size={16} />
+                  </span>
+                  <div>
+                    <span className="settings-row-title">隐藏 Default 项目</span>
+                    <small>在侧边栏和位置选择器中隐藏</small>
+                  </div>
+                </div>
+                <div className="settings-switch">
+                  <input
+                    type="checkbox"
+                    className="settings-switch-input"
+                    checked={Boolean(hideDefaultProject)}
+                    onChange={onHideDefaultProjectToggle}
+                  />
+                  <span className="settings-switch-slider" aria-hidden="true" />
+                </div>
+              </label>
             </div>
           </section>
 
@@ -250,34 +285,6 @@ export function DrawerSettingsView({
                   {runtimeDebugError ? <em> {runtimeDebugError}</em> : null}
                 </span>
               </div>
-
-              <label className="settings-row">
-                <div className="settings-row-main">
-                  <span className="settings-row-icon" aria-hidden="true">
-                    <MonitorCog size={16} />
-                  </span>
-                  <div>
-                    <span className="settings-row-title">桌面自动刷新</span>
-                    <small>{desktopRefreshText}</small>
-                  </div>
-                </div>
-                <div className="settings-switch">
-                  <input
-                    type="checkbox"
-                    className="settings-switch-input"
-                    checked={Boolean(desktopRefresh?.enabled)}
-                    disabled={desktopRefreshSaving || !desktopRefresh?.supported}
-                    onChange={onDesktopRefreshToggle}
-                  />
-                  <span className="settings-switch-slider" aria-hidden="true" />
-                </div>
-              </label>
-              {desktopRefresh?.lastError || desktopRefreshError ? (
-                <div className="settings-row-note is-error">
-                  <Info size={13} />
-                  <span>{desktopRefreshError || desktopRefresh.lastError}</span>
-                </div>
-              ) : null}
             </div>
           </section>
         </div>

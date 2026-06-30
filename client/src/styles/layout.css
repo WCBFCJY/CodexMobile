@@ -2,7 +2,7 @@
 .app-shell {
   position: fixed;
   inset: 0;
-  --desktop-drawer-width: 320px;
+  --desktop-drawer-width: 300px;
   --desktop-main-max: none;
   --desktop-main-gutter: 14px;
   --desktop-shell-offset: 0px;
@@ -62,6 +62,6 @@
 
 @media (min-width: 1280px) {
   .app-shell {
-    --desktop-drawer-width: 340px;
+    --desktop-drawer-width: 320px;
   }
 }

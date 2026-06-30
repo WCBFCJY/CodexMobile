@@ -7,10 +7,17 @@ coverage/
 .cache/
 playwright-report/
 test-results/
+docs/
+.github/
+.specstory/
+test/
+docs/
+marketing/
 
 # Local runtime state, uploads, generated files, pairing tokens, logs
 .codexmobile/
 .playwright-mcp/
+.vscode/
 .tmp*
 .tmp*/
 _tmp*
@@ -45,3 +52,7 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+*.md
+*.txt
+*.py

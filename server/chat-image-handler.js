@@ -125,8 +125,7 @@ export function createChatImageHandler({
     turnId,
     imagePrompt,
     attachments,
-    config,
-    bridge
+    config
   }) {
     rememberImagePrompt(project.id, imagePrompt);
     const imageSessionId = selectedSessionId || `mobile-image-${crypto.randomUUID()}`;
@@ -217,8 +216,7 @@ export function createChatImageHandler({
       draftSessionId,
       turnId,
       mode: 'image',
-      delivery: 'started',
-      desktopBridge: bridge
+      delivery: 'started'
     };
   }
 

@@ -26,6 +26,7 @@
   backdrop-filter: blur(18px);
   overflow: hidden;
   transform: translateX(-105%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 50;
 }
 
@@ -708,6 +709,7 @@
   z-index: 6;
   display: grid;
   align-items: center;
+  justify-items: center;
   padding: 18px;
   background: rgba(17, 24, 39, 0.18);
 }
@@ -715,7 +717,7 @@
 .thread-rename-dialog {
   display: grid;
   gap: 14px;
-  width: 100%;
+  width: min(420px, 100%);
   padding: 16px;
   border: 1px solid rgba(222, 223, 220, 0.92);
   border-radius: 8px;
@@ -961,6 +963,8 @@
   gap: 0;
   padding: 6px 0 8px;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
 }
 
 .drawer-new-row,
@@ -2278,7 +2282,7 @@ button.archive-empty-state {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 16px 0 7px;
+  margin: 24px 0 7px;
   padding: 0 4px;
   border: 0;
   color: var(--muted);
@@ -2316,7 +2320,7 @@ button.archive-empty-state {
 }
 
 .drawer-section-heading:first-child {
-  margin-top: 4px;
+  margin-top: 15px;
 }
 
 .project-list {
@@ -2407,7 +2411,7 @@ button.archive-empty-state {
 
 .thread-row {
   min-height: 44px;
-  padding: 0 8px 0 40px;
+  padding: 0 8px 0 18px;
   border-radius: 12px;
 }
 

@@ -92,6 +92,29 @@ function ActivityTimelineItem({ item, detailsOpen = false }) {
   return <MetaActivityBlock item={item} detailsOpen={detailsOpen} />;
 }
 
+function ActivityShellContent({ step }) {
+  const detail = activityDetailText(step);
+  const command = step.command || detail;
+  const output = step.output || step.error || '';
+  const failed = step.status === 'failed';
+  const running = step.status === 'running' || step.status === 'queued';
+  const shellText = [`$ ${command}`, output].filter(Boolean).join('\n\n');
+  const statusText = failed && step.exitCode !== undefined && step.exitCode !== null
+    ? `退出码 ${step.exitCode}`
+    : failed
+      ? '失败'
+      : running
+        ? '运行中'
+        : '成功';
+  return (
+    <div className={`activity-shell ${failed ? 'is-failed' : ''}`}>
+      <div className="activity-shell-head">Shell</div>
+      <pre><code>{shellText}</code></pre>
+      <div className="activity-shell-status">{statusText}</div>
+    </div>
+  );
+}
+
 function MetaActivityBlock({ item, detailsOpen = false }) {
   const visibleItems = item.type === 'metaBurst' ? item.visibleItems || [] : item.items || [];
   const overflowItems = item.type === 'metaBurst' ? item.overflowItems || [] : [];
@@ -99,6 +122,13 @@ function MetaActivityBlock({ item, detailsOpen = false }) {
   const running = allItems.some((step) => step.status === 'running' || step.status === 'queued');
   const { visibleBodyItems, overflowBodyItems } = activityBodyItemsForDisplay(visibleItems, overflowItems);
   const shouldOpen = activityMetaShouldOpen(item, { forceOpen: detailsOpen });
+
+  // 只有一个 command 类型的 step 时，直接展开显示 shell 内容，不需要二级菜单
+  const singleCommandStep = visibleBodyItems.length === 1 && overflowBodyItems.length === 0
+    ? visibleBodyItems[0]
+    : null;
+  const isSingleCommand = singleCommandStep
+    && (singleCommandStep.type === 'command' || Boolean(singleCommandStep.command));
 
   if (!visibleBodyItems.length && !overflowBodyItems.length) {
     return (
@@ -108,6 +138,25 @@ function MetaActivityBlock({ item, detailsOpen = false }) {
           <span>{item.title}</span>
         </div>
       </div>
+    );
+  }
+
+  // 单个 command：一级菜单展开直接显示 shell
+  if (isSingleCommand) {
+    const failed = singleCommandStep.status === 'failed';
+    return (
+      <details
+        className={`activity-meta ${running ? 'is-running' : ''} ${failed ? 'is-failed' : ''}`}
+        open={shouldOpen || activityStepDetailShouldOpen(singleCommandStep, { forceOpen: detailsOpen })}
+      >
+        <summary className="activity-meta-summary">
+          {activityMetaIcon(item)}
+          <span>{item.title}</span>
+        </summary>
+        <div className="activity-meta-body">
+          <ActivityShellContent step={singleCommandStep} />
+        </div>
+      </details>
     );
   }
 
@@ -140,19 +189,8 @@ function ActivityStepDetail({ step, detailsOpen = false }) {
   const detail = activityDetailText(step);
   const isCommand = step.type === 'command' || Boolean(step.command);
   if (isCommand) {
-    const command = step.command || detail;
-    const output = step.output || step.error || '';
     const failed = step.status === 'failed';
-    const running = step.status === 'running' || step.status === 'queued';
     const title = activityStepDetailTitle(step);
-    const shellText = [`$ ${command}`, output].filter(Boolean).join('\n\n');
-    const statusText = failed && step.exitCode !== undefined && step.exitCode !== null
-      ? `退出码 ${step.exitCode}`
-      : failed
-        ? '失败'
-        : running
-          ? '运行中'
-          : '成功';
     return (
       <details
         className={`activity-command-detail ${failed ? 'is-failed' : ''}`}
@@ -162,11 +200,7 @@ function ActivityStepDetail({ step, detailsOpen = false }) {
           {activityStepIcon(step)}
           <span>{title}</span>
         </summary>
-        <div className="activity-shell">
-          <div className="activity-shell-head">Shell</div>
-          <pre><code>{shellText}</code></pre>
-          <div className="activity-shell-status">{statusText}</div>
-        </div>
+        <ActivityShellContent step={step} />
       </details>
     );
   }

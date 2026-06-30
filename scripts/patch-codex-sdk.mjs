@@ -1,16 +1,3 @@
-/**
- * postinstall：为 @openai/codex-sdk 的 spawn 调用注入 windowsHide，减少 Windows 弹窗。
- *
- * Keywords: codex-sdk, postinstall, spawn, windowsHide, patch
- *
- * Exports:
- * - 无 default，脚本副作用执行后退出。
- *
- * Inward（本模块依赖/组装的关键符号）: node:fs、node:path；目标为 node_modules 内 SDK 产物路径。
- *
- * Outward（谁在用/调用场景）: package.json postinstall 钩子。
- */
-
 import fs from 'node:fs';
 import path from 'node:path';
 

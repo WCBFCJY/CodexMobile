@@ -27,35 +27,39 @@ import { defaultProjectlessWorkspaceRoot } from './codex-config.js';
 const ROOT_DIR = path.parse(os.homedir()).root || path.sep;
 
 /**
- * 获取允许访问的工作目录。
- * 使用 defaultProjectlessWorkspaceRoot()，它已优先使用 CODEXMOBILE_WORKDIR。
+ * 获取允许访问的根目录列表。
+ * 包含工作目录和 /tmp 目录。
  */
-function getAllowedWorkspace() {
-  return path.resolve(defaultProjectlessWorkspaceRoot());
+function getAllowedRoots() {
+  const workspaceRoot = path.resolve(defaultProjectlessWorkspaceRoot());
+  const tmpRoot = '/tmp';
+  return [workspaceRoot, tmpRoot];
 }
 
 /**
- * 检查路径是否在允许的工作目录范围内。
+ * 检查路径是否在允许的目录范围内。
  * @param {string} requestedPath - 请求的路径
- * @returns {{ allowed: boolean, allowedRoot: string, resolvedPath: string }}
+ * @returns {{ allowed: boolean, allowedRoots: string[], resolvedPath: string }}
  */
 export function isPathAllowed(requestedPath) {
-  const allowedRoot = getAllowedWorkspace();
+  const allowedRoots = getAllowedRoots();
   const resolvedPath = path.resolve(requestedPath);
-  const rootWithSep = allowedRoot.endsWith(path.sep) ? allowedRoot : `${allowedRoot}${path.sep}`;
   
-  if (resolvedPath === allowedRoot || resolvedPath.startsWith(rootWithSep)) {
-    return { allowed: true, allowedRoot, resolvedPath };
+  for (const allowedRoot of allowedRoots) {
+    const rootWithSep = allowedRoot.endsWith(path.sep) ? allowedRoot : `${allowedRoot}${path.sep}`;
+    if (resolvedPath === allowedRoot || resolvedPath.startsWith(rootWithSep)) {
+      return { allowed: true, allowedRoots, resolvedPath };
+    }
   }
   
-  return { allowed: false, allowedRoot, resolvedPath };
+  return { allowed: false, allowedRoots, resolvedPath };
 }
 
-function rejectPathNotAllowed(resolvedPath, allowedRoot) {
-  const error = new Error(`路径 "${resolvedPath}" 不在允许的工作目录范围内。允许的目录: ${allowedRoot}`);
+function rejectPathNotAllowed(resolvedPath, allowedRoots) {
+  const error = new Error(`路径 "${resolvedPath}" 不在允许的工作目录范围内。允许的目录: ${allowedRoots.join(', ')}`);
   error.statusCode = 403;
   error.code = 'PATH_NOT_ALLOWED';
-  error.allowedRoot = allowedRoot;
+  error.allowedRoots = allowedRoots;
   return error;
 }
 
@@ -162,15 +166,12 @@ async function browserEntryFromPath(filePath) {
 }
 
 export function localFileRoots({ cwd = process.cwd(), homedir = os.homedir() } = {}) {
-  // 只返回允许访问的工作目录
-  const allowedRoot = getAllowedWorkspace();
-  return [
-    {
-      id: 'workspace',
-      label: path.basename(allowedRoot) || allowedRoot,
-      path: allowedRoot
-    }
-  ];
+  const allowedRoots = getAllowedRoots();
+  return allowedRoots.map((rootPath, index) => ({
+    id: index === 0 ? 'workspace' : `root-${index}`,
+    label: path.basename(rootPath) || rootPath,
+    path: rootPath
+  }));
 }
 
 export async function listLocalDirectory(value, { limit = 500 } = {}) {
@@ -180,7 +181,7 @@ export async function listLocalDirectory(value, { limit = 500 } = {}) {
   // 检查路径是否允许访问
   const pathCheck = isPathAllowed(dirPath);
   if (!pathCheck.allowed) {
-    throw rejectPathNotAllowed(dirPath, pathCheck.allowedRoot);
+    throw rejectPathNotAllowed(dirPath, pathCheck.allowedRoots);
   }
   
   let stat;
@@ -220,7 +221,7 @@ export async function createLocalFileEntry(value, { kind = 'file', name = '' } =
   // 检查路径是否允许访问
   const pathCheck = isPathAllowed(dirPath);
   if (!pathCheck.allowed) {
-    throw rejectPathNotAllowed(dirPath, pathCheck.allowedRoot);
+    throw rejectPathNotAllowed(dirPath, pathCheck.allowedRoots);
   }
   
   const entryKindValue = kind === 'directory' ? 'directory' : 'file';
@@ -265,7 +266,7 @@ export async function renameLocalFileEntry(value, { name = '' } = {}) {
   // 检查路径是否允许访问
   const pathCheck = isPathAllowed(filePath);
   if (!pathCheck.allowed) {
-    throw rejectPathNotAllowed(filePath, pathCheck.allowedRoot);
+    throw rejectPathNotAllowed(filePath, pathCheck.allowedRoots);
   }
   
   const entryName = normalizedEntryName(name);

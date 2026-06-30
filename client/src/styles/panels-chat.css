@@ -141,6 +141,13 @@
   transform: translate3d(0, -18px, 0);
 }
 
+[data-keyboard="open"] .home-pane {
+  padding-bottom: 80px;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .home-content {
   display: flex;
   justify-content: center;

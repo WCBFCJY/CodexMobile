@@ -16,8 +16,9 @@ import { ChatPane } from '../chat/ChatPane.jsx';
 import { HomePane } from './HomePane.jsx';
 import { ImagePreviewModal } from '../chat/ImagePreview.jsx';
 import { ConnectionRecoveryCard, DocsPanel, Drawer, FileManagerPanel, GitPanel, GitQuickDialog, ToastStack, TopBar } from '../panels/index.js';
+import { FilePanel } from '../panels/FilePanel.jsx';
 
-export function AppShell({ shellClass, panelProps, drawerProps, chatProps, composerProps, homeVisible = false }) {
+export function AppShell({ shellClass, panelProps, drawerProps, chatProps, composerProps, homeVisible = false, filePanelEnabled = false, selectedProject = null, projects = [] }) {
   const {
     topBarProps,
     docsPanelProps,
@@ -29,8 +30,10 @@ export function AppShell({ shellClass, panelProps, drawerProps, chatProps, compo
     imagePreviewProps
   } = panelProps;
 
+  const finalClassName = filePanelEnabled ? `${shellClass} has-file-panel` : shellClass;
+
   return (
-    <div className={shellClass}>
+    <div className={finalClassName}>
       <TopBar {...topBarProps} />
       <Drawer {...drawerProps} />
       <DocsPanel {...docsPanelProps} />
@@ -42,6 +45,7 @@ export function AppShell({ shellClass, panelProps, drawerProps, chatProps, compo
       {homeVisible ? <HomePane /> : <ChatPane {...chatProps} />}
       <Composer {...composerProps} />
       <ImagePreviewModal {...imagePreviewProps} />
+      {filePanelEnabled ? <FilePanel project={selectedProject} projects={projects} /> : null}
     </div>
   );
 }

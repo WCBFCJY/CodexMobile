@@ -32,34 +32,17 @@ export function createChatRouteHandler({
     }
 
     if (method === 'GET' && pathname === '/api/chat/interactions') {
-      sendJson(res, 200, {
-        interactions: chatService.listPendingInteractions({
-          sessionId: url.searchParams.get('sessionId') || '',
-          turnId: url.searchParams.get('turnId') || ''
-        })
-      });
+      sendJson(res, 200, { interactions: [] });
       return true;
     }
 
     if (method === 'POST' && parts.length === 5 && parts[0] === 'api' && parts[1] === 'chat' && parts[2] === 'interactions' && parts[4] === 'respond') {
-      const body = await readBody(req);
-      try {
-        const result = await chatService.respondInteraction(decodeURIComponent(parts[3]), body);
-        sendJson(res, 200, result);
-      } catch (error) {
-        sendJson(res, error.statusCode || 500, { error: error.message || 'Failed to respond to interaction' });
-      }
+      sendJson(res, 410, { error: 'Interaction approvals are no longer supported.' });
       return true;
     }
 
     if (method === 'POST' && parts.length === 5 && parts[0] === 'api' && parts[1] === 'chat' && parts[2] === 'interactions' && parts[4] === 'cancel') {
-      const body = await readBody(req);
-      try {
-        const result = await chatService.cancelInteraction(decodeURIComponent(parts[3]), body);
-        sendJson(res, 200, result);
-      } catch (error) {
-        sendJson(res, error.statusCode || 500, { error: error.message || 'Failed to cancel interaction' });
-      }
+      sendJson(res, 410, { error: 'Interaction approvals are no longer supported.' });
       return true;
     }
 
@@ -92,13 +75,7 @@ export function createChatRouteHandler({
     }
 
     if (method === 'POST' && pathname === '/api/chat/queue/steer') {
-      const body = await readBody(req);
-      try {
-        const result = await chatService.steerQueuedDraft(body);
-        sendJson(res, result ? 202 : 404, result || { error: 'Queued draft not found' });
-      } catch (error) {
-        sendJson(res, error.statusCode || 500, { error: error.message || 'Failed to steer queued draft' });
-      }
+      sendJson(res, 410, { error: 'Steer is no longer supported.' });
       return true;
     }
 
@@ -114,13 +91,7 @@ export function createChatRouteHandler({
     }
 
     if (method === 'POST' && pathname === '/api/chat/compact') {
-      const body = await readBody(req);
-      try {
-        const result = await chatService.compactChat(body, { remoteAddress: remoteAddress(req) });
-        sendJson(res, 202, result);
-      } catch (error) {
-        sendJson(res, error.statusCode || 500, { error: error.message || 'Failed to compact chat context' });
-      }
+      sendJson(res, 410, { error: 'Manual context compaction is no longer supported.' });
       return true;
     }
 

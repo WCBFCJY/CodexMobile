@@ -10,7 +10,6 @@ import test from 'node:test';
 
 import {
   modelSettingsKey,
-  normalizeCodexThreadModelSettingsRow,
   updateRootTomlAssignments
 } from './codex-config.js';
 
@@ -52,26 +51,6 @@ test('updateRootTomlAssignments inserts missing settings before the first table'
       'trust_level = "trusted"',
       ''
     ].join('\n')
-  );
-});
-
-test('normalizeCodexThreadModelSettingsRow exposes desktop per-thread model settings', () => {
-  assert.deepEqual(
-    normalizeCodexThreadModelSettingsRow({
-      sessionId: 'thread-1',
-      provider: 'openai',
-      model: 'gpt-5.4',
-      reasoningEffort: 'medium',
-      updatedAtMs: 123
-    }),
-    {
-      provider: 'openai',
-      model: 'gpt-5.4',
-      modelShort: '5.4 中',
-      reasoningEffort: 'medium',
-      sessionId: 'thread-1',
-      updatedAtMs: 123
-    }
   );
 });
 

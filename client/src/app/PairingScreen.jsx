@@ -164,7 +164,7 @@ export default function PairingScreen({ pairing: pairingStatus = {}, onPaired })
               onFocus={handleCodeFocus}
               onChange={(event) => setCode(normalizePairingCode(event.target.value, 10))}
             />
-            <button type="submit" disabled={!code.trim() || pairing}>
+            <button type="submit" disabled={code.trim().length < 10 || pairing}>
               {pairing ? <Loader2 className="spin" size={18} /> : <Check size={18} />}
               信任这台设备
             </button>

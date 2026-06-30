@@ -418,6 +418,7 @@ export function createAuthController({
     });
     pendingPairingRequests.delete(request.requestId);
     pairingFailuresByRemote.delete(normalizedRemote);
+    pairingCooldownsByRemote.delete(normalizedRemote);
     await writeState();
     return { ok: true, token, device: publicDevice(device) };
   }

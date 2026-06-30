@@ -295,25 +295,43 @@ export function useSessionActions({
     const sessionId = selectedSessionRef.current?.id || message.sessionId || '';
     const existingIndex = messages.findIndex((item) => String(item.id) === messageId);
     const removedMessage = existingIndex >= 0 ? messages[existingIndex] : message;
-    setMessages((current) => current.filter((item) => String(item.id) !== messageId));
+
+    // 如果删除的是 assistant 消息，连带向前删除同一轮次内的连续 assistant/activity 消息
+    let removedMessages = [removedMessage];
+    let removedIds = new Set([messageId]);
+    if (removedMessage.role === 'assistant' && existingIndex >= 0) {
+      const batch = [];
+      for (let i = existingIndex; i >= 0; i -= 1) {
+        const item = messages[i];
+        if (item.role === 'assistant' || item.role === 'activity') {
+          batch.unshift(item);
+        } else {
+          break;
+        }
+      }
+      removedMessages = batch;
+      removedIds = new Set(batch.map((item) => String(item.id)));
+    }
+
+    setMessages((current) => current.filter((item) => !removedIds.has(String(item.id))));
 
     if (!sessionId || isDraftSession({ id: sessionId })) {
       return;
     }
 
     try {
-      await apiFetch(
-        `/api/sessions/${encodeURIComponent(sessionId)}/messages/${encodeURIComponent(messageId)}`,
-        { method: 'DELETE' }
-      );
+      // 串行删除所有相关消息
+      for (const msg of removedMessages) {
+        await apiFetch(
+          `/api/sessions/${encodeURIComponent(sessionId)}/messages/${encodeURIComponent(msg.id)}`,
+          { method: 'DELETE' }
+        );
+      }
     } catch (error) {
       setMessages((current) => {
-        if (current.some((item) => String(item.id) === messageId)) {
-          return current;
-        }
         const next = [...current];
         const insertAt = existingIndex >= 0 ? Math.min(existingIndex, next.length) : next.length;
-        next.splice(insertAt, 0, removedMessage);
+        next.splice(insertAt, 0, ...removedMessages);
         return next;
       });
       window.alert(`删除失败：${error.message}`);

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---------- Stage 1: Build PWA ----------
-FROM node:24-bookworm-slim AS builder
+FROM node:24-trixie-slim AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ COPY shared/ ./shared/
 RUN npm run build
 
 # ---------- Stage 2: Runtime ----------
-FROM node:24-bookworm-slim AS runtime
+FROM node:24-trixie-slim AS runtime
 
 WORKDIR /app
 
@@ -34,20 +34,17 @@ WORKDIR /app
 #   sqlite3         — 轻量数据库操作
 #   unzip, zip      — 压缩/解压
 #   nano            — 文本编辑器
-#   fonts-liberation — 文档预览字体支持
-#   fonts-noto-cjk  — CJK 字体支持（Mermaid、PDF 预览）
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        git ca-certificates openssl \
+        git ca-certificates openssl tmux \
         python3 python3-pip python3-venv \
         curl jq wget \
         build-essential \
         ffmpeg sqlite3 \
-        unzip zip \
-        nano \
-        bubblewrap \
-        fonts-liberation \
-        fonts-noto-cjk \
+        unzip zip tree \
+        nano file less \
+        bubblewrap htop \
+        ripgrep procps yq \
     && rm -rf /var/lib/apt/lists/* \
     && ln -sf /usr/bin/python3 /usr/bin/python \
     && rm -f /usr/lib/python3*/EXTERNALLY-MANAGED
@@ -83,7 +80,8 @@ RUN mkdir -p /app/.codex \
              /app/.codexmobile/uploads \
              /app/.codexmobile/generated \
              /app/.codexmobile/tls \
-             /workspace
+             /workspace/Default \
+    && touch /app/.env
 
 # 默认环境变量
 ENV NODE_ENV=production \
@@ -97,4 +95,4 @@ ENV NODE_ENV=production \
 EXPOSE 3321
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["node", "server/index.js"]
+CMD ["node", "--env-file=/app/.env", "server/index.js"]

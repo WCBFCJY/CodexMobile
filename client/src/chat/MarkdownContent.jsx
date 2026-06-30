@@ -181,7 +181,16 @@ function MemoryCitationBlock({ citation }) {
   );
 }
 
+const MERMAID_CACHE_LIMIT = 50;
 const mermaidRenderCache = new Map();
+
+function setMermaidCache(key, value) {
+  mermaidRenderCache.set(key, value);
+  if (mermaidRenderCache.size > MERMAID_CACHE_LIMIT) {
+    const oldestKey = mermaidRenderCache.keys().next().value;
+    mermaidRenderCache.delete(oldestKey);
+  }
+}
 
 function stableHash(value) {
   let hash = 2166136261;
@@ -288,14 +297,14 @@ function MermaidBlock({ code }) {
       })
       .then(({ svg }) => {
         const next = { svg, error: '' };
-        mermaidRenderCache.set(cacheKey, next);
+        setMermaidCache(cacheKey, next);
         if (!cancelled) {
           setRendered(next);
         }
       })
       .catch((error) => {
         const next = { svg: '', error: error?.message || 'Mermaid 渲染失败' };
-        mermaidRenderCache.set(cacheKey, next);
+        setMermaidCache(cacheKey, next);
         if (!cancelled) {
           setRendered(next);
         }

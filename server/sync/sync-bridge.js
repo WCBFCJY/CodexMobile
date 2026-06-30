@@ -42,7 +42,6 @@ export function createSyncBridge(options = {}) {
   return {
     consumeLegacyPayload,
     publicState,
-    publicStatePayload,
-    setBridgeStatus: store.setBridgeStatus
+    publicStatePayload
   };
 }

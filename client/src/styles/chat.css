@@ -153,7 +153,7 @@
 .message-row.is-plan,
 .message-row.is-plan-request,
 .message-row.is-interaction-request {
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: 12px;
 }
 
@@ -713,6 +713,20 @@
   }
 }
 
+/* 触屏设备：点击消息后显示操作按钮 */
+@media (hover: none) and (pointer: coarse) {
+  .message-actions {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 140ms ease;
+  }
+
+  .message-row.is-touch-active .message-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 
 .message-content {
   max-width: 100%;
@@ -851,11 +865,12 @@
 
 .markdown-code-block {
   max-width: 100%;
+  width: fit-content;
   margin: 8px 0 10px;
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: 8px;
-  background: var(--panel-2);
+  background: #f1f2f4;
 }
 
 .markdown-mermaid-block {
@@ -874,8 +889,8 @@
   gap: 8px;
   min-height: 30px;
   padding: 0 8px 0 10px;
-  border-bottom: 1px solid var(--line);
-  color: var(--muted);
+  border-bottom: none;
+  color: #777d86;
   font-size: 11px;
   line-height: 14px;
 }
@@ -907,6 +922,7 @@
 
 .markdown-code-block pre {
   margin: 0;
+  padding: 0 22px 10px 10px;
   border-radius: 0;
   background: transparent;
 }
@@ -957,6 +973,7 @@
   border-radius: 5px;
   color: var(--text);
   background: var(--panel-2);
+  font-family: "Cascadia Code", "Cascadia Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-size: 0.92em;
 }
 
@@ -1783,7 +1800,7 @@
 }
 
 [data-theme="dark"] .markdown-code-block {
-  border-color: var(--line);
+  border: none;
   background: var(--panel-2);
 }
 
@@ -1794,7 +1811,7 @@
 
 [data-theme="dark"] .markdown-code-head {
   color: var(--muted);
-  border-bottom-color: var(--line);
+  border-bottom: none;
 }
 
 [data-theme="dark"] .markdown-code-head button {

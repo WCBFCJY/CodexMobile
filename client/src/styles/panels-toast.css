@@ -170,6 +170,10 @@
   background: transparent;
 }
 
+.app-shell.is-desktop .toast-stack {
+  left: calc(var(--desktop-drawer-width) + 12px);
+}
+
 [data-theme="dark"] .toast-item,
 [data-theme="dark"] .connection-recovery-card {
   border-color: var(--line);

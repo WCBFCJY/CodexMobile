@@ -1080,34 +1080,37 @@ export function upsertAssistantMessage(current, payload) {
   if (!content) {
     return current;
   }
+  const id = payload.messageId || `assistant-${payload.turnId || Date.now()}`;
+  const turnId = payload.turnId || null;
+
+  // 检查 messageId 是否已存在
+  const existingById = current.find(m => m.id === id);
+  if (existingById) {
+    return current;
+  }
+
   const proposedPlan = extractProposedPlanContent(content);
   if (proposedPlan) {
     const dedupedActivity = removeDuplicateFinalAnswerActivity(current, { ...payload, content: proposedPlan });
-    const withCompletedActivity = payload.done === false
-      ? dedupedActivity
-      : completeActivityMessagesForTurn(dedupedActivity, { ...payload, content: proposedPlan });
+    const withCompletedActivity = completeActivityMessagesForTurn(dedupedActivity, { ...payload, content: proposedPlan });
     return upsertMessageById(
       upsertMessageById(withCompletedActivity, planMessageFromPayload(payload, proposedPlan)),
       planRequestMessageFromPayload(payload, proposedPlan)
     );
   }
-  const id = payload.messageId || `assistant-${payload.turnId || Date.now()}`;
+
+  const dedupedActivity = removeDuplicateFinalAnswerActivity(current, payload);
+  const withCompletedActivity = completeActivityMessagesForTurn(dedupedActivity, payload);
+
   const nextMessage = {
     id,
     role: 'assistant',
     content,
     timestamp: new Date().toISOString(),
-    turnId: payload.turnId || null,
+    turnId,
     sessionId: payload.sessionId || null,
     kind: payload.kind
   };
-  const dedupedActivity = removeDuplicateFinalAnswerActivity(current, payload);
-  const withCompletedActivity = payload.done === false ? dedupedActivity : completeActivityMessagesForTurn(dedupedActivity, payload);
-  const existingIndex = withCompletedActivity.findIndex((message) => message.id === id);
-  if (existingIndex >= 0) {
-    const next = [...withCompletedActivity];
-    next[existingIndex] = nextMessage;
-    return next;
-  }
+
   return [...withCompletedActivity, nextMessage];
 }

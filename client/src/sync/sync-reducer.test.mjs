@@ -20,20 +20,20 @@ import {
 test('completed turn clears every runtime key for a mobile submitted turn', () => {
   const running = applySyncRuntimeEvent({}, {
     eventType: 'turn.running',
-    source: 'desktop-ipc',
+    source: 'headless-local',
     sessionId: 'session-1',
-    turnId: 'desktop-turn',
+    turnId: 'headless-turn',
     clientTurnId: 'mobile-turn',
     timestamp: '2026-05-13T01:00:00.000Z'
   });
   assert.equal(running['session-1'].status, 'running');
-  assert.equal(running['mobile-turn'].source, 'desktop-ipc');
+  assert.equal(running['mobile-turn'].source, 'headless-local');
 
   const completed = applySyncRuntimeEvent(running, {
     eventType: 'turn.completed',
-    source: 'desktop-ipc',
+    source: 'headless-local',
     sessionId: 'session-1',
-    turnId: 'desktop-turn',
+    turnId: 'headless-turn',
     clientTurnId: 'mobile-turn',
     timestamp: '2026-05-13T01:01:00.000Z'
   });
@@ -140,7 +140,7 @@ test('sync-state snapshots preserve active runtime startedAt', () => {
 test('sync-state replaces stale sync-owned runtime and removes local handoff runtime', () => {
   const next = mergeSyncStateRuntime(
     {
-      stale: { status: 'running', source: 'desktop-ipc' },
+      stale: { status: 'running', source: 'headless-local' },
       local: { status: 'running', source: 'local-handoff' }
     },
     {

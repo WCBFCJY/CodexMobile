@@ -49,7 +49,7 @@ export function runtimeRecordForSyncEvent(event = {}) {
     detail: event.detail || null,
     startedAt: event.startedAt || event.timestamp || new Date().toISOString(),
     updatedAt: event.timestamp || new Date().toISOString(),
-    steerable: event.source === 'desktop-ipc' ? false : true
+    steerable: true
   };
 }
 
@@ -60,8 +60,17 @@ export function applySyncRuntimeEvent(runtimeById = {}, event = {}) {
   }
   const next = { ...(runtimeById || {}) };
   if (isSyncTerminalEvent(event)) {
-    for (const key of keys) {
-      delete next[key];
+    const eventType = String(event.eventType || '');
+    // turn.completed: 只有 chat-complete 来源才删除 runtime
+    const isFromChatComplete = eventType === 'turn.completed' && event.legacyType === 'chat-complete';
+    // turn.failed: 只有包含 codex 关键词才删除 runtime
+    const isFailedFromCodex = eventType === 'turn.failed' && /codex/i.test(String(event.detail || event.label || ''));
+    // turn.aborted: 始终删除 runtime
+    const isAborted = eventType === 'turn.aborted';
+    if (isFromChatComplete || isFailedFromCodex || isAborted) {
+      for (const key of keys) {
+        delete next[key];
+      }
     }
     return next;
   }
@@ -91,7 +100,7 @@ export function mergeSyncStateRuntime(runtimeById = {}, syncState = {}) {
   const incomingKeySet = new Set(incomingKeys);
   for (const [key, runtime] of Object.entries(next)) {
     if (
-      ['desktop-ipc', 'headless-local', 'local-handoff', 'codexmobile'].includes(String(runtime?.source || '')) &&
+      ['headless-local', 'local-handoff', 'codexmobile'].includes(String(runtime?.source || '')) &&
       !incomingKeySet.has(key)
     ) {
       delete next[key];

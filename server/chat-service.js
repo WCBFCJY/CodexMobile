@@ -1,13 +1,13 @@
 /**
- * 组装聊天业务：桌面 IPC 优先投递、后台 Codex 兜底、队列、图片与自动标题等子能力。
+ * 组装聊天业务：后台 Codex 执行、队列、图片与自动标题等子能力。
  *
- * Keywords: chat-service, desktop-ipc, headless-fallback, codex-turn, queue
+ * Keywords: chat-service, codex-turn, queue
  *
  * Exports:
  * - createChatService — 创建可注入依赖的聊天服务实例。
  * - normalizeSelectedSkills — 再导出自 chat-request-prep。
  *
- * Inward（本模块依赖/组装的关键符号）: chat-queue、chat-delivery、chat-request-prep、chat-image-handler、interaction-requests、desktop-ipc、runtime-debug。
+ * Inward（本模块依赖/组装的关键符号）: chat-queue、chat-delivery、chat-request-prep、chat-image-handler、runtime-debug。
  *
  * Outward（谁在用/调用场景）: HTTP 聊天路由或上层服务装配。
  *
@@ -16,18 +16,9 @@
 import {
   registerProjectlessThread as registerProjectlessThreadInCodexState
 } from './codex-config.js';
-import {
-  notifyDesktopThreadListChanged as notifyDesktopThreadListChangedInCodexApp
-} from './codex-app-server.js';
-import {
-  triggerDesktopRefreshForThread as triggerDesktopRefreshForThreadInCodexApp
-} from './desktop-refresh.js';
 import { registerMobileSession as registerMobileSessionInIndex } from './mobile-session-index.js';
 import { createChatQueue } from './chat-queue.js';
-import {
-  readDesktopBridgeStatus,
-  runQueuedHeadlessChatJob
-} from './chat-delivery.js';
+import { runQueuedHeadlessChatJob } from './chat-delivery.js';
 import {
   prepareChatRequest,
   projectlessThreadWorkingDirectory
@@ -39,14 +30,6 @@ import {
   compactActiveRuns,
   runtimeDebugLine
 } from './runtime-debug.js';
-import {
-  compactDesktopFollowerThread,
-  interruptDesktopFollowerTurn as interruptDesktopFollowerTurnInCodexApp,
-  setDesktopFollowerCollaborationMode as setDesktopFollowerCollaborationModeInCodexApp,
-  startDesktopFollowerTurn as startDesktopFollowerTurnInCodexApp,
-  steerDesktopFollowerTurn as steerDesktopFollowerTurnInCodexApp
-} from './desktop-ipc-client.js';
-import { createInteractionBroker } from './interaction-requests.js';
 
 export { normalizeSelectedSkills } from './chat-request-prep.js';
 
@@ -71,29 +54,20 @@ export function createChatService({
   getProject,
   getSession,
   getCacheSnapshot,
-  getDesktopBridgeStatus,
   listProjectSessions,
   refreshCodexCache,
   renameSession,
   broadcast,
   runCodexTurn,
-  steerCodexTurn,
   abortCodexTurn,
   getActiveRuns,
   runImageTurn,
   isImageRequest,
   useLegacyImageGenerator,
   maybeAutoNameSession,
-  compactCodexThread = compactDesktopFollowerThread,
-  startDesktopFollowerTurn = startDesktopFollowerTurnInCodexApp,
-  steerDesktopFollowerTurn = steerDesktopFollowerTurnInCodexApp,
-  interruptDesktopFollowerTurn = interruptDesktopFollowerTurnInCodexApp,
-  setDesktopFollowerCollaborationMode = setDesktopFollowerCollaborationModeInCodexApp,
   registerProjectlessThread = registerProjectlessThreadInCodexState,
   registerMobileSession = registerMobileSessionInIndex,
-  rememberLiveSession = () => null,
-  notifyDesktopThreadListChanged = notifyDesktopThreadListChangedInCodexApp,
-  triggerDesktopRefreshForThread = triggerDesktopRefreshForThreadInCodexApp
+  rememberLiveSession = () => null
 }) {
   const chatQueue = createChatQueue();
   const getConversationQueue = chatQueue.getConversationQueue;
@@ -129,175 +103,10 @@ export function createChatService({
     )) || null;
   }
 
-  function headlessDeliveryBridge(bridge) {
-    return {
-      ...(bridge || {}),
-      connected: true,
-      strict: false,
-      mode: 'headless-local',
-      reason: '桌面端 IPC 不可用或未接管当前线程，本次已改用后台 Codex 执行。',
-      capabilities: {
-        ...(bridge?.capabilities || {}),
-        createThread: true,
-        sendToOpenDesktopThread: false,
-        headless: true,
-        backgroundCodex: true
-      }
-    };
-  }
-
-  function desktopIpcUnavailableError(message = '桌面端 Codex 已连接，但当前线程没有可接管的桌面窗口。') {
-    const error = new Error(message);
-    error.statusCode = 409;
-    error.code = 'CODEXMOBILE_DESKTOP_THREAD_OWNER_UNAVAILABLE';
-    return error;
-  }
-
-  async function sendViaDesktopIpc({
-    bridge,
-    project,
-    selectedSessionId,
-    draftSessionId,
-    turnId,
-    sendMode,
-    codexMessage,
-    visibleMessage,
-    attachments,
-    selectedSkills,
-    model,
-    reasoningEffort,
-    permissionMode,
-    collaborationMode
-  }) {
-    if (!selectedSessionId) {
-      throw desktopIpcUnavailableError('桌面端 IPC 还不能从手机直接新建桌面线程。');
-    }
-
-    const input = buildCodexTurnInput({
-      message: codexMessage,
-      attachments,
-      selectedSkills
-    });
-    const now = new Date().toISOString();
-    const lastSession = getSession(selectedSessionId);
-    const cwd = lastSession?.cwd || lastSession?.projectPath || project.path || null;
-    const baseTurnStartParams = {
-      input,
-      cwd,
-      approvalPolicy: 'never',
-      approvalsReviewer: 'user',
-      sandboxPolicy: permissionMode === 'bypassPermissions'
-        ? { type: 'dangerFullAccess' }
-        : { type: 'workspaceWrite', networkAccess: false },
-      model: model || null,
-      effort: reasoningEffort || null,
-      collaborationMode: collaborationMode || null,
-      attachments: []
-    };
-
-    let result;
-    try {
-      if (sendMode === 'steer') {
-        if (collaborationMode) {
-          await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode, { timeoutMs: 2500 });
-        }
-        result = await steerDesktopFollowerTurn(selectedSessionId, {
-          input,
-          attachments: [],
-          restoreMessage: {
-            text: codexMessage,
-            cwd,
-            context: {
-              workspaceRoots: project.path ? [project.path] : [],
-              collaborationMode: collaborationMode || null
-            },
-            responsesapiClientMetadata: null
-          }
-        }, { timeoutMs: 2500 });
-      } else {
-        if (sendMode === 'interrupt') {
-          await interruptDesktopFollowerTurn(selectedSessionId, { timeoutMs: 2500 });
-        }
-        if (collaborationMode) {
-          await setDesktopFollowerCollaborationMode(selectedSessionId, collaborationMode, { timeoutMs: 2500 });
-        }
-        result = await startDesktopFollowerTurn(selectedSessionId, baseTurnStartParams, { timeoutMs: 2500 });
-      }
-    } catch (error) {
-      if (error?.message === 'no-client-found' || error?.statusCode === 409) {
-        throw desktopIpcUnavailableError();
-      }
-      throw error;
-    }
-
-    const appTurnId = result?.result?.turn?.id || result?.turn?.id || turnId;
-    rememberTurn(turnId, {
-      projectId: project.id,
-      projectPath: project.path,
-      sessionId: selectedSessionId,
-      previousSessionId: selectedSessionId,
-      draftSessionId,
-      source: 'desktop-ipc',
-      status: 'running',
-      label: sendMode === 'steer' ? '已发送到当前任务' : '已交给电脑端处理',
-      startedAt: now
-    });
-    broadcast({
-      type: 'user-message',
-      source: 'desktop-ipc',
-      sessionId: selectedSessionId,
-      projectId: project.id,
-      turnId,
-      clientTurnId: turnId,
-      message: {
-        id: `local-${Date.now()}`,
-        role: 'user',
-        content: visibleMessage,
-        turnId,
-        deliveryState: 'confirmed',
-        timestamp: now
-      }
-    });
-    broadcast({
-      type: 'status-update',
-      source: 'desktop-ipc',
-      projectId: project.id,
-      sessionId: selectedSessionId,
-      turnId,
-      kind: 'turn',
-      status: 'running',
-      label: sendMode === 'steer' ? '已发送到当前任务' : '已交给电脑端处理',
-      detail: '',
-      timestamp: new Date().toISOString()
-    });
-    return {
-      accepted: true,
-      queued: false,
-      sessionId: selectedSessionId,
-      draftSessionId,
-      turnId: appTurnId,
-      clientTurnId: turnId,
-      delivery: sendMode === 'steer' ? 'steered' : (sendMode === 'interrupt' ? 'interrupted-started' : 'started'),
-      desktopBridge: bridge
-    };
-  }
-
   function emitJobEvent(job, payload) {
     const enriched = { projectId: job.project.id, ...payload };
     rememberTurnEvent(enriched);
     broadcast(enriched);
-  }
-
-  const interactionBroker = createInteractionBroker({
-    broadcast: (payload) => broadcast(payload)
-  });
-
-  function requestCodexInteraction(job, appMessage, context = {}) {
-    return interactionBroker.requestFromAppServer(appMessage, {
-      projectId: job.project.id,
-      sessionId: context.sessionId || job.selectedSessionId || job.draftSessionId || '',
-      turnId: context.turnId || job.turnId || ''
-    });
   }
 
   const { scheduleAutoNameCompletedSession } = createChatAutoNamer({
@@ -308,29 +117,6 @@ export function createChatService({
     renameSession,
     broadcast
   });
-
-  async function steerQueuedDraft(query = {}) {
-    const draft = chatQueue.removeQueuedDraft(query);
-    if (!draft) {
-      return null;
-    }
-    const sessionId = String(query.sessionId || draft.sessionId || '').trim();
-    if (!sessionId) {
-      const error = new Error('没有可发送到当前任务的线程。');
-      error.statusCode = 409;
-      throw error;
-    }
-    return sendChat({
-      projectId: query.projectId || draft.projectId,
-      sessionId,
-      message: draft.text,
-      attachments: draft.attachments,
-      selectedSkills: draft.selectedSkills,
-      fileMentions: draft.fileMentions,
-      collaborationMode: draft.collaborationMode,
-      sendMode: 'steer'
-    });
-  }
 
   function enqueueChatJob(job, { forceQueued = false, autoStart = true } = {}) {
     const { queued, state } = chatQueue.enqueueJob(job, { forceQueued });
@@ -390,9 +176,6 @@ export function createChatService({
       rememberConversationAlias,
       rememberTurn,
       rememberLiveSession,
-      notifyDesktopThreadListChanged,
-      triggerDesktopRefreshForThread,
-      requestCodexInteraction,
       emitJobEvent,
       scheduleAutoNameCompletedSession,
       onQueueDrained: () => setTimeout(() => runNextQueuedChat(queueKey), 0)
@@ -436,7 +219,6 @@ export function createChatService({
     } = prepared;
     let selectedSessionId = prepared.selectedSessionId;
     let conversationSessionId = prepared.conversationSessionId;
-    const bridge = await readDesktopBridgeStatus(getDesktopBridgeStatus);
 
     const imagePrompt = chatImage.resolveImagePrompt({
       enabled: useLegacyImageGenerator(),
@@ -459,8 +241,6 @@ export function createChatService({
       remoteAddress,
       sendMode,
       imagePrompt: Boolean(imagePrompt),
-      bridgeMode: bridge?.mode,
-      bridgeConnected: bridge?.connected,
       selectedSessionId,
       draftSessionId,
       conversationSessionId,
@@ -498,119 +278,15 @@ export function createChatService({
         sessionId: selectedSessionId,
         draftSessionId,
         turnId,
-        delivery: 'queued',
-        desktopBridge: headlessDeliveryBridge(bridge)
+        delivery: 'queued'
       };
-    }
-
-    if (bridge?.mode === 'desktop-ipc' && bridge?.connected && bridge?.capabilities?.sendToOpenDesktopThread && !imagePrompt) {
-      if (selectedSessionId) {
-        try {
-          runtimeDebugLine('sendChat.branch', {
-            branch: 'desktop-ipc',
-            bridgeMode: bridge?.mode,
-            selectedSessionId,
-            sendMode
-          });
-          return await sendViaDesktopIpc({
-            bridge,
-            project,
-            selectedSessionId,
-            draftSessionId,
-            turnId,
-            sendMode,
-            codexMessage,
-            visibleMessage,
-            attachments,
-            selectedSkills,
-            model: modelForTurn,
-            reasoningEffort: reasoningEffortForTurn,
-            permissionMode: body.permissionMode || 'default',
-            collaborationMode: collaborationMode || null
-          });
-        } catch (error) {
-          runtimeDebugLine('sendChat.branch', {
-            branch: 'desktop-ipc-fallback',
-            selectedSessionId,
-            reason: error?.code || error?.message || 'desktop-ipc-failed'
-          });
-          console.log('[desktop-ipc] send unavailable, using headless fallback:', error.message);
-        }
-      } else {
-        runtimeDebugLine('sendChat.branch', {
-          branch: 'desktop-ipc-draft-fallback',
-          bridgeMode: bridge?.mode,
-          draftSessionId
-        });
-      }
     }
 
     if (sendMode === 'steer') {
-      if (!selectedSessionId) {
-        const error = new Error('新对话还没有桌面端线程，不能发送到当前任务。');
-        error.statusCode = 409;
-        throw error;
-      }
-      runtimeDebugLine('sendChat.branch', {
-        branch: 'steer-headless',
-        bridgeMode: bridge?.mode,
-        selectedSessionId
-      });
-      const result = await steerCodexTurn(selectedSessionId, {
-        message: codexMessage,
-        attachments,
-        selectedSkills
-      });
-      rememberTurn(turnId, {
-        projectId: project.id,
-        projectPath: project.path,
-        sessionId: result.sessionId || selectedSessionId,
-        previousSessionId: selectedSessionId,
-        status: 'running',
-        label: '已发送到当前任务'
-      });
-      broadcast({
-        type: 'user-message',
-        sessionId: result.sessionId || selectedSessionId,
-        projectId: project.id,
-        turnId: result.turnId || turnId,
-        clientTurnId: turnId,
-        message: {
-          id: `local-${Date.now()}`,
-          role: 'user',
-          content: visibleMessage,
-          turnId: result.turnId || turnId,
-          deliveryState: 'confirmed',
-          timestamp: new Date().toISOString()
-        }
-      });
-      broadcast({
-        type: 'status-update',
-        projectId: project.id,
-        sessionId: result.sessionId || selectedSessionId,
-        turnId,
-        kind: 'turn',
-        status: 'running',
-        label: '已发送到当前任务',
-        detail: '',
-        timestamp: new Date().toISOString()
-      });
-      runtimeDebugLine('sendChat.exit', {
-        branch: 'steer',
-        delivery: 'steered',
-        sessionId: result.sessionId || selectedSessionId,
-        turnId: result.turnId || turnId
-      });
-      return {
-        accepted: true,
-        queued: false,
-        delivery: 'steered',
-        sessionId: result.sessionId || selectedSessionId,
-        draftSessionId,
-        turnId: result.turnId || turnId,
-        clientTurnId: turnId,
-        desktopBridge: headlessDeliveryBridge(bridge)
-      };
+      const error = new Error('运行中任务暂不支持追加消息，请稍后重试。');
+      error.statusCode = 409;
+      error.code = 'STEER_NOT_SUPPORTED';
+      throw error;
     }
 
     rememberTurn(turnId, {
@@ -658,8 +334,7 @@ export function createChatService({
         turnId,
         imagePrompt,
         attachments,
-        config,
-        bridge
+        config
       });
       runtimeDebugLine('sendChat.exit', {
         branch: 'image-chat',
@@ -672,7 +347,6 @@ export function createChatService({
 
     runtimeDebugLine('sendChat.branch', {
       branch: 'headless',
-      bridgeMode: bridge?.mode,
       sendMode,
       interrupt: sendMode === 'interrupt'
     });
@@ -718,8 +392,7 @@ export function createChatService({
       sessionId: selectedSessionId,
       draftSessionId,
       turnId,
-      delivery,
-      desktopBridge: headlessDeliveryBridge(bridge)
+      delivery
     };
   }
 
@@ -728,7 +401,6 @@ export function createChatService({
     const sessionId = String(body.sessionId || '').trim();
     const previousSessionId = String(body.previousSessionId || '').trim();
     console.log(`[chat] abort request remote=${remoteAddress} turn=${turnId} session=${sessionId}`);
-    interactionBroker.cancelInteractionsForRun({ turnId, sessionId });
     runtimeDebugLine('abortChat.enter', {
       remoteAddress,
       turnId,
@@ -822,109 +494,17 @@ export function createChatService({
     return true;
   }
 
-  async function compactChat(body = {}, { remoteAddress = '' } = {}) {
-    const project = getProject(body.projectId);
-    if (!project) {
-      const error = new Error('Project not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    const sessionId = String(body.sessionId || body.conversationId || '').trim();
-    if (!sessionId || sessionId.startsWith('draft-')) {
-      const error = new Error('请选择已有桌面线程后再压缩上下文。');
-      error.statusCode = 409;
-      throw error;
-    }
-    runtimeDebugLine('compactChat.enter', {
-      remoteAddress,
-      projectId: project.id,
-      sessionId
-    });
-    const messageId = String(body.clientActionId || '').trim() || `manual-context-compaction-${sessionId}-${Date.now()}`;
-    const startedAt = new Date().toISOString();
-    broadcast({
-      type: 'activity-update',
-      projectId: project.id,
-      sessionId,
-      messageId,
-      kind: 'context_compaction',
-      label: '正在压缩上下文',
-      status: 'running',
-      detail: '',
-      startedAt,
-      timestamp: startedAt
-    });
-    let result;
-    try {
-      result = await compactCodexThread(sessionId, { timeoutMs: 30_000 });
-    } catch (error) {
-      const failedAt = new Date().toISOString();
-      broadcast({
-        type: 'activity-update',
-        projectId: project.id,
-        sessionId,
-        messageId,
-        kind: 'context_compaction',
-        label: '上下文压缩失败',
-        status: 'failed',
-        detail: error.message || '桌面端没有完成上下文压缩。',
-        startedAt,
-        completedAt: failedAt,
-        timestamp: failedAt
-      });
-      throw error;
-    }
-    const timestamp = new Date().toISOString();
-    broadcast({
-      type: 'activity-update',
-      projectId: project.id,
-      sessionId,
-      messageId,
-      kind: 'context_compaction',
-      label: '上下文已压缩',
-      status: 'completed',
-      detail: '',
-      startedAt,
-      completedAt: timestamp,
-      timestamp
-    });
-    broadcast({
-      type: 'context-status-update',
-      projectId: project.id,
-      sessionId,
-      autoCompact: {
-        detected: true,
-        status: 'detected',
-        lastCompactedAt: timestamp,
-        reason: '手动压缩上下文'
-      },
-      updatedAt: timestamp,
-      timestamp
-    });
-    runtimeDebugLine('compactChat.exit', {
-      projectId: project.id,
-      sessionId,
-      result: Boolean(result)
-    });
-    return { accepted: true, sessionId, result: result || null };
-  }
-
   return {
     abortChat,
-    compactChat,
     getActiveImageRuns: chatImage.getActiveImageRuns,
     getTurn(turnId) {
       return chatQueue.getTurn(turnId);
     },
-    listPendingInteractions: interactionBroker.listPendingInteractions,
-    respondInteraction: interactionBroker.respondInteraction,
-    cancelInteraction: interactionBroker.cancelInteraction,
     loadRecentImagePrompts: chatImage.loadRecentImagePrompts,
     listQueue: chatQueue.listQueue,
     removeQueuedDraft: chatQueue.removeQueuedDraft,
     restoreQueuedDraft: chatQueue.restoreQueuedDraft,
     sendChat,
-    sessionHasActiveWork,
-    steerQueuedDraft
+    sessionHasActiveWork
   };
 }

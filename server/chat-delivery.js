@@ -1,10 +1,9 @@
 /**
- * 聊天投递层：读取桌面桥状态并执行后台 headless Codex 队列。
+ * 聊天投递层：执行后台 headless Codex 队列。
  *
- * Keywords: desktop-ipc, headless-codex, bridge, codex-turn-input
+ * Keywords: headless-codex, codex-turn-input
  *
  * Exports:
- * - readDesktopBridgeStatus — 获取桌面桥状态；移动端发送不因桌面离线而失败。
  * - runQueuedHeadlessChatJob — 排队执行后台 Codex。
  *
  * Inward（本模块依赖/组装的关键符号）: codex-runner 风格的 runCodexTurn、session registration hooks。
@@ -13,21 +12,6 @@
  *
  * 不负责: HTTP 层与路由注册。
  */
-
-export async function readDesktopBridgeStatus(getDesktopBridgeStatus) {
-  if (!getDesktopBridgeStatus) {
-    return null;
-  }
-  try {
-    return await getDesktopBridgeStatus({ force: true });
-  } catch (error) {
-    return {
-      connected: false,
-      mode: 'unavailable',
-      reason: error?.message || 'desktop bridge unavailable'
-    };
-  }
-}
 
 export function runQueuedHeadlessChatJob({
   job,
@@ -42,9 +26,6 @@ export function runQueuedHeadlessChatJob({
   rememberConversationAlias,
   rememberTurn,
   rememberLiveSession,
-  notifyDesktopThreadListChanged,
-  triggerDesktopRefreshForThread,
-  requestCodexInteraction,
   emitJobEvent,
   scheduleAutoNameCompletedSession,
   onQueueDrained
@@ -52,17 +33,6 @@ export function runQueuedHeadlessChatJob({
   const metadataUpdates = [];
   let lastBackgroundThread = null;
   let terminalEventSeen = false;
-  let desktopRefreshRequested = false;
-
-  function requestDesktopRefresh(threadId, reason) {
-    if (desktopRefreshRequested || !threadId) {
-      return;
-    }
-    desktopRefreshRequested = true;
-    Promise.resolve(triggerDesktopRefreshForThread?.(threadId, { reason })).catch((error) => {
-      console.warn('[desktop-refresh] Failed to trigger after chat:', error.message);
-    });
-  }
 
   function rememberStartedBackgroundThread(payload) {
     if (!payload?.sessionId || !job.draftSessionId) {
@@ -100,12 +70,7 @@ export function runQueuedHeadlessChatJob({
           ? registerProjectlessThread(payload.sessionId, job.project.path)
           : Promise.resolve(null),
         registerMobileSession(sessionRecord)
-      ]).then(() =>
-        notifyDesktopThreadListChanged?.({
-          ...backgroundThread,
-          reason: 'background-thread-started'
-        })
-      ).catch((error) => {
+      ]).catch((error) => {
         console.warn('[sessions] Failed to register background thread:', error.message);
       })
     );
@@ -124,10 +89,7 @@ export function runQueuedHeadlessChatJob({
       serviceTier: job.serviceTier,
       permissionMode: job.permissionMode,
       collaborationMode: job.collaborationMode || null,
-      turnId: job.turnId,
-      onCodexServerRequest: requestCodexInteraction
-        ? (appMessage, context) => requestCodexInteraction(job, appMessage, context)
-        : null
+      turnId: job.turnId
     },
     (payload) => {
       const eventPayload = {
@@ -136,10 +98,6 @@ export function runQueuedHeadlessChatJob({
       };
       if (['chat-complete', 'chat-error', 'chat-aborted'].includes(eventPayload.type)) {
         terminalEventSeen = true;
-        requestDesktopRefresh(
-          eventPayload.sessionId || state.sessionId || sessionId || job.selectedSessionId,
-          lastBackgroundThread ? 'background-thread-completed' : 'headless-turn-completed'
-        );
       }
       if (eventPayload.sessionId) {
         state.sessionId = eventPayload.sessionId;
@@ -214,16 +172,6 @@ export function runQueuedHeadlessChatJob({
       }
       const snapshot = await refreshCodexCache();
       broadcast({ type: 'sync-complete', syncedAt: snapshot.syncedAt, projects: snapshot.projects });
-      const refreshThreadId = lastBackgroundThread?.threadId || state.sessionId || sessionId || job.selectedSessionId || null;
-      if (lastBackgroundThread) {
-        await notifyDesktopThreadListChanged?.({
-          ...lastBackgroundThread,
-          reason: 'background-thread-completed'
-        });
-      }
-      if (refreshThreadId) {
-        requestDesktopRefresh(refreshThreadId, lastBackgroundThread ? 'background-thread-completed' : 'headless-turn-completed');
-      }
     } catch (error) {
       console.warn('[sync] Failed to refresh after chat:', error.message);
     }

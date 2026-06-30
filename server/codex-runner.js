@@ -1,28 +1,25 @@
 /**
- * 启动与管理 Codex CLI 子进程，解析流式输出并驱动一轮对话回合。
+ * 启动与管理 Codex SDK 会话，解析流式输出并驱动一轮对话回合。
  *
- * Keywords: codex-runner, subprocess, streaming, abort, steer
+ * Keywords: codex-runner, sdk, streaming, abort
  *
  * Exports:
- * - statusLabel / shouldCompleteTurnFromAppServerItem / appServerAgentMessagePhase — 状态与消息阶段判定辅助。
- * - runCodexTurn — 主演示路径：跑一轮 Codex。
- * - abortCodexTurn / getActiveRuns / steerCodexTurn — 控制运行中回合。
+ * - statusLabel — 状态标签辅助。
+ * - runCodexTurn — 主路径：跑一轮 Codex。
+ * - abortCodexTurn / getActiveRuns — 控制运行中回合。
  *
- * Inward（本模块依赖/组装的关键符号）: Node child_process、服务层配置、runtime-debug。
+ * Inward（本模块依赖/组装的关键符号）: @openai/codex-sdk、服务层配置。
  *
- * Outward（谁在用/调用场景）: chat-delivery、push、状态 API。
+ * Outward（谁在用/调用场景）: chat-service、push、状态 API。
  *
  * 不负责: HTTP 请求解析。
  */
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { normalizeServiceTier } from '../shared/service-tier.js';
-import { createCodexAppServerClient, defaultServerRequestResult } from './codex-app-server.js';
-import { buildCodexTurnInput, imageMarkdownFromCodexImageGeneration } from './codex-native-images.js';
 import { buildCodexLarkCliContext } from './lark-cli.js';
 import { detectFeishuSkillKeys } from './feishu-skills.js';
-import { codexSandboxForPermissionMode, desktopSandboxPolicyForPermissionMode } from './permission-policy.js';
+import { codexSandboxForPermissionMode } from './permission-policy.js';
 import { readSecurityOptions } from './security-options.js';
 
 const activeRuns = new Map();
@@ -34,15 +31,6 @@ const TURN_INACTIVITY_TIMEOUT_MS = parseTurnTimeoutMs(
   process.env.CODEXMOBILE_TURN_INACTIVITY_TIMEOUT_MS,
   DEFAULT_TURN_INACTIVITY_TIMEOUT_MS
 );
-const INTERACTIVE_SERVER_REQUEST_METHODS = new Set([
-  'item/commandExecution/requestApproval',
-  'item/fileChange/requestApproval',
-  'item/permissions/requestApproval',
-  'item/tool/requestUserInput',
-  'mcpServer/elicitation/request',
-  'applyPatchApproval',
-  'execCommandApproval'
-]);
 
 function parseTurnTimeoutMs(value, fallbackMs = DEFAULT_TURN_TIMEOUT_MS) {
   const timeoutMs = Number(value);
@@ -182,6 +170,16 @@ export function statusLabel(kind, status = 'running') {
   return labels[kind] || (done ? '已完成' : failed ? '失败' : '正在处理');
 }
 
+function compactStatusLabel(content, fallback = '正在处理') {
+  const label = String(content || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!label) {
+    return fallback;
+  }
+  return label.length > 68 ? `${label.slice(0, 68)}...` : label;
+}
+
 function detailFromItem(item) {
   if (!item) {
     return '';
@@ -293,6 +291,11 @@ function turnTimingPayload(turn, { fallbackStartedAt = null, fallbackCompletedAt
   return { startedAt, completedAt, durationMs };
 }
 
+function positiveNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
 function emitStatus(emit, {
   sessionId,
   turnId,
@@ -318,66 +321,6 @@ function emitStatus(emit, {
     completedAt,
     durationMs
   });
-}
-
-function positiveNumber(value) {
-  const number = Number(value);
-  return Number.isFinite(number) && number > 0 ? number : null;
-}
-
-function emitContextStatus(emit, { sessionId, turnId, state, timestamp = new Date().toISOString() }) {
-  const contextWindow = state.contextWindow || null;
-  const inputTokens = state.inputTokens || null;
-  const percent =
-    inputTokens && contextWindow
-      ? Math.max(0, Math.min(100, Math.round((inputTokens / contextWindow) * 1000) / 10))
-      : null;
-  emit({
-    type: 'context-status-update',
-    sessionId,
-    turnId,
-    inputTokens,
-    totalTokens: state.totalTokens || null,
-    contextWindow,
-    percent,
-    lastTokenUsage: state.lastTokenUsage || null,
-    totalTokenUsage: state.totalTokenUsage || null,
-    updatedAt: timestamp,
-    autoCompact: {
-      detected: Boolean(state.autoCompactDetected),
-      status: state.autoCompactDetected ? 'detected' : 'watching',
-      lastCompactedAt: state.autoCompactLastAt || null,
-      reason: state.autoCompactReason || ''
-    }
-  });
-}
-
-function applyTokenCountToContextState(contextState, payload, timestamp) {
-  const info = payload?.info && typeof payload.info === 'object' ? payload.info : {};
-  const last = info.last_token_usage && typeof info.last_token_usage === 'object' ? info.last_token_usage : {};
-  const total = info.total_token_usage && typeof info.total_token_usage === 'object' ? info.total_token_usage : {};
-  const inputTokens = positiveNumber(last.input_tokens ?? total.input_tokens);
-  const totalTokens = positiveNumber(total.total_tokens ?? last.total_tokens);
-  const contextWindow = positiveNumber(info.model_context_window ?? payload?.model_context_window);
-  const previousInputTokens = contextState.inputTokens;
-
-  contextState.inputTokens = inputTokens || contextState.inputTokens || null;
-  contextState.totalTokens = totalTokens || contextState.totalTokens || null;
-  contextState.contextWindow = contextWindow || contextState.contextWindow || null;
-  contextState.lastTokenUsage = last;
-  contextState.totalTokenUsage = total;
-  contextState.updatedAt = timestamp;
-
-  if (
-    previousInputTokens &&
-    inputTokens &&
-    previousInputTokens > 20000 &&
-    inputTokens < previousInputTokens * 0.62
-  ) {
-    contextState.autoCompactDetected = true;
-    contextState.autoCompactLastAt = timestamp;
-    contextState.autoCompactReason = '上下文用量回落';
-  }
 }
 
 function isSpawnPermissionError(error) {
@@ -411,16 +354,6 @@ function codexErrorDiagnostics(error) {
 
 function emitActivity(emit, { sessionId, turnId, messageId, item, kind, status }) {
   const detail = detailFromItem(item);
-  const requestTurnId = String(item?.turnId || '').trim();
-  const planContent = String(item?.planContent || detail || '').trim();
-  const planImplementation = kind === 'plan_implementation'
-    ? {
-      requestId: String(item?.id || (requestTurnId ? `implement-plan:${requestTurnId}` : messageId) || '').trim(),
-      turnId: requestTurnId || turnId,
-      planContent,
-      completed: Boolean(item?.isCompleted || item?.completed || status === 'completed')
-    }
-    : null;
   emit({
     type: 'activity-update',
     sessionId,
@@ -434,22 +367,46 @@ function emitActivity(emit, { sessionId, turnId, messageId, item, kind, status }
     output: item?.aggregated_output || item?.aggregatedOutput || item?.output || '',
     exitCode: item?.exitCode ?? item?.exit_code ?? null,
     fileChanges: normalizeFileChanges(item),
-    planImplementation,
     toolName: item?.tool || item?.name || '',
     error: item?.error?.message || item?.message || '',
     timestamp: new Date().toISOString()
   });
 }
 
-function sandboxPolicyFromPermissionMode(permissionMode, { networkAccess = false } = {}) {
-  return desktopSandboxPolicyForPermissionMode(permissionMode, {
-    ...readSecurityOptions(),
-    networkAccess: Boolean(networkAccess),
-    writableRoots: []
-  });
+function eventItem(event) {
+  if (event.item) {
+    return event.item;
+  }
+  if (event.payload && (event.type === 'response_item' || event.type === 'event_msg')) {
+    return event.payload;
+  }
+  return null;
 }
 
-function appItemKind(type) {
+function eventStatus(event, item) {
+  if (item?.status) {
+    if (item.status === 'in_progress') {
+      return 'running';
+    }
+    return item.status;
+  }
+  if (event.type === 'item.completed') {
+    return 'completed';
+  }
+  if (event.type === 'item.started' || event.type === 'item.updated') {
+    return 'running';
+  }
+  if (event.type === 'event_msg' && item?.type?.endsWith('_end')) {
+    return item.exit_code || item.exit_code === 0 ? (item.exit_code === 0 ? 'completed' : 'failed') : 'completed';
+  }
+  if (event.type === 'response_item') {
+    return 'completed';
+  }
+  return 'running';
+}
+
+function itemKindFromEvent(item) {
+  const type = String(item?.type || '').trim();
   const kinds = {
     agentMessage: 'agent_message',
     commandExecution: 'command_execution',
@@ -468,166 +425,67 @@ function appItemKind(type) {
   return kinds[type] || type || 'item';
 }
 
-function appItemStatus(method, item) {
-  const raw = typeof item?.status === 'string' ? item.status.toLowerCase() : '';
-  if (method === 'item/completed') {
-    if (['failed', 'error', 'cancelled', 'canceled'].includes(raw)) {
-      return 'failed';
-    }
-    return 'completed';
-  }
-  if (['completed', 'success', 'succeeded'].includes(raw)) {
-    return 'completed';
-  }
-  if (['failed', 'error'].includes(raw)) {
-    return 'failed';
-  }
-  return 'running';
-}
-
-export function shouldCompleteTurnFromAppServerItem(method, item, content = '') {
-  if (method !== 'item/completed' || item?.type !== 'agentMessage') {
-    return false;
-  }
-  if (String(item?.phase || '').toLowerCase() === 'commentary') {
-    return false;
-  }
-  if (appItemStatus(method, item) !== 'completed') {
-    return false;
-  }
-  return Boolean(String(content || item?.text || '').trim());
-}
-
-function normalizeAppItem(item, state = {}) {
-  if (!item || typeof item !== 'object') {
-    return item;
-  }
-  const copy = { ...item, type: appItemKind(item.type) };
-  if (item.aggregatedOutput && !copy.aggregated_output) {
-    copy.aggregated_output = item.aggregatedOutput;
-  }
-  if (item.type === 'dynamicToolCall') {
-    copy.tool = item.tool;
-    copy.name = item.tool;
-  }
-  if (item.type === 'imageGeneration') {
-    copy.message = item.revisedPrompt || item.result || '';
-  }
-  if (state.commandOutputs?.has(item.id)) {
-    copy.aggregatedOutput = state.commandOutputs.get(item.id);
-    copy.aggregated_output = copy.aggregatedOutput;
-  }
-  return copy;
-}
-
-function emitNativeImageResult(emit, { sessionId, turnId, messageId, item, status, state }) {
-  if (status !== 'completed') {
-    return false;
-  }
-  const content = imageMarkdownFromCodexImageGeneration(item);
-  if (!content) {
-    return false;
-  }
-  emit({
-    type: 'assistant-update',
-    sessionId,
-    turnId,
-    messageId: `${messageId}-result`,
-    role: 'assistant',
-    kind: 'image_generation_result',
-    phase: 'final_answer',
-    content,
-    status: 'completed',
-    done: true
-  });
-  state.hadAssistantText = true;
-  return true;
-}
-
-export function appServerAgentMessagePhase(params = {}, state = {}, messageId = '') {
-  const directPhase = String(params.phase || params.item?.phase || '').trim().toLowerCase();
-  if (directPhase) {
-    return directPhase;
-  }
-  const itemId = messageId || params.itemId || params.item?.id || '';
-  const knownItem = itemId && state.items?.get ? state.items.get(itemId) : null;
-  return String(knownItem?.phase || '').trim().toLowerCase();
-}
-
-function emitAgentMessageActivity(emit, { sessionId, turnId, messageId, content, status = 'running' }) {
-  const text = String(content || '').trim();
-  if (!text) {
+function emitCodexEvent(event, sessionId, turnId, emit, state, startedAt) {
+  const threadId = event.thread_id || event.id || event.payload?.id;
+  if (event.type === 'thread.started' && threadId) {
     return;
   }
-  emit({
-    type: 'activity-update',
-    sessionId,
-    turnId,
-    messageId,
-    itemId: messageId,
-    kind: 'agent_message',
-    phase: 'commentary',
-    label: text,
-    content: text,
-    status,
-    timestamp: new Date().toISOString()
-  });
-}
-
-function tokenUsagePayload(tokenUsage = {}) {
-  const last = tokenUsage.last || {};
-  const total = tokenUsage.total || {};
-  return {
-    info: {
-      last_token_usage: {
-        input_tokens: last.inputTokens,
-        cached_input_tokens: last.cachedInputTokens,
-        output_tokens: last.outputTokens,
-        reasoning_output_tokens: last.reasoningOutputTokens,
-        total_tokens: last.totalTokens
-      },
-      total_token_usage: {
-        input_tokens: total.inputTokens,
-        cached_input_tokens: total.cachedInputTokens,
-        output_tokens: total.outputTokens,
-        reasoning_output_tokens: total.reasoningOutputTokens,
-        total_tokens: total.totalTokens
-      },
-      model_context_window: tokenUsage.modelContextWindow
-    }
-  };
-}
-
-function errorTextFromNotification(params = {}) {
-  return params.error?.message || params.message || params.error || 'Codex turn failed';
-}
-
-function emitAppServerItem({ method, params }, sessionId, turnId, emit, state) {
-  const rawItem = params?.item;
-  if (!rawItem || rawItem.type === 'userMessage') {
+  if (event.type === 'thread.completed' || event.type === 'turn.completed') {
+    state.usage = event.turn || event.payload?.turn || null;
+    const timing = turnTimingPayload(state.usage, {
+      fallbackStartedAt: startedAt,
+      fallbackCompletedAt: new Date().toISOString()
+    });
+    emitStatus(emit, {
+      sessionId,
+      turnId,
+      kind: 'turn',
+      status: 'completed',
+      label: '任务已完成',
+      ...timing,
+      timestamp: timing.completedAt
+    });
+    return;
+  }
+  if (event.type === 'error' || event.type === 'turn.failed') {
+    const error = event.error?.message || event.error || 'Codex turn failed';
+    state.failed = true;
+    emitStatus(emit, { sessionId, turnId, kind: 'turn', status: 'failed', label: '任务失败', detail: error });
+    emit({ type: 'turn-failed', sessionId, turnId, error });
     return;
   }
 
-  const item = normalizeAppItem(rawItem, state);
-  const status = appItemStatus(method, rawItem);
-  const messageId = rawItem.id || `${turnId}-${item.type}`;
+  const item = eventItem(event);
+  if (!item) {
+    return;
+  }
 
-  if (rawItem.type === 'agentMessage') {
-    const content = String(rawItem.text || state.agentMessages?.get(messageId) || '').trimEnd();
+  const kind = itemKindFromEvent(item);
+  const status = eventStatus(event, item);
+  const messageId = item.id || `${turnId}-${kind}`;
+  const detail = detailFromItem(item);
+
+  if (kind === 'agent_message') {
+    const content = contentFromItem(item);
     if (!content.trim()) {
       return;
     }
-    const isCommentary = rawItem.phase === 'commentary';
+    const isCommentary = String(item.phase || '').toLowerCase() === 'commentary';
+    
+    // commentary → 只发送 status（放入执行卡片）
     if (isCommentary) {
-      emitAgentMessageActivity(emit, {
+      emitStatus(emit, {
         sessionId,
         turnId,
-        messageId,
-        content,
-        status
+        kind: 'agent_message',
+        status: 'running',
+        label: compactStatusLabel(content)
       });
       return;
     }
+    
+    // 中间过程 / 最终消息 → 发送 assistant-update
+    const isIntermediate = status !== 'completed';
     emit({
       type: 'assistant-update',
       sessionId,
@@ -635,202 +493,57 @@ function emitAppServerItem({ method, params }, sessionId, turnId, emit, state) {
       messageId,
       role: 'assistant',
       kind: 'agent_message',
-      phase: isCommentary ? 'commentary' : 'final_answer',
+      phase: 'final_answer',
       content,
       status,
-      done: !isCommentary && status === 'completed'
+      done: !isIntermediate
     });
-    if (!isCommentary) {
-      state.hadAssistantText = true;
-      if (shouldCompleteTurnFromAppServerItem(method, rawItem, content)) {
-        state.scheduleFallbackTurnCompletion?.({
-          completedAt: new Date().toISOString(),
-          fallback: 'final-assistant-item'
-        });
-      }
-    }
+    state.hadAssistantText = true;
     return;
   }
 
-  if (rawItem.type === 'reasoning') {
+  if (kind === 'reasoning') {
     emitStatus(emit, { sessionId, turnId, kind: 'reasoning', status, label: statusLabel('reasoning', status) });
     return;
   }
 
-  if (rawItem.type === 'contextCompaction') {
-    const timestamp = new Date().toISOString();
-    state.context.autoCompactDetected = true;
-    state.context.autoCompactLastAt = timestamp;
-    state.context.autoCompactReason = '上下文已自动压缩';
-    emitContextStatus(emit, { sessionId, turnId, state: state.context, timestamp });
-  }
-
-  emitStatus(emit, {
-    sessionId,
-    turnId,
-    kind: item.type,
-    status,
-    detail: detailFromItem(item)
-  });
-  emitActivity(emit, {
-    sessionId,
-    turnId,
-    messageId,
-    item,
-    kind: item.type,
-    status
-  });
-  if (rawItem.type === 'imageGeneration') {
-    emitNativeImageResult(emit, { sessionId, turnId, messageId, item: rawItem, status, state });
-  }
-}
-
-function emitAppServerNotification(message, sessionId, turnId, emit, state) {
-  const { method, params = {} } = message;
-
-  if (method === 'turn/started') {
-    emitStatus(emit, { sessionId, turnId, kind: 'reasoning', status: 'running', label: '正在思考' });
-    return;
-  }
-
-  if (method === 'thread/tokenUsage/updated') {
-    const timestamp = new Date().toISOString();
-    applyTokenCountToContextState(state.context, tokenUsagePayload(params.tokenUsage), timestamp);
-    emitContextStatus(emit, { sessionId, turnId, state: state.context, timestamp });
-    return;
-  }
-
-  if (method === 'thread/compacted') {
-    const timestamp = new Date().toISOString();
-    state.context.autoCompactDetected = true;
-    state.context.autoCompactLastAt = timestamp;
-    state.context.autoCompactReason = '上下文已自动压缩';
-    emitContextStatus(emit, { sessionId, turnId, state: state.context, timestamp });
-    emit({
-      type: 'activity-update',
+  if (
+    kind === 'command_execution' ||
+    kind === 'file_change' ||
+    kind === 'mcp_tool_call' ||
+    kind === 'web_search' ||
+    kind === 'todo_list' ||
+    kind === 'image_generation_call' ||
+    kind === 'custom_tool_call' ||
+    kind === 'function_call' ||
+    kind === 'function_call_output' ||
+    kind === 'exec_command_begin' ||
+    kind === 'exec_command_end'
+  ) {
+    const normalizedKind =
+      kind === 'exec_command_begin' || kind === 'exec_command_end' ? 'command_execution' : kind;
+    const normalizedStatus = kind === 'function_call_output' ? 'completed' : status;
+    emitStatus(emit, {
       sessionId,
       turnId,
-      messageId: `${turnId}-context-compaction-${Date.now()}`,
-      kind: 'context_compaction',
-      label: '上下文已自动压缩',
-      status: 'completed',
-      detail: '',
-      timestamp
+      kind: normalizedKind,
+      status: normalizedStatus,
+      detail: detailFromItem(item)
     });
-    return;
-  }
-
-  if (method === 'item/agentMessage/delta') {
-    const messageId = params.itemId || `${turnId}-agent-message`;
-    const previous = state.agentMessages.get(messageId) || '';
-    const content = `${previous}${params.delta || ''}`;
-    state.agentMessages.set(messageId, content);
-    if (content.trim()) {
-      const phase = appServerAgentMessagePhase(params, state, messageId);
-      if (phase === 'commentary') {
-        emitAgentMessageActivity(emit, {
-          sessionId,
-          turnId,
-          messageId,
-          content,
-          status: 'running'
-        });
-        return;
-      }
-      state.hadAssistantText = true;
-      emit({
-        type: 'assistant-update',
-        sessionId,
-        turnId,
-        messageId,
-        role: 'assistant',
-        kind: 'agent_message',
-        phase: 'final_answer',
-        content,
-        status: 'running',
-        done: false
-      });
-    }
-    return;
-  }
-
-  if (method === 'item/commandExecution/outputDelta') {
-    const itemId = params.itemId || `${turnId}-command`;
-    const previous = state.commandOutputs.get(itemId) || '';
-    state.commandOutputs.set(itemId, `${previous}${params.delta || ''}`);
-    const item = normalizeAppItem(state.items.get(itemId) || { id: itemId, type: 'commandExecution' }, state);
     emitActivity(emit, {
       sessionId,
       turnId,
-      messageId: itemId,
+      messageId,
       item,
-      kind: 'command_execution',
-      status: 'running'
+      kind: normalizedKind,
+      status: normalizedStatus
     });
     return;
   }
 
-  if (method === 'item/fileChange/outputDelta') {
-    const itemId = params.itemId || `${turnId}-file-change`;
-    const previous = state.commandOutputs.get(itemId) || '';
-    state.commandOutputs.set(itemId, `${previous}${params.delta || ''}`);
-    const item = normalizeAppItem(state.items.get(itemId) || { id: itemId, type: 'fileChange' }, state);
-    emitActivity(emit, {
-      sessionId,
-      turnId,
-      messageId: itemId,
-      item,
-      kind: 'file_change',
-      status: 'running'
-    });
-    return;
+  if (detail) {
+    emitStatus(emit, { sessionId, turnId, kind, status, detail });
   }
-
-  if (method === 'item/started' || method === 'item/completed') {
-    if (params.item?.id) {
-      state.items.set(params.item.id, params.item);
-    }
-    emitAppServerItem(message, sessionId, turnId, emit, state);
-    return;
-  }
-
-  if (method === 'error' && !params.willRetry) {
-    const error = errorTextFromNotification(params);
-    state.failed = true;
-    emitStatus(emit, { sessionId, turnId, kind: 'turn', status: 'failed', label: '任务失败', detail: error });
-    emit({ type: 'turn-failed', sessionId, turnId, error });
-    emit({ type: 'chat-error', sessionId, turnId, error });
-  }
-}
-
-function emitPlanImplementationRequest(message, sessionId, turnId, emit) {
-  const params = message?.params || {};
-  const requestTurnId = String(params.turnId || '').trim();
-  const requestThreadId = String(params.threadId || sessionId || '').trim();
-  const planContent = String(params.planContent || '').trim();
-  const requestId = String(message?.id || (requestTurnId ? `implement-plan:${requestTurnId}` : '')).trim();
-  const content = /<proposed_plan\b/i.test(planContent)
-    ? planContent
-    : `<proposed_plan>\n${planContent}\n</proposed_plan>`;
-  emit({
-    type: 'assistant-update',
-    sessionId: requestThreadId || sessionId,
-    turnId,
-    messageId: requestId || `${turnId}-plan-implementation`,
-    role: 'assistant',
-    kind: 'agent_message',
-    phase: 'final_answer',
-    content,
-    status: 'completed',
-    done: true,
-    timestamp: new Date().toISOString(),
-    planImplementation: {
-      requestId: requestId || (requestTurnId ? `implement-plan:${requestTurnId}` : ''),
-      turnId: requestTurnId || turnId,
-      planContent,
-      completed: false
-    }
-  });
 }
 
 function abortError() {
@@ -839,12 +552,23 @@ function abortError() {
   return error;
 }
 
-export async function runCodexTurn({ sessionId, draftSessionId, projectPath, message, attachments = [], selectedSkills = [], model, reasoningEffort, serviceTier, permissionMode, collaborationMode = null, turnId: providedTurnId, onCodexServerRequest = null }, emit) {
+export async function runCodexTurn({
+  sessionId,
+  draftSessionId,
+  projectPath,
+  message,
+  attachments = [],
+  selectedSkills = [],
+  model,
+  reasoningEffort,
+  permissionMode,
+  turnId: providedTurnId
+}, emit) {
+  const { Codex } = await import('@openai/codex-sdk');
   const workingDirectory = await ensureAsciiWorkingDirectory(projectPath);
   const { sandboxMode, approvalPolicy } = mapPermissionMode(permissionMode);
   const feishuSkillKeys = detectFeishuSkillKeys(message);
   const normalizedReasoningEffort = normalizeReasoningEffort(reasoningEffort);
-  const normalizedServiceTier = normalizeServiceTier(serviceTier);
   const modelReasoningEffort =
     feishuSkillKeys.length && normalizedReasoningEffort === 'xhigh' ? 'low' : normalizedReasoningEffort;
   const larkCliContext = await buildCodexLarkCliContext(message).catch((error) => {
@@ -856,19 +580,10 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
   const state = {
     hadAssistantText: false,
     failed: false,
-    usage: null,
-    context: {},
-    agentMessages: new Map(),
-    commandOutputs: new Map(),
-    items: new Map(),
-    fallbackCompletionTimer: null,
-    turnCompletionResolved: false,
-    scheduleFallbackTurnCompletion: null
+    usage: null
   };
   const run = {
     thread: null,
-    client: null,
-    appTurnId: null,
     abortController,
     turnId,
     sessionId: sessionId || draftSessionId || null,
@@ -880,35 +595,7 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
 
   let currentSessionId = sessionId || null;
   let previousSessionId = draftSessionId || sessionId || null;
-  let client = null;
-  let completionResolve = null;
-  let completionReject = null;
-  const completionPromise = new Promise((resolve, reject) => {
-    completionResolve = resolve;
-    completionReject = reject;
-  });
-  function resolveTurnCompletion(turn = {}) {
-    if (state.turnCompletionResolved) {
-      return;
-    }
-    state.turnCompletionResolved = true;
-    completionResolve(turn);
-  }
-  state.scheduleFallbackTurnCompletion = (turn = {}) => {
-    if (state.turnCompletionResolved || state.fallbackCompletionTimer) {
-      return;
-    }
-    state.fallbackCompletionTimer = setTimeout(() => resolveTurnCompletion(turn), 750);
-    if (typeof state.fallbackCompletionTimer.unref === 'function') {
-      state.fallbackCompletionTimer.unref();
-    }
-  };
-  const abortPromise = new Promise((_, reject) => {
-    abortController.signal.addEventListener('abort', () => reject(abortError()), { once: true });
-  });
-  abortPromise.catch(() => {
-    // The abort can arrive before the turn reaches Promise.race; keep Node from treating it as unhandled.
-  });
+  let thread = null;
   let turnTimeoutTimer = null;
   let turnInactivityTimeoutTimer = null;
   let resetTurnInactivityTimeout = () => {};
@@ -918,145 +605,39 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
       larkCliContext.env.CODEXMOBILE_TURN_ID = turnId;
       larkCliContext.env.CODEXMOBILE_SESSION_ID = sessionId || draftSessionId || '';
     }
-
-    client = await createCodexAppServerClient({
-      env: larkCliContext.env || { ...process.env },
-      cwd: workingDirectory,
-      clientInfo: { name: 'CodexMobile', title: null, version: '0.1.0' },
-      allowHeadlessLocal: true,
-      transport: {
-        mode: 'headless-local',
-        strict: false,
-        sockPath: null,
-        connected: true,
-        reason: '移动端后台 Codex 执行固定使用独立 headless app-server'
-      },
-      onServerRequest: async (appMessage) => {
-        resetTurnInactivityTimeout();
-        if (appMessage?.method === 'item/plan/requestImplementation') {
-          emitPlanImplementationRequest(appMessage, currentSessionId || sessionId || draftSessionId, turnId, emit);
-        }
-        if (typeof onCodexServerRequest === 'function' && INTERACTIVE_SERVER_REQUEST_METHODS.has(appMessage?.method)) {
-          const result = await onCodexServerRequest(appMessage, {
-            sessionId: currentSessionId || sessionId || draftSessionId || '',
-            turnId,
-            projectPath: workingDirectory
-          });
-          if (result !== null && result !== undefined) {
-            return result;
-          }
-        }
-        return defaultServerRequestResult(appMessage);
-      },
-      onNotification: (appMessage) => {
-        resetTurnInactivityTimeout();
-        const params = appMessage.params || {};
-        if (appMessage.method === 'thread/started' && params.thread?.id) {
-          const fromSessionId = previousSessionId || currentSessionId || draftSessionId || params.thread.id;
-          currentSessionId = params.thread.id;
-          run.sessionId = currentSessionId;
-          run.previousSessionId = fromSessionId;
-          emit({
-            type: 'thread-started',
-            sessionId: currentSessionId,
-            previousSessionId: fromSessionId,
-            turnId,
-            projectPath,
-            cwd: params.thread.cwd || workingDirectory,
-            filePath: params.thread.path || params.thread.filePath || null,
-            startedAt: new Date().toISOString()
-          });
-          return;
-        }
-        if (appMessage.method === 'turn/started' && params.turn?.id) {
-          run.appTurnId = params.turn.id;
-        }
-        if (params.threadId && currentSessionId && params.threadId !== currentSessionId) {
-          return;
-        }
-        emitAppServerNotification(appMessage, currentSessionId || sessionId || draftSessionId, turnId, emit, state);
-        if (appMessage.method === 'turn/completed') {
-          state.usage = params.turn || null;
-          const timing = turnTimingPayload(state.usage, {
-            fallbackStartedAt: run.startedAt,
-            fallbackCompletedAt: new Date().toISOString()
-          });
-          emitStatus(emit, {
-            sessionId: currentSessionId,
-            turnId,
-            kind: 'turn',
-            status: 'completed',
-            label: '任务已完成',
-            ...timing,
-            timestamp: timing.completedAt
-          });
-          emit({ type: 'turn-complete', sessionId: currentSessionId, turnId, usage: state.usage, ...timing });
-          resolveTurnCompletion(params.turn || {});
-        } else if (appMessage.method === 'error' && !params.willRetry) {
-          completionReject(new Error(errorTextFromNotification(params)));
-        }
-      }
-    });
-
-    const threadParams = {
-      cwd: workingDirectory,
+    const codex = new Codex({ env: larkCliContext.env || { ...process.env } });
+    const threadOptions = {
+      workingDirectory,
+      skipGitRepoCheck: true,
+      sandboxMode,
       approvalPolicy,
-      sandbox: sandboxMode,
-      model: model || null,
-      config: modelReasoningEffort ? { model_reasoning_effort: modelReasoningEffort } : null,
-      serviceName: 'CodexMobile'
+      model,
+      modelReasoningEffort,
+      ...(larkCliContext.enabled ? { networkAccessEnabled: true } : {})
     };
-    if (normalizedServiceTier) {
-      threadParams.serviceTier = normalizedServiceTier;
-    }
-    const threadResponse = sessionId
-      ? await client.request('thread/resume', { threadId: sessionId, ...threadParams }, { timeoutMs: 30_000 })
-      : await client.request('thread/start', threadParams, { timeoutMs: 30_000 });
-    const desktopThread = threadResponse?.thread || {};
-    currentSessionId = desktopThread.id || sessionId || `codex-${Date.now()}`;
-    run.thread = desktopThread;
-    run.client = client;
+
+    thread = sessionId ? codex.resumeThread(sessionId, threadOptions) : codex.startThread(threadOptions);
+    currentSessionId = thread.id || sessionId || `codex-${Date.now()}`;
+    run.thread = thread;
     run.sessionId = currentSessionId;
+    activeRuns.set(turnId, run);
+
     emit({
       type: 'chat-started',
       sessionId: currentSessionId,
       previousSessionId,
       turnId,
       projectPath,
-      cwd: desktopThread.cwd || workingDirectory,
-      filePath: desktopThread.path || desktopThread.filePath || null,
+      cwd: workingDirectory,
       startedAt: new Date().toISOString()
     });
     emitStatus(emit, { sessionId: currentSessionId, turnId, kind: 'reasoning', status: 'running', label: '正在思考' });
 
-    const turnStartParams = {
-      threadId: currentSessionId,
-      input: buildCodexTurnInput({
-        message,
-        attachments,
-        selectedSkills,
-        larkInstruction: larkCliContext.enabled ? larkCliContext.instruction : ''
-      }),
-      cwd: workingDirectory,
-      approvalPolicy,
-      sandboxPolicy: sandboxPolicyFromPermissionMode(permissionMode, { networkAccess: larkCliContext.enabled }),
-      model: model || null,
-      effort: modelReasoningEffort || null,
-      collaborationMode: collaborationMode || null
-    };
-    if (normalizedServiceTier) {
-      turnStartParams.serviceTier = normalizedServiceTier;
-    }
-    const turnResponse = await client.request('turn/start', turnStartParams, { timeoutMs: 30_000 });
-    if (turnResponse?.turn?.id) {
-      run.appTurnId = turnResponse.turn.id;
-    }
-    const turnTimeoutPromise = new Promise((_, reject) => {
-      turnTimeoutTimer = setTimeout(() => reject(turnTimeoutError()), TURN_TIMEOUT_MS);
-      if (typeof turnTimeoutTimer.unref === 'function') {
-        turnTimeoutTimer.unref();
-      }
-    });
+    const codexInput = [
+      message,
+      larkCliContext.enabled ? larkCliContext.instruction : ''
+    ].filter(Boolean).join('\n\n');
+
     const turnInactivityTimeoutPromise = new Promise((_, reject) => {
       resetTurnInactivityTimeout = () => {
         if (turnInactivityTimeoutTimer) {
@@ -1073,19 +654,56 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
       resetTurnInactivityTimeout();
     });
 
+    const turnTimeoutPromise = new Promise((_, reject) => {
+      turnTimeoutTimer = setTimeout(() => reject(turnTimeoutError()), TURN_TIMEOUT_MS);
+      if (typeof turnTimeoutTimer.unref === 'function') {
+        turnTimeoutTimer.unref();
+      }
+    });
+
+    const abortPromise = new Promise((_, reject) => {
+      abortController.signal.addEventListener('abort', () => reject(abortError()), { once: true });
+    });
+    abortPromise.catch(() => {});
+
+    const streamedTurn = await thread.runStreamed(codexInput, { signal: abortController.signal });
+
+    const streamDonePromise = (async () => {
+      for await (const event of streamedTurn.events) {
+        resetTurnInactivityTimeout();
+        const threadId = event.thread_id || event.id || event.payload?.id;
+        if (event.type === 'thread.started' && threadId) {
+          const fromSessionId = previousSessionId || currentSessionId;
+          if (threadId !== currentSessionId) {
+            currentSessionId = threadId;
+            run.sessionId = threadId;
+          }
+          previousSessionId = fromSessionId;
+          run.previousSessionId = fromSessionId;
+          emit({
+            type: 'thread-started',
+            sessionId: threadId,
+            previousSessionId: fromSessionId,
+            turnId,
+            projectPath,
+            cwd: workingDirectory,
+            startedAt: new Date().toISOString()
+          });
+          emitStatus(emit, { sessionId: threadId, turnId, kind: 'reasoning', status: 'running', label: '正在思考' });
+          continue;
+        }
+        if (run.status === 'aborted') {
+          break;
+        }
+        emitCodexEvent(event, currentSessionId, turnId, emit, state, run.startedAt);
+      }
+    })();
+
     await Promise.race([
-      completionPromise,
+      streamDonePromise,
       abortPromise,
       turnTimeoutPromise,
-      turnInactivityTimeoutPromise,
-      client.closed.then(({ error }) => {
-        if (error && run.status !== 'aborted') {
-          throw error;
-        }
-        if (run.status !== 'aborted') {
-          throw new Error('Codex app-server closed before the turn completed');
-        }
-      })
+      turnInactivityTimeoutPromise
     ]);
 
     if (!state.failed) {
@@ -1099,7 +717,6 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
         previousSessionId,
         turnId,
         usage: state.usage,
-        context: state.context,
         hadAssistantText: state.hadAssistantText,
         ...timing
       });
@@ -1109,14 +726,7 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
     const inactiveTimedOut = isTurnInactivityTimeoutError(error);
     if (timedOut || inactiveTimedOut) {
       run.status = 'timeout';
-      if (client && currentSessionId && run.appTurnId) {
-        await client.request('turn/interrupt', {
-          threadId: currentSessionId,
-          turnId: run.appTurnId
-        }, { timeoutMs: 5_000 }).catch((interruptError) => {
-          console.warn('[codex] Failed to interrupt timed out turn:', interruptError.message);
-        });
-      }
+      abortController.abort();
     }
     const wasAborted =
       error?.name === 'AbortError' ||
@@ -1152,12 +762,6 @@ export async function runCodexTurn({ sessionId, draftSessionId, projectPath, mes
     if (turnInactivityTimeoutTimer) {
       clearTimeout(turnInactivityTimeoutTimer);
     }
-    if (state.fallbackCompletionTimer) {
-      clearTimeout(state.fallbackCompletionTimer);
-    }
-    if (client) {
-      client.close();
-    }
     if (activeRuns.has(turnId)) {
       const activeRun = activeRuns.get(turnId);
       activeRun.status = activeRun.status === 'aborted' ? 'aborted' : 'completed';
@@ -1185,14 +789,6 @@ export function abortCodexTurn(identifier) {
   }
   for (const run of runs) {
     run.status = 'aborted';
-    if (run.client && run.sessionId && run.appTurnId) {
-      run.client.request('turn/interrupt', {
-        threadId: run.sessionId,
-        turnId: run.appTurnId
-      }, { timeoutMs: 5_000 }).catch((error) => {
-        console.warn('[codex] Failed to interrupt turn:', error.message);
-      });
-    }
     run.abortController.abort();
   }
   return true;
@@ -1206,56 +802,6 @@ export function getActiveRuns() {
       previousSessionId: run.previousSessionId,
       startedAt: run.startedAt,
       status: run.status,
-      turnId: run.turnId,
-      steerable: Boolean(run.appTurnId),
-      source: 'headless-local',
-      context: run.context || null
+      turnId: run.turnId
     }));
-}
-
-export async function steerCodexTurn(identifier, { message, attachments = [], selectedSkills = [] } = {}) {
-  const id = String(identifier || '').trim();
-  const run = [...activeRuns.values()].find(
-    (item) => item.status === 'running' && runMatchesIdentifier(item, id)
-  );
-  if (!run) {
-    const error = new Error('当前桌面端没有可引导的运行任务');
-    error.statusCode = 409;
-    error.code = 'NO_ACTIVE_TURN';
-    throw error;
-  }
-  if (!run.client || !run.sessionId || !run.appTurnId) {
-    const error = new Error('当前任务暂时不能接收运行中消息');
-    error.statusCode = 409;
-    error.code = 'ACTIVE_TURN_NOT_STEERABLE';
-    throw error;
-  }
-
-  try {
-    const response = await run.client.request('turn/steer', {
-      threadId: run.sessionId,
-      expectedTurnId: run.appTurnId,
-      input: buildCodexTurnInput({ message, attachments, selectedSkills })
-    }, { timeoutMs: 30_000 });
-    return {
-      accepted: true,
-      delivery: 'steered',
-      sessionId: run.sessionId,
-      turnId: run.turnId,
-      appTurnId: response?.turnId || run.appTurnId
-    };
-  } catch (error) {
-    const text = String(error?.message || '');
-    if (
-      /active.*not.*steerable|no active turn to steer|cannot steer|expected active turn id/i.test(text) ||
-      error?.code === 'ActiveTurnNotSteerable'
-    ) {
-      const steerError = new Error('当前桌面端任务不能接收运行中消息，可以加入队列或中止后发送。');
-      steerError.statusCode = 409;
-      steerError.code = 'ACTIVE_TURN_NOT_STEERABLE';
-      steerError.detail = text;
-      throw steerError;
-    }
-    throw error;
-  }
 }

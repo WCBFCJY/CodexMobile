@@ -52,7 +52,15 @@ test('isPathAllowed checks if path is within allowed workspace', () => {
   
   const allowed = isPathAllowed('/tmp/test-workspace/project');
   assert.equal(allowed.allowed, true);
-  assert.equal(allowed.allowedRoot, path.resolve(testRoot));
+  assert.ok(Array.isArray(allowed.allowedRoots));
+  assert.ok(allowed.allowedRoots.includes(path.resolve(testRoot)));
+  
+  // /tmp 目录也应该被允许（仅 Linux/Docker 环境）
+  // Windows 上 path.resolve('/tmp') 会变成驱动器路径，跳过此断言
+  if (process.platform !== 'win32') {
+    const tmpAllowed = isPathAllowed('/tmp/some-file');
+    assert.equal(tmpAllowed.allowed, true);
+  }
   
   const notAllowed = isPathAllowed('/etc/passwd');
   assert.equal(notAllowed.allowed, false);
@@ -60,14 +68,16 @@ test('isPathAllowed checks if path is within allowed workspace', () => {
   delete process.env.CODEXMOBILE_WORKDIR;
 });
 
-test('localFileRoots returns single allowed workspace directory', () => {
+test('localFileRoots returns allowed workspace directories', () => {
   const testRoot = '/tmp/project';
   process.env.CODEXMOBILE_WORKDIR = testRoot;
   const roots = localFileRoots({ cwd: '/tmp/project', homedir: '/Users/example' });
-  // 现在只返回一个允许的工作目录
-  assert.equal(roots.length, 1);
+  // 返回工作目录和 /tmp 目录
+  assert.equal(roots.length, 2);
   assert.equal(roots[0].id, 'workspace');
   assert.equal(roots[0].path, path.resolve(testRoot));
+  // Windows 上 /tmp 会变成驱动器路径
+  assert.ok(roots[1].path.endsWith('tmp') || roots[1].path === '/tmp');
   delete process.env.CODEXMOBILE_WORKDIR;
 });
 

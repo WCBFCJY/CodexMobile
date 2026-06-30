@@ -1,7 +1,7 @@
 /**
  * 主顶栏：会话标题、连接状态、侧边栏切换、桌面回跳、文档 / Git 快捷入口与线程 ID 复制等。
  *
- * Keywords: topbar, header, desktop-handoff, git, docs, notifications
+ * Keywords: topbar, header, git, docs, notifications
  *
  * Exports:
  * - SidebarToggleIcon — 与 macOS 风格相近的侧边栏切换图标。
@@ -13,11 +13,10 @@
  * Outward: App 根布局顶部固定区域。
  */
 
-import { Bell, Check, Copy, GitBranch, GitCommitHorizontal, MonitorUp, MoreHorizontal, Plus, UploadCloud } from 'lucide-react';
+import { Bell, Check, Copy, GitBranch, GitCommitHorizontal, MoreHorizontal, Plus, UploadCloud } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { copyTextToClipboard } from '../utils/clipboard.js';
 import { isDraftSession } from '../app/session-utils.js';
-import { desktopHandoffMenuState } from '../desktop-handoff-state.js';
 import { FeishuLogoIcon } from './DocsPanel.jsx';
 import { bridgeConnectionLabel } from './topbar-status.js';
 
@@ -35,14 +34,11 @@ export function TopBar({
   selectedProject,
   selectedSession,
   connectionState,
-  desktopBridge,
   selectedRuntime,
   onMenu,
   onOpenDocs,
   onGitAction,
-  onDesktopHandoff,
-  desktopHandoffSupported = true,
-  desktopHandoffPending = false,
+  onOpenGitPanel,
   notificationSupported,
   notificationEnabled,
   onEnableNotifications,
@@ -50,7 +46,7 @@ export function TopBar({
   homeMode = false,
   initialGitMenuOpen = false
 }) {
-  const status = bridgeConnectionLabel(connectionState, desktopBridge, { selectedSession, selectedRuntime });
+  const status = bridgeConnectionLabel(connectionState, { selectedSession, selectedRuntime });
   const [menuOpen, setMenuOpen] = useState(false);
   const [gitMenuOpen, setGitMenuOpen] = useState(initialGitMenuOpen);
   const [copiedThreadId, setCopiedThreadId] = useState(false);
@@ -58,12 +54,6 @@ export function TopBar({
   const gitMenuRef = useRef(null);
   const copiedTimerRef = useRef(null);
   const canCopyThreadId = Boolean(selectedSession?.id && !isDraftSession(selectedSession));
-  const desktopHandoffState = desktopHandoffMenuState({
-    selectedSession,
-    selectedRuntime,
-    supported: desktopHandoffSupported,
-    pending: desktopHandoffPending
-  });
   const title = selectedSession?.title || selectedProject?.name || 'CodexMobile';
 
   useEffect(() => {
@@ -94,6 +84,12 @@ export function TopBar({
     onGitAction?.(action);
   }
 
+  function handleOpenGitPanel() {
+    setMenuOpen(false);
+    setGitMenuOpen(false);
+    onOpenGitPanel?.();
+  }
+
   function handleToggleGitMenu() {
     setMenuOpen(false);
     setGitMenuOpen((value) => !value);
@@ -118,14 +114,6 @@ export function TopBar({
   function handleOpenDocs() {
     setMenuOpen(false);
     onOpenDocs?.();
-  }
-
-  function handleDesktopHandoff() {
-    if (desktopHandoffState.disabled) {
-      return;
-    }
-    setMenuOpen(false);
-    onDesktopHandoff?.();
   }
 
   function handleEnableNotifications() {
@@ -173,6 +161,10 @@ export function TopBar({
                 <Plus size={16} />
                 <span>创建分支</span>
               </button>
+              <button type="button" role="menuitem" onClick={handleOpenGitPanel}>
+                <MoreHorizontal size={16} />
+                <span>更多</span>
+              </button>
             </div>
           ) : null}
         </div>
@@ -188,17 +180,9 @@ export function TopBar({
           </button>
           {menuOpen ? (
             <div className="top-menu-popover" role="menu" aria-label="更多操作">
-              <div className="top-menu-title">
-                <MoreHorizontal size={16} />
-                <span>更多</span>
-              </div>
               <button type="button" role="menuitem" onClick={handleCopyThreadId} disabled={!canCopyThreadId}>
                 {copiedThreadId ? <Check size={16} /> : <Copy size={16} />}
                 <span>{copiedThreadId ? '已复制对话 ID' : '复制对话 ID'}</span>
-              </button>
-              <button type="button" role="menuitem" onClick={handleDesktopHandoff} disabled={desktopHandoffState.disabled} title={desktopHandoffState.reason}>
-                <MonitorUp size={16} />
-                <span>{desktopHandoffState.label}</span>
               </button>
               <button type="button" role="menuitem" onClick={handleOpenDocs}>
                 <FeishuLogoIcon size={18} className="top-docs-logo" />

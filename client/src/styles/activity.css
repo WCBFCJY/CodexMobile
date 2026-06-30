@@ -644,7 +644,8 @@
   line-height: 16px;
 }
 
-.activity-command-detail.is-failed .activity-shell-status {
+.activity-command-detail.is-failed .activity-shell-status,
+.activity-shell.is-failed .activity-shell-status {
   color: #8a5b24;
 }
 

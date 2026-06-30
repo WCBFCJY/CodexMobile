@@ -1,5 +1,5 @@
 /**
- * 将前端权限模式映射为 Codex CLI 与桌面 app-server 的安全沙箱策略。
+ * 将前端权限模式映射为 Codex SDK 运行时的安全沙箱策略。
  *
  * Keywords: permission-policy, sandbox, danger-full-access, codex-runner
  *

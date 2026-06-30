@@ -4,7 +4,7 @@
  * Keywords: websocket, sync-state, sync-event, connection
  *
  * Exports:
- * - 若干 `should*` 纯函数 — 旧测试兼容守卫，统一返回不直连旧 UI。
+ * - shouldRefreshCurrentSessionAfterReconnect — 重连后判断是否需刷新当前会话。
  * - useAppWebSocket — 建立 WS 连接并把 sync payload 分发到同步消费层。
  *
  * Inward: api、sync/useSyncSocket、model-sync、session-live-refresh。
@@ -17,41 +17,6 @@ import { applySessionRenameToProjectSessions } from '../session-live-refresh.js'
 import { mergeModelSettingsIntoStatus, shouldApplyModelSettings } from './model-sync.js';
 import { normalizeContextStatus } from './context-status.js';
 import { applySyncSocketPayload } from '../sync/useSyncSocket.js';
-
-export function isExternalThreadPayload(payload = {}) {
-  void payload;
-  return false;
-}
-
-export function isDesktopThreadStatusPayload(payload = {}) {
-  void payload;
-  return false;
-}
-
-export function shouldRenderStatusMessageForPayload(payload = {}) {
-  void payload;
-  return false;
-}
-
-export function shouldRenderActivityMessageForPayload(payload = {}) {
-  void payload;
-  return false;
-}
-
-export function shouldRenderAssistantMessageForPayload(payload = {}) {
-  void payload;
-  return false;
-}
-
-export function shouldRefreshDesktopThreadForPayload(payload = {}) {
-  void payload;
-  return false;
-}
-
-export function shouldCompleteLocalTurnBeforeRefresh(payload = {}) {
-  void payload;
-  return false;
-}
 
 export function shouldRefreshCurrentSessionAfterReconnect(session = null) {
   const sessionId = String(session?.id || '').trim();
@@ -94,6 +59,8 @@ export function useAppWebSocket({
 
     let stopped = false;
     let reconnectTimer = null;
+    // 防止 React StrictMode 导致的事件重复处理，随 effect 生命周期释放
+    const processedEventIds = new Set();
 
     async function refreshCurrentSessionAfterReconnect() {
       const project = selectedProjectRef.current;
@@ -184,6 +151,21 @@ export function useAppWebSocket({
     }
 
     function applySyncPayload(payload = {}) {
+      // 防止 React StrictMode 导致的事件重复处理
+      if (payload.type === 'sync-event' && payload.event) {
+        const ev = payload.event;
+        const eventId = ev.eventType + '|' + (ev.message?.id || '') + '|' + (ev.timestamp || '') + '|' + String(ev.message?.content || ev.activity?.content || '').slice(0, 50);
+        if (processedEventIds.has(eventId)) {
+          return;
+        }
+        processedEventIds.add(eventId);
+        // 防止 Set 无限增长
+        if (processedEventIds.size > 200) {
+          const first = processedEventIds.values().next().value;
+          processedEventIds.delete(first);
+        }
+      }
+
       applyModelFromSyncPayload(payload);
       applySyncSocketPayload(payload, {
         defaultStatus,

@@ -1,14 +1,14 @@
 /**
- * 读取 rollout/session JSONL，拼装消息列表、分页与桌面/协作活动投影入口。
+ * 读取 rollout/session JSONL，拼装消息列表、分页与运行时活动投影入口。
  *
- * Keywords: session-messages, rollout-jsonl, pagination, desktop-thread
+ * Keywords: session-messages, rollout-jsonl, pagination
  *
  * Exports:
  * - messagesFromRolloutJsonl / publicContextState / publicRuntimeState — 解析与脱敏视图。
  * - readRolloutContextState / paginateMessages / isoFromEpochSeconds — IO 与分页工具。
  * - createSessionMessageReader — 可注入 fs 与会话依赖的读数器。
  *
- * Inward（本模块依赖/组装的关键符号）: codex-app-server、desktop-activity-parser、desktop-thread-projector。
+ * Inward（本模块依赖/组装的关键符号）: session-message-reader 内部 JSONL 解析。
  *
  * Outward（谁在用/调用场景）: codex-data.readSessionMessages、API 层。
  *
@@ -17,9 +17,7 @@
 import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import readline from 'node:readline';
-import { readDesktopThread as defaultReadDesktopThread } from './codex-app-server.js';
 import {
-  readDesktopCollabActivities as defaultReadDesktopCollabActivities,
   readRawSessionActivities as defaultReadRawSessionActivities
 } from './desktop-activity-parser.js';
 import {
@@ -27,7 +25,6 @@ import {
   implementedPlanContentFromMessage,
   implementedPlanContentsMatch,
   isInternalUserInput,
-  messagesFromDesktopThread as defaultMessagesFromDesktopThread,
   planMessageFromContent,
   planRequestMessageFromContent,
   removeDuplicateGuidedUserSegments,
@@ -292,20 +289,6 @@ function activityContainerStatusForRuntime(item = {}, contextState = {}) {
     return '';
   }
   return runtime.status || '';
-}
-
-function desktopThreadHasMessages(thread) {
-  if (Array.isArray(thread?.messages) && thread.messages.length > 0) {
-    return true;
-  }
-  return (Array.isArray(thread?.turns) ? thread.turns : []).some((turn) =>
-    Array.isArray(turn?.items) && turn.items.length > 0
-  );
-}
-
-function canFallbackToRollout(error) {
-  const message = String(error?.message || '').toLowerCase();
-  return error?.statusCode === 404 || message.includes('thread not loaded') || message.includes('desktop thread not found');
 }
 
 export function publicContextState(state = {}, configContext = {}) {
@@ -579,61 +562,23 @@ export function isoFromEpochSeconds(value) {
 
 export function createSessionMessageReader({
   readDeletedMessageIds = defaultReadDeletedMessageIds,
-  readDesktopThread = defaultReadDesktopThread,
-  messagesFromDesktopThread = defaultMessagesFromDesktopThread,
   readRawSessionActivities = defaultReadRawSessionActivities,
-  readDesktopCollabActivities = defaultReadDesktopCollabActivities,
   removeFallbackActivitiesCoveredByRaw = defaultRemoveFallbackActivitiesCoveredByRaw,
   upsertDesktopActivity = defaultUpsertDesktopActivity,
   sortDesktopActivitySteps = defaultSortDesktopActivitySteps,
   filterDeletedMessages = defaultFilterDeletedMessages,
   readRolloutContextState: readRolloutContextStateImpl = readRolloutContextState,
   resolveSessionThread = async () => null,
-  getConfigContext = () => ({}),
-  desktopAvailable = true
+  getConfigContext = () => ({})
 } = {}) {
   async function readThread(sessionId) {
-    if (!desktopAvailable) {
-      const session = await resolveSessionThread(sessionId);
-      const filePath = session?.filePath || session?.path || '';
-      const thread = await readRolloutThreadFromFile(filePath, sessionId).catch(() => null);
-      if (thread) {
-        return thread;
-      }
-      const error = new Error('Desktop thread not found');
-      error.statusCode = 404;
-      throw error;
-    }
-
-    try {
-      const response = await readDesktopThread(sessionId, { includeTurns: true });
-      if (response?.thread) {
-        if (!desktopThreadHasMessages(response.thread)) {
-          const session = await resolveSessionThread(sessionId);
-          const filePath = session?.filePath || session?.path || response.thread.path || '';
-          const fallbackThread = await readRolloutThreadFromFile(filePath, sessionId).catch(() => null);
-          if (fallbackThread && desktopThreadHasMessages(fallbackThread)) {
-            return fallbackThread;
-          }
-        }
-        return response.thread;
-      }
-    } catch (error) {
-      if (!canFallbackToRollout(error)) {
-        throw error;
-      }
-      if (error?.statusCode === 503) {
-        desktopIpcSkipUntil = Date.now() + IPC_SKIP_MS;
-      }
-    }
-
     const session = await resolveSessionThread(sessionId);
     const filePath = session?.filePath || session?.path || '';
     const thread = await readRolloutThreadFromFile(filePath, sessionId).catch(() => null);
     if (thread) {
       return thread;
     }
-    const error = new Error('Desktop thread not found');
+    const error = new Error('Session thread not found');
     error.statusCode = 404;
     throw error;
   }
@@ -647,7 +592,7 @@ export function createSessionMessageReader({
 
     const baseMessages = Array.isArray(thread.messages)
       ? thread.messages.map((message) => ({ ...message }))
-      : messagesFromDesktopThread(thread, { includeActivity: false });
+      : [];
     const contextState = thread._contextContent
       ? contextStateFromJsonlContent(thread._contextContent, sessionId)
       : await readRolloutContextStateImpl(thread.path, sessionId);
@@ -661,26 +606,10 @@ export function createSessionMessageReader({
       if (contextState?.runtime?.turnId) {
         visibleTurnIds.add(String(contextState.runtime.turnId));
       }
-      if (!Array.isArray(thread.messages) && visibleTurnIds.size) {
-        const activityMessages = messagesFromDesktopThread(thread, { includeActivity: true, turnIds: visibleTurnIds })
-          .filter((message) => message?.role === 'activity');
-        messages.push(...activityMessages);
-      }
       const activityOptions = visibleTurnIds.size ? { turnIds: visibleTurnIds } : {};
       const rawActivities = await readRawSessionActivities(thread.path, thread.turns || [], activityOptions);
       removeFallbackActivitiesCoveredByRaw(messages, rawActivities);
       for (const item of rawActivities) {
-        upsertDesktopActivity(
-          messages,
-          item.turnId,
-          item.activity,
-          item.segmentIndex,
-          activityContainerStatusForRuntime(item, contextState),
-          thread.id || sessionId
-        );
-      }
-      const collabActivities = await readDesktopCollabActivities(thread.path, activityOptions);
-      for (const item of collabActivities) {
         upsertDesktopActivity(
           messages,
           item.turnId,

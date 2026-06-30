@@ -36,7 +36,7 @@ function runtimeForEvent(event) {
     detail: event.detail || null,
     startedAt: event.startedAt || event.timestamp || null,
     updatedAt: event.timestamp || new Date().toISOString(),
-    steerable: event.source === 'desktop-ipc' ? false : true
+    steerable: true
   };
 }
 
@@ -44,7 +44,6 @@ export function createSyncStore({ maxEvents = 200 } = {}) {
   const state = {
     runtimeById: {},
     terminalById: {},
-    bridgeStatus: null,
     modelSettings: null,
     projects: [],
     syncedAt: null,
@@ -113,8 +112,7 @@ export function createSyncStore({ maxEvents = 200 } = {}) {
         reasoningEffort: event.reasoningEffort || null,
         sessionId: event.sessionId || null,
         updatedAt: event.timestamp || new Date().toISOString(),
-        source: event.source || null,
-        desktopSync: event.desktopSync || null
+        source: event.source || null
       };
     }
     if (event.eventType === 'thread.renamed' && event.sessionId && event.title) {
@@ -132,15 +130,10 @@ export function createSyncStore({ maxEvents = 200 } = {}) {
     return snapshot();
   }
 
-  function setBridgeStatus(bridgeStatus) {
-    state.bridgeStatus = bridgeStatus || null;
-  }
-
   function snapshot() {
     return {
       runtimeById: clone(state.runtimeById) || {},
       terminalById: clone(state.terminalById) || {},
-      bridgeStatus: clone(state.bridgeStatus),
       modelSettings: clone(state.modelSettings),
       projects: clone(state.projects) || [],
       syncedAt: state.syncedAt,
@@ -150,7 +143,6 @@ export function createSyncStore({ maxEvents = 200 } = {}) {
 
   return {
     applyEvent,
-    setBridgeStatus,
     snapshot
   };
 }

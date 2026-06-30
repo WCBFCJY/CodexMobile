@@ -309,8 +309,35 @@ export function createGitService({ getProject, runner = runGit } = {}) {
   }
 
   async function createBranch(projectId, branchName) {
-    const cwd = await projectCwd(projectId);
+    // 直接获取项目路径，不经过 projectCwd 检查，因为可能需要初始化 git
+    const project = getProject(projectId);
+    if (!project?.path) {
+      throw serviceError('Project not found', 404);
+    }
+    const cwd = project.path;
     const name = normalizeBranchName(branchName);
+
+    // 检查是否是 git 仓库，如果不是则自动初始化
+    try {
+      await runner(cwd, ['rev-parse', '--is-inside-work-tree']);
+    } catch {
+      await runner(cwd, ['init']);
+    }
+
+    // 检查是否有至少一个 commit，如果没有则创建空提交
+    try {
+      await runner(cwd, ['rev-parse', '--verify', 'HEAD']);
+    } catch {
+      // 没有 HEAD，确保有 user.email 后创建空提交作为起点
+      try {
+        await runner(cwd, ['config', 'user.email']);
+      } catch {
+        await runner(cwd, ['config', 'user.email', 'codexmobile@localhost']);
+        await runner(cwd, ['config', 'user.name', 'CodexMobile']);
+      }
+      await runner(cwd, ['commit', '-m', 'Initial commit', '--allow-empty']);
+    }
+
     await runner(cwd, ['switch', '-c', name]);
     return {
       branch: name,

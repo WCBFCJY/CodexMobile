@@ -22,7 +22,6 @@ import { chatRenderItems } from './chat-render-items.js';
 export function ChatPane({
   messages,
   selectedSession,
-  loading = false,
   loadError = '',
   running,
   activeRuntimeStartedAt = null,
@@ -106,25 +105,6 @@ export function ChatPane({
     return undefined;
   }, [selectedSession?.id, scrollToBottom]);
 
-  if (loading) {
-    return (
-      <section className="chat-pane chat-loading" ref={paneRef} aria-busy="true" aria-live="polite">
-        <div className="chat-loading-card">
-          <Loader2 className="spin" size={22} />
-          <div>
-            <strong>{selectedSession?.title || '对话'}</strong>
-            <span>正在加载消息</span>
-          </div>
-        </div>
-        <div className="chat-loading-lines" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-      </section>
-    );
-  }
-
   if (loadError) {
     return (
       <section className="chat-pane chat-load-error" ref={paneRef} role="alert">
@@ -165,7 +145,7 @@ export function ChatPane({
             </button>
           </div>
         ) : null}
-        {renderItems.map((item) => {
+        {renderItems.map((item, index) => {
           if (item.type === 'fileSummary') {
             return (
               <div key={item.key} className="message-row is-file-summary">
@@ -184,18 +164,25 @@ export function ChatPane({
               />
             );
           }
+          // 判断是否为轮次内最后一条助手消息（之后是 user 或到末尾）
+          const message = item.message;
+          const isLastAssistantInTurn = message.role === 'assistant' && (
+            index === renderItems.length - 1 ||
+            renderItems[index + 1]?.message?.role === 'user'
+          );
           return (
             <ChatMessage
               key={item.key}
-              message={item.message}
+              message={message}
               now={now}
-              afterContent={item.fileSummaries?.map((summary, index) => (
-                <ActivityFileSummary key={`${item.key}-file-summary-${index}`} summary={summary} />
+              afterContent={item.fileSummaries?.map((summary, summaryIndex) => (
+                <ActivityFileSummary key={`${item.key}-file-summary-${summaryIndex}`} summary={summary} />
               ))}
               onPreviewImage={onPreviewImage}
               onDeleteMessage={onDeleteMessage}
               onImplementPlan={onImplementPlan}
               onAdjustPlan={onAdjustPlan}
+              isLastAssistantInTurn={isLastAssistantInTurn}
             />
           );
         })}

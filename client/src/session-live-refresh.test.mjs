@@ -121,7 +121,7 @@ test('mergeLiveSelectedThreadMessages can drop stale desktop running activity af
       id: 'status-client-turn',
       role: 'activity',
       status: 'running',
-      source: 'desktop-ipc',
+      source: 'headless-local',
       sessionId: 'thread-1',
       turnId: 'client-turn-1',
       timestamp: '2026-05-13T00:00:01.000Z'

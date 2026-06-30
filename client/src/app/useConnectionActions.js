@@ -13,6 +13,7 @@
 
 import { clearToken } from '../api.js';
 import { bridgeConnectionLabel } from '../panels/index.js';
+import { sessionMessagesApiPath } from './session-utils.js';
 
 export function useConnectionActions({
   apiFetch,
@@ -23,7 +24,9 @@ export function useConnectionActions({
   setSyncing,
   loadStatus,
   loadProjects,
-  showToast
+  showToast,
+  selectedSession,
+  setMessages
 }) {
   async function handleSync() {
     setSyncing(true);
@@ -31,7 +34,14 @@ export function useConnectionActions({
       await apiFetch('/api/sync', { method: 'POST' });
       await loadStatus();
       await loadProjects({ preserveSelection: true, preloadSessions: true });
-      showToast({ level: 'success', title: '同步完成', body: '线程和状态已经刷新。' });
+      // 重新加载当前会话消息，清除前端临时追加的消息（如 turn.failed）
+      if (selectedSession?.id && !selectedSession.draft) {
+        try {
+          const data = await apiFetch(sessionMessagesApiPath(selectedSession.id));
+          setMessages(data.messages || []);
+        } catch (_) { /* 忽略，不影响同步完成 */ }
+      }
+
     } catch (error) {
       showToast({ level: 'error', title: '同步失败', body: error.message || '无法刷新同步。' });
     } finally {
@@ -56,9 +66,9 @@ export function useConnectionActions({
 
   function handleShowConnectionStatus() {
     showToast({
-      level: status.desktopBridge?.connected ? 'info' : 'warning',
-      title: bridgeConnectionLabel(connectionState, status.desktopBridge).label,
-      body: status.desktopBridge?.reason || status.desktopBridge?.mode || 'CodexMobile 状态已读取。'
+      level: connectionState === 'connected' ? 'info' : 'warning',
+      title: bridgeConnectionLabel(connectionState).label,
+      body: 'CodexMobile 状态已读取。'
     });
   }
 

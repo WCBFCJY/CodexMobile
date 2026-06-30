@@ -1,5 +1,5 @@
 /**
- * 运行中交互请求卡片：处理 Codex app-server 的计划提问、补充信息、命令审批与权限授权。
+ * 运行中交互请求卡片：处理 Codex SDK 交互请求——计划提问、补充信息、命令审批与权限授权。
  *
  * Keywords: interaction, approval, user-input, mobile-card, api
  *

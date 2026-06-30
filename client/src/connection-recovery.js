@@ -1,7 +1,7 @@
 /**
- * 根据鉴权、连接态与桌面桥推导出连接恢复卡片的文案与主/次操作类型。
+ * 根据鉴权、连接态推导出连接恢复卡片的文案与主/次操作类型。
  *
- * Keywords: connection, recovery, desktop-bridge, pairing, syncing
+ * Keywords: connection, recovery, pairing, syncing
  *
  * Exports:
  * - connectionRecoveryState — 返回 state、title、detail、primary/secondaryAction 等。
@@ -14,7 +14,6 @@
 export function connectionRecoveryState({
   authenticated = true,
   connectionState = 'connected',
-  desktopBridge = {},
   syncing = false
 } = {}) {
   if (!authenticated) {
@@ -28,13 +27,7 @@ export function connectionRecoveryState({
   }
 
   if (connectionState === 'connecting') {
-    return {
-      state: 'reconnecting',
-      title: '正在重连',
-      detail: '正在恢复手机和本机服务的连接。',
-      primaryAction: 'retry',
-      primaryLabel: '重试'
-    };
+    return null;
   }
 
   if (connectionState === 'disconnected') {
@@ -49,39 +42,13 @@ export function connectionRecoveryState({
     };
   }
 
-  const desktopBridgeHealthy = desktopBridge?.connected === true && desktopBridge?.mode !== 'unavailable';
-
-  if (syncing && !desktopBridgeHealthy) {
+  if (syncing) {
     return {
       state: 'syncing',
       title: '正在同步',
-      detail: '正在刷新桌面线程和本地缓存。',
+      detail: '正在刷新线程和本地缓存。',
       primaryAction: 'status',
       primaryLabel: '查看状态'
-    };
-  }
-
-  if (desktopBridge && desktopBridge.connected === false) {
-    return {
-      state: 'desktop-unavailable',
-      title: '桌面端未连接',
-      detail: desktopBridge.reason || '打开桌面端 Codex 后可以继续实时同步。',
-      primaryAction: 'sync',
-      primaryLabel: '刷新同步',
-      secondaryAction: 'status',
-      secondaryLabel: '查看状态'
-    };
-  }
-
-  if (desktopBridge?.mode === 'unavailable') {
-    return {
-      state: 'backend-unavailable',
-      title: '后台不可用',
-      detail: desktopBridge.reason || 'CodexMobile 后台可访问，但桌面桥接不可用。',
-      primaryAction: 'sync',
-      primaryLabel: '刷新同步',
-      secondaryAction: 'status',
-      secondaryLabel: '查看状态'
     };
   }
 

@@ -17,26 +17,17 @@ test('connectionRecoveryState maps connection states to recovery cards', () => {
   assert.deepEqual(
     connectionRecoveryState({
       syncing: true,
-      connectionState: 'connected',
-      desktopBridge: { mode: 'desktop-ipc', connected: true }
+      connectionState: 'connected'
     }),
-    null
+    { state: 'syncing', title: '正在同步', detail: '正在刷新线程和本地缓存。', primaryAction: 'status', primaryLabel: '查看状态' }
   );
 });
 
-test('connectionRecoveryState reports desktop bridge problems but stays quiet when healthy', () => {
+test('connectionRecoveryState returns null when connected and healthy', () => {
   assert.deepEqual(
     connectionRecoveryState({
-      connectionState: 'connected',
-      desktopBridge: { mode: 'desktop-ipc', connected: true }
+      connectionState: 'connected'
     }),
     null
-  );
-  assert.equal(
-    connectionRecoveryState({
-      connectionState: 'connected',
-      desktopBridge: { mode: 'desktop-ipc', connected: false, reason: 'not open' }
-    }).state,
-    'desktop-unavailable'
   );
 });

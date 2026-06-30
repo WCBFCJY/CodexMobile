@@ -12,7 +12,7 @@
  * Outward: Drawer / 顶层在「文档」入口打开时渲染。
  */
 
-import { Check, ChevronLeft, Loader2, RefreshCw, ShieldCheck, X } from 'lucide-react';
+import { Check, Loader2, RefreshCw, ShieldCheck, X } from 'lucide-react';
 
 export function FeishuLogoIcon({ size = 30, className = '' }) {
   return (
@@ -91,9 +91,7 @@ export function DocsPanel({ open, docs, busy, error, onClose, onConnect, onDisco
   return (
     <section className="docs-panel" role="dialog" aria-modal="true" aria-label="飞书文档">
       <header className="docs-panel-header">
-        <button className="icon-button" type="button" onClick={onClose} aria-label="关闭文档">
-          <ChevronLeft size={22} />
-        </button>
+        <span className="docs-panel-spacer" aria-hidden="true" />
         <div className="docs-panel-title">
           <strong>飞书文档</strong>
           {subtitle ? <span>{subtitle}</span> : null}
@@ -121,7 +119,7 @@ export function DocsPanel({ open, docs, busy, error, onClose, onConnect, onDisco
           <div className="docs-check-list">
             {setupItems.map((item) => (
               <div key={item.id} className={item.ok ? 'is-ok' : ''}>
-                {item.ok ? <Check size={15} /> : <X size={15} />}
+                {item.ok ? <Check size={15} /> : <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<X size={15} /></>}
                 <span>{item.label}</span>
               </div>
             ))}

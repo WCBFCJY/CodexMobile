@@ -12,19 +12,31 @@
  * Outward: App.jsx 或上层布局挂载输入条处。
  */
 
-import { ArrowUp, Bot, Check, ChevronDown, ChevronRight, ClipboardList, FileText, Folder, GitBranch, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X, Zap } from 'lucide-react';
+import { ArrowUp, Bot, Check, ChevronDown, ChevronRight, ClipboardList, FileText, Folder, GitBranch, Image, Loader2, MessageSquare, MessageSquarePlus, Paperclip, Plus, Search, Shield, Square, Terminal, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { apiFetch } from '../api.js';
 import { detectComposerToken, exactSlashCommandForInput, filteredSlashCommands, replaceComposerToken } from '../composer-shortcuts.js';
-import { composerSendState } from '../send-state.js';
 import { compactPath, isDraftSession } from '../app/session-utils.js';
 import { attachmentPreviewUrl, isImageAttachment } from './attachment-preview.js';
 import { filesFromClipboardData } from './paste-files.js';
 import { ContextStatusButton, ContextStatusDetails } from './ContextStatus.jsx';
-import { DEFAULT_PERMISSION_MODE, MODEL_SPEED_OPTIONS, REASONING_OPTIONS, formatBytes, modelSpeedLabel, normalizeModelSpeed, normalizePermissionModeForSecurity, permissionLabel, permissionOptionsForSecurity, reasoningLabel, selectedSkillSummary, shortModelName } from './composer-options.js';
+import { DEFAULT_PERMISSION_MODE, REASONING_OPTIONS, formatBytes, normalizePermissionModeForSecurity, permissionLabel, permissionOptionsForSecurity, reasoningLabel, selectedSkillSummary, shortModelName } from './composer-options.js';
 
 export { DEFAULT_PERMISSION_MODE } from './composer-options.js';
+
+function composerSendState({ running = false, hasInput = false, uploading = false, steerable = true } = {}) {
+  if (uploading) {
+    return { disabled: true, label: '正在上传', mode: 'uploading', showMenu: false, canSteer: false, canQueue: false, canInterrupt: false };
+  }
+  if (running && !hasInput) {
+    return { disabled: false, label: '中止当前任务', mode: 'abort', showMenu: false, canSteer: false, canQueue: false, canInterrupt: true };
+  }
+  if (running && hasInput) {
+    return { disabled: false, label: '选择发送方式', mode: steerable ? 'steer' : 'queue', showMenu: true, canSteer: Boolean(steerable), canQueue: true, canInterrupt: true };
+  }
+  return { disabled: !hasInput, label: '发送消息', mode: 'start', showMenu: false, canSteer: false, canQueue: false, canInterrupt: false };
+}
 
 export function Composer({
   composerRef,
@@ -62,7 +74,6 @@ export function Composer({
   uploading,
   contextStatus,
   runSteerable = true,
-  desktopBridge,
   queueDrafts,
   onRestoreQueueDraft,
   onRemoveQueueDraft,
@@ -73,7 +84,8 @@ export function Composer({
   readOnlyReason = '',
   homeMode = false,
   projects = [],
-  onSelectHomeProject
+  onSelectHomeProject,
+  hideDefaultProject = false
 }) {
   const textareaRef = useRef(null);
   const imageInputRef = useRef(null);
@@ -85,6 +97,7 @@ export function Composer({
   const modelBtnRef = useRef(null);
   const modelMenuRef = useRef(null);
   const contextBtnRef = useRef(null);
+  const projectBtnRef = useRef(null);
   const [openMenu, setOpenMenu] = useState(null);
   const [menuPos, setMenuPos] = useState(null);
   const [modelSubmenu, setModelSubmenu] = useState(null);
@@ -101,13 +114,15 @@ export function Composer({
   const hasInput = !composerReadOnly && (input.trim().length > 0 || attachments.length > 0 || selectedFileMentions.length > 0);
   const modelList = models?.length ? models : [{ value: selectedModel || 'gpt-5.5', label: selectedModel || 'gpt-5.5' }];
   const selectedModelLabel = modelList.find((model) => model.value === selectedModel)?.label || selectedModel || 'gpt-5.5';
-  const normalizedModelSpeed = normalizeModelSpeed(selectedModelSpeed);
   const skillList = Array.isArray(skills) ? skills : [];
   const selectedSkillSet = new Set(Array.isArray(selectedSkillPaths) ? selectedSkillPaths : []);
   const selectedSkills = skillList.filter((skill) => selectedSkillSet.has(skill.path));
   const projectList = Array.isArray(projects) ? projects : [];
-  const projectlessProject = projectList.find((project) => project.projectless) || null;
-  const regularProjects = projectList.filter((project) => !project.projectless);
+  const visibleProjectList = hideDefaultProject
+    ? projectList.filter((project) => project.name !== 'Default')
+    : projectList;
+  const projectlessProject = visibleProjectList.find((project) => project.projectless) || null;
+  const regularProjects = visibleProjectList.filter((project) => !project.projectless);
   const homeProject = selectedProject || projectlessProject || regularProjects[0] || null;
   const normalizedProjectFilter = projectFilter.trim().toLowerCase();
   const filteredHomeProjects = regularProjects.filter((project) => {
@@ -168,9 +183,7 @@ export function Composer({
       running,
       hasInput,
       uploading,
-      desktopBridge,
-      steerable: runSteerable,
-      sessionIsDraft: isDraftSession(selectedSession)
+      steerable: runSteerable
     });
   const stopMode = sendState.mode === 'abort';
   const runningInputMode = running && hasInput;
@@ -336,11 +349,17 @@ export function Composer({
         : name === 'skill' ? skillBtnRef
         : name === 'branch' ? branchBtnRef
         : name === 'context' ? contextBtnRef
+        : name === 'project' ? projectBtnRef
         : modelBtnRef;
       const btn = ref.current;
       if (btn) {
         const rect = btn.getBoundingClientRect();
-        setMenuPos({ left: rect.left, right: window.innerWidth - rect.right, bottom: window.innerHeight - rect.top });
+        setMenuPos({
+          left: rect.left,
+          right: window.innerWidth - rect.right,
+          bottom: window.innerHeight - rect.top,
+          top: rect.bottom
+        });
       }
       if (name !== 'model' || current !== 'model') {
         setModelSubmenu(null);
@@ -498,7 +517,7 @@ export function Composer({
         document.body
       ) : null}
       {openMenu === 'permission' && menuPos ? createPortal(
-        <div className="composer-menu permission-menu" style={{ right: menuPos.right, bottom: menuPos.bottom + 6 }}>
+        <div className="composer-menu permission-menu" style={{ right: menuPos.right - 50, bottom: menuPos.bottom + 6 }}>
           {permissionOptions.map((option) => (
             <button
               key={option.value}
@@ -517,7 +536,7 @@ export function Composer({
         document.body
       ) : null}
       {openMenu === 'skill' && menuPos ? createPortal(
-        <div className="composer-menu skill-menu" style={{ right: menuPos.right, bottom: menuPos.bottom + 6 }}>
+        <div className="composer-menu skill-menu" style={{ right: menuPos.right - 100, bottom: menuPos.bottom + 6 }}>
           <div className="skill-search-wrap">
             <Search size={14} />
             <input
@@ -593,17 +612,6 @@ export function Composer({
               </span>
               <ChevronRight className="submenu-chevron" size={15} />
             </button>
-            <button
-              type="button"
-              className={`model-menu-parent ${modelSubmenu === 'speed' ? 'is-selected' : ''}`}
-              onClick={() => setModelSubmenu((current) => (current === 'speed' ? null : 'speed'))}
-            >
-              <span className="menu-item-main">
-                <strong>速度</strong>
-                <small>{modelSpeedLabel(normalizedModelSpeed)}</small>
-              </span>
-              <ChevronRight className="submenu-chevron" size={15} />
-            </button>
           </div>
           {modelSubmenu === 'model' ? (
             <div className="composer-menu model-submenu" style={{ left: (modelMenuRef.current?.getBoundingClientRect().right || 0) + 6, bottom: menuPos.bottom + 6 }}>
@@ -624,33 +632,11 @@ export function Composer({
               ))}
             </div>
           ) : null}
-          {modelSubmenu === 'speed' ? (
-            <div className="composer-menu model-submenu" style={{ left: (modelMenuRef.current?.getBoundingClientRect().right || 0) + 6, bottom: menuPos.bottom + 6 }}>
-              <div className="menu-section-label">速度</div>
-              {MODEL_SPEED_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={normalizedModelSpeed === option.value ? 'is-selected' : ''}
-                  onClick={() => {
-                    onSelectModelSpeed?.(option.value);
-                    closeModelMenu();
-                  }}
-                >
-                  {normalizedModelSpeed === option.value ? <Check size={16} /> : <span className="menu-spacer" />}
-                  <span className="menu-item-main">
-                    <strong>{option.label}{option.value === 'fast' ? <Zap size={13} /> : null}</strong>
-                    <small>{option.description}</small>
-                  </span>
-                </button>
-              ))}
-            </div>
-          ) : null}
         </>,
         document.body
       ) : null}
       {openMenu === 'branch' && gitProject && menuPos ? createPortal(
-        <div className="composer-menu branch-menu" style={{ right: menuPos.right, bottom: menuPos.bottom + 6 }} aria-label="选择分支">
+        <div className="composer-menu branch-menu" style={{ right: menuPos.right - 120, bottom: menuPos.bottom + 6 }} aria-label="选择分支">
           <div className="skill-search-wrap">
             <Search size={14} />
             <input
@@ -712,7 +698,7 @@ export function Composer({
         document.body
       ) : null}
       {openMenu === 'project' && homeMode && menuPos ? createPortal(
-        <div className="composer-menu project-menu" style={{ left: menuPos.left, bottom: menuPos.bottom + 6 }} aria-label="选择项目">
+        <div className="composer-menu project-menu" style={{ left: menuPos.left, top: menuPos.top + 6 }} aria-label="选择项目">
           <div className="skill-search-wrap">
             <Search size={14} />
             <input
@@ -961,7 +947,7 @@ export function Composer({
             <button
               type="button"
               ref={permissionBtnRef}
-              className={`composer-tool-icon ${normalizedPermissionMode === 'bypassPermissions' ? 'is-permission-bypass' : ''}`}
+              className={`composer-tool-icon ${(normalizedPermissionMode === 'bypassPermissions' || normalizedPermissionMode === 'sandboxOff') ? 'is-permission-bypass' : ''} ${normalizedPermissionMode === 'acceptEdits' ? 'is-auto-review' : ''}`}
               onClick={() => toggleMenu('permission')}
               disabled={composerReadOnly}
               title={permissionLabel(normalizedPermissionMode)}
@@ -1007,12 +993,6 @@ export function Composer({
                 <span className="model-chip-name">{shortModelName(selectedModelLabel)}</span>
                 <span className="model-chip-dot" aria-hidden="true" />
                 <span className="model-chip-reason">{reasoningLabel(selectedReasoningEffort)}</span>
-                {normalizedModelSpeed === 'fast' ? (
-                  <>
-                    <span className="model-chip-dot" aria-hidden="true" />
-                    <span className="model-chip-speed">{modelSpeedLabel(normalizedModelSpeed)}</span>
-                  </>
-                ) : null}
               </span>
               <ChevronDown size={13} strokeWidth={2} aria-hidden="true" />
             </button>
@@ -1032,6 +1012,7 @@ export function Composer({
         <div className="home-project-strip" aria-label="首页项目选择">
           <button
             type="button"
+            ref={projectBtnRef}
             className="home-project-button"
             onClick={() => toggleMenu('project')}
             disabled={composerReadOnly || !homeProject}

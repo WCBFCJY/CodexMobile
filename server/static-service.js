@@ -24,6 +24,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as XLSX from 'xlsx';
 import { sendJson, sendStaticContent, staticCacheControl } from './http-utils.js';
+import { isPathAllowed } from './file-browser.js';
 
 export const DEFAULT_MIME_TYPES = new Map([
   ['.html', 'text/html; charset=utf-8'],
@@ -164,6 +165,18 @@ async function resolveExistingLocalFile(url) {
       continue;
     }
     const filePath = path.resolve(candidate);
+    
+    // 检查路径是否允许访问
+    const pathCheck = isPathAllowed(filePath);
+    if (!pathCheck.allowed) {
+      const error = new Error(`路径 "${filePath}" 不在允许的工作目录范围内。`);
+      error.statusCode = 403;
+      error.code = 'PATH_NOT_ALLOWED';
+      error.requestedPath = requestedPath;
+      error.checkedPaths = checkedPaths;
+      throw error;
+    }
+    
     try {
       const stat = await fs.stat(filePath);
       if (!stat.isFile()) {

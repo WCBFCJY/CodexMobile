@@ -1,7 +1,7 @@
 /**
  * 主侧栏抽屉：项目 / 会话列表、文件管理入口、配额与设置入口、归档与子代理等。
  *
- * Keywords: drawer, sidebar, sessions, projects, file-manager, settings, archive-box, desktop-refresh, security-devices
+ * Keywords: drawer, sidebar, sessions, projects, file-manager, settings, archive-box, security-devices
  *
  * Exports:
  * - Drawer — 侧栏根组件。
@@ -13,6 +13,7 @@
 
 import { Archive, BarChart3, Check, ChevronDown, Folder, Loader2, MessageSquare, MoreHorizontal, Pencil, Plus, RefreshCw, Search, Settings, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { apiFetch } from '../api.js';
 import { setClientRuntimeDebugEnabled } from '../app/runtime-debug-client.js';
 import { compactPath, formatRelativeShort, sessionRunBadgeState, subAgentSubtitle } from '../app/session-utils.js';
@@ -65,9 +66,12 @@ export function Drawer({
   theme,
   setTheme,
   runtimeDebug,
-  desktopRefresh,
   onLoggedOut,
-  refreshStatus
+  refreshStatus,
+  filePanelEnabled,
+  onFilePanelToggle,
+  hideDefaultProject,
+  onHideDefaultProjectToggle
 }) {
   const [drawerView, setDrawerView] = useState('main');
   const [subagentExpandedById, setSubagentExpandedById] = useState({});
@@ -85,8 +89,6 @@ export function Drawer({
   const [collapsedSections, setCollapsedSections] = useState({ projects: false, conversations: false });
   const [runtimeDebugError, setRuntimeDebugError] = useState('');
   const [runtimeDebugSaving, setRuntimeDebugSaving] = useState(false);
-  const [desktopRefreshError, setDesktopRefreshError] = useState('');
-  const [desktopRefreshSaving, setDesktopRefreshSaving] = useState(false);
   const [archivedSessions, setArchivedSessions] = useState([]);
   const [archiveLoading, setArchiveLoading] = useState(false);
   const [archiveLoaded, setArchiveLoaded] = useState(false);
@@ -100,9 +102,12 @@ export function Drawer({
     .flatMap((sessions) => (Array.isArray(sessions) ? sessions : []))
     .filter((session) => sessionRunBadgeState(session, { runningById, threadRuntimeById, completedSessionIds }) === 'running')
     .length;
+  const visibleProjects = hideDefaultProject
+    ? projects.filter((project) => project.name !== 'Default')
+    : projects;
   const orderedProjects = [
-    ...projects.filter((project) => project.projectless),
-    ...projects.filter((project) => !project.projectless)
+    ...visibleProjects.filter((project) => project.projectless),
+    ...visibleProjects.filter((project) => !project.projectless)
   ];
   const projectlessProject = orderedProjects.find((project) => project.projectless) || null;
   const projectChoices = orderedProjects.filter((project) => !project.projectless);
@@ -263,21 +268,6 @@ export function Drawer({
     }
   }
 
-  async function handleDesktopRefreshToggle(event) {
-    const enabled = event.target.checked;
-    setDesktopRefreshError('');
-    setDesktopRefreshSaving(true);
-    try {
-      await apiFetch('/api/desktop-refresh', { method: 'POST', body: { enabled } });
-      await refreshStatus?.();
-    } catch (error) {
-      setDesktopRefreshError(error.message || '保存失败');
-      await refreshStatus?.();
-    } finally {
-      setDesktopRefreshSaving(false);
-    }
-  }
-
   async function loadArchivedSessions({ force = false } = {}) {
     if (archiveLoading || (archiveLoaded && !force)) {
       return;
@@ -381,12 +371,12 @@ export function Drawer({
         runtimeDebugSaving={runtimeDebugSaving}
         runtimeDebugError={runtimeDebugError}
         onRuntimeDebugToggle={handleRuntimeDebugToggle}
-        desktopRefresh={desktopRefresh}
-        desktopRefreshSaving={desktopRefreshSaving}
-        desktopRefreshError={desktopRefreshError}
-        onDesktopRefreshToggle={handleDesktopRefreshToggle}
         onLoggedOut={onLoggedOut}
         appVersion={appVersion}
+        filePanelEnabled={filePanelEnabled}
+        onFilePanelToggle={onFilePanelToggle}
+        hideDefaultProject={hideDefaultProject}
+        onHideDefaultProjectToggle={onHideDefaultProjectToggle}
       />
     );
   }
@@ -665,7 +655,12 @@ export function Drawer({
             <button
               type="button"
               className="footer-icon-button"
-              onClick={onOpenFileManager}
+              onClick={() => {
+                if (filePanelEnabled) {
+                  onFilePanelToggle?.();
+                }
+                onOpenFileManager?.();
+              }}
               aria-label="文件管理"
             >
               <Folder size={16} />
@@ -723,7 +718,7 @@ export function Drawer({
             </div>
           </div>
         ) : null}
-        {renameDraft ? (
+        {renameDraft ? createPortal(
           <div className="thread-rename-backdrop" onClick={closeRenameDialog}>
             <form className="thread-rename-dialog" onSubmit={submitRenameDialog} onClick={(event) => event.stopPropagation()}>
               <div className="thread-rename-head">
@@ -750,7 +745,8 @@ export function Drawer({
                 </button>
               </div>
             </form>
-          </div>
+          </div>,
+          document.body
         ) : null}
       </aside>
     </>
